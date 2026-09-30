@@ -1,0 +1,18 @@
+import { NextResponse } from "next/server";
+import { sendContactEmail } from "@/lib/contact/smtp";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json() as Record<string, unknown>;
+    const name = typeof body.name === "string" ? body.name.trim().slice(0, 120) : "";
+    const email = typeof body.email === "string" ? body.email.trim().slice(0, 254) : "";
+    const subject = typeof body.subject === "string" ? body.subject.trim().slice(0, 180) : "";
+    const message = typeof body.message === "string" ? body.message.trim().slice(0, 5000) : "";
+    if (!name || !email || !subject || !message || !/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a name, valid email, subject, and message." }, { status: 400 });
+    await sendContactEmail({ name, email, subject, message });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Contact delivery failed", error);
+    return NextResponse.json({ error: "Email delivery is not configured or is temporarily unavailable." }, { status: 503 });
+  }
+}

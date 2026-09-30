@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
+import EverydayStudio from "@/components/tools/EverydayStudio";
+export const metadata: Metadata = { title: "Free everyday online tools", description: "Format JSON, count text, generate secure passwords, make SHA-256 hashes, and calculate dates locally.", alternates: { canonical: "/tools/everyday-toolbox" } };
+export default function EverydayToolboxPage() { return <main className="min-h-screen bg-slate-50 px-5 py-10 dark:bg-slate-950 sm:px-6 sm:py-16"><div className="mx-auto max-w-5xl"><Link href="/tools" className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 dark:text-violet-300"><ArrowLeft size={16} /> All tools</Link><p className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-violet-700"><LockKeyhole size={14} /> Free and local</p><h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Everyday tools where exactness matters.</h1><p className="mt-4 max-w-2xl text-slate-600 dark:text-slate-400">No sign-up, no prompt, no guessing. Just immediate, deterministic results in your browser.</p><div className="mt-10"><EverydayStudio /></div></div></main>; }

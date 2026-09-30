@@ -23,12 +23,15 @@
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 import * as pdfjsLib from "pdfjs-dist";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { createWorker } from "tesseract.js";
 
-import { GlobalWorkerOptions } from "pdfjs-dist";
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
-GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+
 
 // ---------------------------------------------------------------------------
 // Config / logging

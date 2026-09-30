@@ -1,8 +1,33 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./theme.css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Template-local tokens. They are deliberately scoped so future templates
+   cannot inherit, overwrite, or collide with this editorial design. */
+.editorial-developer {
+  --ed-bg: #0e0f0b; --ed-surface: #15160f; --ed-line: #2b2c21;
+  --ed-text: #ecebe1; --ed-muted: #8f9187; --ed-accent: #c9a14a; --ed-signal: #6feab0;
+  background: var(--ed-bg); color: var(--ed-text); font-family: var(--font-sans), sans-serif;
+}
+.editorial-developer .bg-bg { background-color: var(--ed-bg) !important; }
+.editorial-developer .bg-surface { background-color: var(--ed-surface) !important; }
+.editorial-developer .bg-line { background-color: var(--ed-line) !important; }
+.editorial-developer .bg-text { background-color: var(--ed-text) !important; }
+.editorial-developer .bg-accent { background-color: var(--ed-accent) !important; }
+.editorial-developer .bg-signal { background-color: var(--ed-signal) !important; }
+.editorial-developer .text-bg { color: var(--ed-bg) !important; }
+.editorial-developer .text-text { color: var(--ed-text) !important; }
+.editorial-developer .text-muted { color: var(--ed-muted) !important; }
+.editorial-developer .text-accent { color: var(--ed-accent) !important; }
+.editorial-developer .text-signal { color: var(--ed-signal) !important; }
+.editorial-developer .border-line { border-color: var(--ed-line) !important; }
+.editorial-developer .border-accent { border-color: var(--ed-accent) !important; }
+.editorial-developer .border-text { border-color: var(--ed-text) !important; }
+.editorial-developer .font-display { font-family: var(--font-sans), sans-serif !important; }
+.editorial-developer .max-w-content { max-width: 1200px; }
 
 @theme inline {
   --color-background: var(--background);
@@ -48,7 +73,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
+.legacy-theme-tokens {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -83,7 +108,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+.legacy-theme-tokens.dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

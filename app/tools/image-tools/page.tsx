@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
+import ImageQuickStudio from "@/components/tools/ImageQuickStudio";
+export const metadata: Metadata = { title: "Free background remover and image upscaler", description: "Remove simple image backgrounds or make a larger, polished PNG locally in your browser.", alternates: { canonical: "/tools/image-tools" } };
+export default function ImageToolsPage() { return <main className="min-h-screen bg-slate-50 px-5 py-10 dark:bg-slate-950 sm:px-6 sm:py-16"><div className="mx-auto max-w-6xl"><Link href="/tools" className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 dark:text-violet-300"><ArrowLeft size={16} /> All tools</Link><p className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-violet-700"><LockKeyhole size={14} /> Free and local</p><h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Remove image backgrounds. Make images larger.</h1><p className="mt-4 max-w-2xl text-slate-600 dark:text-slate-400">A private, quick image workspace for everyday edits—no account and no upload.</p><div className="mt-10"><ImageQuickStudio /></div></div></main>; }

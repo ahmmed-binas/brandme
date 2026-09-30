@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
+import PdfEditor from "@/components/tools/PdfEditor";
+export const metadata: Metadata = { title: "Free PDF editor", description: "Replace visible PDF text, add annotations, draw, and download an edited PDF locally in your browser.", alternates: { canonical: "/tools/pdf-editor" } };
+export default function PdfEditorPage() { return <div className="min-h-screen bg-slate-50 px-5 py-10 dark:bg-slate-950 sm:px-6 sm:py-16"><main className="mx-auto max-w-7xl"><Link href="/tools" className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 dark:text-violet-300"><ArrowLeft size={16} /> All tools</Link><div className="mt-8 max-w-2xl"><p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300"><LockKeyhole size={14} /> Free and local</p><h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl">Edit PDF text without uploading it.</h1><p className="mt-4 leading-7 text-slate-600 dark:text-slate-400">Replace visible text, add text, draw, highlight, whiteout, and add shapes. Processing stays in your browser.</p></div><div className="mt-10"><PdfEditor /></div></main></div>; }

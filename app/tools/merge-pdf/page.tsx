@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
+import PdfMergeStudio from "@/components/tools/PdfMergeStudio";
+export const metadata: Metadata = { title: "Merge PDF files free", description: "Combine PDF files locally in your browser, order them, and download one PDF for free.", alternates: { canonical: "/tools/merge-pdf" } };
+export default function MergePdfPage() { return <main className="min-h-screen bg-slate-50 px-5 py-10 dark:bg-slate-950 sm:px-6 sm:py-16"><div className="mx-auto max-w-5xl"><Link href="/tools" className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 dark:text-violet-300"><ArrowLeft size={16} /> All tools</Link><p className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-violet-700"><LockKeyhole size={14} /> Free and local</p><h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Merge PDF files online, without uploading.</h1><p className="mt-4 max-w-2xl text-slate-600 dark:text-slate-400">Add files, arrange their order, and create a single PDF entirely in your browser.</p><div className="mt-10"><PdfMergeStudio /></div></div></main>; }

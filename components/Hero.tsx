@@ -34,26 +34,25 @@ export default function Hero() {
           transition={{ delay:0.3 }}
           className="mt-8 text-lg text-neutral-600 dark:text-neutral-400"
         >
-          Transform your CV into a beautiful professional portfolio
-          in seconds.
+          Shape a considered portfolio that presents your work with clarity.
         </motion.p>
 
 
         <div className="mt-10 flex justify-center gap-4">
 
           <Link
-            href="/upload"
+            href="/templatechooser"
             className="rounded-full bg-black text-white dark:bg-white dark:text-black px-8 py-4 font-medium"
           >
-            Create Portfolio
+            Start your portfolio
           </Link>
 
 
           <Link
-            href="/templates"
+            href="/templatechooser"
             className="rounded-full border px-8 py-4"
           >
-            View Templates
+            Explore portfolios
           </Link>
 
         </div>

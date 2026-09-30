@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useMemo, useState, type ChangeEvent, type DragEvent, type FocusEvent, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
-import HeaderBar from "@/components/common/Header";
 import {
   getFileType,
   extractFileContent,
@@ -385,10 +384,50 @@ function DetailExtractorPage() {
   // ================= SUBMIT =================
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form data:", { ...formData, education, experience, projects });
-    // TODO: POST to a Next.js API route (e.g. /api/users) instead of an
-    // external server, once the backend endpoint is finalized.
-    alert("✅ Submitted!");
+    // Build the website payload from the fields currently displayed in this
+    // form, so the submitted template reflects user edits as well as AI data.
+    const getPlainText = (value: string) => {
+      const element = document.createElement("div");
+      element.innerHTML = value;
+      return element.innerText.trim();
+    };
+
+    const portfolioData = {
+      name: formData.name.trim(),
+      professional_title: formData.professional_title.trim(),
+      tagline: formData.about_yourself_sm.trim(),
+      summary: formData.summary_about_yourself
+        ? [getPlainText(formData.summary_about_yourself)]
+        : [],
+      github: formData.github_link.trim(),
+      linkedin: formData.linkedin_link.trim(),
+      instagram: formData.instagram_link.trim(),
+      email: formData.email.trim(),
+      skills: formData.skills.split(/[,\n]/).map((skill) => skill.trim()).filter(Boolean),
+      projects: projects
+        .filter((project) => project.project_name.trim() || project.project_summary.trim())
+        .map((project) => ({
+          title: project.project_name.trim(),
+          description: getPlainText(project.project_summary),
+          image: project.project_pic || undefined,
+        })),
+      experience: experience
+        .filter((job) => job.work_title.trim() || job.work_institution_name.trim())
+        .map((job) => ({
+          job_title: job.work_title.trim(),
+          company: job.work_institution_name.trim(),
+          location: job.place_of_work.trim(),
+          website: job.link_for_company.trim(),
+          start_date: job.start_date,
+          end_date: job.end_date,
+          description: getPlainText(job.work_summary),
+          technologies: job.technologies.map((item) => item.trim()).filter(Boolean),
+        })),
+    };
+
+    sessionStorage.setItem("portfolioData", JSON.stringify(portfolioData));
+    const selectedTemplate = new URLSearchParams(window.location.search).get("template") || "template-one";
+    window.location.assign(`/templates/${selectedTemplate}`);
   };
 
   function mapAIDataToForm(aiData: any) {
@@ -519,18 +558,31 @@ const handleAIProcess = async () => {
       }
     );
 
-
     if (!response.ok) {
       throw new Error(`AI summary request failed (${response.status})`);
     }
 
-
     const aiData = await response.json();
-
 
     console.log("FINAL AI DATA:", aiData);
 
+    // server.js returns 200 OK even on failure paths, using
+    // { error: ... } or { warning: ..., raw: ... } instead of a
+    // proper HTTP error status — so response.ok alone won't catch
+    // these. Check explicitly before touching form state.
+    if (aiData.error) {
+      setAiError(aiData.error);
+      return;
+    }
 
+    if (aiData.warning) {
+      console.warn("AI warning:", aiData.warning, aiData.raw);
+      setAiError(
+        "The AI response wasn't fully usable — some fields may be missing. You can fill them in manually."
+      );
+      // Fall through: some paths still return partial/raw data worth
+      // keeping in the form, so we don't `return` here.
+    }
 
     // -------- MAIN FORM DATA --------
 
@@ -538,7 +590,7 @@ const handleAIProcess = async () => {
       ...prev,
 
       name:
-        aiData.name,
+        aiData.name || prev.name,
 
       professional_title:
         aiData.professional_title || prev.professional_title,
@@ -703,6 +755,48 @@ const handleAIProcess = async () => {
 
 
 
+    // -------- SAVE FOR TEMPLATE PREVIEW --------
+    // Lets TemplateChooser render the same data via TemplateTSXOne
+    // whenever the user navigates there, without prop drilling across
+    // routes. Shaped to match PortfolioData, not the internal
+    // formData/experience/education/projects state above.
+
+    const previewData = {
+      name: aiData.name || formData.name || "",
+      professional_title: aiData.professional_title || formData.professional_title || "",
+      tagline: formData.about_yourself_sm || formData.summary_about_yourself || "",
+      summary: aiData.summary ? [aiData.summary] : [],
+      github: aiData.github || formData.github_link || "",
+      linkedin: aiData.linkedin || formData.linkedin_link || "",
+      instagram: formData.instagram_link || "",
+      email: aiData.email || formData.email || "",
+      skills: Array.isArray(aiData.skills) ? aiData.skills : [],
+      projects: Array.isArray(aiData.projects)
+        ? aiData.projects.map((p: any) => ({
+            title: p.name || "",
+            description: p.description || "",
+            technologies: p.technologies || [],
+            github: p.github || "",
+            live_url: p.live_url || "",
+          }))
+        : [],
+      experience: Array.isArray(aiData.experience)
+        ? aiData.experience.map((exp: any) => ({
+            job_title: exp.job_title || "",
+            company: exp.company || "",
+            location: exp.location || "",
+            start_date: exp.start_date || "",
+            end_date: exp.end_date || "",
+            description: exp.description || "",
+            technologies: exp.technologies || [],
+          }))
+        : [],
+    };
+
+    sessionStorage.setItem("portfolioData", JSON.stringify(previewData));
+
+
+
   } catch (error) {
 
     console.error(
@@ -721,18 +815,22 @@ const handleAIProcess = async () => {
   }
 };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 pt-20">
-      <HeaderBar />
+    <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
       {loading && <LoadingBars message="Loading" progress={progress} />}
 
-      <div className="flex w-full max-w-4xl h-[500px] bg-white rounded-xl shadow-xl">
+      <div className="mx-auto mb-6 max-w-5xl">
+        <p className="text-sm font-bold uppercase tracking-[0.16em] text-blue-700">Portfolio studio</p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Build it your way.</h1>
+        <p className="mt-2 max-w-2xl text-slate-600">Edit every word, project, image, and experience manually—or import a CV to use as a starting point. Nothing is published until you choose to preview it.</p>
+      </div>
+      <div className="mx-auto flex w-full max-w-5xl min-h-[680px] bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Left Section - CV Upload */}
         <div className="w-1/2 flex flex-col items-center justify-center border-r border-gray-300 p-4">
           <h2 className="text-xl md:text-2xl font-extrabold mb-2 text-center text-gray-800 tracking-wide font-sans">
-            Upload CV or a file with your details
+            Start with your details
           </h2>
           <h3 className="text-sm md:text-base font-medium text-center text-gray-500 tracking-wide font-sans">
-            Accepted formats: .pdf, .doc, .docx
+            Import is optional. You can fill in every field manually.
           </h3>
 
           <div
@@ -765,6 +863,8 @@ const handleAIProcess = async () => {
             {file && <p className="text-sm mt-2 text-gray-600">Selected file: {file.name}</p>}
             {dragActive && <p className="text-sm mt-1 text-blue-500">Drop the file here...</p>}
           </div>
+
+          <p className="mt-5 rounded-lg bg-blue-50 p-3 text-center text-xs leading-5 text-blue-900">AI-assisted import is optional. Connect an AI provider only after reviewing its privacy terms and explicitly consenting to share your information.</p>
 
           <button
             type="button"
