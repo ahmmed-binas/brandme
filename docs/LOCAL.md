@@ -59,7 +59,7 @@ Open http://localhost:3000. The database tables are created on first use.
 3. **Approve templates:** http://localhost:3000/templates/review. Customers only see approved ones.
 4. **Make a portfolio:** http://localhost:3000/templatechooser → pick one → **Use this template**. Click any text in the preview to edit it. Changes save to the database as you type (the top bar says *Saved to your account*). Reload the page: everything comes back.
 5. **Publish:** **Publish** in the top bar → choose an address → your site is at http://localhost:3000/p/your-address.
-6. **Blog:** in the editor open the **Blog** tab → **New post** → write → **Publish post**. It appears at `/p/your-address/blog` and under *Writing* on your portfolio.
+6. **Blog** (Pro, Premium and the free trial): in the editor open the **Blog** tab → **New post** → write → **Publish post**. It appears at `/p/your-address/blog` and under *Writing* on your portfolio.
 7. **Journal (the site's own blog):** http://localhost:3000/admin/journal → **New post**, or edit the articles that ship with the site. Live at http://localhost:3000/blog.
 8. **Ratings:** open any template preview and click the stars.
 9. **A second, normal customer:** sign out (Account → Sign out) and sign in for testing with a different email that isn't in `ADMIN_EMAILS`.

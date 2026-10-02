@@ -27,6 +27,7 @@ export function BlogPanel({ templateId, signedIn, liveUrl }: { templateId: strin
   const base = `/api/portfolios/${templateId}/posts`;
   const [posts, setPosts] = useState<PortfolioPost[] | null>(null);
   const [error, setError] = useState("");
+  const [plan, setPlan] = useState<{ allowed: boolean; name: string }>({ allowed: true, name: "" });
   const [open, setOpen] = useState<PortfolioPost | null>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const timer = useRef<number | undefined>(undefined);
@@ -34,7 +35,7 @@ export function BlogPanel({ templateId, signedIn, liveUrl }: { templateId: strin
 
   useEffect(() => {
     if (!signedIn) return;
-    call<{ posts: PortfolioPost[] }>(base).then((body) => setPosts(body.posts)).catch((problem: Error) => setError(problem.message));
+    call<{ posts: PortfolioPost[]; allowed: boolean; planName: string }>(base).then((body) => { setPosts(body.posts); setPlan({ allowed: body.allowed, name: body.planName }); }).catch((problem: Error) => setError(problem.message));
   }, [base, signedIn]);
 
   const replace = (post: PortfolioPost) => setPosts((current) => (current ?? []).some((item) => item.id === post.id) ? (current ?? []).map((item) => (item.id === post.id ? post : item)) : [post, ...(current ?? [])]);
@@ -105,6 +106,13 @@ export function BlogPanel({ templateId, signedIn, liveUrl }: { templateId: strin
     <p className="font-display text-[1.4rem] leading-tight text-ink">Write a blog on your site</p>
     <p className="mt-2">Share news, case studies and what you’ve learned. Posts appear at <b>/blog</b> on your portfolio and on your own domain.</p>
     <Link href={`/login?callbackUrl=${encodeURIComponent(`/editor/${templateId}`)}`} className="mt-4 inline-block rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-paper">Sign in to start writing</Link>
+  </div>;
+
+  if (posts !== null && !plan.allowed) return <div className="p-5 text-[13px] leading-relaxed text-ink-soft">
+    <p className="font-display text-[1.4rem] leading-tight text-ink">A blog on your site</p>
+    <p className="mt-2">Share news, case studies and what you’ve learned, at <b>/blog</b> on your portfolio and your own domain. Blogs are included in <b>Pro</b> and <b>Premium</b>{plan.name ? `; you’re on ${plan.name}` : ""}.</p>
+    {posts.length > 0 && <p className="mt-2">Your {posts.length} post{posts.length === 1 ? " is" : "s are"} kept and will be back on your site when you upgrade.</p>}
+    <Link href="/pricing" className="mt-4 inline-block rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-paper hover:bg-signal">See Pro</Link>
   </div>;
 
   if (open) {

@@ -3,6 +3,7 @@ import { siteUrl } from "@/lib/site";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES } from "@/lib/templates/roles";
 import { listJournal } from "@/lib/content/journal";
+import { isLive, standingOf } from "@/lib/plans";
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 
@@ -28,15 +29,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     await ensureSchema();
     const published = await db.query<{ slug: string; published_at: Date }>("SELECT slug, published_at FROM portfolios WHERE published_at IS NOT NULL AND slug IS NOT NULL ORDER BY published_at DESC LIMIT 45000");
-    const posts = await db.query<{ slug: string; post_slug: string; published_at: Date }>(
-      `SELECT p.slug, b.slug AS post_slug, b.published_at FROM portfolio_posts b
+    const posts = await db.query<{ slug: string; post_slug: string; published_at: Date; plan: string; trial_ends_at: Date; plan_expires_at: Date | null }>(
+      `SELECT p.slug, b.slug AS post_slug, b.published_at, u.plan, u.trial_ends_at, u.plan_expires_at FROM portfolio_posts b
        JOIN portfolios p ON p.owner_id = b.owner_id AND p.template_id = b.template_id
+       JOIN app_users u ON u.id = b.owner_id
        WHERE b.published_at IS NOT NULL AND p.published_at IS NOT NULL AND p.slug IS NOT NULL ORDER BY b.published_at DESC LIMIT 4000`,
     );
     return [
       ...pages,
       ...published.rows.map((row) => ({ url: `${siteUrl}/p/${row.slug}`, lastModified: row.published_at, changeFrequency: "monthly" as const, priority: 0.4 })),
-      ...posts.rows.map((row) => ({ url: `${siteUrl}/p/${row.slug}/blog/${row.post_slug}`, lastModified: row.published_at, changeFrequency: "yearly" as const, priority: 0.3 })),
+      ...posts.rows.filter((row) => { const standing = standingOf(row); return standing.plan.blog && isLive(standing.standing); }).map((row) => ({ url: `${siteUrl}/p/${row.slug}/blog/${row.post_slug}`, lastModified: row.published_at, changeFrequency: "yearly" as const, priority: 0.3 })),
     ];
   } catch {
     return pages; // A database outage shouldn't break the sitemap.

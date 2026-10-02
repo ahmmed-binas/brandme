@@ -17,7 +17,7 @@ const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
 const FEATURES: Record<PaidPlanId, string[]> = {
   basic: ["One live portfolio", "Every template, every colour and type option", "Your own domain, connected for you, with HTTPS", "Unlimited edits, saved as you type", "200 MB of images", "Pay for 1 or 2 years"],
-  pro: ["Everything in Basic", "Three live portfolios", "No Formora link on your site", "GitHub checked weekly for new projects", "Career news search every 3 months", "100 AI credits every month", "Pay for up to 5 years"],
+  pro: ["Everything in Basic", "Three live portfolios", "No Formora link on your site", "A blog on your site and your own domain", "GitHub checked weekly for new projects", "Career news search every 3 months", "100 AI credits every month", "Pay for up to 5 years"],
   premium: ["Everything in Pro", "A domain name included (up to $20/yr)", "Career news search every month", "300 AI credits every month", "Ten live portfolios and 5 GB of images", "Priority help from a person"],
 };
 

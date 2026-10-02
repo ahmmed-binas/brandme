@@ -1,5 +1,5 @@
 import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
-import { createPost, listPosts, PostError, type PostInput } from "@/lib/portfolio/posts";
+import { BLOG_UPGRADE, createPost, listPosts, PostError, type PostInput } from "@/lib/portfolio/posts";
 
 type Context = { params: Promise<{ templateId: string }> };
 
@@ -7,13 +7,14 @@ type Context = { params: Promise<{ templateId: string }> };
 export const GET = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  return Response.json({ posts: await listPosts(owner.user.id, owner.templateId, { drafts: true }) });
+  return Response.json({ posts: await listPosts(owner.user.id, owner.templateId, { drafts: true }), allowed: owner.user.plan.blog, planName: owner.user.plan.name });
 });
 
 /** Starts a new post (a draft unless `publish: true`). */
 export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
+  if (!owner.user.plan.blog) return jsonError(402, BLOG_UPGRADE);
   const body = await readJson(request, 80_000);
   if (body instanceof Response) return body;
   try {

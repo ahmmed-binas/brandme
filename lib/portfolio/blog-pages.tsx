@@ -9,14 +9,14 @@ const ownerName = (site: Site) => (site.portfolio.content as StandardContent).na
 const base = (site: Site) => (site.canonical.startsWith("https://") ? { metadataBase: new URL(site.canonical) } : {});
 
 export async function blogIndexMetadata(site: Site | null): Promise<Metadata> {
-  if (!site || site.portfolio.resting) return { title: "Blog not found", robots: { index: false } };
+  if (!site || site.portfolio.resting || !site.portfolio.hasBlog) return { title: "Blog not found", robots: { index: false } };
   const name = ownerName(site);
   const url = `${site.canonical.replace(/\/$/, "")}/blog`;
   return { ...base(site), title: { absolute: `Blog — ${name}` }, description: `Writing by ${name}.`, alternates: { canonical: url }, openGraph: { type: "website", title: `Blog — ${name}`, url } };
 }
 
 export async function BlogIndex({ site }: { site: Site | null }) {
-  if (!site || site.portfolio.resting) notFound();
+  if (!site || site.portfolio.resting || !site.portfolio.hasBlog) notFound();
   return <PortfolioBlogIndex templateId={site.portfolio.templateId} content={site.portfolio.content as StandardContent} home={site.home} posts={await sitePosts(site)} />;
 }
 

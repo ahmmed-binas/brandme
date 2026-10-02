@@ -34,12 +34,12 @@ export const toPublic = (post: PortfolioPost, withBody = false): PublicPost => (
 
 /** Published posts for a live (not resting) site, newest first. */
 export async function sitePosts(site: Site, limit?: number): Promise<PublicPost[]> {
-  if (site.portfolio.resting) return [];
+  if (site.portfolio.resting || !site.portfolio.hasBlog) return [];
   return (await listPosts(site.portfolio.ownerId, site.portfolio.templateId, { limit })).map((post) => toPublic(post));
 }
 
 export const sitePost = cache(async (site: Site, slug: string): Promise<PublicPost | null> => {
-  if (site.portfolio.resting || !/^[a-z0-9-]{1,80}$/.test(slug)) return null;
+  if (site.portfolio.resting || !site.portfolio.hasBlog || !/^[a-z0-9-]{1,80}$/.test(slug)) return null;
   const post = await getPost(site.portfolio.ownerId, site.portfolio.templateId, slug);
   return post ? toPublic(post, true) : null;
 });

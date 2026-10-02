@@ -151,6 +151,8 @@ export interface PublishedPortfolio {
   content: Record<string, unknown>;
   theme: ColorTheme | null;
   showsBranding: boolean;
+  /** The owner's plan includes a blog; posts are hidden (not deleted) when it doesn't. */
+  hasBlog: boolean;
   /** The owner's trial or plan has lapsed; visitors see a holding page, not the portfolio. */
   resting: boolean;
   ownerName: string | null;
@@ -179,6 +181,6 @@ async function findPublished(where: string, params: unknown[]): Promise<Publishe
   const standing = standingOf(row);
   return {
     ownerId: row.owner_id, templateId: row.template_id, content: row.published_content, theme: row.published_theme, updatedAt: row.published_at.toISOString(),
-    showsBranding: standing.plan.showsBranding, resting: !isLive(standing.standing), ownerName: (row.published_content.name as string | undefined) ?? row.name,
+    showsBranding: standing.plan.showsBranding, hasBlog: standing.plan.blog, resting: !isLive(standing.standing), ownerName: (row.published_content.name as string | undefined) ?? row.name,
   };
 }

@@ -35,6 +35,8 @@ export interface PlanLimits {
   includedDomain: boolean;
   /** Total image storage. */
   storageMb: number;
+  /** A blog on the portfolio (/blog, and on the owner's own domain). */
+  blog: boolean;
   /** Weekly GitHub sync into the portfolio. */
   autoSync: boolean;
   /** How often the research agent looks for news about the owner; null when not included. */
@@ -56,22 +58,22 @@ export const PLANS: Record<PlanId, PlanLimits> = {
   trial: {
     id: "trial", name: "Free trial", summary: "Everything in Pro for 14 days.", yearlyCents: 0, terms: [],
     publishedPortfolios: 1, aiEditsPerDay: 25, showsBranding: true, connectOwnDomain: true, includedDomain: false,
-    storageMb: 100, autoSync: true, researchEveryDays: null, monthlyCredits: 0, prioritySupport: false,
+    storageMb: 100, blog: true, autoSync: true, researchEveryDays: null, monthlyCredits: 0, prioritySupport: false,
   },
   basic: {
     id: "basic", name: "Basic", summary: "Your portfolio online, on your own domain, kept fast and safe.", yearlyCents: 1000, terms: [1, 2],
     publishedPortfolios: 1, aiEditsPerDay: 30, showsBranding: true, connectOwnDomain: true, includedDomain: false,
-    storageMb: 200, autoSync: false, researchEveryDays: null, monthlyCredits: 0, prioritySupport: false,
+    storageMb: 200, blog: false, autoSync: false, researchEveryDays: null, monthlyCredits: 0, prioritySupport: false,
   },
   pro: {
     id: "pro", name: "Pro", summary: "A portfolio that keeps itself up to date.", yearlyCents: 2400, terms: [1, 2, 5],
     publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, connectOwnDomain: true, includedDomain: false,
-    storageMb: 1000, autoSync: true, researchEveryDays: 90, monthlyCredits: 100, prioritySupport: false,
+    storageMb: 1000, blog: true, autoSync: true, researchEveryDays: 90, monthlyCredits: 100, prioritySupport: false,
   },
   premium: {
     id: "premium", name: "Premium", summary: "A domain included, monthly check-ins on your career, and priority help.", yearlyCents: 4900, terms: [1, 2, 5],
     publishedPortfolios: 10, aiEditsPerDay: 200, showsBranding: false, connectOwnDomain: true, includedDomain: true,
-    storageMb: 5000, autoSync: true, researchEveryDays: 30, monthlyCredits: 300, prioritySupport: true,
+    storageMb: 5000, blog: true, autoSync: true, researchEveryDays: 30, monthlyCredits: 300, prioritySupport: true,
   },
 };
 
