@@ -22,14 +22,21 @@
 
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
-import * as pdfjsLib from "pdfjs-dist";
 import { createWorker } from "tesseract.js";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
-
+// pdf.js needs browser APIs (DOMMatrix, workers), so it is loaded on first use
+// rather than at import time; importing it eagerly breaks server prerendering.
+let pdfjsPromise;
+function loadPdfjs() {
+  pdfjsPromise ??= import("pdfjs-dist").then((pdfjsLib) => {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+      import.meta.url
+    ).toString();
+    return pdfjsLib;
+  });
+  return pdfjsPromise;
+}
 
 
 
@@ -263,6 +270,7 @@ export async function extractPDF(file, onProgress) {
   let pdf;
   try {
     const arrayBuffer = await file.arrayBuffer();
+    const pdfjsLib = await loadPdfjs();
     pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   } catch (err) {
     throw new FileExtractionError("Failed to open PDF.", {
