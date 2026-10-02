@@ -10,6 +10,8 @@
 | `/editor/[templateId]` | Private portfolio editor; intentionally no-index | `app/editor/[templateId]/page.tsx` |
 | `/p/[slug]` | A user's published portfolio (server-rendered from the database) | `app/p/[slug]/page.tsx` |
 | `/account` | Signed-in user's portfolios, live status, and plan | `app/account/page.tsx` |
+| `/community` | Suggestions, reviews and design submissions (public; posting needs sign-in) | `app/community/page.tsx` |
+| `/community/moderation` | Moderation queue for `ADMIN_EMAILS` | `app/community/moderation/page.tsx` |
 | any custom domain | A published portfolio on its owner's domain (see `docs/CUSTOM_DOMAINS.md`) | `app/sites/[host]/page.tsx` |
 | `/DetailExtractorPage` | CV/document detail extraction | `app/DetailExtractorPage/page.tsx` |
 | `/tools` | Free document tools directory | `app/tools/page.tsx` |
@@ -41,6 +43,8 @@ lib/domains/         Custom domains: name rules, Vercel API client, purchase/con
 app/api/domains/     Search, buy (Stripe checkout), connect, and disconnect domains.
 app/sites/[host]/    A portfolio served on its custom domain (reached via proxy.ts).
 proxy.ts             Routes custom-domain requests to /sites/<host>.
+lib/community/       Community rules (rules.ts: every refusal and hold), data access, viewer.
+db/migrations.mjs    Versioned database migrations (run on start and by `npm run db:migrate`).
 lib/content/         Editorial content and pagination data.
 utils/               File extraction and legacy helper code.
 public/              Static images and assets served from the site root.
@@ -74,3 +78,12 @@ To add a new portfolio design, follow `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`.
 Browser-local editing works without an account; signing in adds account saving and publishing. Tables (`app_users`, `portfolios`, `ai_usage`) are created automatically on first use by `utils/db-schema.ts`. Owners are identified by their Google account id, carried in the session by `auth.ts`.
 
 Payments are not built yet. When they are, a payment webhook should only set `app_users.plan`; every limit already reads from `lib/plans.ts`. See `docs/BUSINESS_PLAN.md` for the plan and roadmap.
+
+## Community moderation
+
+Posting rules live in `lib/community/rules.ts`:
+
+- **Refused immediately** (nothing stored, the author keeps their text and sees why): too short or long, spam terms (`COMMUNITY_BLOCKED_TERMS` adds more), all capitals, more than 3 links, non-https links, missing rating or images, duplicate text within 7 days, more than 5 posts an hour or 20 a day, a second review.
+- **Held for a moderator:** every design submission, and posts with links from members with nothing published yet.
+- **Moderators** (`ADMIN_EMAILS`) use `/community/moderation` or the controls on each post: approve, refuse (a reason is required and shown to the author), remove a published post (reason required), or restore. Refused authors can edit and resubmit.
+- Images of unpublished posts are only served to their author and moderators.

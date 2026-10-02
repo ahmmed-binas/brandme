@@ -94,6 +94,59 @@ export const migrations = [
       `UPDATE custom_domains SET verified_at = NULL`,
     ],
   },
+  {
+    id: "004_community",
+    statements: [
+      `CREATE TABLE IF NOT EXISTS community_posts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        author_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL CHECK (kind IN ('suggestion', 'review', 'design')),
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        rating SMALLINT CHECK (rating BETWEEN 1 AND 5),
+        link TEXT,
+        -- published: visible to everyone; pending: awaiting a moderator;
+        -- refused: rejected before publishing; removed: taken down after publishing.
+        status TEXT NOT NULL CHECK (status IN ('published', 'pending', 'refused', 'removed')),
+        moderation_note TEXT,
+        moderated_by UUID REFERENCES app_users(id) ON DELETE SET NULL,
+        moderated_at TIMESTAMPTZ,
+        votes INTEGER NOT NULL DEFAULT 0,
+        comment_count INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
+      `CREATE INDEX IF NOT EXISTS community_posts_feed ON community_posts (status, kind, created_at DESC)`,
+      `CREATE INDEX IF NOT EXISTS community_posts_author ON community_posts (author_id, created_at DESC)`,
+      // One live review per person.
+      `CREATE UNIQUE INDEX IF NOT EXISTS community_one_review ON community_posts (author_id) WHERE kind = 'review' AND status IN ('published', 'pending')`,
+      `CREATE TABLE IF NOT EXISTS community_images (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+        position SMALLINT NOT NULL,
+        mime TEXT NOT NULL,
+        data BYTEA NOT NULL
+      )`,
+      `CREATE INDEX IF NOT EXISTS community_images_post ON community_images (post_id, position)`,
+      `CREATE TABLE IF NOT EXISTS community_comments (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+        author_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        body TEXT NOT NULL,
+        status TEXT NOT NULL CHECK (status IN ('published', 'pending', 'refused', 'removed')),
+        moderation_note TEXT,
+        moderated_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`,
+      `CREATE INDEX IF NOT EXISTS community_comments_post ON community_comments (post_id, created_at)`,
+      `CREATE TABLE IF NOT EXISTS community_votes (
+        post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (post_id, user_id)
+      )`,
+    ],
+  },
 ];
 
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
