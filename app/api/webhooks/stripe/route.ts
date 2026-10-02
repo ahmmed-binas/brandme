@@ -1,6 +1,7 @@
 import { route } from "@/lib/api/http";
 import type Stripe from "stripe";
 import { fulfilPaidOrder } from "@/lib/domains/service";
+import { fulfilBillingOrder } from "@/lib/billing/service";
 import { stripe, stripeConfigured } from "@/lib/payments/stripe";
 
 /**
@@ -21,10 +22,11 @@ export const POST = route(async (request: Request) => {
 
   if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
     const session = event.data.object;
-    const orderId = session.metadata?.orderId;
-    if (orderId && session.payment_status === "paid") {
-      const paymentIntent = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
-      await fulfilPaidOrder(orderId, paymentIntent);
+    const paymentIntent = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+    if (session.payment_status === "paid") {
+      // Domain purchases and plan/credit purchases carry different metadata.
+      if (session.metadata?.orderId) await fulfilPaidOrder(session.metadata.orderId, paymentIntent);
+      if (session.metadata?.billingOrderId) await fulfilBillingOrder(session.metadata.billingOrderId, paymentIntent);
     }
   }
   return Response.json({ received: true });

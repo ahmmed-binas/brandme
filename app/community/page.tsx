@@ -45,6 +45,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
       <div className="flex flex-col items-start gap-5 lg:col-span-4 lg:items-end">
         {stats.count > 0 && stats.average !== null && <p className="text-right text-[0.95rem] text-ink-soft"><span className="font-display text-[2.4rem] leading-none text-ink">{stats.average.toFixed(1)}</span> / 5 from {stats.count} {stats.count === 1 ? "review" : "reviews"}</p>}
         <WriteButton signedIn={Boolean(viewer)} label={viewer ? "Write a post" : "Sign in to post"} />
+        <Link href="/community/support" className="text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Need help? Contact support →</Link>
       </div>
     </header>
 

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { brand } from "@/lib/brand";
 
 const COLUMNS = [
-  { title: "Product", links: [["Templates", "/templatechooser"], ["How it works", "/#how-it-works"], ["Your portfolios", "/account"]] },
-  { title: "Community", links: [["Suggestions & reviews", "/community"], ["Journal", "/blog"], ["Contact", "/contact"]] },
+  { title: "Product", links: [["Templates", "/templatechooser"], ["Pricing", "/pricing"], ["How it works", "/#how-it-works"], ["Your account", "/account"]] },
+  { title: "Company", links: [["About", "/about"], ["Community", "/community"], ["Support", "/community/support"], ["Journal", "/blog"]] },
   { title: "Free tools", links: [["PDF editor", "/tools/pdf-editor"], ["Merge PDFs", "/tools/merge-pdf"], ["All tools", "/tools"]] },
 ] as const;
 

@@ -41,9 +41,9 @@ export async function grantCredits(ownerId: string, credits: number, reason: str
 export async function chargeCredits(ownerId: string, credits: number, reason: string): Promise<{ charged: number; balance: number }> {
   await ensureSchema();
   const result = await db.query<{ charged: number; balance: number }>(
-    `WITH current AS (SELECT credits FROM app_users WHERE id = $1 FOR UPDATE),
-     updated AS (UPDATE app_users SET credits = credits - LEAST(credits, $2) WHERE id = $1 RETURNING credits)
-     SELECT (SELECT credits FROM current) - updated.credits AS charged, updated.credits AS balance FROM updated`,
+    `UPDATE app_users u SET credits = u.credits - c.take
+     FROM (SELECT id, LEAST(credits, $2) AS take FROM app_users WHERE id = $1 FOR UPDATE) c
+     WHERE u.id = c.id RETURNING c.take AS charged, u.credits AS balance`,
     [ownerId, credits],
   );
   const row = result.rows[0] ?? { charged: 0, balance: 0 };

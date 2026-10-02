@@ -83,10 +83,10 @@ export function planFor(value: string | null | undefined): PlanLimits {
   return PLANS.trial;
 }
 
-/** Total price in cents for a plan paid upfront for `years`. */
+/** Total price in cents for a plan paid upfront for `years`. The yearly rate is rounded to whole dollars so prices read cleanly. */
 export function priceFor(plan: PaidPlanId, years: number): number {
   const discount = TERM_DISCOUNT[years] ?? 0;
-  return Math.round((PLANS[plan].yearlyCents * years * (1 - discount)) / 100) * 100;
+  return Math.round((PLANS[plan].yearlyCents * (1 - discount)) / 100) * 100 * years;
 }
 
 export const formatUsd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;

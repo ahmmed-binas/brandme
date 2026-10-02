@@ -1,3 +1,4 @@
+import { INCLUDED_DOMAIN_MAX_CENTS } from "@/lib/plans";
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import type { CurrentUser } from "@/utils/user-account";
@@ -164,6 +165,12 @@ export async function startPurchase(user: CurrentUser, templateId: TemplateId, d
     [user.id, templateId, domain, price.purchasePrice, offer.priceCents, JSON.stringify(contact)],
   );
   const orderId = order.rows[0].id;
+  // Premium includes one domain a year: no payment step, straight to registration.
+  if (await includedDomainAvailable(user, price.purchasePrice)) {
+    await db.query("UPDATE domain_orders SET charged_cents = 0, updated_at = NOW() WHERE id = $1", [orderId]);
+    await fulfilPaidOrder(orderId, null);
+    return `${origin}/editor/${templateId}?domainOrder=${orderId}`;
+  }
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
     customer_email: contact.email,
@@ -176,6 +183,13 @@ export async function startPurchase(user: CurrentUser, templateId: TemplateId, d
   await db.query("UPDATE domain_orders SET stripe_session_id = $2, updated_at = NOW() WHERE id = $1", [orderId, session.id]);
   if (!session.url) throw new DomainError("Payment could not be started.", 502);
   return session.url;
+}
+
+/** Premium, active, a domain within the included price, and none claimed in the last year. */
+async function includedDomainAvailable(user: CurrentUser, registrarPrice: number): Promise<boolean> {
+  if (!user.plan.includedDomain || user.standing.standing !== "active" || registrarPrice * 100 > INCLUDED_DOMAIN_MAX_CENTS) return false;
+  const used = await db.query("SELECT 1 FROM domain_orders WHERE owner_id = $1 AND charged_cents = 0 AND status NOT IN ('refunded', 'refund_failed') AND created_at > NOW() - INTERVAL '1 year'", [user.id]);
+  return !used.rowCount;
 }
 
 async function refund(orderId: string, paymentIntent: string | null, reason: string) {
