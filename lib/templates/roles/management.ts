@@ -218,7 +218,7 @@ export const MANAGEMENT_ROLES = [
     quote: ["I finally take weekends off. Sofia is the best investment I’ve made in the business.", "Founder", "Client"],
     experience: [["Virtual Assistant", "Self-employed", "2022", "Present"], ["Executive Assistant", "City Harvest (charity)", "2018", "2022"]],
     education: [["BA Italian & History", "University of Sussex", "2016"]],
-  }, ["practice", "rolodex"]),
+  }, ["practice"]),
   role("administrator", "Office Administrator", "office administrators", "admin", ["admin assistant", "administrative assistant", "receptionist", "secretary", "office coordinator"], {
     title: "Office Administrator", tagline: "Organised, reliable and the first friendly face people meet.",
     bio: ["I keep a busy architecture office running: reception, post, supplies, meeting rooms, invoices and new starters.", "I like systems that save everyone time, and I build them in spreadsheets when there isn’t one."],

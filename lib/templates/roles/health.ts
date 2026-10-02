@@ -20,7 +20,7 @@ export const HEALTH_ROLES = [
     experience: [["General Practitioner", "Consulta Ferrer, Eixample", "2020", "Present"], ["Specialist Registrar, Family Medicine", H, "2014", "2018"]],
     education: [MD, ["Specialist training, Family & Community Medicine", H, "2018"]],
     availability: "Accepting new patients · English, Spanish, Catalan",
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
   role("paediatrician", "Paediatrician", "paediatricians", "healthcare", ["pediatrician", "children’s doctor", "child doctor", "kids doctor", "neonatologist"], {
     name: DR, title: "Consultant Paediatrician", tagline: "Calm, careful care for children, and answers parents can understand.",
     bio: ["I look after babies, children and teenagers, from newborn checks to asthma, allergies and growth worries.", "I explain things to children in their own words and give parents a written plan to take home."],
@@ -31,7 +31,7 @@ export const HEALTH_ROLES = [
     experience: [["Consultant Paediatrician", "Clínica Infantil Diagonal", "2019", "Present"], ["Paediatric Registrar", "Hospital Infantil del Mar", "2014", "2019"]],
     education: [MD, ["Specialist training, Paediatrics", "Hospital Infantil del Mar", "2019"]],
     availability: "New patients from birth to 16",
-  }, ["clinic", "exercise-book"]),
+  }, ["clinic", "pulse", "exercise-book"]),
   role("general-surgeon", "General Surgeon", "general surgeons", "healthcare", ["surgeon", "laparoscopic surgeon", "hernia surgeon", "gallbladder surgeon"], {
     name: DR, title: "Consultant General & Laparoscopic Surgeon", tagline: "Keyhole surgery explained clearly, done carefully, followed up personally.",
     bio: ["I specialise in hernia, gallbladder and abdominal wall surgery, almost all of it keyhole, with most patients home the same day.", "I see every patient before and after their operation myself."],
@@ -41,7 +41,7 @@ export const HEALTH_ROLES = [
     quote: ["Back at work in a week, with three tiny scars. She called me herself the next morning.", "Patient", "Hernia repair, 2024"],
     experience: [["Consultant General Surgeon", H, "2017", "Present"], ["Surgical Registrar", "Hospital del Litoral", "2011", "2017"]],
     education: [MD, ["Specialist training, General & Digestive Surgery", "Hospital del Litoral", "2017"]],
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
   role("orthopaedic-surgeon", "Orthopaedic Surgeon", "orthopaedic surgeons", "healthcare", ["orthopedic surgeon", "knee surgeon", "hip surgeon", "sports surgeon", "spine surgeon"], {
     name: DR, title: "Consultant Orthopaedic Surgeon, Knee & Sports Injury", tagline: "Getting you back to what you love doing, with surgery only when it helps.",
     bio: ["I treat knee problems and sports injuries, from ligament tears to arthritis. About half the people I see don’t need an operation, and I tell them so.", "When surgery is right, I plan the rehab with your physio before we start."],
@@ -51,7 +51,7 @@ export const HEALTH_ROLES = [
     quote: ["Two other surgeons wanted to operate. She sent me to a physio instead, and I ran a marathon eight months later.", "Patient", "Runner"],
     experience: [["Consultant Orthopaedic Surgeon", H, "2016", "Present"], ["Fellow, Knee & Sports Surgery", "Hospital del Litoral", "2014", "2016"]],
     education: [MD, ["Specialist training, Orthopaedic Surgery & Traumatology", "Hospital del Litoral", "2014"]],
-  }, ["clinic", "training-log"]),
+  }, ["clinic", "pulse", "training-log"]),
   role("cardiologist", "Cardiologist", "cardiologists", "healthcare", ["heart doctor", "heart specialist", "cardiology", "interventional cardiologist"], {
     name: DR, title: "Consultant Cardiologist", tagline: "Heart care that starts with listening, not just a scan.",
     bio: ["I see people with chest pain, palpitations, high blood pressure and heart failure, and athletes who want their heart checked before they compete.", "I do the echo myself in the same appointment, so you leave with an answer."],
@@ -61,7 +61,7 @@ export const HEALTH_ROLES = [
     quote: ["I came in worried and left with a diagnosis, a plan and a drawing of my heart that finally made sense.", "Patient", "Arrhythmia clinic"],
     experience: [["Consultant Cardiologist", H, "2018", "Present"], ["Cardiology Registrar", "Hospital del Litoral", "2013", "2018"]],
     education: [MD, ["Specialist training, Cardiology", "Hospital del Litoral", "2018"]],
-  }, ["clinic", "prospectus"]),
+  }, ["clinic", "pulse", "prospectus"]),
   role("dermatologist", "Dermatologist", "dermatologists", "healthcare", ["skin doctor", "skin specialist", "dermatology", "mole check", "acne doctor"], {
     name: DR, title: "Consultant Dermatologist", tagline: "Skin, hair and nails, diagnosed properly and treated kindly.",
     bio: ["I treat acne, eczema, psoriasis and hair loss, and I check moles and skin cancers with dermoscopy and mole mapping.", "I’ll always tell you which treatments are worth paying for and which aren’t."],
@@ -71,7 +71,7 @@ export const HEALTH_ROLES = [
     quote: ["After years of creams that didn’t work, my skin has been clear for eighteen months.", "Patient", "Acne clinic"],
     experience: [["Consultant Dermatologist", "Clínica Dermatològica Eixample", "2018", "Present"], ["Dermatology Registrar", H, "2014", "2018"]],
     education: [MD, ["Specialist training, Dermatology & Venereology", H, "2018"]],
-  }, ["clinic", "lookbook"]),
+  }, ["clinic", "pulse", "lookbook"]),
   role("psychiatrist", "Psychiatrist", "psychiatrists", "healthcare", ["psychiatry", "mental health doctor", "adhd psychiatrist", "child psychiatrist"], {
     name: DR, title: "Consultant Psychiatrist", tagline: "Careful assessment, honest options and time to talk them through.",
     bio: ["I assess and treat adults with depression, anxiety, bipolar disorder and ADHD. First appointments are ninety minutes.", "I combine medication with talking therapy where it helps, and I work closely with your GP."],
@@ -81,7 +81,7 @@ export const HEALTH_ROLES = [
     quote: ["She was the first person who took the time to understand the whole picture.", "Patient", "Adult ADHD service"],
     experience: [["Consultant Psychiatrist", "Centre de Salut Mental Eixample", "2017", "Present"], ["Psychiatry Registrar", H, "2012", "2017"]],
     education: [MD, ["Specialist training, Psychiatry", H, "2017"]],
-  }, ["sanctuary", "clinic"]),
+  }, ["sanctuary", "pulse", "clinic"]),
   role("obgyn", "Obstetrician & Gynaecologist", "obstetricians and gynaecologists", "healthcare", ["gynecologist", "gynaecologist", "obstetrician", "OBGYN", "women’s health doctor", "fertility doctor"], {
     name: DR, title: "Consultant Obstetrician & Gynaecologist", tagline: "Pregnancy and women’s health care from someone who stays with you.",
     bio: ["I look after women through pregnancy and birth, and see patients for periods, endometriosis, fertility questions and menopause.", "If you’re pregnant with me, I aim to be at your birth."],
@@ -91,7 +91,7 @@ export const HEALTH_ROLES = [
     quote: ["She was there at 3am, as calm as at our first scan. We couldn’t have asked for more.", "Parents", "Birth, 2024"],
     experience: [["Consultant Obstetrician & Gynaecologist", "Clínica Maternal Barcelona", "2016", "Present"], ["Registrar, Obstetrics & Gynaecology", H, "2011", "2016"]],
     education: [MD, ["Specialist training, Obstetrics & Gynaecology", H, "2016"]],
-  }, ["clinic", "sanctuary"]),
+  }, ["clinic", "pulse", "sanctuary"]),
   role("anaesthetist", "Anaesthetist", "anaesthetists", "healthcare", ["anesthesiologist", "anaesthesia", "pain doctor", "pain management"], {
     name: DR, title: "Consultant Anaesthetist & Pain Specialist", tagline: "Safe anaesthesia, and long-term pain taken seriously.",
     bio: ["I give anaesthetics for orthopaedic and day-case surgery and run a clinic for people living with long-term back and nerve pain.", "I meet every patient before their operation to explain what will happen and answer their worries."],
@@ -101,7 +101,7 @@ export const HEALTH_ROLES = [
     quote: ["Nobody had explained my pain before. Six months on, I’m walking the dog again.", "Patient", "Pain clinic"],
     experience: [["Consultant Anaesthetist", H, "2017", "Present"], ["Anaesthesia Registrar", "Hospital del Litoral", "2012", "2017"]],
     education: [MD, ["Specialist training, Anaesthesiology & Pain Medicine", "Hospital del Litoral", "2017"]],
-  }, ["clinic", "datasheet"]),
+  }, ["clinic", "pulse", "datasheet"]),
   role("radiologist", "Radiologist", "radiologists", "healthcare", ["radiology", "imaging doctor", "interventional radiologist", "MRI"], {
     name: DR, title: "Consultant Musculoskeletal Radiologist", tagline: "Clear scans, clear reports and a call when it matters.",
     bio: ["I report MRI, ultrasound and CT scans of muscles, joints and bones, and perform ultrasound-guided injections.", "I write reports that other doctors and patients can actually understand."],
@@ -111,7 +111,7 @@ export const HEALTH_ROLES = [
     quote: ["Her reports are the clearest I receive. I know exactly what to do next.", "Orthopaedic Surgeon", "Referring colleague"],
     experience: [["Consultant Radiologist", H, "2018", "Present"], ["Radiology Registrar", "Hospital del Litoral", "2014", "2018"]],
     education: [MD, ["Specialist training, Radiology", "Hospital del Litoral", "2018"]],
-  }, ["datasheet", "clinic"]),
+  }, ["datasheet", "pulse", "clinic"]),
   role("emergency-physician", "Emergency Medicine Doctor", "emergency doctors", "healthcare", ["A&E doctor", "ER doctor", "emergency physician", "urgent care doctor"], {
     name: DR, title: "Emergency Medicine Consultant", tagline: "Calm decisions in the worst hour of someone’s week.",
     bio: ["I lead shifts in a busy city emergency department, from cardiac arrests to sprained ankles, and teach junior doctors resuscitation.", "Outside the hospital I run trauma training for mountain rescue teams."],
@@ -121,7 +121,7 @@ export const HEALTH_ROLES = [
     quote: ["The calmest voice in the resus room. Everyone does their best work when she’s leading.", "Charge Nurse", "Emergency department"],
     experience: [["Emergency Medicine Consultant", H, "2017", "Present"], ["Emergency Registrar", "Hospital del Litoral", "2012", "2017"]],
     education: [MD, ["Specialist training, Emergency Medicine", "Hospital del Litoral", "2017"]],
-  }, ["clinic", "site-board"]),
+  }, ["clinic", "pulse", "site-board"]),
   role("ophthalmologist", "Ophthalmologist", "ophthalmologists", "healthcare", ["eye doctor", "eye surgeon", "cataract surgeon", "eye specialist"], {
     name: DR, title: "Consultant Ophthalmologist, Cataract & Glaucoma", tagline: "Clearer sight, and the time to explain every option.",
     bio: ["I perform cataract surgery and look after people with glaucoma and macular disease.", "Cataract surgery takes about twenty minutes; I spend longer than that explaining it beforehand."],
@@ -131,7 +131,7 @@ export const HEALTH_ROLES = [
     quote: ["I can read the menu without glasses for the first time in twenty years.", "Patient", "Cataract surgery"],
     experience: [["Consultant Ophthalmologist", "Institut Oftalmològic Barcelona", "2017", "Present"], ["Ophthalmology Registrar", H, "2013", "2017"]],
     education: [MD, ["Specialist training, Ophthalmology", H, "2017"]],
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
   role("neurologist", "Neurologist", "neurologists", "healthcare", ["brain doctor", "headache specialist", "migraine doctor", "epilepsy", "neurology"], {
     name: DR, title: "Consultant Neurologist", tagline: "Headaches, seizures and memory worries, investigated thoroughly.",
     bio: ["I see adults with migraine, epilepsy, multiple sclerosis, Parkinson’s and memory problems.", "I give each new patient an hour, because the history is usually where the answer is."],
@@ -141,7 +141,7 @@ export const HEALTH_ROLES = [
     quote: ["Ten years of migraines, and she was the first to find what was triggering them.", "Patient", "Headache clinic"],
     experience: [["Consultant Neurologist", H, "2017", "Present"], ["Neurology Registrar", "Hospital del Litoral", "2012", "2017"]],
     education: [MD, ["Specialist training, Neurology", "Hospital del Litoral", "2017"]],
-  }, ["clinic", "seminar"]),
+  }, ["clinic", "pulse", "seminar"]),
   role("oncologist", "Oncologist", "oncologists", "healthcare", ["cancer doctor", "cancer specialist", "medical oncologist", "breast cancer doctor"], {
     name: DR, title: "Consultant Medical Oncologist, Breast Cancer", tagline: "Expert cancer treatment, with you at the centre of every decision.",
     bio: ["I treat women and men with breast cancer, from early disease to advanced cancer, and lead clinical trials of new treatments.", "I make sure every patient knows their options and has a named nurse they can call."],
@@ -151,7 +151,7 @@ export const HEALTH_ROLES = [
     quote: ["She explained everything twice and never once made us feel rushed.", "Patient’s husband", "Breast unit"],
     experience: [["Consultant Medical Oncologist", "Institut Oncològic Mediterrani", "2016", "Present"], ["Oncology Registrar", H, "2011", "2016"]],
     education: [MD, ["PhD, Cancer Biology", "Universitat de Barcelona", "2015"]],
-  }, ["clinic", "seminar"]),
+  }, ["clinic", "pulse", "seminar"]),
   role("dentist", "Dentist", "dentists", "healthcare", ["dental surgeon", "family dentist", "cosmetic dentist", "dental clinic"], {
     name: DR, title: "Dentist & Practice Owner", tagline: "Gentle dentistry for nervous patients and busy families.",
     bio: ["I run a small practice in Eixample offering check-ups, fillings, crowns, implants and whitening.", "Many of my patients haven’t seen a dentist in years because they were scared. I take it slowly and explain every step."],
@@ -161,7 +161,7 @@ export const HEALTH_ROLES = [
     quote: ["I hadn’t been to a dentist in eight years. Now I actually don’t mind going.", "Patient", "Nervous patient programme"],
     experience: [["Principal Dentist", "Clínica Dental Ferrer", "2018", "Present"], ["Associate Dentist", "Clínica Dental Diagonal", "2013", "2018"]],
     education: [["Degree in Dentistry (DDS)", "Universitat de Barcelona", "2013"], ["Master’s in Oral Implantology", "Universitat Internacional de Catalunya", "2016"]],
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
   role("orthodontist", "Orthodontist", "orthodontists", "healthcare", ["braces", "invisalign provider", "teeth straightening"], {
     name: DR, title: "Specialist Orthodontist", tagline: "Straighter smiles, planned carefully and finished properly.",
     bio: ["I straighten teeth for children and adults with fixed braces and clear aligners.", "Every treatment starts with a 3D scan, so you can see the result before you begin."],
@@ -171,7 +171,7 @@ export const HEALTH_ROLES = [
     quote: ["My daughter actually enjoyed her appointments. The result is better than we hoped.", "Parent", "Patient family"],
     experience: [["Specialist Orthodontist", "Ortodòncia Ferrer", "2017", "Present"], ["Associate Orthodontist", "Clínica Dental Diagonal", "2014", "2017"]],
     education: [["Degree in Dentistry (DDS)", "Universitat de Barcelona", "2011"], ["Master’s in Orthodontics", "Universitat de Barcelona", "2014"]],
-  }, ["clinic", "lookbook"]),
+  }, ["clinic", "pulse", "lookbook"]),
   role("nurse", "Registered Nurse", "nurses", "healthcare", ["RN", "nurse", "staff nurse", "ward nurse", "ICU nurse", "theatre nurse"], {
     name: NAME, title: "Senior Staff Nurse, Intensive Care", tagline: "Expert, steady care at the bedside, and a hand to hold for families.",
     bio: ["I’ve been an intensive care nurse for nine years, caring for patients after major surgery, trauma and serious infection.", "I mentor student nurses and lead our unit’s work on family visiting and patient diaries."],
@@ -182,7 +182,7 @@ export const HEALTH_ROLES = [
     experience: [["Senior Staff Nurse, ICU", H, "2019", "Present"], ["Staff Nurse, Surgical Ward", H, "2016", "2019"]],
     education: [["Bachelor’s in Nursing", "Universitat de Barcelona", "2016"], ["Master’s in Critical Care Nursing", "Universitat Pompeu Fabra", "2020"]],
     availability: "Open to senior nurse and clinical educator roles",
-  }, ["clinic", "sanctuary"]),
+  }, ["clinic", "pulse", "sanctuary"]),
   role("nurse-practitioner", "Nurse Practitioner", "nurse practitioners", "healthcare", ["NP", "advanced nurse practitioner", "ANP", "advanced practice nurse"], {
     name: NAME, title: "Advanced Nurse Practitioner", tagline: "Same-day appointments with a nurse who can diagnose and prescribe.",
     bio: ["I run same-day clinics in a busy practice: infections, injuries, rashes and the things that can’t wait a week.", "I can examine, diagnose, prescribe and refer, and I know when a doctor needs to see you instead."],
@@ -192,7 +192,7 @@ export const HEALTH_ROLES = [
     quote: ["Seen the same morning, sorted the same morning.", "Patient", "Same-day clinic"],
     experience: [["Advanced Nurse Practitioner", "Centre de Salut Eixample", "2019", "Present"], ["Practice Nurse", "Centre de Salut Gràcia", "2015", "2019"]],
     education: [["Bachelor’s in Nursing", "Universitat de Barcelona", "2014"], ["Master’s in Advanced Nursing Practice", "Universitat de Barcelona", "2019"]],
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
   role("midwife", "Midwife", "midwives", "healthcare", ["independent midwife", "birth midwife", "doula", "home birth"], {
     name: NAME, title: "Independent Midwife", tagline: "One midwife through pregnancy, birth and those first weeks at home.",
     bio: ["I care for women having babies at home or in hospital, from the first appointment to six weeks after birth.", "You’ll have my number, and it will be me who comes when labour starts."],
@@ -202,7 +202,7 @@ export const HEALTH_ROLES = [
     quote: ["Lucía made our home birth feel safe and calm. We still talk about her every week.", "Parents", "Home birth, 2025"],
     experience: [["Independent Midwife", "Néixer a Casa", "2018", "Present"], ["Hospital Midwife", H, "2012", "2018"]],
     education: [["Bachelor’s in Nursing", "Universitat de Barcelona", "2009"], ["Specialist training, Midwifery", H, "2012"]],
-  }, ["sanctuary", "clinic"]),
+  }, ["sanctuary", "pulse", "clinic"]),
   role("physiotherapist", "Physiotherapist", "physiotherapists", "healthcare", ["physical therapist", "physio", "PT", "sports physio", "rehab"], {
     name: NAME, title: "Chartered Physiotherapist, Sports & Spine", tagline: "Hands-on treatment and a plan you can do at home.",
     bio: ["I treat back and neck pain, sports injuries and recovery after surgery, using hands-on treatment and exercise.", "Every patient leaves the first session with a written exercise plan and a timeline."],
@@ -212,7 +212,7 @@ export const HEALTH_ROLES = [
     quote: ["Back running pain-free after a year of trying everything else.", "Patient", "Runner"],
     experience: [["Chartered Physiotherapist", "Fisio Ferrer", "2019", "Present"], ["Physiotherapist", H, "2015", "2019"]],
     education: [["Bachelor’s in Physiotherapy", "Universitat Ramon Llull", "2015"], ["Master’s in Sports Physiotherapy", "Universitat de Barcelona", "2017"]],
-  }, ["clinic", "training-log"]),
+  }, ["clinic", "pulse", "training-log"]),
   role("pharmacist", "Pharmacist", "pharmacists", "healthcare", ["community pharmacist", "clinical pharmacist", "chemist", "pharmacy owner"], {
     name: NAME, title: "Community Pharmacist & Owner", tagline: "Advice without an appointment, from someone who knows your medicines.",
     bio: ["I run a neighbourhood pharmacy in Gràcia. Most days I’m answering questions about medicines, checking blood pressure and helping people manage long-term conditions.", "I also run a medication review service for older patients taking five or more medicines."],
@@ -222,7 +222,7 @@ export const HEALTH_ROLES = [
     quote: ["Lucía spotted that two of my mother’s medicines were working against each other.", "Customer", "Medication review"],
     experience: [["Pharmacist & Owner", "Farmàcia Ferrer, Gràcia", "2017", "Present"], ["Hospital Pharmacist", H, "2011", "2017"]],
     education: [["Degree in Pharmacy", "Universitat de Barcelona", "2011"]],
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
   role("psychologist", "Psychologist", "psychologists", "healthcare", ["clinical psychologist", "counselling psychologist", "child psychologist", "CBT therapist"], {
     name: NAME, title: "Clinical Psychologist", tagline: "Evidence-based therapy at a pace that suits you.",
     bio: ["I work with adults on anxiety, depression, trauma and stress, using CBT, EMDR and compassion-focused therapy.", "We start with an assessment so we both know what we’re working on and how we’ll know it’s helping."],
@@ -232,7 +232,7 @@ export const HEALTH_ROLES = [
     quote: ["Practical, warm and never preachy. I have tools I still use every day.", "Client", "2024"],
     experience: [["Clinical Psychologist", "Consulta Psicològica Ferrer", "2018", "Present"], ["Clinical Psychologist", H, "2013", "2018"]],
     education: [["Degree in Psychology", "Universitat Autònoma de Barcelona", "2010"], ["Specialist training, Clinical Psychology (PIR)", H, "2013"]],
-  }, ["sanctuary", "practice"]),
+  }, ["sanctuary", "pulse", "practice"]),
   role("optometrist", "Optometrist", "optometrists", "healthcare", ["optician", "eye test", "contact lenses", "eye care"], {
     name: NAME, title: "Optometrist & Practice Owner", tagline: "Thorough eye tests and glasses that suit you.",
     bio: ["I run an independent optician’s in Eixample. Every eye test includes a retinal photo and pressure check, and lasts forty minutes.", "I specialise in contact lenses for difficult prescriptions and in children’s eye care."],
@@ -242,7 +242,7 @@ export const HEALTH_ROLES = [
     quote: ["The first optician who managed to fit me with contact lenses I can actually wear.", "Patient", "Contact lens clinic"],
     experience: [["Optometrist & Owner", "Òptica Ferrer", "2019", "Present"], ["Optometrist", "Visió Diagonal", "2014", "2019"]],
     education: [["Degree in Optics & Optometry", "Universitat Politècnica de Catalunya", "2014"]],
-  }, ["clinic", "lookbook"]),
+  }, ["clinic", "pulse", "lookbook"]),
   role("dietitian", "Dietitian", "dietitians", "healthcare", ["nutritionist", "registered dietitian", "sports nutritionist", "diet"], {
     name: NAME, title: "Registered Dietitian", tagline: "Food advice based on evidence, not fads.",
     bio: ["I help people with diabetes, gut problems, food allergies and weight concerns eat in a way that works for their life.", "No meal-replacement shakes, no forbidden foods, just a realistic plan."],
@@ -252,7 +252,7 @@ export const HEALTH_ROLES = [
     quote: ["For the first time in years, I’m not scared of eating out.", "Client", "IBS programme"],
     experience: [["Registered Dietitian", "Nutrició Ferrer", "2019", "Present"], ["Hospital Dietitian", H, "2015", "2019"]],
     education: [["Degree in Human Nutrition & Dietetics", "Universitat de Barcelona", "2015"]],
-  }, ["sanctuary", "clinic"]),
+  }, ["sanctuary", "pulse", "clinic"]),
   role("occupational-therapist", "Occupational Therapist", "occupational therapists", "healthcare", ["OT", "paediatric OT", "hand therapist"], {
     name: NAME, title: "Paediatric Occupational Therapist", tagline: "Helping children do the everyday things that matter to them.",
     bio: ["I work with children who find handwriting, dressing, coordination or sensory overload hard, often alongside autism or dyspraxia.", "Therapy happens through play, and I always give parents and teachers something to try at home and in class."],
@@ -262,7 +262,7 @@ export const HEALTH_ROLES = [
     quote: ["Our son now ties his own shoelaces and asks to write birthday cards.", "Parent", "Patient family"],
     experience: [["Paediatric Occupational Therapist", "Teràpia Infantil Ferrer", "2019", "Present"], ["Occupational Therapist", "Hospital Infantil del Mar", "2015", "2019"]],
     education: [["Degree in Occupational Therapy", "Universitat Autònoma de Barcelona", "2015"]],
-  }, ["exercise-book", "clinic"]),
+  }, ["exercise-book", "pulse", "clinic"]),
   role("speech-therapist", "Speech & Language Therapist", "speech and language therapists", "healthcare", ["speech therapist", "SLT", "speech pathologist", "speech-language pathologist", "logopedist"], {
     name: NAME, title: "Speech & Language Therapist", tagline: "Helping children and adults find their words.",
     bio: ["I work with children who are late to talk, stammer or have speech sound difficulties, and with adults after a stroke.", "Sessions are practical and fun, and families always leave with activities for the week."],
@@ -272,7 +272,7 @@ export const HEALTH_ROLES = [
     quote: ["Six months ago our daughter had ten words. Now she doesn’t stop talking.", "Parent", "Patient family"],
     experience: [["Speech & Language Therapist", "Logopèdia Ferrer", "2018", "Present"], ["Speech Therapist", H, "2014", "2018"]],
     education: [["Degree in Speech Therapy (Logopèdia)", "Universitat de Barcelona", "2014"]],
-  }, ["exercise-book", "sanctuary"]),
+  }, ["exercise-book", "pulse", "sanctuary"]),
   role("paramedic", "Paramedic", "paramedics", "healthcare", ["EMT", "ambulance", "emergency medical technician", "first responder"], {
     name: NAME, title: "Advanced Paramedic", tagline: "First on scene, and steady when it counts.",
     bio: ["I’ve worked on emergency ambulances for twelve years, the last five as an advanced paramedic on the critical care desk.", "I teach first aid in schools and run event medical cover at weekends."],
@@ -282,7 +282,7 @@ export const HEALTH_ROLES = [
     quote: ["She kept my dad alive and kept us calm. We’ll never forget her.", "Family", "Cardiac arrest call, 2024"],
     experience: [["Advanced Paramedic", "Servei d’Emergències Mèdiques", "2020", "Present"], ["Paramedic", "Servei d’Emergències Mèdiques", "2013", "2020"]],
     education: [["Higher Diploma, Emergency Health Technician", "Institut Joan d’Àustria", "2013"], ["Advanced Paramedic Practice", "Universitat de Barcelona", "2020"]],
-  }, ["site-board", "clinic"]),
+  }, ["site-board", "pulse", "clinic"]),
   role("veterinarian", "Veterinarian", "vets", "healthcare", ["vet", "veterinary surgeon", "animal doctor", "small animal vet", "equine vet"], {
     name: DR, title: "Veterinary Surgeon & Clinic Owner", tagline: "Kind, careful care for dogs, cats and the people who love them.",
     bio: ["I run a small-animal clinic in Gràcia with two other vets and four nurses. We do everything from vaccinations to orthopaedic surgery.", "We take our time with nervous pets and always explain costs before treatment."],
@@ -292,5 +292,5 @@ export const HEALTH_ROLES = [
     quote: ["Our anxious greyhound actually wags his tail at the vet now.", "Owner", "Clinic client"],
     experience: [["Veterinary Surgeon & Owner", "Clínica Veterinària Gràcia", "2018", "Present"], ["Veterinary Surgeon", "Hospital Veterinari Diagonal", "2011", "2018"]],
     education: [["Degree in Veterinary Medicine", "Universitat Autònoma de Barcelona", "2011"]],
-  }, ["clinic", "practice"]),
+  }, ["clinic", "pulse", "practice"]),
 ];

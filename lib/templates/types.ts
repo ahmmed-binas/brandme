@@ -51,7 +51,7 @@ export const PROFESSIONS = [
 ] as const satisfies ReadonlyArray<{ id: string; label: string; field: FieldId }>;
 export type ProfessionId = (typeof PROFESSIONS)[number]["id"];
 
-export const STYLES = ["Minimal", "Editorial", "Bold", "Technical", "Artsy", "Classic", "Playful"] as const;
+export const STYLES = ["Minimal", "Editorial", "Bold", "Technical", "Artsy", "Classic", "Playful", "Motion"] as const;
 export type StyleTag = (typeof STYLES)[number];
 
 /** A named colour scheme. Templates read these as CSS variables (--t-bg, --t-fg, …). */

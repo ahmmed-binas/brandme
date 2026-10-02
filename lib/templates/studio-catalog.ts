@@ -283,11 +283,6 @@ const SPECS: StudioSpec[] = [
     idealFor: ["Account executives", "Sales leaders", "Business development"], sections: ["stats", "highlights", "projects", "experience", "about", "skills", "education", "testimonials", "contact"],
     palettes: [p("board", "Scoreboard green", "#f2f0e9", "#121812", "#f2a900", "#5e625b", "#0f2a1e"), p("navy", "Navy board", "#f1f2f5", "#0e1726", "#ff8a3d", "#5d6474", "#0e1b33"), p("night", "Night game", "#0d0f0e", "#f2efe6", "#f2a900", "#8a8d86", "#15362a")],
     fonts: [f("archivo", "Archivo Condensed + Space Mono", F.archivo, F.archivo, F.spaceMono), f("bigshoulders", "Big Shoulders + Space Mono", F.bigShoulders, F.archivo, F.spaceMono)] },
-  { id: "rolodex", name: "Rolodex", persona: "hr", professions: ["hr", "consulting", "language", "admin"], styles: ["Playful", "Classic"], mood: "light",
-    description: "Index cards with tabs: a card file you flip through, typed entries, references on file and a contact card to keep.",
-    idealFor: ["Recruiters", "HR & people partners", "Talent consultants"], sections: ["stats", "projects", "services", "about", "skills", "experience", "education", "testimonials", "highlights", "contact"],
-    palettes: [p("desk", "Oak desk", "#e6e0d4", "#1f1d1a", "#c8452f", "#6e675c", "#fffdf6"), p("mint", "Mint", "#dbe7e0", "#17241f", "#2f6f5e", "#5f6e67", "#fbfdfb"), p("night", "Late shift", "#1b1c1f", "#ece7dd", "#e8735a", "#9a958c", "#2a2b30")],
-    fonts: [f("youngserif", "Young Serif + Courier", F.youngSerif, F.dmSans, F.courier), f("fraunces", "Fraunces + Courier", F.fraunces, F.dmSans, F.courier)] },
   { id: "datasheet", name: "Datasheet", persona: "engineering", professions: ["engineering", "architecture", "developer", "data"], styles: ["Technical", "Minimal"], mood: "light",
     description: "A component datasheet: part number, features, figures, absolute maximum ratings and your career as a chip pinout.",
     idealFor: ["Civil & structural engineers", "Mechanical & electrical engineers", "Hardware engineers"], sections: ["skills", "about", "stats", "projects", "experience", "education", "highlights", "testimonials", "contact"],
@@ -298,10 +293,37 @@ const SPECS: StudioSpec[] = [
     idealFor: ["Nonprofit leaders", "Programme managers", "Public servants"], sections: ["stats", "about", "projects", "testimonials", "experience", "education", "skills", "highlights", "contact"],
     palettes: [p("earth", "Earth", "#f5f0e6", "#1f1b16", "#c2611f", "#776d62", "#ebe3d4"), p("water", "Water", "#f2f6f7", "#10262f", "#1b7a99", "#5d6f76", "#e2ecef"), p("charcoal", "Charcoal", "#141615", "#ece9e2", "#e0a24a", "#8e8b84", "#1d201e")],
     fonts: [f("familjen", "Familjen + Literata", F.familjen, F.literata), f("hanken", "Hanken + Fraunces", F.hanken, F.fraunces)] },
+
+  // ——— Motion collection: live, moving sites ———
+  { id: "residence", name: "Residence", persona: "realestate", professions: ["realestate", "architecture"], styles: ["Motion", "Editorial"], mood: "dark",
+    description: "A cinematic property site: the home drifts behind the headline, listings glide sideways as you scroll and neighbourhoods reveal a photo under the cursor.",
+    idealFor: ["Luxury estate agents", "Realtors", "Property developers"], sections: ["stats", "projects", "skills", "about", "services", "testimonials", "education", "contact"],
+    palettes: [p("noir", "Noir & champagne", "#0f0e0c", "#efe9df", "#c8a96a", "#8f887d", "#1a1815"), p("limestone", "Limestone", "#f1ece3", "#1d1b18", "#8a6a3c", "#7a7266", "#e6dfd3"), p("coastal", "Coastal", "#eef2f3", "#142430", "#2f6f8f", "#64737c", "#e0e8eb")],
+    fonts: [f("dmserif", "DM Serif + Manrope", F.dmSerif, F.manrope), f("cormorant", "Cormorant + Manrope", F.cormorant, F.manrope)] },
+  { id: "margin-notes", name: "Margin Notes", persona: "education", professions: ["education", "student", "academic"], styles: ["Motion", "Playful"], mood: "light",
+    description: "A teacher’s site that moves like a good lesson: doodles drawn as you read, stats that fill, a year in the classroom told as you scroll.",
+    idealFor: ["Teachers", "Tutors", "Lecturers & coaches"], sections: ["stats", "skills", "projects", "highlights", "about", "services", "testimonials", "experience", "education", "contact"],
+    palettes: [p("paper", "Paper & ink", "#fbf8f1", "#1f2340", "#e2542f", "#6b6f80", "#efe9dc"), p("sage", "Sage", "#f3f5ee", "#1d2a22", "#3f7d58", "#6c776f", "#e3e9de"), p("dusk", "Dusk", "#1c1e2c", "#f1ece2", "#ffb454", "#9a9cab", "#272a3b")],
+    fonts: [f("fraunces", "Fraunces + Figtree", F.fraunces, F.figtree, F.caveat), f("bricolage", "Bricolage + Figtree", F.bricolage, F.figtree, F.caveat)] },
+  { id: "pulse", name: "Pulse", persona: "healthcare", professions: ["healthcare", "wellness"], styles: ["Motion", "Minimal"], mood: "light",
+    description: "A calm, living clinic site: soft light that breathes, a heartbeat that keeps time, fees you can book from and a training timeline that draws itself.",
+    idealFor: ["Doctors & surgeons", "Dentists & therapists", "Private clinics"], sections: ["stats", "skills", "about", "services", "education", "experience", "testimonials", "highlights", "contact"],
+    palettes: [p("mist", "Mist", "#f4f7f6", "#0f2a28", "#1f8f81", "#5b6f6c", "#e6efed"), p("blush", "Blush", "#faf5f2", "#2b1d1a", "#c26a4a", "#806e68", "#f1e6e0"), p("night", "Night shift", "#0b1416", "#e6f0ef", "#6fd6c4", "#7d9592", "#13232a")],
+    fonts: [f("instrument", "Instrument Serif + Hanken", F.instrument, F.hanken), f("newsreader", "Newsreader + Hanken", F.newsreader, F.hanken)] },
+  { id: "counsel", name: "Counsel", persona: "legal", professions: ["legal", "finance", "consulting", "management"], styles: ["Motion", "Classic"], mood: "light",
+    description: "Quiet authority in motion: headlines that unmask line by line, a ticker of outcomes and matters that stack like files as you scroll.",
+    idealFor: ["Lawyers & barristers", "Accountants & advisers", "Consultants"], sections: ["stats", "about", "skills", "projects", "services", "testimonials", "experience", "education", "highlights", "contact"],
+    palettes: [p("ivory", "Ivory & claret", "#f4f0e8", "#121110", "#7a1f2b", "#6d675e", "#ebe5d8"), p("ink", "Ink & brass", "#0f0f0e", "#ece6da", "#b89a5b", "#8a857c", "#191917"), p("navy", "Navy", "#0f1a2b", "#e9e6df", "#c9a46a", "#8b93a3", "#16243a")],
+    fonts: [f("garamond", "Garamond + Inter Tight", F.garamond, F.interTight, F.interTight), f("cormorant", "Cormorant + Inter Tight", F.cormorant, F.interTight, F.interTight)] },
+  { id: "mise", name: "Mise", persona: "food", professions: ["food", "events"], styles: ["Motion", "Bold"], mood: "light",
+    description: "A chef’s site that turns like a plate: the name across a spinning dish, dishes that rotate as you scroll and a menu whose lines draw in.",
+    idealFor: ["Chefs & private chefs", "Restaurants & supper clubs", "Bakers & caterers"], sections: ["skills", "projects", "about", "services", "gallery", "testimonials", "experience", "highlights", "contact"],
+    palettes: [p("market", "Market", "#f4ede1", "#231a12", "#b5482a", "#7d6e60", "#ebe1d0"), p("charred", "Charred", "#141110", "#f3e9dc", "#e0632b", "#968b80", "#1e1a18"), p("herb", "Herb", "#eef0e6", "#1b2116", "#557a3a", "#6c7365", "#e2e6d6")],
+    fonts: [f("dmserif", "DM Serif + DM Sans", F.dmSerif, F.dmSans), f("playfair", "Playfair + DM Sans", F.playfair, F.dmSans)] },
 ];
 
 const CATEGORY: Partial<Record<ProfessionId, TemplateDefinition["category"]>> = { developer: "Developer", data: "Developer", student: "Developer", design: "Creative", art: "Creative", photo: "Creative", music: "Creative", film: "Creative", architecture: "Creative" };
-const LEGACY_STYLE: Record<StyleTag, TemplateDefinition["style"]> = { Minimal: "Minimal", Editorial: "Editorial", Bold: "Modern", Technical: "Modern", Artsy: "Editorial", Classic: "Classic", Playful: "Modern" };
+const LEGACY_STYLE: Record<StyleTag, TemplateDefinition["style"]> = { Minimal: "Minimal", Editorial: "Editorial", Bold: "Modern", Technical: "Modern", Artsy: "Editorial", Classic: "Classic", Playful: "Modern", Motion: "Modern" };
 
 export const studioCatalog: TemplateDefinition[] = SPECS.map((spec) => ({
   ...spec,

@@ -50,9 +50,13 @@ export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   carte: load(() => import("./food/Carte")),
   lookbook: load(() => import("./beauty/Lookbook")),
   quota: load(() => import("./sales/Quota")),
-  rolodex: load(() => import("./hr/Rolodex")),
   datasheet: load(() => import("./engineering/Datasheet")),
   "field-report": load(() => import("./nonprofit/FieldReport")),
+  residence: load(() => import("./realestate/Residence")),
+  "margin-notes": load(() => import("./education/MarginNotes")),
+  pulse: load(() => import("./healthcare/Pulse")),
+  counsel: load(() => import("./legal/Counsel")),
+  mise: load(() => import("./food/Mise")),
 };
 
 export default function StudioTemplate(props: StudioProps) {

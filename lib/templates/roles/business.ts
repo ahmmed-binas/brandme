@@ -14,7 +14,7 @@ export const BUSINESS_ROLES = [
     quote: ["Priya got our sale over the line without a single surprise. Calm, quick and always on our side.", "Founder", "Company sale, 2024"],
     experience: [["Partner, Corporate", "Halden Raman LLP", "2019", "Present"], ["Senior Associate, Corporate", "Broadgate Clarke", "2012", "2019"]],
     education: [["LLB Law", "University of Manchester", "2006"], SRA],
-  }, ["brief", "prospectus"]),
+  }, ["brief", "counsel", "prospectus"]),
   role("criminal-defence-lawyer", "Criminal Defence Lawyer", "criminal defence lawyers", "legal", ["criminal lawyer", "defense attorney", "criminal solicitor", "police station representative"], {
     title: "Criminal Defence Solicitor", tagline: "Arrested or under investigation? Call me first.",
     bio: ["I represent people at the police station and in court, from driving offences to serious fraud.", "I answer my phone at night, and I tell clients the truth about their chances."],
@@ -25,7 +25,7 @@ export const BUSINESS_ROLES = [
     experience: [["Criminal Defence Solicitor", "Raman & Co. Criminal Defence", "2018", "Present"], ["Solicitor", "Northern Defence Partnership", "2010", "2018"]],
     education: [SRA, ["Higher Rights of Audience (Criminal)", "SRA", "2014"]],
     availability: "Emergency line open 24 hours",
-  }, ["brief", "site-board"]),
+  }, ["brief", "counsel", "site-board"]),
   role("family-lawyer", "Family Lawyer", "family lawyers", "legal", ["divorce lawyer", "family solicitor", "child custody lawyer", "family law"], {
     title: "Family Solicitor & Mediator", tagline: "Divorce and separation handled with care, and without unnecessary fights.",
     bio: ["I help people through divorce, separation, arrangements for children and dividing money and property.", "I’m also a trained mediator, so I always look for agreements that keep you out of court."],
@@ -35,7 +35,7 @@ export const BUSINESS_ROLES = [
     quote: ["She kept things calm when I couldn’t. My children barely noticed the change.", "Client", "Separation, 2024"],
     experience: [["Family Solicitor & Mediator", "Halden Raman LLP", "2017", "Present"], ["Solicitor, Family", "Pennine Law", "2010", "2017"]],
     education: [SRA, ["Accredited Family Mediator", "Family Mediation Council", "2016"]],
-  }, ["brief", "sanctuary"]),
+  }, ["brief", "counsel", "sanctuary"]),
   role("immigration-lawyer", "Immigration Lawyer", "immigration lawyers", "legal", ["visa lawyer", "immigration solicitor", "immigration adviser", "asylum lawyer"], {
     title: "Immigration Solicitor", tagline: "Clear advice on visas, settlement and citizenship, in your language.",
     bio: ["I help families, students, workers and employers with visas, settlement, citizenship and appeals.", "I speak English, Tamil and Hindi, and I give every client a written checklist so nothing is missed."],
@@ -45,7 +45,7 @@ export const BUSINESS_ROLES = [
     quote: ["After two refusals elsewhere, Priya got my wife’s visa approved in six weeks.", "Client", "Spouse visa"],
     experience: [["Immigration Solicitor", "Halden Raman LLP", "2018", "Present"], ["Immigration Caseworker", "North West Law Centre", "2011", "2018"]],
     education: [SRA],
-  }, ["brief", "practice"]),
+  }, ["brief", "counsel", "practice"]),
   role("property-lawyer", "Conveyancing Solicitor", "conveyancing solicitors", "legal", ["conveyancer", "property lawyer", "real estate attorney", "property solicitor"], {
     title: "Residential Conveyancing Solicitor", tagline: "Buying or selling a home, with updates you don’t have to chase.",
     bio: ["I handle house purchases, sales and remortgages across England and Wales.", "You’ll get one named solicitor, a fixed fee and an update every week until you have the keys."],
@@ -55,7 +55,7 @@ export const BUSINESS_ROLES = [
     quote: ["The only part of buying our house that didn’t stress us out.", "Buyers", "Purchase, 2025"],
     experience: [["Conveyancing Solicitor", "Halden Raman LLP", "2016", "Present"], ["Conveyancer", "Pennine Law", "2010", "2016"]],
     education: [SRA],
-  }, ["brief", "open-house"]),
+  }, ["brief", "counsel", "open-house"]),
   role("barrister", "Barrister", "barristers", "legal", ["counsel", "advocate", "trial lawyer", "litigator"], {
     title: "Barrister, Employment & Commercial", tagline: "Advocacy that is prepared, persuasive and clear.",
     bio: ["I appear in the Employment Tribunal, County Court and High Court, and advise on merits and strategy before proceedings start.", "Solicitors instruct me because I’m easy to reach and my advice is practical."],
@@ -65,7 +65,7 @@ export const BUSINESS_ROLES = [
     quote: ["Priya’s cross-examination won the case. The judgment quotes her closing submissions twice.", "Instructing solicitor", "Employment Tribunal"],
     experience: [["Barrister", "St John Street Chambers", "2011", "Present"]],
     education: [["Bar Professional Training Course", "The City Law School", "2010"], ["Called to the Bar", "Middle Temple", "2011"]],
-  }, ["brief", "broadsheet"]),
+  }, ["brief", "counsel", "broadsheet"]),
   role("paralegal", "Paralegal", "paralegals", "legal", ["legal assistant", "trainee solicitor", "legal secretary", "law graduate"], {
     title: "Paralegal, Employment", tagline: "Organised, accurate and ready for a training contract.",
     bio: ["I support an employment team of five: preparing bundles, drafting letters, managing deadlines and taking first instructions from clients.", "I’m studying for the SQE and looking for a training contract."],
@@ -76,7 +76,7 @@ export const BUSINESS_ROLES = [
     experience: [["Paralegal", "Halden Raman LLP", "2023", "Present"], ["Legal Administrator", "Pennine Law", "2022", "2023"]],
     education: [["LLB Law", "University of Leeds", "2022"], ["SQE1", "Solicitors Regulation Authority", "2025"]],
     name: "Priya Raman", availability: "Seeking a training contract for 2026",
-  }, ["brief", "syllabus"]),
+  }, ["brief", "counsel", "syllabus"]),
 
   // ——— Finance (London, £) ———
   role("accountant", "Accountant", "accountants", "finance", ["chartered accountant", "CPA", "small business accountant", "ACA", "ACCA"], {
@@ -88,7 +88,7 @@ export const BUSINESS_ROLES = [
     quote: ["Henrik saved us more in the first year than he’ll charge us in ten.", "Founder", "Client"],
     experience: [["Founder", "Larsen Accounting", "2019", "Present"], ["Audit Manager", "Deloitte", "2012", "2019"]],
     education: [["Chartered Accountant (ACA)", "ICAEW", "2012"]],
-  }, ["prospectus", "practice"]),
+  }, ["prospectus", "counsel", "practice"]),
   role("bookkeeper", "Bookkeeper", "bookkeepers", "finance", ["bookkeeping", "accounts assistant", "payroll bureau"], {
     title: "Bookkeeper & Payroll", tagline: "Tidy books every month, so tax time is boring.",
     bio: ["I keep the books for 40 small businesses: bank reconciliations, invoicing, payroll and VAT returns.", "I send every client a one-page summary each month so they know exactly where they stand."],
@@ -98,7 +98,7 @@ export const BUSINESS_ROLES = [
     quote: ["I finally understand my numbers, and I never miss a VAT deadline.", "Café owner", "Client"],
     experience: [["Bookkeeper", "Larsen Books", "2018", "Present"], ["Accounts Assistant", "Kontor Software", "2014", "2018"]],
     education: [["AAT Level 4", "Association of Accounting Technicians", "2016"]],
-  }, ["prospectus", "practice"]),
+  }, ["prospectus", "counsel", "practice"]),
   role("financial-adviser", "Financial Adviser", "financial advisers", "finance", ["financial planner", "financial advisor", "wealth manager", "IFA", "retirement planner"], {
     title: "Chartered Financial Planner", tagline: "A plan for your money, written down and reviewed every year.",
     bio: ["I help families plan for retirement, school fees and passing on wealth, and I explain every recommendation in writing.", "I’m independent and paid by fees, not commissions."],
@@ -108,7 +108,7 @@ export const BUSINESS_ROLES = [
     quote: ["For the first time, we know when we can retire, and that we’ll be fine.", "Clients", "Retirement plan"],
     experience: [["Chartered Financial Planner", "Larsen Wealth", "2018", "Present"], ["Paraplanner", "St Ives Wealth", "2013", "2018"]],
     education: [["Chartered Financial Planner", "Chartered Insurance Institute", "2018"]],
-  }, ["prospectus", "practice"]),
+  }, ["prospectus", "counsel", "practice"]),
   role("tax-adviser", "Tax Adviser", "tax advisers", "finance", ["tax consultant", "chartered tax adviser", "CTA", "tax accountant"], {
     title: "Chartered Tax Adviser", tagline: "Tax planning that is clever, legal and explained simply.",
     bio: ["I advise business owners, landlords and people moving to or from the UK on income tax, capital gains and inheritance tax.", "I also deal with HMRC enquiries, so you don’t have to."],
@@ -118,7 +118,7 @@ export const BUSINESS_ROLES = [
     quote: ["Henrik handled our HMRC enquiry calmly and it closed with no additional tax.", "Landlord", "Client"],
     experience: [["Chartered Tax Adviser", "Larsen Tax", "2019", "Present"], ["Tax Manager", "Deloitte", "2012", "2019"]],
     education: [["Chartered Tax Adviser (CTA)", "Chartered Institute of Taxation", "2014"]],
-  }, ["prospectus", "brief"]),
+  }, ["prospectus", "counsel", "brief"]),
   role("mortgage-broker", "Mortgage Broker", "mortgage brokers", "finance", ["mortgage adviser", "mortgage advisor", "loan officer", "home loans"], {
     title: "Mortgage Adviser", tagline: "The right mortgage, found and handled from offer to keys.",
     bio: ["I help first-time buyers, movers and self-employed people find mortgages from more than 90 lenders.", "I handle the paperwork and chase the lender, so you don’t have to."],
@@ -128,7 +128,7 @@ export const BUSINESS_ROLES = [
     quote: ["Self-employed, with two years of accounts. Henrik found us a mortgage when the bank said no.", "First-time buyers", "Client"],
     experience: [["Mortgage Adviser", "Larsen Mortgages", "2017", "Present"], ["Mortgage Adviser", "High Street Bank", "2012", "2017"]],
     education: [["CeMAP", "London Institute of Banking & Finance", "2012"]],
-  }, ["prospectus", "open-house"]),
+  }, ["prospectus", "counsel", "open-house"]),
   role("auditor", "Auditor", "auditors", "finance", ["audit manager", "internal auditor", "external auditor", "risk and assurance"], {
     title: "Audit Manager", tagline: "Independent, thorough and easy to work with.",
     bio: ["I lead external audits for mid-sized companies and charities, from planning to signing the opinion.", "I find issues early and explain them clearly, so the finance team isn’t surprised at the end."],
@@ -138,7 +138,7 @@ export const BUSINESS_ROLES = [
     quote: ["The smoothest audit we’ve had. Henrik’s team asked for everything once, clearly and early.", "Finance Director", "Audit client"],
     experience: [["Audit Manager", "Deloitte", "2017", "Present"], ["Audit Senior", "Deloitte", "2012", "2017"]],
     education: [["Chartered Accountant (ACA)", "ICAEW", "2012"]],
-  }, ["prospectus", "datasheet"]),
+  }, ["prospectus", "counsel", "datasheet"]),
   role("financial-analyst", "Financial Analyst", "financial analysts", "finance", ["FP&A analyst", "investment analyst", "equity analyst", "finance analyst"], {
     title: "Senior FP&A Analyst", tagline: "Models people trust and forecasts that come true.",
     bio: ["I build the budget, forecast and board reporting for a 300-person software company.", "My forecasts have landed within 3% of actuals for eight quarters running."],
@@ -148,7 +148,7 @@ export const BUSINESS_ROLES = [
     quote: ["Henrik’s models are the ones the board actually reads.", "CFO", "Kontor Software"],
     experience: [["Senior FP&A Analyst", "Kontor Software", "2021", "Present"], ["Financial Analyst", "Fable Foods", "2018", "2021"]],
     education: [["MSc Finance", "Copenhagen Business School", "2018"]],
-  }, ["prospectus", "signal"]),
+  }, ["prospectus", "counsel", "signal"]),
 
   // ——— People & recruiting (Berlin, €) ———
   role("recruiter", "Recruiter", "recruiters", "hr", ["recruitment consultant", "talent acquisition", "headhunter", "technical recruiter", "agency recruiter"], {
@@ -160,7 +160,7 @@ export const BUSINESS_ROLES = [
     quote: ["Ruth found our first three engineers in six weeks, and all three are still here.", "Founder", "Client"],
     experience: [["Technical Recruiter", "Independent", "2021", "Present"], ["Talent Acquisition Partner", "N26", "2016", "2021"]],
     education: [["MA Sociology", "Freie Universität Berlin", "2015"]],
-  }, ["rolodex", "quota"]),
+  }, ["quota"]),
   role("hr-business-partner", "HR Business Partner", "HR business partners", "hr", ["HRBP", "people partner", "HR generalist", "HR advisor"], {
     title: "Senior People Partner", tagline: "Helping managers manage well, and people do their best work.",
     bio: ["I partner with leaders across engineering and product on performance, restructures, pay and employee relations.", "I bring data to people decisions and common sense to policies."],
@@ -170,7 +170,7 @@ export const BUSINESS_ROLES = [
     quote: ["Ruth helped me through my hardest decision as a manager, with care for everyone involved.", "Engineering Director", "Talo"],
     experience: [["Senior People Partner", "Talo", "2020", "Present"], ["HR Business Partner", "N26", "2016", "2020"]],
     education: [["CIPD Level 7", "CIPD", "2020"]],
-  }, ["rolodex", "practice"]),
+  }, ["practice"]),
   role("learning-development", "Learning & Development Manager", "L&D managers", "hr", ["L&D", "training manager", "corporate trainer", "leadership development"], {
     title: "Learning & Development Lead", tagline: "Training people actually use the week after.",
     bio: ["I design leadership and skills programmes for a 600-person company: first-time managers, feedback and onboarding.", "I measure what changes at work, not just how many people attended."],
@@ -180,7 +180,7 @@ export const BUSINESS_ROLES = [
     quote: ["Ruth’s programme changed how our managers give feedback. People noticed within weeks.", "VP People", "Client"],
     experience: [["Learning & Development Lead", "Talo", "2021", "Present"], ["Trainer", "N26", "2017", "2021"]],
     education: [["Certified Professional Coach", "ICF", "2020"]],
-  }, ["rolodex", "syllabus"]),
+  }, ["syllabus"]),
 
   // ——— Property (Portland, $) ———
   role("real-estate-agent", "Real Estate Agent", "real estate agents", "realestate", ["realtor", "estate agent", "real estate broker", "listing agent", "buyer’s agent"], {
@@ -193,7 +193,7 @@ export const BUSINESS_ROLES = [
     experience: [["Principal Broker", "Brooks & Field Real Estate", "2019", "Present"], ["Broker", "Eastside Realty Group", "2013", "2019"]],
     education: [["Licensed Principal Broker", "Oregon Real Estate Agency", "2013"]],
     keepWork: true,
-  }, ["open-house", "practice"]),
+  }, ["open-house", "residence", "practice"]),
   role("letting-agent", "Letting Agent", "letting agents", "realestate", ["leasing agent", "rental agent", "lettings negotiator", "property letting"], {
     title: "Leasing Agent", tagline: "Good tenants for owners, good homes for renters.",
     bio: ["I lease apartments and houses across Portland’s east side, from first viewing to signed lease.", "I screen tenants carefully and match people to homes they’ll want to stay in."],
@@ -204,7 +204,7 @@ export const BUSINESS_ROLES = [
     experience: [["Leasing Agent", "Brooks & Field Real Estate", "2020", "Present"], ["Leasing Consultant", "Eastside Apartments", "2016", "2020"]],
     education: [["Licensed Property Manager", "Oregon Real Estate Agency", "2017"]],
     keepWork: true,
-  }, ["open-house", "practice"]),
+  }, ["open-house", "residence", "practice"]),
   role("property-manager", "Property Manager", "property managers", "realestate", ["block manager", "building manager", "landlord services", "HOA manager"], {
     title: "Property Manager", tagline: "Your rentals looked after like they were mine.",
     bio: ["I manage 140 rental homes for private owners: rent collection, repairs, inspections and tenant questions.", "Owners get a monthly statement and a call back the same day."],
@@ -215,7 +215,7 @@ export const BUSINESS_ROLES = [
     experience: [["Property Manager", "Brooks & Field Property Management", "2019", "Present"], ["Assistant Property Manager", "Eastside Apartments", "2015", "2019"]],
     education: [["Licensed Property Manager", "Oregon Real Estate Agency", "2016"]],
     keepWork: true,
-  }, ["open-house", "practice"]),
+  }, ["open-house", "residence", "practice"]),
 
   // ——— Marketing (Barcelona, €) ———
   role("digital-marketer", "Digital Marketing Specialist", "digital marketers", "marketing", ["digital marketing", "performance marketer", "PPC specialist", "paid ads", "growth marketer"], {

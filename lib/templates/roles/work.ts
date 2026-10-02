@@ -15,7 +15,7 @@ export const WORK_ROLES = [
     quote: ["Our daughter used to cry about maths. Now she does times tables for fun.", "Parent", "Year 4"],
     experience: [["Year 4 Teacher & Maths Lead", "Meanwood Primary School", "2019", "Present"], ["Year 2 Teacher", "Chapel Allerton Primary", "2016", "2019"]],
     education: [["BA Primary Education with QTS", "Leeds Trinity University", "2016"]],
-  }, ["exercise-book", "syllabus"]),
+  }, ["exercise-book", "margin-notes", "syllabus"]),
   role("secondary-teacher", "Secondary School Teacher", "secondary teachers", "education", ["high school teacher", "secondary teacher", "science teacher", "maths teacher", "english teacher"], {
     title: "Secondary Science Teacher & Head of Year 9", tagline: "I teach teenagers that they are better at science than they think.",
     bio: ["I’ve taught science in a Leeds comprehensive for nine years. I like practical lessons, low-stakes quizzing and the moment a quiet student explains something to the rest of the class.", "I also tutor GCSE and A-level Chemistry online."],
@@ -25,7 +25,7 @@ export const WORK_ROLES = [
     quote: ["Miss Mensah never makes you feel stupid for asking.", "Year 10 student", "Roundhay Park Academy"],
     experience: [["Teacher of Science & Head of Year 9", "Roundhay Park Academy", "2019", "Present"], ["Teacher of Science", "Hunslet Moor High School", "2016", "2019"]],
     education: [["BSc Chemistry", "University of Leeds", "2014"], QTS],
-  }, ["exercise-book", "syllabus"]),
+  }, ["exercise-book", "margin-notes", "syllabus"]),
   role("private-tutor", "Private Tutor", "tutors", "education", ["tutor", "online tutor", "home tutor", "GCSE tutor", "maths tutor", "exam coach"], {
     title: "GCSE & A-level Maths Tutor", tagline: "Calm, patient tutoring that turns ‘I can’t’ into ‘I get it’.",
     bio: ["I tutor GCSE and A-level maths one-to-one, online and in Leeds. I was a secondary teacher for seven years before tutoring full time.", "Parents get a short note after every session saying what we covered and what to practise."],
@@ -35,7 +35,7 @@ export const WORK_ROLES = [
     quote: ["From a 3 to a 7 in eight months. He actually smiles when he does maths now.", "Parent", "GCSE student"],
     experience: [["Private Tutor", "Self-employed", "2023", "Present"], ["Teacher of Maths", "Roundhay Park Academy", "2016", "2023"]],
     education: [["BSc Mathematics", "University of York", "2015"], QTS],
-  }, ["exercise-book", "practice"]),
+  }, ["exercise-book", "margin-notes", "practice"]),
   role("sen-teacher", "SEN Teacher", "SEN teachers", "education", ["special needs teacher", "SENCO", "special education teacher", "learning support teacher"], {
     title: "SENCO & Specialist Teacher", tagline: "Every child can learn. My job is finding how.",
     bio: ["I coordinate special educational needs in a secondary school and teach small groups with dyslexia, autism and ADHD.", "I work closely with families and make sure plans are actually followed in every classroom."],
@@ -45,7 +45,7 @@ export const WORK_ROLES = [
     quote: ["For the first time, school understands our son, and he’s happy to go.", "Parent", "Year 8"],
     experience: [["SENCO", "Roundhay Park Academy", "2020", "Present"], ["Learning Support Teacher", "Hunslet Moor High School", "2014", "2020"]],
     education: [QTS, ["National Award for SEN Coordination", "University of Leeds", "2021"]],
-  }, ["exercise-book", "sanctuary"]),
+  }, ["exercise-book", "margin-notes", "sanctuary"]),
   role("music-teacher", "Music Teacher", "music teachers", "education", ["piano teacher", "guitar teacher", "singing teacher", "violin teacher", "music tutor"], {
     title: "Piano & Theory Teacher", tagline: "Lessons that build confident, curious musicians.",
     bio: ["I teach piano and music theory to children and adults, from first notes to Grade 8 and diploma.", "Lessons mix exam pieces with music students choose, so practice doesn’t feel like homework."],
@@ -55,7 +55,7 @@ export const WORK_ROLES = [
     quote: ["My son passed Grade 5 with distinction and still loves practising.", "Parent", "Student"],
     experience: [["Piano Teacher", "Self-employed", "2014", "Present"], ["Peripatetic Music Teacher", "Leeds Music Service", "2012", "2018"]],
     education: [["BMus Music", "Leeds Conservatoire", "2012"]],
-  }, ["liner-notes", "exercise-book"]),
+  }, ["liner-notes", "margin-notes", "exercise-book"]),
   role("language-teacher", "Language Teacher", "language teachers", "education", ["ESL teacher", "English teacher", "Spanish teacher", "French teacher", "TEFL teacher"], {
     title: "English & Spanish Teacher", tagline: "Speak from the first lesson, with grammar that makes sense.",
     bio: ["I teach English to adults and Spanish to teenagers and adults, online and in Leeds.", "Lessons are built around real conversations, with grammar explained only when you need it."],
@@ -65,7 +65,7 @@ export const WORK_ROLES = [
     quote: ["I passed IELTS with 8.0 and got my nursing registration.", "Student", "IELTS course"],
     experience: [["Language Teacher", "Self-employed", "2018", "Present"], ["Teacher of Spanish", "Roundhay Park Academy", "2015", "2018"]],
     education: [["CELTA", "Cambridge English", "2017"], QTS],
-  }, ["exercise-book", "practice"]),
+  }, ["exercise-book", "margin-notes", "practice"]),
   role("lecturer", "University Lecturer", "lecturers", "education", ["professor", "college lecturer", "academic", "teaching fellow", "FE lecturer"], {
     title: "Senior Lecturer in Chemistry Education", tagline: "Teaching that sticks, backed by research.",
     bio: ["I lecture first-year chemistry and run the university’s teacher training course for science graduates.", "My research is on how students learn practical skills."],
@@ -75,7 +75,7 @@ export const WORK_ROLES = [
     quote: ["The best lecturer I had. She made a 300-seat room feel like a seminar.", "Former student", "BSc Chemistry"],
     experience: [["Senior Lecturer", "University of Leeds", "2021", "Present"], ["Teacher of Science", "Roundhay Park Academy", "2016", "2021"]],
     education: [["PhD Chemistry Education", "University of Leeds", "2020"]],
-  }, ["seminar", "syllabus"]),
+  }, ["seminar", "margin-notes", "syllabus"]),
   role("driving-instructor", "Driving Instructor", "driving instructors", "education", ["ADI", "driving school", "driving teacher"], {
     title: "Approved Driving Instructor", tagline: "Calm lessons, first-time passes and safe drivers for life.",
     bio: ["I teach learners in north Leeds in a dual-control automatic.", "Nervous drivers are my speciality. We go at your pace."],
@@ -85,7 +85,7 @@ export const WORK_ROLES = [
     quote: ["I was terrified of driving. Grace got me through first time.", "Pupil", "Passed 2025"],
     experience: [["Approved Driving Instructor", "Mensah School of Motoring", "2017", "Present"]],
     education: [["Approved Driving Instructor (ADI)", "DVSA", "2017"]],
-  }, ["site-board", "practice"]),
+  }, ["site-board", "margin-notes", "practice"]),
   role("headteacher", "Headteacher", "headteachers", "education", ["head teacher", "principal", "school leader", "deputy head", "assistant head"], {
     title: "Headteacher", tagline: "A school where every child is known and every teacher wants to stay.",
     bio: ["I lead a 900-pupil secondary school in Leeds. We moved from Requires Improvement to Good in three years.", "I teach a Year 7 science class every week, because leaders should still teach."],
@@ -95,7 +95,7 @@ export const WORK_ROLES = [
     quote: ["She knows every child’s name, and every teacher feels backed.", "Chair of Governors", "Roundhay Park Academy"],
     experience: [["Headteacher", "Roundhay Park Academy", "2022", "Present"], ["Deputy Headteacher", "Hunslet Moor High School", "2018", "2022"]],
     education: [["NPQH", "Department for Education", "2021"], QTS],
-  }, ["annual-report", "exercise-book"]),
+  }, ["annual-report", "margin-notes", "exercise-book"]),
 
   // ——— Trades (Bristol, £) ———
   ...([
@@ -211,7 +211,7 @@ export const WORK_ROLES = [
     experience: [["Private Chef", "Self-employed", "2023", "Present"], ["Head Chef", "Maíz, Soho", "2019", "2023"]],
     education: [["Professional Chef Diploma", "Westminster Kingsway College", "2012"]],
     keepWork: true,
-  }, ["carte", "practice"]),
+  }, ["carte", "mise", "practice"]),
   role("head-chef", "Head Chef", "head chefs", "food", ["chef", "executive chef", "sous chef", "chef de cuisine", "line cook"], {
     title: "Head Chef", tagline: "Seasonal cooking, a calm kitchen and food costs under control.",
     bio: ["I run a 70-cover kitchen and a team of twelve. The menu changes every week with what our farms send us.", "I care as much about a happy, well-trained brigade as about what goes on the plate."],
@@ -222,7 +222,7 @@ export const WORK_ROLES = [
     experience: [["Head Chef", "Maíz, Soho", "2019", "Present"], ["Sous Chef", "Brindisa Kitchen", "2015", "2019"]],
     education: [["Professional Chef Diploma", "Westminster Kingsway College", "2012"]],
     keepWork: true,
-  }, ["carte", "practice"]),
+  }, ["carte", "mise", "practice"]),
   role("baker", "Baker", "bakers", "food", ["bakery owner", "sourdough baker", "cake maker", "artisan baker"], {
     title: "Baker & Bakery Owner", tagline: "Slow sourdough and honest pastries, baked before sunrise.",
     bio: ["I run a small neighbourhood bakery in Hackney: long-fermented sourdough, laminated pastries and seasonal cakes.", "We supply six local cafés and sell out most Saturdays by eleven."],
@@ -232,7 +232,7 @@ export const WORK_ROLES = [
     quote: ["The best sourdough in London, and I’ve tried most of them.", "Food writer", "Weekend magazine"],
     experience: [["Owner & Head Baker", "Comal Bakery, Hackney", "2021", "Present"], ["Baker", "E5 Bakehouse", "2017", "2021"]],
     education: [["Level 3 Professional Bakery", "National Bakery School", "2017"]],
-  }, ["carte", "site-board"]),
+  }, ["carte", "mise", "site-board"]),
   role("pastry-chef", "Pastry Chef", "pastry chefs", "food", ["patissier", "pâtissier", "dessert chef", "chocolatier"], {
     title: "Pastry Chef", tagline: "Desserts with as much care as the main course.",
     bio: ["I lead pastry at a modern restaurant: plated desserts, petits fours, ice creams and bread for service.", "I also make wedding cakes to order."],
@@ -243,7 +243,7 @@ export const WORK_ROLES = [
     experience: [["Pastry Chef", "Maíz, Soho", "2020", "Present"], ["Pastry Chef de Partie", "Hotel kitchen, Mayfair", "2015", "2020"]],
     education: [["Diplôme de Pâtisserie", "Le Cordon Bleu London", "2014"]],
     keepWork: true,
-  }, ["carte", "lookbook"]),
+  }, ["carte", "mise", "lookbook"]),
   role("caterer", "Caterer", "caterers", "food", ["catering company", "event catering", "wedding catering", "corporate catering"], {
     title: "Event Caterer", tagline: "Generous food for weddings, parties and offices, served on time.",
     bio: ["I cater weddings, parties and corporate events for 40 to 400 guests across London and the south east.", "Every menu is tasted with you beforehand, and every allergy is labelled."],
@@ -254,7 +254,7 @@ export const WORK_ROLES = [
     experience: [["Founder", "Comal Catering", "2021", "Present"], ["Head Chef", "Maíz, Soho", "2019", "2021"]],
     education: [["Level 3 Food Safety", "Royal Society for Public Health", "2020"]],
     keepWork: true,
-  }, ["carte", "practice"]),
+  }, ["carte", "mise", "practice"]),
   role("bartender", "Bartender", "bartenders", "food", ["mixologist", "bar manager", "cocktail bartender", "sommelier", "barista"], {
     title: "Head Bartender", tagline: "Good drinks, good company and a bar that runs itself.",
     bio: ["I run the bar at a Soho restaurant: cocktail menu, training, stock and the late shift.", "I also do private bartending and cocktail classes."],
@@ -264,7 +264,7 @@ export const WORK_ROLES = [
     quote: ["The best margarita in London, and he remembers everyone’s name.", "Regular", "Review"],
     experience: [["Head Bartender", "Maíz, Soho", "2020", "Present"], ["Bartender", "Cocktail bar, Shoreditch", "2016", "2020"]],
     education: [["WSET Level 2 Spirits", "Wine & Spirit Education Trust", "2018"]],
-  }, ["carte", "liner-notes"]),
+  }, ["carte", "mise", "liner-notes"]),
 
   // ——— Events (Cotswolds, £) ———
   role("wedding-planner", "Wedding Planner", "wedding planners", "events", ["wedding coordinator", "destination wedding planner"], {

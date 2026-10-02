@@ -26,3 +26,5 @@
 @keyframes studio-marquee { to { transform: translateX(-50%) } }
 @keyframes studio-roll { to { transform: translateY(-50%) } }
 @media (prefers-reduced-motion: reduce) { .studio-root * { animation: none !important; } }
+/* Still captures (gallery thumbnails) show every transition already finished. */
+[data-static] .studio-root *, [data-static] .studio-root *::before, [data-static] .studio-root *::after { transition-duration: 0s !important; transition-delay: 0s !important; }
