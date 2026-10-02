@@ -70,9 +70,9 @@ export default async function GalleryArticlePage({ params }: Props) {
         </div>
       </header>
 
-      <figure className="mt-14 overflow-hidden rounded-[1.6rem] border border-rule bg-ink/5 shadow-[0_50px_120px_-60px_rgba(0,0,0,.6)]">
+      <figure className="mx-auto mt-14 max-w-[720px] overflow-hidden rounded-[1.6rem] border border-rule bg-ink/5 shadow-[0_50px_120px_-60px_rgba(0,0,0,.6)]">
         <div className="flex items-center gap-1.5 border-b border-rule bg-card px-4 py-3" aria-hidden><span className="size-2.5 rounded-full bg-ink/15" /><span className="size-2.5 rounded-full bg-ink/15" /><span className="size-2.5 rounded-full bg-ink/15" /><span className="ml-3 truncate font-mono text-[11px] text-ink-faint">{item.kind === "original" ? `${item.slug}.yourname.com` : item.title.toLowerCase().replace(/\s+/g, "")}</span></div>
-        <div className="aspect-square max-h-[78vh] w-full sm:aspect-[16/10]"><ClipPlayer clips={item.clips} poster={item.poster} title={item.title} /></div>
+        <div className="aspect-square w-full"><ClipPlayer clips={item.clips} poster={item.poster} title={item.title} /></div>
       </figure>
     </div>
 
