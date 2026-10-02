@@ -78,13 +78,15 @@ export function CommentForm({ postId, signedIn }: { postId: string; signedIn: bo
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setBusy(true); setError(null);
-    try { await send(`/api/community/posts/${postId}/comments`, "POST", { body }); setBody(""); router.refresh(); }
+    const sent = body;
+    // Only clear what was sent, so anything typed meanwhile survives.
+    try { await send(`/api/community/posts/${postId}/comments`, "POST", { body: sent }); setBody((current) => (current === sent ? "" : current)); router.refresh(); }
     catch (caught) { setError((caught as Error).message); }
     finally { setBusy(false); }
   };
   return <form onSubmit={submit} className="space-y-3">
     <label htmlFor="comment" className="sr-only">Add a comment</label>
-    <textarea id="comment" value={body} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="Add to the conversation…" className="w-full resize-y rounded-lg border border-rule bg-card px-3.5 py-3 text-[1rem] leading-relaxed outline-none focus:border-ink" />
+    <textarea id="comment" value={body} readOnly={busy} aria-busy={busy} onChange={(event) => setBody(event.target.value)} rows={3} placeholder="Add to the conversation…" className="w-full resize-y rounded-lg border border-rule bg-card px-3.5 py-3 text-[1rem] leading-relaxed outline-none focus:border-ink" />
     {error && <p role="alert" className="text-[0.92rem] text-[color:var(--destructive)]">{error}</p>}
     <button disabled={busy || !body.trim()} className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper disabled:opacity-50">{busy && <Loader2 size={14} className="animate-spin" />}Comment</button>
   </form>;
