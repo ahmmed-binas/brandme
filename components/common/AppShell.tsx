@@ -6,7 +6,7 @@ import Footer from "./Footer";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isPortfolioView = pathname === "/templates" || pathname.startsWith("/templates/") || pathname.startsWith("/editor/");
+  const isPortfolioView = pathname === "/templates" || pathname.startsWith("/templates/") || pathname.startsWith("/editor/") || pathname.startsWith("/p/");
 
   if (isPortfolioView) {
     return <>{children}</>;

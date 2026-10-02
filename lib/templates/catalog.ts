@@ -14,6 +14,7 @@ export const templateCatalog: TemplateDefinition[] = [
     idealFor: ["Software developers", "Full-stack developers", "Backend engineers"],
     tags: ["Dark", "Editorial", "Case studies"],
     editor: "dedicated",
+    colorThemes: false,
   },
   {
     id: "template-one",
@@ -27,6 +28,7 @@ export const templateCatalog: TemplateDefinition[] = [
     idealFor: ["Developers", "Product designers", "Creative technologists"],
     tags: ["Dark", "Editorial", "Portfolio"],
     editor: "standard",
+    colorThemes: true,
   },
   {
     id: "kinetic-portfolio",
@@ -39,6 +41,7 @@ export const templateCatalog: TemplateDefinition[] = [
     idealFor: ["Creative developers", "Designers", "Independent consultants"],
     tags: ["Typography", "Motion", "Minimal"],
     editor: "standard",
+    colorThemes: false,
   },
 ];
 

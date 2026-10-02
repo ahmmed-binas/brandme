@@ -316,7 +316,7 @@ export default function TemplateTSXOne({
       <div
         ref={torchRef}
         className={`
-          fixed
+          ${embedded ? "absolute" : "fixed"}
           inset-0
           pointer-events-none
           transition-all
@@ -1075,7 +1075,7 @@ export default function TemplateTSXOne({
         {/* Rotating booth                                                 */}
         {/* ============================================================= */}
 
-        <Image
+        {!embedded && <Image
           src={rotationbooth}
           alt="Rotating Booth"
           width={80}
@@ -1094,7 +1094,7 @@ export default function TemplateTSXOne({
             object-contain
             z-50
           "
-        />
+        />}
 
       </main>
 

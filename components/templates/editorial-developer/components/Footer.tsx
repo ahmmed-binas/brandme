@@ -22,7 +22,7 @@ export default function Footer() {
         <ul className="flex flex-wrap gap-6">
           {SECTIONS.map((s) => (
             <li key={s.id}>
-              <a href={`/#${s.id}`} className="font-mono text-xs text-muted underline-hover">
+              <a href={`#${s.id}`} className="font-mono text-xs text-muted underline-hover">
                 {s.label}
               </a>
             </li>

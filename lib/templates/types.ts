@@ -11,4 +11,6 @@ export interface TemplateDefinition {
   idealFor: string[];
   tags: string[];
   editor: "standard" | "dedicated";
+  /** Whether the template responds to the editor's colour-theme picker. */
+  colorThemes: boolean;
 }

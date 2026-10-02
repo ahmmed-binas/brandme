@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TemplateRenderer from "./TemplateRenderer";
 import type { PortfolioData } from "./template-one/TemplateOne";
 import type { TemplateId } from "@/lib/templates/types";
+import { readPreviewDraft } from "@/lib/portfolio/browser-storage";
+import { isColorTheme, isEditorialShape, standardContentSchema } from "@/lib/portfolio/schema";
 import { portfolioData as editorialDefaultData, type PortfolioData as EditorialData } from "./editorial-developer/data";
 
 const EMPTY_PORTFOLIO: PortfolioData = {
@@ -69,6 +71,8 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
   const [portfolio, setPortfolio] = useState<PortfolioData>(EMPTY_PORTFOLIO);
   const [theme, setTheme] = useState<"midnight" | "classic" | "dark" | "light">("midnight");
   const [editorialData, setEditorialData] = useState<EditorialData>(editorialDefaultData);
+  /** Content sent by the editor is newer than anything in storage. */
+  const receivedFromEditor = useRef(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -77,37 +81,37 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
         return;
       }
       try {
-        const editorialSaved = localStorage.getItem(`template:${templateId}:data`) ?? sessionStorage.getItem(`template:${templateId}:data`);
-        if (templateId === "editorial-developer" && editorialSaved) setEditorialData(JSON.parse(editorialSaved) as EditorialData);
-        const saved = localStorage.getItem("portfolioData") ?? sessionStorage.getItem("portfolioData");
-        const requestedTheme = new URLSearchParams(window.location.search).get("theme");
-        const savedTheme = localStorage.getItem("portfolioTheme") ?? sessionStorage.getItem("portfolioTheme");
-        const activeTheme = requestedTheme || savedTheme;
-        if (activeTheme === "classic" || activeTheme === "dark" || activeTheme === "light" || activeTheme === "midnight") setTheme(activeTheme);
-        if (!saved) {
-          // A public template should look finished before a customer connects CV data.
-          if (templateId === "kinetic-portfolio") setPortfolio(DEMO_PORTFOLIO);
+        const saved = readPreviewDraft(templateId);
+        const requestedTheme = new URLSearchParams(window.location.search).get("theme") ?? saved?.theme;
+        if (isColorTheme(requestedTheme)) setTheme(requestedTheme);
+        if (templateId === "editorial-developer") {
+          if (isEditorialShape(saved?.content) && !receivedFromEditor.current) setEditorialData(saved.content as unknown as EditorialData);
           return;
         }
-        const parsed: unknown = JSON.parse(saved);
-        if (parsed && typeof parsed === "object") setPortfolio({ ...EMPTY_PORTFOLIO, ...(parsed as PortfolioData) });
+        const parsed = standardContentSchema.safeParse(saved?.content);
+        if (parsed.success) setPortfolio({ ...EMPTY_PORTFOLIO, ...parsed.data });
+        // A public template should look finished before a customer adds their own content.
+        else if (templateId === "kinetic-portfolio") setPortfolio(DEMO_PORTFOLIO);
       } catch {
         // Invalid browser data should never stop a template from rendering.
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [templateId]);
 
   useEffect(() => {
     if (templateId !== "editorial-developer") return;
     const receiveEditorMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       const message = event.data as { type?: string; data?: unknown } | null;
-      if (message?.type === "editorial-template-data" && message.data && typeof message.data === "object") {
+      if (message?.type === "editorial-template-data" && isEditorialShape(message.data)) {
+        receivedFromEditor.current = true;
         setEditorialData(message.data as EditorialData);
       }
     };
     window.addEventListener("message", receiveEditorMessage);
+    // Inside the editor's preview frame: ask for the current draft now that we can receive it.
+    if (window.parent !== window) window.parent.postMessage({ type: "editorial-preview-ready" }, window.location.origin);
     return () => window.removeEventListener("message", receiveEditorMessage);
   }, [templateId]);
 
