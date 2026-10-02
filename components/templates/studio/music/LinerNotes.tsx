@@ -10,10 +10,11 @@ import { Picture, Reveal, StudioRoot, contactLinks, ed, external, pad, paragraph
 /** A record that can be spun by dragging; it keeps a little momentum. */
 function Vinyl({ label, cover }: { label: string; cover?: string }) {
   const [angle, setAngle] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const drag = useRef<{ x: number; start: number } | null>(null);
-  return <div className="relative aspect-square w-full touch-none select-none" onPointerDown={(event) => { (event.target as HTMLElement).setPointerCapture(event.pointerId); drag.current = { x: event.clientX, start: angle }; }}
-    onPointerMove={(event) => { if (drag.current) setAngle(drag.current.start + (event.clientX - drag.current.x) * 0.8); }} onPointerUp={() => { drag.current = null; }} role="img" aria-label={`${label} record. Drag to spin.`}>
-    <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,#2a2a2a_0_18%,#0d0d0d_19%,#161616_40%,#0b0b0b_41%,#191919_60%,#0d0d0d_61%,#141414_80%,#080808_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,.7)]" style={{ transform: `rotate(${angle}deg)`, transition: drag.current ? "none" : "transform 1.2s cubic-bezier(.2,.7,.1,1)" }}>
+  return <div className="relative aspect-square w-full touch-none select-none" onPointerDown={(event) => { (event.target as HTMLElement).setPointerCapture(event.pointerId); drag.current = { x: event.clientX, start: angle }; setDragging(true); }}
+    onPointerMove={(event) => { if (drag.current) setAngle(drag.current.start + (event.clientX - drag.current.x) * 0.8); }} onPointerUp={() => { drag.current = null; setDragging(false); }} role="img" aria-label={`${label} record. Drag to spin.`}>
+    <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,#2a2a2a_0_18%,#0d0d0d_19%,#161616_40%,#0b0b0b_41%,#191919_60%,#0d0d0d_61%,#141414_80%,#080808_100%)] shadow-[0_30px_60px_-20px_rgba(0,0,0,.7)]" style={{ transform: `rotate(${angle}deg)`, transition: dragging ? "none" : "transform 1.2s cubic-bezier(.2,.7,.1,1)" }}>
       <div className="absolute inset-0 rounded-full opacity-40 [background:repeating-radial-gradient(circle,transparent_0_2px,rgba(255,255,255,.05)_2px_3px)]" />
       <div className="absolute inset-[34%] overflow-hidden rounded-full border-4 border-[#0b0b0b]">{cover ? <Picture src={cover} alt="" className="size-full" /> : <div className="size-full ba" />}</div>
       <div className="absolute inset-[48.5%] rounded-full bg-[#e9e2d3]" />

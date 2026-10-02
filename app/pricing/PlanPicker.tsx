@@ -17,14 +17,14 @@ export default function PlanPicker({ plans, paymentsReady }: { plans: PlanCard[]
   const [error, setError] = useState<string | null>(null);
 
   const choose = async (plan: PlanCard) => {
-    if (status !== "authenticated") { window.location.href = `/login?callbackUrl=${encodeURIComponent("/pricing")}`; return; }
+    if (status !== "authenticated") { window.location.assign(`/login?callbackUrl=${encodeURIComponent("/pricing")}`); return; }
     const term = plan.terms.includes(years) ? years : Math.max(...plan.terms.filter((value) => value <= years));
     setBusy(plan.id); setError(null);
     try {
       const response = await fetch("/api/billing/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: plan.id, years: term }) });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error ?? "The payment page couldn’t be opened.");
-      window.location.href = body.url;
+      window.location.assign(body.url);
     } catch (caught) {
       setError((caught as Error).message);
       setBusy(null);

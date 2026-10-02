@@ -31,8 +31,8 @@ function parse(raw: unknown): Content | null {
 }
 
 export default function StudioEditor({ template }: { template: TemplateDefinition }) {
-  const sample = useRef(personaFor(template.persona));
-  const { state: data, update, reset, undo, redo, canUndo, canRedo } = useUndoableState<Content>(sample.current);
+  const [sample] = useState(() => personaFor(template.persona));
+  const { state: data, update, reset, undo, redo, canUndo, canRedo } = useUndoableState<Content>(sample);
   const preview = useDeferredValue(data);
   const [tab, setTab] = useState<Tab>("content");
   const [device, setDevice] = useState<Device>("desktop");
@@ -44,7 +44,7 @@ export default function StudioEditor({ template }: { template: TemplateDefinitio
 
   const apply = useCallback((content: Content) => reset(content), [reset]);
   const persistence = usePortfolioPersistence({ templateId: template.id, content: data, theme: null, apply, parse });
-  const isSample = data.name === sample.current.name;
+  const isSample = data.name === sample.name;
 
   const set = (patch: Partial<Content>, checkpoint = false) => update((current) => ({ ...current, ...patch }), { checkpoint });
   const setDesign = (patch: Partial<DesignSettings>) => update((current) => ({ ...current, design: { ...current.design, ...patch } }), { checkpoint: true });

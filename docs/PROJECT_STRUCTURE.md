@@ -33,7 +33,15 @@ lib/brand.ts         Product name, contact email, and primary navigation.
 lib/templates/       Template catalog, IDs, and template metadata types.
 lib/portfolio/       Content validation (schema.ts), database access (repository.ts), browser drafts.
 lib/ai/              Server-side AI copy editing (Claude). Never imported by client code.
-lib/plans.ts         Plan limits (live portfolios, AI edits). The only place pricing rules live.
+lib/plans.ts         Plans, prices, terms, trial and grace rules. The only place pricing lives.
+lib/billing/         Stripe checkout for plans and credits, renewals, the credit ledger.
+lib/ai/metering.ts   The gate every AI request goes through: own key or credits, caps, daily budget.
+lib/autoupdate/      GitHub sync, the research agent, and suggestions the owner approves.
+lib/email/           SMTP mailer (sent once per key) and the lifecycle email texts.
+lib/jobs/            The hourly scheduled jobs (/api/cron).
+lib/support/         Private support tickets.
+lib/assets/          Uploaded images, served from /media/<id>.<ext>.
+lib/templates/       Catalogue, studio collection, sample people, approval.
 app/api/portfolios/  Save, load, publish, and unpublish portfolios (owner only).
 app/api/ai/assist/   AI copy-editing endpoint, metered per plan.
 app/api/ai/import/   Free text → structured portfolio content (Claude).

@@ -32,6 +32,17 @@ services:
       db:
         condition: service_healthy
 
+  # Runs the scheduled jobs every hour: trial and renewal emails, renewals,
+  # monthly credits, automatic portfolio updates and clean-up.
+  cron:
+    image: curlimages/curl:8.10.1
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET in .env}
+    entrypoint: ["/bin/sh", "-c", "sleep 60; while true; do curl -fsS -X POST -H \"Authorization: Bearer $$CRON_SECRET\" http://app:3000/api/cron || echo 'cron run failed'; echo; sleep 3600; done"]
+    depends_on:
+      - app
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped

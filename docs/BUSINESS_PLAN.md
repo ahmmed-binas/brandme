@@ -20,105 +20,87 @@ The question is not "how do we use AI?" but **"what does a job-seeker or freelan
 
 ## 2. Who it's for
 
-Start narrow. Portfolio needs differ a lot by profession, and a focused product beats a generic one.
+People whose work is visible and changes over time, and who are judged on it: software engineers, designers, artists and illustrators, photographers, writers, architects, researchers, data scientists, marketers, consultants, musicians, film-makers, founders, students, and practitioners such as therapists and coaches.
 
-1. **Primary: software developers looking for work** (students, graduates, career changers, bootcamp grads). The existing Editorial Developer template, the GitHub angle, and the founder's own background all point here. This group also feels the trust problem most: recruiters are already overwhelmed by AI-written applications.
-2. **Next: designers and creative technologists** (Midnight and Kinetic templates).
-3. **Later, B2B: bootcamps, universities, and career services** that need every student to have a credible portfolio.
+Each profession gets its own templates (35 originals, plus the 3 earlier ones), because a photographer needs a contact sheet and a researcher needs a references list, not the same "skills bar" with a different colour. That specificity is what generic website builders don't do well and what AI page generators make look the same.
 
-## 3. What to charge for
+## 3. The model: cheap, prepaid, and hard to leave because it's useful
 
-Portfolio use is **episodic**: people care intensely during a job search, then ignore their portfolio for months. A pure monthly subscription churns as soon as someone is hired. The pricing below matches that rhythm.
+The goal is not big margins. It's **never losing money on a customer, and becoming the place someone's portfolio lives for years**: so convenient that they never have to think about updating it again.
 
-| Plan | Price (suggested; test it) | What's included |
+| | Price | Terms | What it adds |
+| --- | --- | --- | --- |
+| **Free trial** | $0 | 14 days, no card | Everything in Pro, 60 AI credits |
+| **Basic** | $10/year | 1 or 2 years ($18 for two) | One live portfolio, every template and design option, own domain with HTTPS, unlimited edits, 200 MB images |
+| **Pro** | $24/year | 1, 2 or 5 years ($44 / $90) | Three portfolios, no Formora link, weekly GitHub sync, career-news search every 3 months, 100 AI credits a month |
+| **Premium** | $49/year | 1, 2 or 5 years ($88 / $185) | A domain name included (up to $20/yr), monthly career-news search, 300 AI credits a month, ten portfolios, priority support |
+
+Why it's shaped this way:
+- **Yearly and prepaid.** A portfolio isn't a monthly habit; a monthly bill invites cancelling. Paying for 2 or 5 years up front gives you the cash before the costs arrive, and gives the customer one less thing to manage. Basic stops at 2 years, Pro and Premium go to 5 (what you asked for).
+- **AI is never inside the flat price.** AI costs money every time it runs, so it's paid as you go: credits priced from the real token usage with a 1.6× margin, or the customer's own Claude API key (no cost to us at all). A hard daily budget (`AI_DAILY_BUDGET_USD`) stops the platform key if anything goes wrong. This is what makes "never at a loss" true.
+- **Trial → grace → rest, never delete.** When a trial or plan ends, the site stays up for 14 more days with a friendly banner and a few kind emails. Then it "rests" (visitors see a short holding page). Nothing is deleted, so coming back is one click. That is both humane and the strongest retention lever: people return to the thing they built.
+- **Switching plans is fair.** Unused time converts into time on the new plan; nobody pays twice.
+
+Prices live in one file, `lib/plans.ts`. Change them there; checkout, the pricing page and the account page follow.
+
+## 4. Unit economics (per customer per year)
+
+| Item | Basic ($10) | Pro ($24) | Premium ($49) |
+| --- | --- | --- | --- |
+| Stripe fees (2.9% + 30¢, once per term) | $0.59 | $1.00 | $1.72 |
+| Hosting (DB row, images, rendering on your server) | ~$0.10 | ~$0.30 | ~$1.00 |
+| Included AI credits at cost (credits ÷ 1.6) | $0 | up to $7.50 | up to $22.50 |
+| Research runs (≈$0.10–0.20 each) | — | ~$0.80 | ~$2.40 |
+| Included domain | — | — | up to $20 |
+| **Worst case left over** | **~$9.30** | **~$14.40** | **~$1.40** |
+
+Typical usage is far below the worst case (most people use a fraction of included credits). Premium's worst case is thin because it includes both a domain and the most credits; if real usage shows Premium users max out both, lower the monthly credits to 200 before touching the price.
+
+Credits: $5 = 500, $10 = 1,200, $20 = 3,000. A rewrite costs about 5–10 credits, a full career search 30–60. Real cost is measured per request (`lib/ai/metering.ts`) and the platform's daily spend is recorded in `ai_spend`.
+
+Domains bought through Formora: registrar price + 20% + $3, prepaid (a $12 .com sells for $18).
+
+## 5. What makes people stay
+
+1. **It updates itself.** Pro and Premium check GitHub weekly and search the web for new talks, publications, awards, press and roles. Findings arrive as suggestions (email digest + editor panel); one click adds them. Nothing changes without the owner's approval, and low-confidence or same-name results are dropped.
+2. **It lives at their own name.** A domain connected or bought through Formora is the most durable lock-in there is, and it's one people are glad of.
+3. **Five-year prepay.** Fewer renewal moments means fewer decisions to leave.
+4. **Their design is specific to them.** Rebuilding a crafted, profession-specific site elsewhere is real work.
+
+## 6. Abuse and safety
+
+- One trial per Google account; credits only via the ledger (every grant has a unique reference, so webhooks or retries can't double-grant).
+- Per-plan daily AI request caps, even when credits remain; customers' own keys are encrypted at rest and verified before saving.
+- Global daily AI budget; scheduled research only runs within the customer's credits.
+- Image uploads are type-checked by their bytes, size-limited and counted against plan storage; orphaned uploads are deleted after a week.
+- Community and support: spam terms, shouting, link limits, rate limits, moderation with reasons.
+- Templates only reach customers after the owner approves them at `/templates/review`.
+
+## 7. What exists today (October 2026)
+
+- 38 templates (35 new, profession-specific) with palettes, font pairings, accent colour, section show/hide and renaming; a gallery with profession, style and light/dark filters; an approval desk for the owner.
+- A fast editor with autosave (browser + account, conflict-safe), undo/redo, click-in-preview to edit, device previews, image uploads, AI writing help and imports.
+- Plans, trial, grace and resting sites; Stripe Checkout for plans and credits with saved cards, automatic renewal and receipts; customers' own Claude keys.
+- Lifecycle email over your own SMTP mailbox; an hourly job for emails, renewals, monthly credits, auto-updates and clean-up.
+- Custom domains on your own server (Caddy, automatic HTTPS), domain purchases with refunds on failure, Premium's included domain.
+- Community board (suggestions, reviews, design submissions, moderation) and a private support desk.
+
+## 8. Next, in order
+
+1. **Your name, domain and company mailbox.** Then set `SMTP_*`, `APP_URL`, Stripe keys and the webhook (see `docs/SELF_HOSTING.md`).
+2. **Approve templates** at `/templates/review`; edit `lib/about.ts` with your story.
+3. **Legal pages:** privacy policy and terms (needed for Google sign-in verification and payments).
+4. **Domain renewals** before purchased domains turn one year old.
+5. **Analytics per portfolio** (page views, no personal data): the first thing people feel in Pro.
+6. **Verification badges** (GitHub ownership, live link checks) to make portfolios more trustworthy than AI-written CVs.
+
+## 9. Metrics that matter
+
+| Stage | Metric | Early target |
 | --- | --- | --- |
-| **Free** | £0 | 1 live portfolio at `/p/your-name`, all free templates, "Made with Formora" badge, 3 AI edits/day, browser + account saving |
-| **Job Search Pass** | £19 one-off for 3 months | Everything in Pro for one job hunt. No subscription to forget about. |
-| **Pro** | £7/month or £60/year | Custom domain, no badge, up to 10 portfolios, analytics, verification badges, premium templates, 50 AI edits/day, PDF export |
-| **Cohort** (B2B) | £8–15 per student per year | Pro for a whole cohort, a staff dashboard to review portfolios, the school's own branding |
-
-Rules that keep pricing honest:
-- **Never paywall basic editing or publishing.** The free tier must produce a real, shareable portfolio. That page is the marketing.
-- **The free badge is the growth loop.** Every free portfolio a recruiter opens advertises Formora.
-- **Charge for outcomes that cost money or create trust:** custom domains, verification, analytics, and heavy AI use.
-
-## 4. Unit economics
-
-| Cost | Estimate | Notes |
-| --- | --- | --- |
-| One AI edit (Claude Opus 5.5 at $4 / $20 per million input/output tokens) | **~$0.03–0.06** | About 2k tokens in and 1–2k out, including reasoning. Measure the real figure once live; the server logs each request. |
-| Free user, worst case (3 AI edits every day) | ~$3–5/month | Rare in practice; typical free users make a handful of edits in total. Keep the daily cap. |
-| Hosting a published portfolio | well under $0.01/month | One database row, rendered on request |
-| Custom domain + SSL | Registrar price (about $10–20 a year for .com/.dev); HTTPS is free on Vercel | Built: customers pay registrar price + 20% + $3, prepaid via Stripe. A $12 domain sells for $18, about $6 margin per domain per year. |
-
-At £7/month, a Pro user who makes 50 AI edits a month costs about £2 in AI, leaving a healthy margin. **Watch the AI cost per paying user monthly.** If it rises, lower the effort setting or move routine edits to a cheaper model, but only after measuring that quality holds.
-
-All limits live in one file: `lib/plans.ts`. The server enforces them; the UI only explains them.
-
-## 5. What exists today (October 2026)
-
-Built in this round:
-- Accounts (Google sign-in) with **portfolios saved per user**, and autosave to both the browser and the account
-- **Publishing** to `/p/<address>`, with draft/live separation: edits stay private until republished
-- **Plan limits enforced on the server**: live portfolio count and daily AI edits
-- **AI copy editing** that can only rewrite existing text and never touches names, links, dates, images, or skill lists. It refunds failed requests.
-- Content validation on every save (blocks script links, unsafe images, and oversized payloads)
-- An editor that works on mobile, with undo, a save status indicator, and image compression
-
-Also built: **custom domains** (buy `yourname.com` through Formora with automatic setup, or connect your own on Pro) and **profile import** from a CV, GitHub, a LinkedIn data export, or pasted text organised by Claude. See `docs/CUSTOM_DOMAINS.md`.
-
-Not built yet (in priority order, see section 6): Pro subscriptions, domain renewals, analytics, verification, privacy policy and terms, and account deletion.
-
-## 6. Roadmap
-
-### Phase 1: launch-ready (weeks 1–4)
-1. **Pick one name and one domain.** The codebase mixes "Formora", "CV Gen Studio", "brandme", and the placeholder `formora.example` (in `app/layout.tsx` and `lib/brand.ts`). Fix this before any marketing.
-2. **Legal basics:** privacy policy, terms, and an account deletion endpoint. Google OAuth verification and GDPR require them.
-3. **Payments:** Stripe is already wired in for domain purchases. Add Checkout for the Job Search Pass and Pro, and have the existing webhook set `app_users.plan`. Nothing else needs to change, because limits already read from the plan.
-4. **Domain renewals** before the first purchased domains turn one year old (see `docs/CUSTOM_DOMAINS.md`).
-5. **Share previews:** an Open Graph image per published portfolio, so links look good on LinkedIn and Slack.
-6. **Simple analytics:** count page views per portfolio (no personal data) and show them in the account page. This is the first Pro feature people can feel.
-7. **Remove dead paths:** `app/backend/server.js` (an Express server calling a local Ollama model) and the CV extractor's call to `localhost:5000` don't work once deployed. Route CV parsing through the new server-side AI (`lib/ai/`) instead.
-
-### Phase 2: the trust layer (weeks 5–10). This is the moat.
-1. **GitHub verification:** connect GitHub and show a "verified" badge on projects whose repository belongs to the user.
-2. **Live link checks:** check project links weekly and show "checked on <date>". Warn the owner about broken links.
-3. **Employer email verification:** confirm a role by email to an address at the company's domain.
-4. A **public verification summary** at the bottom of each portfolio, explaining what was checked and when.
-
-### Phase 3: the living portfolio (weeks 10–16)
-1. **AI CV import:** turn an uploaded CV into structured portfolio content, replacing the regex parser.
-2. **GitHub sync:** suggest new projects when a user ships a notable repository.
-3. **"Refresh my portfolio" nudges** by email when content is stale or a job search starts.
-
-### Phase 4: distribution (after product-market fit)
-1. **Cohort accounts** for bootcamps and universities.
-2. An optional **talent directory** that recruiters can search, opt-in only. This creates a two-sided network, the strongest moat of all, but only worth building once there are thousands of verified portfolios.
-
-## 7. Metrics that matter
-
-| Stage | Metric | Target to aim for early |
-| --- | --- | --- |
-| Activation | Visitors who publish a portfolio in their first session | 20%+ of people who open the editor |
-| Value | Published portfolios that get at least one outside view in 7 days | 50%+ |
-| Retention | Portfolios updated again within 60 days | 30%+ |
-| Revenue | Free → paid conversion among publishers | 3–5% |
-| Cost | AI cost per paying user per month | under 25% of revenue |
-
-## 8. Risks and how to handle them
-
-| Risk | Mitigation |
-| --- | --- |
-| Big platforms (LinkedIn, website builders) add AI portfolios | Compete on verification and a developer focus, which generic tools won't prioritise. Keep the free tier genuinely useful. |
-| AI costs grow faster than revenue | Daily caps per plan, refunds only for failures, and a monthly review of cost per user |
-| Fake or abusive published pages | Account-required publishing, content validation, reserved addresses, and (next) a report-abuse link and takedown process |
-| Users churn after getting a job | The Job Search Pass captures that revenue up front, and the free tier keeps the page live, so they come back for the next search |
-| Unverifiable AI-written content erodes trust in Formora pages | The AI never invents facts (enforced in its instructions and by protecting factual fields), and verification badges separate checked claims from unchecked ones |
-
-## 9. What to do this week
-
-1. Choose the name and domain; replace the placeholders.
-2. Set up production Postgres (Neon, Supabase, or Vercel Postgres all work with `DATABASE_URL`) and deploy.
-3. Add `ANTHROPIC_API_KEY` to turn on the AI assistant.
-4. Publish your own portfolio on it, and share it with 10 developers who are job hunting. Watch where they get stuck.
-5. Then build payments, in Phase 1 order.
+| Activation | Trials that publish in the first session | 30%+ |
+| Conversion | Trials that buy a plan (including in grace) | 8–15% |
+| Term mix | Payments that are multi-year | 40%+ |
+| Retention | Customers who renew or are on a multi-year term after 1 year | 70%+ |
+| Updates | Suggestions applied per Pro customer per quarter | 2+ |
+| Cost | AI cost per paying customer per year | below included credits at cost |

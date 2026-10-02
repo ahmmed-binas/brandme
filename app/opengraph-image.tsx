@@ -19,7 +19,7 @@ export default async function OpenGraphImage() {
         <span style={{ display: "flex" }}>at&nbsp;<span style={{ color: "#2338e0", fontStyle: "italic" }}>your own</span></span>
         <span>address.</span>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#57534a", borderTop: "1px solid rgba(21,20,15,0.18)", paddingTop: 24 }}><span>Portfolio builder</span><span>Free to publish</span></div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#57534a", borderTop: "1px solid rgba(21,20,15,0.18)", paddingTop: 24 }}><span>Portfolio builder</span><span>35+ templates · from $10 a year</span></div>
     </div>,
     { ...size, fonts: font ? [{ name: "Fraunces", data: font, style: "normal", weight: 400 }] : [] },
   );

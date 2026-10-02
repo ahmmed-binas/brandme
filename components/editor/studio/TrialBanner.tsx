@@ -14,12 +14,11 @@ const KEY = "formora:banner-dismissed";
  */
 export function TrialBanner({ signedIn }: { signedIn: boolean }) {
   const [account, setAccount] = useState<Account | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => { try { return typeof window !== "undefined" && sessionStorage.getItem(KEY) === "1"; } catch { return false; } });
   useEffect(() => {
     if (!signedIn) return;
     let cancelled = false;
     fetch("/api/account/status").then((response) => response.json()).then((body: { account: Account | null }) => { if (!cancelled) setAccount(body.account); }).catch(() => undefined);
-    try { setDismissed(sessionStorage.getItem(KEY) === "1"); } catch { /* storage may be unavailable */ }
     return () => { cancelled = true; };
   }, [signedIn]);
   if (!account) return null;

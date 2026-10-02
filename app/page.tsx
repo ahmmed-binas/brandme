@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
-import TemplateShowcase from "@/components/landing/TemplateShowcase";
+import TemplateShowcase, { CollectionStrip } from "@/components/landing/TemplateShowcase";
 import Faq from "@/components/landing/Faq";
 import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq";
@@ -56,10 +56,11 @@ export default function Home() {
     <section aria-labelledby="templates-title" className="border-t border-rule py-24 lg:py-32">
       <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <Reveal><SectionHeading kicker="Templates" id="templates-title">Three ways to be <em className="font-[300]">taken seriously.</em></SectionHeading></Reveal>
+          <Reveal><SectionHeading kicker="Templates" id="templates-title">A design for your <em className="font-[300]">kind of work.</em></SectionHeading></Reveal>
           <Link href="/templatechooser" className="group inline-flex items-center gap-2 text-[0.98rem] text-ink">Browse all templates <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /></Link>
         </div>
         <div className="mt-14"><TemplateShowcase /></div>
+        <CollectionStrip />
       </div>
     </section>
 
@@ -82,19 +83,20 @@ export default function Home() {
 
     <section aria-labelledby="pricing-title" className="py-24 lg:py-32">
       <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-14 px-5 sm:px-8 lg:grid-cols-12">
-        <Reveal className="lg:col-span-5"><SectionHeading kicker="Pricing" id="pricing-title">Free to publish. <em className="font-[300]">Pay only for a name.</em></SectionHeading></Reveal>
+        <Reveal className="lg:col-span-5"><SectionHeading kicker="Pricing" id="pricing-title">Free for 14 days. <em className="font-[300]">Then about a coffee a year.</em></SectionHeading>
+          <p className="mt-6 max-w-[26rem] text-[1.02rem] leading-[1.7] text-ink-soft">Pay once for a year, two or five, and stop thinking about it. AI help is pay-as-you-go, or bring your own Claude key.</p></Reveal>
         <div className="grid gap-px overflow-hidden rounded-xl border border-rule bg-rule sm:grid-cols-2 lg:col-span-7">
           <Reveal className="flex flex-col bg-card p-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Portfolio</p>
-            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">Free</p>
-            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Every template", "Import from CV, GitHub, LinkedIn", "Publish at a free Formora address", "AI help with your wording"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Free trial</p>
+            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">14 days</p>
+            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Every template and design option", "Import from CV, GitHub, LinkedIn", "Publish at a free address", "60 AI credits to try the assistant", "No card needed"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
             <Link href="/templatechooser" className="mt-9 inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Start building</Link>
           </Reveal>
           <Reveal delay={0.08} className="flex flex-col bg-card p-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Your own domain</p>
-            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">~$18<span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ year</span></p>
-            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Registered in your name", "Set up and secured for you", "Or connect one you own", "Refunded if registration fails"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
-            <p className="mt-auto pt-9 text-[0.85rem] leading-relaxed text-ink-faint">Typical .com price. You see the exact price before paying.</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Then</p>
+            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">$10<span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ year</span></p>
+            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Your own domain, set up and secured for you", "Pay for up to five years at once", "Pro keeps your portfolio up to date for you", "Premium includes your domain name"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
+            <Link href="/pricing" className="mt-auto pt-9 text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Compare Basic, Pro and Premium →</Link>
           </Reveal>
         </div>
       </div>

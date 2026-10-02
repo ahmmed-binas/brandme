@@ -11,6 +11,29 @@ const SHOWCASE = [
   { id: "kinetic-portfolio", name: "Kinetic", for: "Creative technologists and consultants", Mock: KineticMock, className: "lg:col-span-5", height: "h-[300px]" },
 ];
 
+/** A slow moving wall of the profession collection, each linking to its gallery filter. */
+const COLLECTION: Array<[string, string, string]> = [
+  ["darkroom", "Photographers", "photo"], ["salon", "Painters", "art"], ["plan-section", "Architects", "architecture"], ["preprint", "Researchers", "academic"],
+  ["terminal", "Engineers", "developer"], ["broadsheet", "Journalists", "writing"], ["liner-notes", "Musicians", "music"], ["swiss", "Designers", "design"],
+  ["credits", "Film-makers", "film"], ["practice", "Consultants", "consulting"], ["sanctuary", "Therapists", "wellness"], ["notebook", "Data scientists", "data"],
+];
+
+export function CollectionStrip() {
+  const reduce = useReducedMotion();
+  return <div className="relative -mx-5 mt-16 overflow-hidden sm:-mx-8 [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
+    <ul className={`flex w-max gap-5 px-5 hover:[animation-play-state:paused] ${reduce ? "" : "[animation:studio-marquee_70s_linear_infinite]"}`}>
+      {[...COLLECTION, ...COLLECTION].map(([id, label, filter], index) => <li key={`${id}-${index}`} aria-hidden={index >= COLLECTION.length} className="w-[18rem] shrink-0">
+        <Link href={`/templatechooser?for=${filter}`} tabIndex={index >= COLLECTION.length ? -1 : undefined} className="group block">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnails */}
+          <img src={`/templates/${id}.webp`} alt="" loading="lazy" className="aspect-[3/2] w-full rounded-lg border border-rule object-cover object-top transition-transform duration-500 group-hover:-translate-y-1" />
+          <p className="mt-2 text-[0.92rem] text-ink-soft group-hover:text-ink">For {label.toLowerCase()} →</p>
+        </Link>
+      </li>)}
+    </ul>
+    <style>{"@keyframes studio-marquee { to { transform: translateX(-50%) } }"}</style>
+  </div>;
+}
+
 export default function TemplateShowcase() {
   const reduce = useReducedMotion();
   return <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:grid-rows-[auto_auto]">

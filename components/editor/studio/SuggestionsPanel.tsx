@@ -28,13 +28,11 @@ export function SuggestionsPanel({ signedIn, templateId, content, onApply }: { s
   const [busy, setBusy] = useState<"github" | "research" | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const response = await fetch("/api/suggestions");
-    if (!response.ok) return;
-    const body = (await response.json()) as State;
+  const load = useCallback(() => fetch("/api/suggestions").then((response) => (response.ok ? response.json() as Promise<State> : null)).then((body) => {
+    if (!body) return;
     setState(body);
     setUsername((current) => current || body.settings.githubUsername || "");
-  }, []);
+  }).catch(() => undefined), []);
   useEffect(() => { if (signedIn) void load(); }, [signedIn, load]);
 
   if (!signedIn) return <div className="m-4 rounded-xl border border-rule bg-white/60 p-4 text-[13px] leading-relaxed text-ink-soft">Sign in and your portfolio can keep itself up to date: new GitHub projects, talks, awards and roles appear here for you to add with one click.</div>;

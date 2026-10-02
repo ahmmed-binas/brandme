@@ -28,7 +28,22 @@ docker compose logs -f app               # app logs
 
 Then:
 1. **Google sign-in:** add `https://formora.app/api/auth/callback/google` as a redirect URI in Google Cloud Console (see `GOOGLE_AUTH_SETUP.md`).
-2. **Stripe** (only for selling domains): add the webhook `https://formora.app/api/webhooks/stripe` (see `CUSTOM_DOMAINS.md`).
+2. **Stripe** (plans, AI credits and domains): add the webhook `https://formora.app/api/webhooks/stripe` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`, and put its signing secret in `STRIPE_WEBHOOK_SECRET`. Prices are set in code (`lib/plans.ts`), so there are no Stripe products to create.
+3. **Email from your company address:** once your domain and mailbox exist, fill in `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` and `SMTP_TO` (see below). Until then emails are only written to the app log.
+4. **Scheduled jobs:** set a long random `CRON_SECRET`. The `cron` service calls `/api/cron` every hour (renewals, trial and renewal emails, monthly credits, automatic portfolio updates, clean-up). Check it with `docker compose logs cron`.
+5. **Admins:** put your Google email in `ADMIN_EMAILS`, sign in, and approve templates at `/templates/review`. Customers only see approved templates.
+6. **AI:** set `ANTHROPIC_API_KEY` and `AI_DAILY_BUDGET_USD`. Customers can also use their own key from their account page.
+
+### Email settings for common providers
+
+| Provider | SMTP_HOST | SMTP_PORT | SMTP_SECURE | Notes |
+| --- | --- | --- | --- | --- |
+| Google Workspace | smtp.gmail.com | 587 | false | Use an app password for the mailbox (2-step verification must be on). |
+| Microsoft 365 | smtp.office365.com | 587 | false | Enable “Authenticated SMTP” for the mailbox in the admin centre. |
+| Zoho Mail | smtp.zoho.com (or .eu) | 465 | true | Use an app-specific password. |
+| Fastmail | smtp.fastmail.com | 465 | true | Create an app password with SMTP access. |
+
+Add SPF and DKIM records for your domain as your mail provider describes, so reminders and receipts don’t land in spam. `SMTP_FROM` should be an address on that domain, e.g. `Formora <hello@yourdomain.com>`.
 
 ## How custom domains reach the server
 
@@ -69,7 +84,7 @@ npm run db:migrate
 cd .next/standalone && PORT=3000 node server.js     # keep it running with systemd or pm2
 ```
 
-Use the provided `Caddyfile`, replacing `app:3000` with `localhost:3000`. Leave `HOSTNAME` unset (or `0.0.0.0`), not `127.0.0.1`: with a specific address, Next.js treats the custom-domain rewrite as an external request. Block port 3000 from the internet with your firewall so all traffic goes through Caddy.
+Use the provided `Caddyfile`, replacing `app:3000` with `localhost:3000`. Schedule the jobs with cron: `0 * * * * curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron`. Leave `HOSTNAME` unset (or `0.0.0.0`), not `127.0.0.1`: with a specific address, Next.js treats the custom-domain rewrite as an external request. Block port 3000 from the internet with your firewall so all traffic goes through Caddy.
 
 ## Troubleshooting
 

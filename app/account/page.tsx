@@ -73,7 +73,7 @@ function Ai({ billing, reload }: { billing: Billing; reload: () => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const run = async (name: string, action: () => Promise<void>) => { setBusy(name); setMessage(null); try { await action(); } catch (error) { setMessage({ tone: "error", text: (error as Error).message }); } finally { setBusy(null); } };
-  const buy = (pack: string) => run(pack, async () => { const body = await json("/api/billing/checkout", { method: "POST", body: JSON.stringify({ credits: pack }) }); window.location.href = body.url; });
+  const buy = (pack: string) => run(pack, async () => { const body = await json("/api/billing/checkout", { method: "POST", body: JSON.stringify({ credits: pack }) }); window.location.assign(body.url); });
   return <section className="mt-12">
     <Heading id="ai" title="AI help" />
     <p className="mt-4 max-w-[40rem] text-[0.98rem] leading-relaxed text-ink-soft">The AI assistant, imports and career research are paid separately from your plan, so you only pay for what you use. Buy credits, or connect your own Claude API key and pay Anthropic directly.</p>
@@ -139,17 +139,16 @@ function DeleteAccount() {
 export default function AccountPage() {
   const { data: session, status } = useSession();
   const [billing, setBilling] = useState<Billing | null>(null);
-  const [paid, setPaid] = useState<string | null>(null);
+  // Returning from Stripe: ?paid=plan or ?paid=credits.
+  const [paid] = useState<string | null>(() => (typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("paid")));
   const load = useCallback(() => { fetch("/api/account/billing").then((response) => response.ok ? response.json() : null).then(setBilling).catch(() => undefined); }, []);
   useEffect(() => { if (status === "authenticated") load(); }, [status, load]);
   useEffect(() => {
-    const value = new URLSearchParams(window.location.search).get("paid");
-    if (!value) return;
-    setPaid(value);
+    if (!paid) return;
     // The webhook usually lands within seconds; refresh once more to pick it up.
     const timer = window.setTimeout(load, 3000);
     return () => window.clearTimeout(timer);
-  }, [load]);
+  }, [paid, load]);
 
   if (status === "loading") return <main className="px-5 py-16"><p className="mx-auto max-w-3xl text-ink-soft">Loading your account…</p></main>;
   if (!session?.user) return <main className="px-5 py-16"><div className="mx-auto max-w-md rounded-2xl border border-rule bg-card p-8"><h1 className="font-display text-[2.2rem] leading-[1.05] tracking-[-0.02em]">Sign in to your account</h1><p className="mt-3 text-ink-soft">Use Google to continue.</p><div className="mt-6"><GoogleSignInButton /></div></div></main>;
