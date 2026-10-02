@@ -1,6 +1,6 @@
 # Templates
 
-Formora has 49 templates: three originals (Editorial Developer, Midnight, Kinetic) and the 46-template **studio collection**, each drawn for a profession. Professions are grouped into fields (Tech, Creative, Business, Health & care, Trades & hospitality, Education, Public sector) in `lib/templates/types.ts`, and the gallery filters by field, then profession.
+Formora has 45 templates: three originals (Editorial Developer, Midnight, Kinetic) and the 42-template **studio collection**, each drawn for a profession. Professions are grouped into fields (Tech, Creative, Business, Health & care, Trades & hospitality, Education, Public sector) in `lib/templates/types.ts`, and the gallery filters by field, then profession.
 
 Customers only see a studio template once it is approved. The owner's decisions ship in `lib/templates/decisions.ts`, so a fresh deployment starts with them; a decision made at `/templates/review` (stored in the database) overrides it. Rejected templates are removed from the code.
 

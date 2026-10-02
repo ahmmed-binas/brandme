@@ -83,9 +83,9 @@ To add a new portfolio design, follow `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`.
 
 ## Accounts, saving, and payments
 
-Browser-local editing works without an account; signing in adds account saving and publishing. Tables (`app_users`, `portfolios`, `ai_usage`) are created automatically on first use by `utils/db-schema.ts`. Owners are identified by their Google account id, carried in the session by `auth.ts`.
+Browser-local editing works without an account; signing in adds account saving and publishing. The schema is created and upgraded automatically by the versioned migrations in `db/migrations.mjs`. Owners are identified by their Google account id, carried in the session by `auth.ts`.
 
-Payments are not built yet. When they are, a payment webhook should only set `app_users.plan`; every limit already reads from `lib/plans.ts`. See `docs/BUSINESS_PLAN.md` for the plan and roadmap.
+Plans, the 14-day trial and grace period live in `lib/plans.ts`. Payments go through Stripe Checkout (`lib/billing/service.ts`); the webhook at `app/api/webhooks/stripe/route.ts` fulfils plan, credit and domain orders, and the hourly job in `lib/jobs/scheduled.ts` handles renewals and reminder emails. See `docs/BUSINESS_PLAN.md` for pricing and unit economics.
 
 ## Community moderation
 

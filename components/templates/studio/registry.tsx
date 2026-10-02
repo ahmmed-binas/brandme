@@ -12,7 +12,6 @@ const load = (loader: () => Promise<{ default: ComponentType<StudioProps> }>) =>
 
 export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   terminal: load(() => import("./developer/Terminal")),
-  changelog: load(() => import("./developer/Changelog")),
   blueprint: load(() => import("./developer/Blueprint")),
   contributions: load(() => import("./developer/Contributions")),
   swiss: load(() => import("./design/Swiss")),
@@ -50,12 +49,9 @@ export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   "site-board": load(() => import("./trades/SiteBoard")),
   carte: load(() => import("./food/Carte")),
   lookbook: load(() => import("./beauty/Lookbook")),
-  "save-the-date": load(() => import("./events/SaveTheDate")),
-  roadmap: load(() => import("./product/Roadmap")),
   quota: load(() => import("./sales/Quota")),
   rolodex: load(() => import("./hr/Rolodex")),
   datasheet: load(() => import("./engineering/Datasheet")),
-  lexicon: load(() => import("./language/Lexicon")),
   "field-report": load(() => import("./nonprofit/FieldReport")),
 };
 
