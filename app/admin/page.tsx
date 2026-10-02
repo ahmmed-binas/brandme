@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 const TOOLS = [
   ["/templates/review", "Template approvals", "Approve, reject or ask for changes before customers see a template."],
   ["/admin/journal", "Journal", "Write and edit posts for /blog."],
+  ["/admin/gallery", "Gallery submissions", "Review templates people share before they go into the gallery."],
   ["/community/moderation", "Community moderation", "Posts and comments held for review."],
   ["/community/support", "Support inbox", "Reply to customers’ support requests."],
 ] as const;

@@ -8,6 +8,7 @@ export const brand = {
 
 export const primaryNavigation = [
   { href: "/templatechooser", label: "Templates" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/pricing", label: "Pricing" },
   { href: "/community", label: "Community" },
   { href: "/blog", label: "Journal" },

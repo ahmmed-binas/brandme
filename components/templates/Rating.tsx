@@ -17,7 +17,7 @@ export function RatingBadge({ rating, className = "" }: { rating?: RatingSummary
 }
 
 /** Lets a signed-in person give a template 1–5 stars, and change or clear it. */
-export function RateTemplate({ templateId, initial }: { templateId: string; initial: RatingSummary }) {
+export function RateTemplate({ templateId, initial, endpoint = `/api/templates/${templateId}/rating`, returnTo = `/templatepreview?template=${templateId}` }: { templateId: string; initial: RatingSummary; endpoint?: string; returnTo?: string }) {
   const [summary, setSummary] = useState<RatingSummary>(initial);
   const [mine, setMine] = useState<number | null>(null);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
@@ -26,20 +26,20 @@ export function RateTemplate({ templateId, initial }: { templateId: string; init
 
   useEffect(() => {
     let live = true;
-    fetch(`/api/templates/${templateId}/rating`).then((response) => response.ok ? response.json() : null).then((data) => {
+    fetch(endpoint).then((response) => response.ok ? response.json() : null).then((data) => {
       if (!live || !data) return;
       setSummary({ average: data.average, count: data.count });
       setMine(data.mine);
       setSignedIn(data.signedIn);
     }).catch(() => {});
     return () => { live = false; };
-  }, [templateId]);
+  }, [endpoint]);
 
   async function rate(stars: number | null) {
     setError("");
     const previous = mine;
     setMine(stars);
-    const response = await fetch(`/api/templates/${templateId}/rating`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stars }) }).catch(() => null);
+    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stars }) }).catch(() => null);
     const data = await response?.json().catch(() => null);
     if (!response?.ok) { setMine(previous); setError(data?.error ?? "That didn’t save. Try again."); return; }
     setSummary({ average: data.average, count: data.count });
@@ -48,7 +48,7 @@ export function RateTemplate({ templateId, initial }: { templateId: string; init
   const shown = hover || mine || 0;
   return <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
     <RatingBadge rating={summary} />
-    {signedIn === false && <Link href={`/login?callbackUrl=${encodeURIComponent(`/templatepreview?template=${templateId}`)}`} className="text-[0.84rem] text-ink underline underline-offset-4">Sign in to rate</Link>}
+    {signedIn === false && <Link href={`/login?callbackUrl=${encodeURIComponent(returnTo)}`} className="text-[0.84rem] text-ink underline underline-offset-4">Sign in to rate</Link>}
     {signedIn && <span className="inline-flex items-center gap-2">
       <span className="text-[0.84rem] text-ink-soft">{mine ? "Your rating" : "Rate it"}</span>
       <span className="inline-flex" role="radiogroup" aria-label="Your rating" onMouseLeave={() => setHover(0)}>

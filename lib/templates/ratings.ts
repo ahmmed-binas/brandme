@@ -43,3 +43,21 @@ export async function rateTemplate(userId: string, templateId: string, stars: nu
     [userId, templateId, stars],
   );
 }
+
+/** Downloads of each free template, keyed by template id. */
+export async function downloadCounts(): Promise<Record<string, number>> {
+  if (!databaseConfigured()) return {};
+  try {
+    await ensureSchema();
+    const result = await db.query<{ template_id: string; count: number }>("SELECT template_id, count FROM template_downloads");
+    return Object.fromEntries(result.rows.map((row) => [row.template_id, row.count]));
+  } catch {
+    return {};
+  }
+}
+
+export async function countDownload(templateId: string): Promise<void> {
+  if (!databaseConfigured()) return;
+  await ensureSchema();
+  await db.query("INSERT INTO template_downloads (template_id, count) VALUES ($1, 1) ON CONFLICT (template_id) DO UPDATE SET count = template_downloads.count + 1, updated_at = NOW()", [templateId]);
+}

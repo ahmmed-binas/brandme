@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ExternalLink, Globe, KeyRound, Loader2, LogOut, PencilLine } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import GoogleSignInButton from "@/components/common/GoogleSignInButton";
+import { ProfileSection } from "@/components/auth/ProfileSection";
 import { getTemplate } from "@/lib/templates/catalog";
 import type { TemplateId } from "@/lib/templates/types";
 
@@ -151,13 +152,14 @@ export default function AccountPage() {
   }, [paid, load]);
 
   if (status === "loading") return <main className="px-5 py-16"><p className="mx-auto max-w-3xl text-ink-soft">Loading your account…</p></main>;
-  if (!session?.user) return <main className="px-5 py-16"><div className="mx-auto max-w-md rounded-2xl border border-rule bg-card p-8"><h1 className="font-display text-[2.2rem] leading-[1.05] tracking-[-0.02em]">Sign in to your account</h1><p className="mt-3 text-ink-soft">Use Google to continue.</p><div className="mt-6"><GoogleSignInButton /></div></div></main>;
+  if (!session?.user) return <main className="px-5 py-16"><div className="mx-auto max-w-md rounded-2xl border border-rule bg-card p-8"><h1 className="font-display text-[2.2rem] leading-[1.05] tracking-[-0.02em]">Sign in to your account</h1><p className="mt-3 text-ink-soft">Use Google or your email and password.</p><div className="mt-6 flex flex-wrap gap-3"><GoogleSignInButton /><Link href="/login?callbackUrl=/account" className="inline-flex items-center rounded-xl border border-rule px-5 py-3 text-sm font-bold">Sign in with email</Link></div></div></main>;
   return <main className="px-5 pb-24 pt-14">
     <div className="mx-auto max-w-3xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Account</p><h1 className="mt-2 font-display text-[clamp(2.2rem,5vw,3.2rem)] leading-none tracking-[-0.02em]">{session.user.name || "Your account"}</h1><p className="mt-2 text-ink-soft">{session.user.email}</p></div>
         <button onClick={() => void signOut({ callbackUrl: "/" })} className="inline-flex items-center gap-2 rounded-full border border-rule px-4 py-2 text-[0.9rem] hover:border-ink"><LogOut size={15} /> Sign out</button>
       </div>
+      <ProfileSection />
       {paid && <p role="status" className="mt-8 rounded-xl bg-emerald-50 px-4 py-3 text-[0.95rem] text-emerald-950">Thank you, your payment went through. {paid === "credits" ? "Your credits are on their way." : "Your plan is active."} A receipt is in your inbox.</p>}
       {billing ? <Plan billing={billing} reload={load} /> : <p className="mt-10 text-sm text-ink-soft">Loading your plan…</p>}
       <Portfolios />

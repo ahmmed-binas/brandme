@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -104,6 +105,14 @@ export default function Composer({ open, onClose, editing, initialKind = "sugges
             </button>)}
           </div>}
 
+          {/* Templates now go to the gallery, with their files and story; older design posts stay editable here. */}
+          {kind === "design" && !editing && <div className="rounded-2xl border border-rule bg-card p-6">
+            <p className="font-display text-[1.5rem] leading-tight text-ink">Share it in the Gallery</p>
+            <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">Designs and templates now live in the Gallery, where people can see a clip of your site, read the story behind it and download it for free. Every submission is reviewed by hand.</p>
+            <Link href="/gallery/submit" className="mt-5 inline-flex rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper hover:bg-signal hover:text-signal-ink">Submit a template</Link>
+          </div>}
+
+          <div className={kind === "design" && !editing ? "hidden" : "space-y-6"}>
           {kind === "review" && <div><p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">Your rating</p><StarInput value={rating} onChange={setRating} /></div>}
 
           <label className="block">
@@ -141,6 +150,7 @@ export default function Composer({ open, onClose, editing, initialKind = "sugges
             <p className="max-w-[22rem] text-[0.82rem] leading-relaxed text-ink-faint">{kind === "design" ? "Designs are checked by a moderator before they appear." : "Be kind and specific. Spam and shouting are refused automatically."}</p>
             <button disabled={busy} className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink disabled:opacity-60">{busy && <Loader2 size={15} className="animate-spin" />}{editing ? "Save and resubmit" : kind === "design" ? "Submit for review" : "Post"}</button>
           </div>
+        </div>
         </form>}
       </motion.div>
     </motion.div>}

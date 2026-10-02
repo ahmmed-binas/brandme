@@ -10,5 +10,6 @@ export const GET = route(async () => {
   return Response.json({ account: {
     plan: user.plan.id, planName: user.plan.name, standing: user.standing.standing,
     daysLeft: user.standing.daysLeft, endsAt: user.standing.endsAt.toISOString(), credits: user.credits, ownKey: user.hasOwnKey,
+    username: user.username, emailVerified: user.emailVerified,
   } });
 });

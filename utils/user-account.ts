@@ -29,15 +29,19 @@ export interface CurrentUser {
   credits: number;
   /** The user saved their own Anthropic API key; AI then runs on their account, not ours. */
   hasOwnKey: boolean;
+  /** Public handle shown on gallery submissions, e.g. "ada_l". Null until chosen. */
+  username: string | null;
+  /** Google accounts are verified by Google; password accounts once they click the link we email. */
+  emailVerified: boolean;
 }
 
-interface UserRow { id: string; email: string | null; name: string | null; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; credits: number; has_key: boolean }
+interface UserRow { id: string; email: string | null; name: string | null; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; credits: number; has_key: boolean; username: string | null; verified: boolean }
 
-export const USER_COLUMNS = "id, email, name, plan, trial_ends_at, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key";
+export const USER_COLUMNS = "id, email, name, plan, trial_ends_at, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified";
 
 export function toCurrentUser(row: UserRow): CurrentUser {
   const standing = standingOf(row);
-  return { id: row.id, email: row.email, name: row.name, plan: standing.plan, planId: row.plan, standing, credits: row.credits, hasOwnKey: row.has_key };
+  return { id: row.id, email: row.email, name: row.name, plan: standing.plan, planId: row.plan, standing, credits: row.credits, hasOwnKey: row.has_key, username: row.username, emailVerified: row.verified };
 }
 
 export async function getUserById(id: string): Promise<CurrentUser | null> {
@@ -52,9 +56,11 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const providerAccountId = session?.user?.providerAccountId;
   if (!providerAccountId) return null;
   await ensureSchema();
-  const result = await db.query<UserRow>(`SELECT ${USER_COLUMNS} FROM app_users WHERE provider = 'google' AND provider_account_id = $1`, [providerAccountId]);
+  const provider = session.user?.provider === "password" ? "password" : "google";
+  const result = await db.query<UserRow>(`SELECT ${USER_COLUMNS} FROM app_users WHERE provider = $1 AND provider_account_id = $2`, [provider, providerAccountId]);
   const row = result.rows[0];
   if (row) return toCurrentUser(row);
+  if (provider === "password") return null; // Deleted account: the session no longer maps to anyone.
   // The sign-in event may have failed to write (e.g. the database was briefly down); repair it now.
   await saveGoogleUser({ providerAccountId, email: session.user?.email, name: session.user?.name, image: session.user?.image });
   return getCurrentUser();

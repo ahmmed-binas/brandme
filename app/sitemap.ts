@@ -3,6 +3,7 @@ import { siteUrl } from "@/lib/site";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES } from "@/lib/templates/roles";
 import { listJournal } from "@/lib/content/journal";
+import { galleryItems } from "@/lib/gallery/items";
 import { isLive, standingOf } from "@/lib/plans";
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
@@ -19,6 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${siteUrl}/community`, lastModified: now, changeFrequency: "daily", priority: 0.6 },
     { url: `${siteUrl}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
+    { url: `${siteUrl}/gallery`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    ...(await galleryItems()).map((item) => ({ url: `${siteUrl}/gallery/${item.slug}`, lastModified: new Date(item.createdAt), changeFrequency: "monthly" as const, priority: 0.6 })),
     { url: `${siteUrl}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${siteUrl}/for`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     ...(await listJournal()).map((post) => ({ url: `${siteUrl}/blog/${post.slug}`, lastModified: new Date(post.updatedAt ?? post.publishedAt!), changeFrequency: "monthly" as const, priority: 0.5 })),

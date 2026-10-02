@@ -34,3 +34,4 @@ npm run build
 - `docs/GOOGLE_AUTH_SETUP.md`: sign-in and database setup
 - `docs/LOCAL.md`: run everything on your computer with a test account
 - `docs/LAUNCH.md`: hosting choice, server setup, and how customers get their own domain
+- `docs/GALLERY.md`: the free-template gallery, downloads, clips and community submissions

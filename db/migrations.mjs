@@ -321,6 +321,69 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "007_template_downloads",
+  statements: [
+    // How often each free template has been downloaded, shown in the gallery.
+    `CREATE TABLE IF NOT EXISTS template_downloads (
+      template_id TEXT PRIMARY KEY,
+      count INTEGER NOT NULL DEFAULT 0,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+  ],
+});
+
+migrations.push({
+  id: "008_accounts_and_gallery",
+  statements: [
+    // Email + password accounts, and a public @username for everyone.
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS username TEXT`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS app_users_username ON app_users (lower(username)) WHERE username IS NOT NULL`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS password_hash TEXT`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS birth_date DATE`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ`,
+    `CREATE INDEX IF NOT EXISTS app_users_email ON app_users (lower(email))`,
+    // One-time links for verifying an email address or resetting a password. Only a hash is stored.
+    `CREATE TABLE IF NOT EXISTS auth_tokens (
+      token_hash TEXT PRIMARY KEY,
+      user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      purpose TEXT NOT NULL CHECK (purpose IN ('verify', 'reset')),
+      expires_at TIMESTAMPTZ NOT NULL,
+      used_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    // Templates people submit to the gallery. Nothing is public until an admin approves it.
+    `CREATE TABLE IF NOT EXISTS gallery_submissions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      slug TEXT NOT NULL UNIQUE,
+      title TEXT NOT NULL,
+      summary TEXT NOT NULL,
+      idea TEXT NOT NULL,
+      process TEXT NOT NULL,
+      inspiration TEXT NOT NULL,
+      audience TEXT NOT NULL,
+      tags TEXT[] NOT NULL DEFAULT '{}',
+      license TEXT NOT NULL DEFAULT 'MIT',
+      live_url TEXT,
+      cover BYTEA NOT NULL,
+      cover_mime TEXT NOT NULL,
+      clip BYTEA,
+      clip_mime TEXT,
+      zip BYTEA NOT NULL,
+      zip_files JSONB NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'changes', 'rejected')),
+      review_note TEXT,
+      reviewed_by UUID REFERENCES app_users(id) ON DELETE SET NULL,
+      reviewed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS gallery_submissions_status ON gallery_submissions (status, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS gallery_submissions_owner ON gallery_submissions (owner_id, created_at DESC)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

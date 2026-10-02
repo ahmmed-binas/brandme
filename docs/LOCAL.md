@@ -62,7 +62,9 @@ Open http://localhost:3000. The database tables are created on first use.
 6. **Blog** (Pro, Premium and the free trial): in the editor open the **Blog** tab → **New post** → write → **Publish post**. It appears at `/p/your-address/blog` and under *Writing* on your portfolio.
 7. **Journal (the site's own blog):** http://localhost:3000/admin/journal → **New post**, or edit the articles that ship with the site. Live at http://localhost:3000/blog.
 8. **Ratings:** open any template preview and click the stars.
-9. **A second, normal customer:** sign out (Account → Sign out) and sign in for testing with a different email that isn't in `ADMIN_EMAILS`.
+9. **Gallery:** http://localhost:3000/gallery. Hover a tile to play its clip; open one to read about it, rate it and download it free.
+10. **A real account with a password:** http://localhost:3000/signup. The confirmation link is printed in the terminal running `npm run dev` (look for `[email body]`). Then submit a template at http://localhost:3000/gallery/submit and approve it as admin at http://localhost:3000/admin/gallery.
+11. **A second, normal customer:** sign out (Account → Sign out) and sign in for testing with a different email that isn't in `ADMIN_EMAILS`.
 
 What doesn't work locally without more setup: Google sign-in (needs Google keys), payments (Stripe test keys work fine if you add them), buying domains (needs a Vercel token), real emails (they're printed in the terminal instead), the AI assistant (needs an Anthropic key).
 

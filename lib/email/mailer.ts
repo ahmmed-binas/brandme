@@ -1,3 +1,4 @@
+import { devLoginEnabled } from "@/lib/dev-login";
 import nodemailer, { type Transporter } from "nodemailer";
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
@@ -31,6 +32,8 @@ export interface Mail { to: string; subject: string; text: string; html?: string
 export async function sendMail(mail: Mail): Promise<void> {
   if (!mailConfigured()) {
     console.info(`[email not sent: SMTP not configured] to=${mail.to} subject="${mail.subject}"`);
+    // Locally, print the whole email so links (verify, reset) can be followed without a mailbox.
+    if (process.env.NODE_ENV !== "production" || devLoginEnabled()) console.info(`[email body]\n${mail.text}\n[/email body]`);
     return;
   }
   await transport().sendMail({ from: fromAddress(), ...mail, headers: { "X-Entity-Ref-ID": crypto.randomUUID() } });
