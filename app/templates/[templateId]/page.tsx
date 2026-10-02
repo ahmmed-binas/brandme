@@ -1,24 +1,16 @@
 import { notFound } from "next/navigation";
 import PortfolioTemplateView from "@/components/templates/PortfolioTemplateView";
-import { getTemplate, templateCatalog } from "@/lib/templates/catalog";
+import { getTemplate } from "@/lib/templates/catalog";
 import type { Metadata } from "next";
-import TemplateFeedback from "@/components/templates/TemplateFeedback";
+import { sampleFor } from "@/lib/templates/samples";
 
-export default async function TemplatePage({
-  params,
-}: {
-  params: Promise<{ templateId: string }>;
-}) {
+export default async function TemplatePage({ params, searchParams }: { params: Promise<{ templateId: string }>; searchParams: Promise<{ role?: string }> }) {
   const { templateId } = await params;
   const template = getTemplate(templateId);
-
   if (!template) notFound();
-
-  return <><PortfolioTemplateView templateId={template.id} /></>;
-}
-
-export function generateStaticParams() {
-  return templateCatalog.map(({ id }) => ({ templateId: id }));
+  // Studio templates preview with sample content, written for a job title when one is chosen.
+  const sample = template.collection === "studio" ? sampleFor(template, (await searchParams).role) : undefined;
+  return <PortfolioTemplateView templateId={template.id} sample={sample} />;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ templateId: string }> }): Promise<Metadata> {

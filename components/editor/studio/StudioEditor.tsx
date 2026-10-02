@@ -6,7 +6,6 @@ import { ArrowLeft, Check, Globe, Laptop, Monitor, Redo2, Smartphone, Sparkles, 
 import TemplateRenderer from "@/components/templates/TemplateRenderer";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import { SECTION_KEYS, standardContentSchema, type DesignSettings, type SectionKey, type StandardContent } from "@/lib/portfolio/schema";
-import { personaFor } from "@/lib/templates/personas";
 import { prepareImage } from "@/lib/images";
 import { mergeIntoStandard } from "@/lib/import/profile";
 import { usePortfolioPersistence } from "../usePortfolioPersistence";
@@ -30,9 +29,13 @@ function parse(raw: unknown): Content | null {
   return parsed.success ? parsed.data : null;
 }
 
-export default function StudioEditor({ template }: { template: TemplateDefinition }) {
-  const [sample] = useState(() => personaFor(template.persona));
-  const { state: data, update, reset, undo, redo, canUndo, canRedo } = useUndoableState<Content>(sample);
+interface RoleOption { id: string; label: string; suggested: boolean }
+
+export default function StudioEditor({ template, sample: initialSample, role: initialRole, roles }: { template: TemplateDefinition; sample: Content; role: string; roles: RoleOption[] }) {
+  const [sample, setSample] = useState(initialSample);
+  const [role, setRole] = useState(initialRole);
+  const [switching, setSwitching] = useState(false);
+  const { state: data, update, reset, undo, redo, canUndo, canRedo } = useUndoableState<Content>(initialSample);
   const preview = useDeferredValue(data);
   const [tab, setTab] = useState<Tab>("content");
   const [device, setDevice] = useState<Device>("desktop");
@@ -45,6 +48,24 @@ export default function StudioEditor({ template }: { template: TemplateDefinitio
   const apply = useCallback((content: Content) => reset(content), [reset]);
   const persistence = usePortfolioPersistence({ templateId: template.id, content: data, theme: null, apply, parse });
   const isSample = data.name === sample.name;
+
+  /** Swap the sample for one written for another job title, keeping the design choices. */
+  const switchRole = async (next: string) => {
+    setSwitching(true);
+    try {
+      const response = await fetch(`/api/samples?template=${encodeURIComponent(template.id)}${next ? `&role=${encodeURIComponent(next)}` : ""}`);
+      const body = await response.json() as { content?: Content };
+      if (!response.ok || !body.content) return;
+      setSample(body.content);
+      setRole(next);
+      reset({ ...body.content, design: data.design });
+      const url = new URL(window.location.href);
+      if (next) url.searchParams.set("role", next); else url.searchParams.delete("role");
+      window.history.replaceState(null, "", url);
+    } finally {
+      setSwitching(false);
+    }
+  };
 
   const set = (patch: Partial<Content>, checkpoint = false) => update((current) => ({ ...current, ...patch }), { checkpoint });
   const setDesign = (patch: Partial<DesignSettings>) => update((current) => ({ ...current, design: { ...current.design, ...patch } }), { checkpoint: true });
@@ -178,6 +199,12 @@ export default function StudioEditor({ template }: { template: TemplateDefinitio
           {tab === "content" && <>
             {isSample && <div className="m-4 rounded-xl border border-dashed border-ink/30 bg-white/60 p-4 text-[13px] leading-relaxed">
               <p><b className="font-semibold">This is sample content</b> so you can see the design. Import your details in <button type="button" onClick={() => setTab("ai")} className="underline">AI & import</button>, or start from blank.</p>
+              <label className="mt-3 block"><span className="text-[12px] font-medium text-ink-soft">Show sample content for</span>
+                <select value={role} disabled={switching} onChange={(event) => void switchRole(event.target.value)} aria-label="Job title for the sample content" className="mt-1 w-full rounded-lg border border-rule bg-white px-2.5 py-2 text-[13px] outline-none focus:border-ink disabled:opacity-60">
+                  <option value="">This design’s own sample</option>
+                  <optgroup label="Suits this design">{roles.filter((item) => item.suggested).map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</optgroup>
+                  <optgroup label="Every job title">{roles.filter((item) => !item.suggested).map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</optgroup>
+                </select></label>
               <button type="button" onClick={() => reset({ name: "", professional_title: "", tagline: "", summary: [""], design: data.design })} className="mt-3 rounded-full border border-ink/30 px-3 py-1 text-[12px] font-medium hover:border-ink">Start from blank</button>
             </div>}
             <Section id="identity" title="Name & introduction" open={openSection === "identity"} onToggle={() => setOpenSection(openSection === "identity" ? "" : "identity")}>

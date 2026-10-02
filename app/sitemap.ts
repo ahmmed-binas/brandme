@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 import { availableTemplates } from "@/lib/templates/approval";
+import { ROLES } from "@/lib/templates/roles";
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 
@@ -17,6 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/community`, lastModified: now, changeFrequency: "daily", priority: 0.6 },
     { url: `${siteUrl}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: `${siteUrl}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${siteUrl}/for`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    ...ROLES.map((role) => ({ url: `${siteUrl}/for/${role.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 })),
     ...(await availableTemplates()).map((template) => ({ url: `${siteUrl}/templates/${template.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 })),
   ];
   if (!databaseConfigured()) return pages;

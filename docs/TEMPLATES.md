@@ -31,3 +31,13 @@ Rules for designs, so they work in the editor, on phones and on the live site:
 4. Sign in as an admin and approve it at `/templates/review`, or add it to `decisions.ts`.
 
 Set `TEMPLATES_REQUIRE_APPROVAL=false` to skip approval entirely.
+
+## Job titles (roles)
+
+Below each profession sit real job titles — 156 of them, from Paediatrician and Registered Nurse to Account Executive, Operations Manager and Plumber — in `lib/templates/roles/`. Each role has sample content written for it (title, introduction, skills, services and fees, numbers, a testimonial, experience and qualifications), laid over the profession's sample person by `applyRole`.
+
+- The gallery's "What do you do?" box finds a role (`rankRoles` in `roles/search.ts`, which runs in the browser on the small `RoleSummary` list) and orders the suggested templates first.
+- `?role=<id>` on `/templates/<id>`, `/templatepreview` and `/editor/<id>` shows that role's sample. Samples are built on the server (`lib/templates/samples.ts`); the editor's "Show sample content for" picker fetches others from `/api/samples`.
+- `/for` lists every role and `/for/<role>` is a landing page per job title, included in the sitemap.
+
+To add a role, add an entry with `role(...)` in the matching file. Write prices in the base sample person's currency and keep stat values under 24 characters (the schema limit).

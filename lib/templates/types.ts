@@ -31,6 +31,8 @@ export const PROFESSIONS = [
   { id: "sales", label: "Sales & business development", field: "business" },
   { id: "consulting", label: "Consulting & freelance", field: "business" },
   { id: "leadership", label: "Founders & executives", field: "business" },
+  { id: "management", label: "Managers & operations", field: "business" },
+  { id: "admin", label: "Office & admin", field: "business" },
   { id: "finance", label: "Finance & accounting", field: "business" },
   { id: "legal", label: "Law & legal", field: "business" },
   { id: "realestate", label: "Real estate", field: "business" },

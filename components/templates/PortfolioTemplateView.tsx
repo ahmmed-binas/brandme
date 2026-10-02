@@ -6,8 +6,7 @@ import type { PortfolioData } from "./template-one/TemplateOne";
 import type { TemplateId } from "@/lib/templates/types";
 import { readPreviewDraft } from "@/lib/portfolio/browser-storage";
 import { getTemplate } from "@/lib/templates/catalog";
-import { personaFor } from "@/lib/templates/personas";
-import { isColorTheme, isEditorialShape, standardContentSchema } from "@/lib/portfolio/schema";
+import { isColorTheme, isEditorialShape, standardContentSchema, type StandardContent } from "@/lib/portfolio/schema";
 import { portfolioData as editorialDefaultData, type PortfolioData as EditorialData } from "./editorial-developer/data";
 
 const EMPTY_PORTFOLIO: PortfolioData = {
@@ -69,9 +68,9 @@ const DEMO_PORTFOLIO: PortfolioData = {
   ],
 };
 
-export default function PortfolioTemplateView({ templateId }: { templateId: TemplateId }) {
+export default function PortfolioTemplateView({ templateId, sample }: { templateId: TemplateId; sample?: StandardContent }) {
   // Studio templates start from their sample person, so the first paint is never placeholder text.
-  const [portfolio, setPortfolio] = useState<PortfolioData>(() => { const definition = getTemplate(templateId); return definition?.collection === "studio" ? personaFor(definition.persona) : EMPTY_PORTFOLIO; });
+  const [portfolio, setPortfolio] = useState<PortfolioData>(() => sample ?? EMPTY_PORTFOLIO);
   const [theme, setTheme] = useState<"midnight" | "classic" | "dark" | "light">("midnight");
   const [editorialData, setEditorialData] = useState<EditorialData>(editorialDefaultData);
   /** Content sent by the editor is newer than anything in storage. */
@@ -82,8 +81,8 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
       const definition = getTemplate(templateId);
       const params = new URLSearchParams(window.location.search);
       // Studio templates preview with their sample person until the visitor has a draft of their own.
-      if (definition?.collection === "studio" && (params.has("sample") || !readPreviewDraft(templateId))) {
-        setPortfolio(personaFor(definition.persona));
+      if (definition?.collection === "studio" && sample && (params.has("sample") || !readPreviewDraft(templateId))) {
+        setPortfolio(sample);
         return;
       }
       if (params.get("demo") === "true") {
@@ -107,7 +106,7 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [templateId]);
+  }, [templateId, sample]);
 
   useEffect(() => {
     if (templateId !== "editorial-developer") return;

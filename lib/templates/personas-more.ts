@@ -10,6 +10,58 @@ import type { StandardContent } from "@/lib/portfolio/schema";
 const s = (name: string) => `/samples/${name}.webp`;
 
 export const MORE_PERSONAS: Record<string, StandardContent> = {
+  management: {
+    name: "Rebecca Hale", professional_title: "Operations Manager", location: "Birmingham, UK", availability: "Open to Head of Operations roles",
+    tagline: "I make busy organisations run smoothly, quietly and on budget.",
+    summary: [
+      "I’ve managed operations for twelve years, in logistics, healthcare and retail. I like messy processes, honest numbers and teams who know what good looks like.",
+      "My work is mostly invisible when it’s done well: orders that arrive, rotas that work, costs that stay where they should.",
+    ],
+    email: "rebecca@example.com", phone: "+44 121 496 0281", linkedin: "https://www.linkedin.com/",
+    skills: ["Operations management", "Process improvement", "Budgeting", "People leadership", "Lean", "Supplier management", "KPIs & reporting", "Change management"],
+    projects: [
+      { title: "New regional distribution centre", year: "2024", role: "Operations lead", client: "On time, 4% under budget", category: "Programme", description: "Opened a 120,000 sq ft site with 180 staff in nine months, without a single missed delivery to stores." },
+      { title: "Same-day picking", year: "2023", role: "Project owner", client: "Pick rate +27%", category: "Process", description: "Redesigned warehouse slotting and shift patterns; same-day dispatch went from 71% to 96%." },
+      { title: "Absence down by a third", year: "2022", role: "Sponsor", client: "Absence −34%", category: "People", description: "Fairer rotas, return-to-work conversations and team leads trained to have them." },
+    ],
+    experience: [
+      { job_title: "Operations Manager", company: "Midland Fresh Foods", location: "Birmingham", start_date: "2021", end_date: "Present", description: "Run two distribution centres, 420 people and a £38m budget." },
+      { job_title: "Operations Team Leader", company: "Severn Logistics", location: "Worcester", start_date: "2016", end_date: "2021" },
+      { job_title: "Graduate Management Trainee", company: "Northway Retail", location: "Coventry", start_date: "2013", end_date: "2016" },
+    ],
+    education: [{ school: "Aston University", degree: "BSc Business & Management", start_date: "2010", end_date: "2013" }, { school: "Chartered Management Institute", degree: "Level 7 Diploma in Strategic Management", start_date: "", end_date: "2020" }],
+    testimonials: [{ quote: "Rebecca made the hardest year in our history feel organised. Nobody missed a shift pay or a delivery.", name: "Managing Director", role: "Midland Fresh Foods" }, { quote: "The best manager I’ve worked for: clear, fair and always in the warehouse, not just the office.", name: "Shift Manager", role: "Her team" }],
+    highlights: [{ title: "Chartered Manager (CMgr)", detail: "Chartered Management Institute", year: "2021" }, { title: "Operations Leader of the Year, Midlands", detail: "Regional business awards", year: "2024" }],
+    stats: [{ value: "420", label: "people led" }, { value: "£38m", label: "budget" }, { value: "96%", label: "same-day dispatch" }],
+    services: [{ title: "Operations review", description: "Two weeks on site, then a written plan with costs.", price: "£6,500" }, { title: "Interim operations manager", description: "Hands-on cover for three to nine months.", price: "From £650 / day" }],
+  },
+
+  admin: {
+    name: "Sofia Marchetti", professional_title: "Executive Assistant to the CEO", location: "London", availability: "Open to EA and Chief of Staff roles",
+    tagline: "I keep a busy leader’s week calm, so they can do the work only they can do.",
+    summary: [
+      "I’ve supported chief executives for nine years, in a fintech, a charity and a design studio. Diaries, travel, board papers, events and the hundred small things that keep an office running.",
+      "I’m discreet, very organised and the person people come to when they don’t know who else to ask.",
+    ],
+    email: "sofia@example.com", phone: "+44 20 7946 0647", linkedin: "https://www.linkedin.com/",
+    skills: ["Diary management", "Travel planning", "Board papers", "Event planning", "Office management", "Google Workspace", "Microsoft 365", "Discretion"],
+    projects: [
+      { title: "Board meetings, rebuilt", year: "2024", role: "Owner", client: "Papers out 5 days earlier", category: "Governance", description: "A shared calendar and template for board papers. Directors now get packs a full week ahead." },
+      { title: "Company retreat for 140", year: "2023", role: "Organiser", client: "Under budget", category: "Event", description: "Three days in Lisbon: flights, hotel, venues and a programme everyone actually enjoyed." },
+      { title: "New office move", year: "2022", role: "Project lead", client: "Zero downtime", category: "Office", description: "Moved 90 people over one weekend, from furniture to Wi-Fi." },
+    ],
+    experience: [
+      { job_title: "Executive Assistant to the CEO", company: "Northwind Pay", location: "London", start_date: "2021", end_date: "Present" },
+      { job_title: "Executive Assistant", company: "City Harvest (charity)", location: "London", start_date: "2018", end_date: "2021" },
+      { job_title: "Office Manager", company: "Atelier Nove", location: "London", start_date: "2016", end_date: "2018" },
+    ],
+    education: [{ school: "University of Sussex", degree: "BA Italian & History", start_date: "2012", end_date: "2016" }],
+    testimonials: [{ quote: "Sofia runs my week better than I could. I’d follow her to any company.", name: "Chief Executive", role: "Northwind Pay" }, { quote: "Calm in every crisis, and somehow always two steps ahead.", name: "Chair of the Board", role: "City Harvest" }],
+    highlights: [{ title: "PA of the Year, finalist", detail: "Office industry awards", year: "2024" }],
+    stats: [{ value: "9", label: "years supporting CEOs" }, { value: "140", label: "person retreat organised" }, { value: "3", label: "languages" }],
+    services: [{ title: "Virtual assistance", description: "Diary, inbox and travel, ten hours a week.", price: "From £450 / month" }, { title: "Event organising", description: "Offsites, dinners and conferences.", price: "Quote" }],
+  },
+
   legal: {
     name: "Priya Raman", professional_title: "Employment Solicitor & Partner", location: "Manchester, UK", availability: "Taking new instructions for employers and senior employees",
     tagline: "Clear employment advice for people who would rather not need it.",
