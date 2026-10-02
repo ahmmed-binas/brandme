@@ -38,13 +38,20 @@ const text = (max: number) => z.string().max(max).optional();
 const link = z.string().max(2000).transform(safeLink).optional();
 const list = (maxItems: number, maxLength: number) => z.array(z.string().max(maxLength)).max(maxItems).optional();
 
+const image = z.string().max(MAX_IMAGE_DATA_URL_LENGTH + 100).transform(safeImage).optional();
+
 export const standardProjectSchema = z.object({
   title: text(200),
   description: text(4000),
   technologies: list(30, 60),
   github: link,
   live_url: link,
-  image: z.string().max(MAX_IMAGE_DATA_URL_LENGTH + 100).transform(safeImage).optional(),
+  image,
+  /** Optional detail used by richer templates: year, the owner's role, a client, and a category. */
+  year: text(40),
+  role: text(120),
+  client: text(120),
+  category: text(60),
 });
 
 export const standardExperienceSchema = z.object({
@@ -58,7 +65,32 @@ export const standardExperienceSchema = z.object({
   website: link,
 });
 
-/** Content shape used by every "standard" template (Midnight, Kinetic, …). */
+export const educationSchema = z.object({ school: text(200), degree: text(200), start_date: text(60), end_date: text(60), description: text(2000) });
+export const serviceSchema = z.object({ title: text(160), description: text(2000), price: text(80) });
+export const testimonialSchema = z.object({ quote: text(1200), name: text(120), role: text(160) });
+/** Awards, publications, exhibitions, talks, press: anything worth listing with a year. */
+export const highlightSchema = z.object({ title: text(300), detail: text(400), year: text(40), url: link });
+export const galleryItemSchema = z.object({ image, caption: text(300), year: text(40) });
+export const statSchema = z.object({ value: text(24), label: text(80) });
+export const linkSchema = z.object({ label: text(60), url: link });
+
+/** Every section a template can show. Templates declare which ones they use; the editor shows only those. */
+export const SECTION_KEYS = ["about", "projects", "experience", "skills", "education", "services", "testimonials", "highlights", "gallery", "stats", "contact"] as const;
+export type SectionKey = (typeof SECTION_KEYS)[number];
+
+const HEX = /^#[0-9a-f]{6}$/i;
+/** Per-portfolio design choices. Each template interprets its own palette and font ids; unknown ids fall back to its defaults. */
+export const designSchema = z.object({
+  palette: z.string().max(40).optional(),
+  font: z.string().max(40).optional(),
+  accent: z.string().max(7).refine((value) => !value || HEX.test(value), "Accent must be a hex colour.").optional(),
+  hidden: z.array(z.enum(SECTION_KEYS)).max(SECTION_KEYS.length).optional(),
+  /** Free-form section titles, e.g. "Selected work" instead of "Projects". */
+  labels: z.partialRecord(z.enum(SECTION_KEYS), z.string().max(40)).optional(),
+}).optional();
+export type DesignSettings = NonNullable<z.infer<typeof designSchema>>;
+
+/** Content shape used by every "standard" template (Midnight, Kinetic and the whole studio collection). */
 export const standardContentSchema = z.object({
   name: text(120),
   professional_title: text(200),
@@ -71,6 +103,19 @@ export const standardContentSchema = z.object({
   skills: list(40, 60),
   projects: z.array(standardProjectSchema).max(30).optional(),
   experience: z.array(standardExperienceSchema).max(30).optional(),
+  location: text(120),
+  availability: text(160),
+  avatar: image,
+  cover: image,
+  website: link,
+  links: z.array(linkSchema).max(12).optional(),
+  education: z.array(educationSchema).max(12).optional(),
+  services: z.array(serviceSchema).max(12).optional(),
+  testimonials: z.array(testimonialSchema).max(12).optional(),
+  highlights: z.array(highlightSchema).max(40).optional(),
+  gallery: z.array(galleryItemSchema).max(36).optional(),
+  stats: z.array(statSchema).max(6).optional(),
+  design: designSchema,
 });
 
 export type StandardContent = z.infer<typeof standardContentSchema>;

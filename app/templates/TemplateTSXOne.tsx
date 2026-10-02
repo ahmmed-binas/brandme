@@ -1,4 +1,5 @@
 "use client";
+import type { StandardContent } from "@/lib/portfolio/schema";
 
 import {
   FaGithub,
@@ -15,44 +16,10 @@ import Image from "next/image";
 |--------------------------------------------------------------------------
 */
 
-export interface PortfolioProject {
-  title?: string;
-  description?: string;
-  technologies?: string[];
-  github?: string;
-  live_url?: string;
-  image?: string;
-}
-
-export interface PortfolioExperience {
-  job_title?: string;
-  company?: string;
-  location?: string;
-  start_date?: string;
-  end_date?: string;
-  description?: string;
-  technologies?: string[];
-  website?: string;
-}
-
-export interface PortfolioData {
-  name?: string;
-  professional_title?: string;
-  tagline?: string;
-
-  summary?: string[];
-
-  github?: string;
-  linkedin?: string;
-  instagram?: string;
-  email?: string;
-
-  skills?: string[];
-
-  projects?: PortfolioProject[];
-
-  experience?: PortfolioExperience[];
-}
+// The shared content model; see lib/portfolio/schema.ts.
+export type PortfolioData = StandardContent;
+export type PortfolioProject = NonNullable<StandardContent["projects"]>[number];
+export type PortfolioExperience = NonNullable<StandardContent["experience"]>[number];
 
 /*
 |--------------------------------------------------------------------------

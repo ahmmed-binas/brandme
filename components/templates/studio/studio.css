@@ -1,0 +1,28 @@
+/* Shared utilities for studio templates. Colours and fonts come from the
+   per-portfolio variables set by StudioRoot (see kit.tsx). */
+.studio-root { --t-rule: color-mix(in oklab, var(--t-fg) 16%, transparent); --t-rule-strong: color-mix(in oklab, var(--t-fg) 38%, transparent); }
+.studio-root .fd { font-family: var(--t-display); }
+.studio-root .ft { font-family: var(--t-text); }
+.studio-root .fm { font-family: var(--t-mono); }
+.studio-root .tm { color: var(--t-muted); }
+.studio-root .ta { color: var(--t-accent); }
+.studio-root .ba { background: var(--t-accent); }
+.studio-root .bs { background: var(--t-surface); }
+.studio-root .rule { border-color: var(--t-rule); }
+.studio-root .rule-strong { border-color: var(--t-rule-strong); }
+.studio-root .hover-a:hover { color: var(--t-accent); }
+.studio-root a { text-underline-offset: 0.2em; }
+.studio-root ::selection { background: var(--t-accent); color: var(--t-bg); }
+.studio-root .balance { text-wrap: balance; }
+.studio-root .pretty { text-wrap: pretty; }
+/* Fine paper grain for print-like templates. */
+.studio-root .paper::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: .5; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.studio-root .paper > * { position: relative; z-index: 1; }
+/* Click-to-edit affordance, only inside the editor. */
+.studio-editing [data-edit] { cursor: pointer; transition: outline-color .15s; outline: 1.5px dashed transparent; outline-offset: 4px; }
+.studio-editing [data-edit]:hover { outline-color: color-mix(in oklab, var(--t-accent) 70%, transparent); }
+@keyframes studio-blink { 50% { opacity: 0 } }
+@keyframes studio-marquee { to { transform: translateX(-50%) } }
+@keyframes studio-roll { to { transform: translateY(-50%) } }
+@media (prefers-reduced-motion: reduce) { .studio-root * { animation: none !important; } }

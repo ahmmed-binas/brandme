@@ -1,4 +1,5 @@
 import type { TemplateDefinition, TemplateId } from "./types";
+import { studioCatalog } from "./studio-catalog";
 
 // Add each new template here. The route, chooser, and renderer use this as
 // their single source of truth, so no existing screens need editing.
@@ -15,6 +16,7 @@ export const templateCatalog: TemplateDefinition[] = [
     tags: ["Dark", "Editorial", "Case studies"],
     editor: "dedicated",
     colorThemes: false,
+    collection: "original", professions: ["developer"], styles: ["Editorial", "Technical"], mood: "dark",
   },
   {
     id: "template-one",
@@ -29,6 +31,8 @@ export const templateCatalog: TemplateDefinition[] = [
     tags: ["Dark", "Editorial", "Portfolio"],
     editor: "standard",
     colorThemes: true,
+    collection: "original", professions: ["developer", "design"], styles: ["Editorial"], mood: "dark", persona: "developer",
+    sections: ["about", "projects", "experience", "skills", "contact"],
   },
   {
     id: "kinetic-portfolio",
@@ -42,7 +46,10 @@ export const templateCatalog: TemplateDefinition[] = [
     tags: ["Typography", "Motion", "Minimal"],
     editor: "standard",
     colorThemes: false,
+    collection: "original", professions: ["developer", "design", "consulting"], styles: ["Bold", "Minimal"], mood: "light", persona: "developer",
+    sections: ["about", "projects", "experience", "skills", "contact"],
   },
+  ...studioCatalog,
 ];
 
 export const DEFAULT_TEMPLATE_ID: TemplateId = "template-one";

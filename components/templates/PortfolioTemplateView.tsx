@@ -5,6 +5,8 @@ import TemplateRenderer from "./TemplateRenderer";
 import type { PortfolioData } from "./template-one/TemplateOne";
 import type { TemplateId } from "@/lib/templates/types";
 import { readPreviewDraft } from "@/lib/portfolio/browser-storage";
+import { getTemplate } from "@/lib/templates/catalog";
+import { personaFor } from "@/lib/templates/personas";
 import { isColorTheme, isEditorialShape, standardContentSchema } from "@/lib/portfolio/schema";
 import { portfolioData as editorialDefaultData, type PortfolioData as EditorialData } from "./editorial-developer/data";
 
@@ -76,7 +78,14 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      if (new URLSearchParams(window.location.search).get("demo") === "true") {
+      const definition = getTemplate(templateId);
+      const params = new URLSearchParams(window.location.search);
+      // Studio templates preview with their sample person until the visitor has a draft of their own.
+      if (definition?.collection === "studio" && (params.has("sample") || !readPreviewDraft(templateId))) {
+        setPortfolio(personaFor(definition.persona));
+        return;
+      }
+      if (params.get("demo") === "true") {
         setPortfolio(DEMO_PORTFOLIO);
         return;
       }
