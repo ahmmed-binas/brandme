@@ -70,7 +70,8 @@ const DEMO_PORTFOLIO: PortfolioData = {
 };
 
 export default function PortfolioTemplateView({ templateId }: { templateId: TemplateId }) {
-  const [portfolio, setPortfolio] = useState<PortfolioData>(EMPTY_PORTFOLIO);
+  // Studio templates start from their sample person, so the first paint is never placeholder text.
+  const [portfolio, setPortfolio] = useState<PortfolioData>(() => { const definition = getTemplate(templateId); return definition?.collection === "studio" ? personaFor(definition.persona) : EMPTY_PORTFOLIO; });
   const [theme, setTheme] = useState<"midnight" | "classic" | "dark" | "light">("midnight");
   const [editorialData, setEditorialData] = useState<EditorialData>(editorialDefaultData);
   /** Content sent by the editor is newer than anything in storage. */

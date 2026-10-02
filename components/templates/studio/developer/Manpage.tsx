@@ -20,7 +20,7 @@ export default function Manpage({ content, template, embedded }: StudioProps) {
   const { c, has, label } = studio;
   const cmd = command(c.name);
   const head = `${cmd.toUpperCase()}(1)`;
-  const today = new Date().toLocaleDateString("en", { month: "long", year: "numeric" });
+  const today = `${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][new Date().getMonth()]} ${new Date().getFullYear()}`;
 
   return <StudioRoot studio={studio} className="fm text-[clamp(14px,2.9cqw,16.5px)] leading-[1.6]">
     <div className="mx-auto max-w-[86ch] px-5 py-12 @3xl:py-20">
@@ -60,7 +60,7 @@ export default function Manpage({ content, template, embedded }: StudioProps) {
 
       {has("contact") && c.email && <Section title="Author"><p>Written by {c.name} &lt;<a href={`mailto:${c.email}`} className="underline" {...ed("email")}>{c.email}</a>&gt;.</p></Section>}
 
-      <footer className="mt-14 flex justify-between gap-4 border-t rule pt-3"><span className="tm">Formora 1.0</span><span className="tm">{today}</span><span className="font-bold">{head}</span></footer>
+      <footer className="mt-14 flex justify-between gap-4 border-t rule pt-3"><span className="tm">Formora 1.0</span><span className="tm" suppressHydrationWarning>{today}</span><span className="font-bold">{head}</span></footer>
     </div>
   </StudioRoot>;
 }

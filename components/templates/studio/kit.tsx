@@ -91,7 +91,7 @@ export function Reveal({ children, className = "", delay = 0, as: Tag = "div" }:
   return <Tag ref={ref as never} style={{ transitionDelay: state === "shown" ? `${delay}ms` : undefined }} className={`transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(.2,.7,.1,1)] ${motion} ${className}`}>{children}</Tag>;
 }
 
-export const initials = (name?: string) => (name ?? "").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]!.toUpperCase()).join("");
+export const initials = (name?: string) => (name ?? "").replace(/^(dr|prof|mr|mrs|ms|mx)\.?\s+/i, "").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]!.toUpperCase()).join("");
 export const firstName = (name?: string) => (name ?? "").split(/\s+/)[0] ?? "";
 export const lastName = (name?: string) => (name ?? "").split(/\s+/).slice(1).join(" ");
 export const hostname = (url?: string) => { try { return url ? new URL(url).hostname.replace(/^www\./, "") : ""; } catch { return url ?? ""; } };

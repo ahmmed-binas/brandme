@@ -175,6 +175,8 @@ export const PERSONAS: Record<string, StandardContent> = {
       "We work slowly at the start and quickly at the end: months of drawing and models, then a build that surprises nobody.",
     ],
     email: "studio@example.com", website: "https://bergarkitekter.no", instagram: "https://www.instagram.com/",
+    cover: s("interior-oak"),
+    gallery: [{ image: s("interior-stone"), caption: "Stone kitchen, Bergen" }, { image: s("arch-model"), caption: "Working model, Light Studio" }, { image: s("interior-oak"), caption: "Oak Room, Oslo" }],
     skills: ["Residential", "Timber construction", "Passive house", "Site planning", "Rhino", "Physical models"],
     projects: [
       { title: "House on a Slope", year: "2024", client: "Private", category: "Residential", role: "Lead architect", description: "A 140 m² family house stepped down a 1:4 slope, with every room facing the fjord and a stair that doubles as a reading room.", image: s("arch-plan") },
@@ -210,8 +212,8 @@ export const PERSONAS: Record<string, StandardContent> = {
       { title: "Wellcome Career Development Award", detail: "£1.6M, 2025–2030", year: "2025" },
     ],
     projects: [
-      { title: "scBay", year: "2023", category: "Software", description: "An R package for trajectory inference with honest uncertainty. 40k downloads.", github: "https://github.com/", image: s("chart-lines") },
-      { title: "Embryo Atlas", year: "2024", category: "Dataset", description: "Single-cell profiles of 180,000 cells across six days of mouse development, openly licensed.", image: s("chart-scatter") },
+      { title: "scBay", year: "2023", category: "Software", description: "An R package for trajectory inference with honest uncertainty. 40k downloads.", github: "https://github.com/", image: s("chart-trajectory") },
+      { title: "Embryo Atlas", year: "2024", category: "Dataset", description: "Single-cell profiles of 180,000 cells across six days of mouse development, openly licensed.", image: s("chart-umap") },
     ],
     experience: [
       { job_title: "Assistant Professor", company: "University of Edinburgh", start_date: "2022", end_date: "Present", description: "Lab of six; teaching Statistical Genomics (MSc)." },
