@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertCircle, Check, Cloud, CloudOff, Copy, ExternalLink, Globe, HardDrive, Loader2, X } from "lucide-react";
 import type { PublishInfo, SaveState } from "./usePortfolioPersistence";
 import { normaliseSlug, slugError } from "@/lib/portfolio/schema";
+import { DomainPanel } from "./DomainPanel";
 
 /** Shows where the work is saved, so people never wonder whether they will lose it. */
 export function SaveStatus({ save, signedIn }: { save: SaveState; signedIn: boolean }) {
@@ -51,7 +52,9 @@ export function PublishDialog({ open, onClose, signedIn, templateId, info, sugge
   publish: (slug: string) => Promise<string>;
   unpublish: () => Promise<void>;
 }) {
-  const [slug, setSlug] = useState(info.slug ?? normaliseSlug(suggestedSlug));
+  // Follows the saved address (which may load after the dialog opens) until the user types their own.
+  const [typedSlug, setSlug] = useState<string | null>(null);
+  const slug = typedSlug ?? info.slug ?? normaliseSlug(suggestedSlug);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -74,7 +77,7 @@ export function PublishDialog({ open, onClose, signedIn, templateId, info, sugge
   };
 
   return <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/50 p-4" onClick={onClose}>
-    <div role="dialog" aria-modal="true" aria-labelledby="publish-title" className="w-full max-w-md rounded-2xl bg-white p-6 text-slate-900 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+    <div role="dialog" aria-modal="true" aria-labelledby="publish-title" className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 text-slate-900 shadow-2xl" onClick={(event) => event.stopPropagation()}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-700"><Globe size={14} /> {live ? "Live portfolio" : "Publish"}</p>
@@ -109,6 +112,7 @@ export function PublishDialog({ open, onClose, signedIn, templateId, info, sugge
         </button>
         {live && <button disabled={busy} onClick={() => void run(unpublish)} className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Unpublish</button>}
         <p className="text-xs leading-5 text-slate-500">Edits stay private until you publish them. Only you can change this portfolio.</p>
+        <div className="border-t border-slate-100 pt-4"><DomainPanel templateId={templateId} personName={suggestedSlug} published={live} /></div>
       </div>}
     </div>
   </div>;

@@ -77,13 +77,15 @@ export type StandardContent = z.infer<typeof standardContentSchema>;
 
 const EDITORIAL_ARRAY_KEYS = ["experience", "projects", "education", "certifications", "engineeringApproach", "services", "testimonials"] as const;
 const EDITORIAL_OBJECT_KEYS = ["personal", "about", "skills", "openSource", "social", "snapshot"] as const;
+export const EDITORIAL_SKILL_CATEGORIES = ["frontend", "backend", "database", "devops", "ai", "tools"] as const;
 
 /** Structural check for the Editorial Developer template's richer content model. */
 export function isEditorialShape(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const data = value as Record<string, unknown>;
   return EDITORIAL_ARRAY_KEYS.every((key) => Array.isArray(data[key]))
-    && EDITORIAL_OBJECT_KEYS.every((key) => Boolean(data[key]) && typeof data[key] === "object" && !Array.isArray(data[key]));
+    && EDITORIAL_OBJECT_KEYS.every((key) => Boolean(data[key]) && typeof data[key] === "object" && !Array.isArray(data[key]))
+    && EDITORIAL_SKILL_CATEGORIES.every((category) => Array.isArray((data.skills as Record<string, unknown>)[category]));
 }
 
 const IMAGE_KEY = /(avatar|image|photo|logo|thumbnail)$/i;

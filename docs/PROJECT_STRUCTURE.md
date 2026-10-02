@@ -10,6 +10,7 @@
 | `/editor/[templateId]` | Private portfolio editor; intentionally no-index | `app/editor/[templateId]/page.tsx` |
 | `/p/[slug]` | A user's published portfolio (server-rendered from the database) | `app/p/[slug]/page.tsx` |
 | `/account` | Signed-in user's portfolios, live status, and plan | `app/account/page.tsx` |
+| any custom domain | A published portfolio on its owner's domain (see `docs/CUSTOM_DOMAINS.md`) | `app/sites/[host]/page.tsx` |
 | `/DetailExtractorPage` | CV/document detail extraction | `app/DetailExtractorPage/page.tsx` |
 | `/tools` | Free document tools directory | `app/tools/page.tsx` |
 | `/tools/pdf-editor` | Browser-local PDF visual editor | `app/tools/pdf-editor/page.tsx` |
@@ -33,6 +34,13 @@ lib/ai/              Server-side AI copy editing (Claude). Never imported by cli
 lib/plans.ts         Plan limits (live portfolios, AI edits). The only place pricing rules live.
 app/api/portfolios/  Save, load, publish, and unpublish portfolios (owner only).
 app/api/ai/assist/   AI copy-editing endpoint, metered per plan.
+app/api/ai/import/   Free text → structured portfolio content (Claude).
+app/api/import/      GitHub profile import.
+lib/import/          Import sources (GitHub, LinkedIn export) and mapping into each template.
+lib/domains/         Custom domains: name rules, Vercel API client, purchase/connect business rules.
+app/api/domains/     Search, buy (Stripe checkout), connect, and disconnect domains.
+app/sites/[host]/    A portfolio served on its custom domain (reached via proxy.ts).
+proxy.ts             Routes custom-domain requests to /sites/<host>.
 lib/content/         Editorial content and pagination data.
 utils/               File extraction and legacy helper code.
 public/              Static images and assets served from the site root.

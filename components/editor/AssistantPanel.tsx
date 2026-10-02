@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bot, FileUp, Loader2, PanelRightClose, Send, Sparkles } from "lucide-react";
+import { Bot, Loader2, PanelRightClose, Send, Sparkles } from "lucide-react";
+import { describeProfile, type ImportedProfile } from "@/lib/import/profile";
+import { ImportSources } from "./ImportSources";
 
 type Message = { role: "assistant" | "user"; text: string };
 
@@ -11,13 +13,14 @@ type Message = { role: "assistant" | "user"; text: string };
  * requests go to the server-side assistant (metered per plan). Otherwise a small
  * set of local quick actions still works, so the panel is never a dead end.
  */
-export function AssistantPanel<T>({ templateId, content, onContent, quickAction, onImportCv, onClose, intro, signedIn }: {
+export function AssistantPanel<T>({ templateId, content, onContent, quickAction, onImport, onClose, intro, signedIn }: {
   templateId: string;
   content: T;
   onContent: (content: T) => void;
   /** Local fallback: applies a change and returns a reply, or null if it doesn't understand. */
   quickAction: (request: string) => string | null;
-  onImportCv: (file: File) => Promise<string>;
+  /** Apply imported details to the editor (the editor maps them onto its template). */
+  onImport: (profile: ImportedProfile) => void;
   onClose?: () => void;
   intro: string;
   signedIn: boolean;
@@ -27,7 +30,6 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
-  const cvInput = useRef<HTMLInputElement | null>(null);
   const log = useRef<HTMLDivElement | null>(null);
   const say = (message: Message) => setMessages((current) => [...current, message]);
 
@@ -62,12 +64,13 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
     say({ role: "assistant", text: quickAction(request) ?? (available ? "Sign in to use the full AI assistant. Without an account I can shorten your title, add a project or role, and add a skill." : "I can shorten your title, add a project or role, and add a skill. Everything else is editable in the Content panel.") });
   };
 
-  const importCv = async (file?: File) => {
-    if (!file) return;
-    say({ role: "assistant", text: `Reading ${file.name}…` });
-    setBusy(true);
-    try { say({ role: "assistant", text: await onImportCv(file) }); } catch { say({ role: "assistant", text: "I couldn’t read that file. Try a PDF, DOCX, image, or plain-text CV under 25 MB." }); } finally { setBusy(false); }
+  const applyImport = (profile: ImportedProfile, source: string) => {
+    const found = describeProfile(profile);
+    if (found === "nothing usable") { say({ role: "assistant", text: `I couldn’t find portfolio details in that ${source} import.` }); return; }
+    onImport(profile);
+    say({ role: "assistant", text: `Imported from ${source}: ${found}. Review it in the Content panel. Undo puts things back.` });
   };
+  const signInHref = `/login?callbackUrl=${encodeURIComponent(`/editor/${templateId}`)}`;
 
   return <>
     <div className="flex items-center justify-between border-b border-slate-200 p-4">
@@ -75,9 +78,8 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
       {onClose && <button onClick={onClose} className="hidden rounded-lg p-2 text-slate-500 hover:bg-slate-100 xl:block" aria-label="Close AI panel"><PanelRightClose size={18} /></button>}
     </div>
     <div ref={log} className="min-h-0 flex-1 overflow-y-auto p-4">
-      <button disabled={busy} onClick={() => cvInput.current?.click()} className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-violet-300 bg-violet-50 px-3 py-3 text-sm font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-60"><FileUp size={16} /> Upload CV and fill portfolio</button>
-      <input ref={cvInput} onChange={(event) => { void importCv(event.target.files?.[0]); event.target.value = ""; }} type="file" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" className="hidden" />
-      {available && !signedIn && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600"><Link href={`/login?callbackUrl=${encodeURIComponent(`/editor/${templateId}`)}`} className="font-bold text-violet-700 hover:underline">Sign in</Link> to let the AI rewrite your bio, projects, and experience.</p>}
+      <ImportSources aiReady={available && signedIn} signInHref={signInHref} busy={busy} setBusy={setBusy} onImport={applyImport} onMessage={(text) => say({ role: "assistant", text })} />
+      {available && !signedIn && <p className="mt-3 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600"><Link href={signInHref} className="font-bold text-violet-700 hover:underline">Sign in</Link> to let the AI rewrite your bio, projects, and experience.</p>}
       <div className="mt-5 space-y-3" aria-live="polite">
         {messages.map((message, index) => <div key={index} className={`rounded-2xl px-3 py-2.5 text-sm leading-6 ${message.role === "user" ? "ml-6 bg-violet-600 text-white" : "mr-3 bg-slate-100 text-slate-700"}`}>{message.text}</div>)}
         {busy && <div className="mr-3 inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-3 py-2.5 text-sm text-slate-500"><Loader2 size={14} className="animate-spin" /> Working…</div>}

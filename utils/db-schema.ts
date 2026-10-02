@@ -34,6 +34,33 @@ const statements = [
     requests INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (owner_id, day)
   )`,
+  `CREATE TABLE IF NOT EXISTS custom_domains (
+    domain TEXT PRIMARY KEY,
+    owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    template_id TEXT NOT NULL,
+    source TEXT NOT NULL CHECK (source IN ('connected', 'purchased')),
+    verified_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (owner_id, template_id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS domain_orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    template_id TEXT NOT NULL,
+    domain TEXT NOT NULL,
+    registrar_price NUMERIC(10, 2) NOT NULL,
+    charged_cents INTEGER NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'usd',
+    status TEXT NOT NULL DEFAULT 'awaiting_payment',
+    contact JSONB,
+    stripe_session_id TEXT UNIQUE,
+    stripe_payment_intent TEXT,
+    registrar_order_id TEXT,
+    error TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS domain_orders_owner ON domain_orders (owner_id, created_at DESC)`,
 ];
 
 let ready: Promise<void> | undefined;

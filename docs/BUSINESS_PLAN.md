@@ -49,7 +49,7 @@ Rules that keep pricing honest:
 | One AI edit (Claude Opus 5.5 at $4 / $20 per million input/output tokens) | **~$0.03–0.06** | About 2k tokens in and 1–2k out, including reasoning. Measure the real figure once live; the server logs each request. |
 | Free user, worst case (3 AI edits every day) | ~$3–5/month | Rare in practice; typical free users make a handful of edits in total. Keep the daily cap. |
 | Hosting a published portfolio | well under $0.01/month | One database row, rendered on request |
-| Custom domain + SSL | $0 on most hosts (Vercel or Netlify domains API), plus registration if Formora resells domains | Resell domains at a margin only once DNS setup is reliable |
+| Custom domain + SSL | Registrar price (about $10–20 a year for .com/.dev); HTTPS is free on Vercel | Built: customers pay registrar price + 20% + $3, prepaid via Stripe. A $12 domain sells for $18, about $6 margin per domain per year. |
 
 At £7/month, a Pro user who makes 50 AI edits a month costs about £2 in AI, leaving a healthy margin. **Watch the AI cost per paying user monthly.** If it rises, lower the effort setting or move routine edits to a cheaper model, but only after measuring that quality holds.
 
@@ -65,17 +65,20 @@ Built in this round:
 - Content validation on every save (blocks script links, unsafe images, and oversized payloads)
 - An editor that works on mobile, with undo, a save status indicator, and image compression
 
-Not built yet (in priority order, see section 6): payments, custom domains, analytics, verification, privacy policy and terms, and account deletion.
+Also built: **custom domains** (buy `yourname.com` through Formora with automatic setup, or connect your own on Pro) and **profile import** from a CV, GitHub, a LinkedIn data export, or pasted text organised by Claude. See `docs/CUSTOM_DOMAINS.md`.
+
+Not built yet (in priority order, see section 6): Pro subscriptions, domain renewals, analytics, verification, privacy policy and terms, and account deletion.
 
 ## 6. Roadmap
 
 ### Phase 1: launch-ready (weeks 1–4)
 1. **Pick one name and one domain.** The codebase mixes "Formora", "CV Gen Studio", "brandme", and the placeholder `formora.example` (in `app/layout.tsx` and `lib/brand.ts`). Fix this before any marketing.
 2. **Legal basics:** privacy policy, terms, and an account deletion endpoint. Google OAuth verification and GDPR require them.
-3. **Payments:** Stripe Checkout for the Job Search Pass and Pro, and a webhook that sets `app_users.plan`. Nothing else needs to change, because limits already read from the plan.
-4. **Share previews:** an Open Graph image per published portfolio, so links look good on LinkedIn and Slack.
-5. **Simple analytics:** count page views per portfolio (no personal data) and show them in the account page. This is the first Pro feature people can feel.
-6. **Remove dead paths:** `app/backend/server.js` (an Express server calling a local Ollama model) and the CV extractor's call to `localhost:5000` don't work once deployed. Route CV parsing through the new server-side AI (`lib/ai/`) instead.
+3. **Payments:** Stripe is already wired in for domain purchases. Add Checkout for the Job Search Pass and Pro, and have the existing webhook set `app_users.plan`. Nothing else needs to change, because limits already read from the plan.
+4. **Domain renewals** before the first purchased domains turn one year old (see `docs/CUSTOM_DOMAINS.md`).
+5. **Share previews:** an Open Graph image per published portfolio, so links look good on LinkedIn and Slack.
+6. **Simple analytics:** count page views per portfolio (no personal data) and show them in the account page. This is the first Pro feature people can feel.
+7. **Remove dead paths:** `app/backend/server.js` (an Express server calling a local Ollama model) and the CV extractor's call to `localhost:5000` don't work once deployed. Route CV parsing through the new server-side AI (`lib/ai/`) instead.
 
 ### Phase 2: the trust layer (weeks 5–10). This is the moat.
 1. **GitHub verification:** connect GitHub and show a "verified" badge on projects whose repository belongs to the user.
@@ -90,8 +93,7 @@ Not built yet (in priority order, see section 6): payments, custom domains, anal
 
 ### Phase 4: distribution (after product-market fit)
 1. **Cohort accounts** for bootcamps and universities.
-2. **Custom domains** in self-serve.
-3. An optional **talent directory** that recruiters can search, opt-in only. This creates a two-sided network, the strongest moat of all, but only worth building once there are thousands of verified portfolios.
+2. An optional **talent directory** that recruiters can search, opt-in only. This creates a two-sided network, the strongest moat of all, but only worth building once there are thousands of verified portfolios.
 
 ## 7. Metrics that matter
 

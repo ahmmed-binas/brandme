@@ -136,12 +136,21 @@ export interface PublishedPortfolio {
 }
 
 export async function getPublished(slug: string): Promise<PublishedPortfolio | null> {
+  return findPublished("p.slug = $1", [slug]);
+}
+
+/** The published portfolio behind a custom domain. */
+export async function getPublishedFor(ownerId: string, templateId: TemplateId): Promise<PublishedPortfolio | null> {
+  return findPublished("p.owner_id = $1 AND p.template_id = $2", [ownerId, templateId]);
+}
+
+async function findPublished(where: string, params: unknown[]): Promise<PublishedPortfolio | null> {
   await ensureSchema();
   const result = await db.query<{ template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string }>(
     `SELECT p.template_id, p.published_content, p.published_theme, p.published_at, u.plan
      FROM portfolios p JOIN app_users u ON u.id = p.owner_id
-     WHERE p.slug = $1 AND p.published_at IS NOT NULL`,
-    [slug],
+     WHERE ${where} AND p.published_at IS NOT NULL`,
+    params,
   );
   const row = result.rows[0];
   if (!row) return null;

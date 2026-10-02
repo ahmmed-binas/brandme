@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Globe, ImagePlus, Monitor, Palette, PanelLeftClose, PanelLeftOpen, PanelRightOpen, Plus, Trash2, Undo2 } from "lucide-react";
 import type { PortfolioData, PortfolioExperience, PortfolioProject } from "@/components/templates/template-one/TemplateOne";
@@ -8,6 +8,7 @@ import TemplateRenderer from "@/components/templates/TemplateRenderer";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import { COLOR_THEMES, isColorTheme, standardContentSchema, type ColorTheme } from "@/lib/portfolio/schema";
 import { compressImage } from "@/lib/images";
+import { mergeIntoStandard } from "@/lib/import/profile";
 import { usePortfolioPersistence } from "./usePortfolioPersistence";
 import { useUndoableState } from "./useUndoableState";
 import { AssistantPanel } from "./AssistantPanel";
@@ -81,6 +82,17 @@ export default function PortfolioEditor({ template }: { template: TemplateDefini
   const apply = useCallback((content: PortfolioData, savedTheme: string | null) => { reset(content); if (isColorTheme(savedTheme)) setTheme(savedTheme); }, [reset]);
   const persistence = usePortfolioPersistence({ templateId: template.id, content: data, theme, apply, parse: parseStandard });
 
+  // Returning from domain checkout: reopen the publish dialog so the domain's progress is visible.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("domainOrder")) return;
+    const timer = window.setTimeout(() => {
+      setPublishOpen(true);
+      params.delete("domainOrder");
+      window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   const set = (patch: Partial<PortfolioData>, checkpoint = false) => update((current) => ({ ...current, ...patch }), { checkpoint });
   const updateProject = (index: number, patch: Partial<PortfolioProject>) => update((current) => ({ ...current, projects: (current.projects ?? []).map((item, i) => i === index ? { ...item, ...patch } : item) }));
   const updateExperience = (index: number, patch: Partial<PortfolioExperience>) => update((current) => ({ ...current, experience: (current.experience ?? []).map((item, i) => i === index ? { ...item, ...patch } : item) }));
@@ -113,21 +125,6 @@ export default function PortfolioEditor({ template }: { template: TemplateDefini
     if (lower.includes("add") && (lower.includes("experience") || lower.includes("role") || lower.includes("job"))) { set({ experience: [...(data.experience ?? []), newRole()] }, true); return "Added an experience entry for you to complete."; }
     if (lower.includes("add") && lower.includes("skill")) { set({ skills: [...(data.skills ?? []), "New skill"] }, true); return "Added a new skill. Rename it in the Content panel."; }
     return null;
-  };
-
-  const importCv = async (file: File) => {
-    const extraction = await import("@/utils/FileExtraction");
-    const raw = await extraction.extractFileContent(file);
-    const text = typeof raw === "string" ? raw : JSON.stringify(raw);
-    const parsed = extraction.extractOCRJSON(text);
-    set({
-      name: parsed.name || data.name,
-      email: parsed.email || data.email,
-      github: parsed.github || data.github,
-      linkedin: parsed.linkedin || data.linkedin,
-      skills: typeof parsed.skills === "string" && parsed.skills.trim() ? parsed.skills.split(/[,\n•]/).map((item: string) => item.trim()).filter(Boolean).slice(0, 12) : data.skills,
-    }, true);
-    return "CV imported. I filled in your name, contact links, and skills where I could identify them reliably — review them in the Content panel. You can undo this from the toolbar.";
   };
 
   const panelClass = (panel: MobilePanel, open: boolean) => `${mobilePanel === panel ? "flex" : "hidden"} ${open ? "xl:flex" : "xl:hidden"} min-h-0 flex-col`;
@@ -233,7 +230,7 @@ export default function PortfolioEditor({ template }: { template: TemplateDefini
       </main>
 
       <aside className={`${panelClass("ai", aiOpen)} border-slate-200 bg-white xl:border-l`}>
-        <AssistantPanel templateId={template.id} content={data} signedIn={persistence.signedIn} onContent={(content) => update(() => content, { checkpoint: true })} quickAction={quickAction} onImportCv={importCv} onClose={() => setAiOpen(false)} intro="Upload a CV to fill your portfolio, or ask me to rewrite your bio, tighten project descriptions, or adjust the tone." />
+        <AssistantPanel templateId={template.id} content={data} signedIn={persistence.signedIn} onContent={(content) => update(() => content, { checkpoint: true })} quickAction={quickAction} onImport={(profile) => update((current) => mergeIntoStandard(current, profile), { checkpoint: true })} onClose={() => setAiOpen(false)} intro="Import your details above, or ask me to rewrite your bio, tighten project descriptions, or adjust the tone." />
       </aside>
     </div>
 

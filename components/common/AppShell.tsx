@@ -1,12 +1,14 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useSelectedLayoutSegment } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isPortfolioView = pathname === "/templates" || pathname.startsWith("/templates/") || pathname.startsWith("/editor/") || pathname.startsWith("/p/");
+  // The route segment (not the browser path) is used because custom domains are served via a rewrite:
+  // the browser shows "/" while the route is /sites/<host>.
+  const segment = useSelectedLayoutSegment();
+  const isPortfolioView = segment === "templates" || segment === "editor" || segment === "p" || segment === "sites";
 
   if (isPortfolioView) {
     return <>{children}</>;

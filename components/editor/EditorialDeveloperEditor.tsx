@@ -6,6 +6,7 @@ import { ArrowLeft, Eye, FileJson, Globe, Monitor, PanelRightOpen, Plus, RotateC
 import type { TemplateDefinition } from "@/lib/templates/types";
 import { portfolioData as defaultData, type PortfolioData } from "@/components/templates/editorial-developer/data";
 import { isEditorialShape } from "@/lib/portfolio/schema";
+import { mergeIntoEditorial } from "@/lib/import/profile";
 import { usePortfolioPersistence } from "./usePortfolioPersistence";
 import { useUndoableState } from "./useUndoableState";
 import { AssistantPanel } from "./AssistantPanel";
@@ -58,6 +59,17 @@ export default function EditorialDeveloperEditor({ template }: { template: Templ
   const apply = useCallback((content: PortfolioData) => reset(content), [reset]);
   const persistence = usePortfolioPersistence({ templateId: template.id, content: data, apply, parse: parseEditorial });
 
+  // Returning from domain checkout: reopen the publish dialog so the domain's progress is visible.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("domainOrder")) return;
+    const timer = window.setTimeout(() => {
+      setPublishOpen(true);
+      params.delete("domainOrder");
+      window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   // The preview is an isolated iframe (the template's styles must not leak into the editor); keep it in step.
   const syncPreview = useCallback(() => previewFrame.current?.contentWindow?.postMessage({ type: "editorial-template-data", data }, window.location.origin), [data]);
   useEffect(() => { syncPreview(); }, [syncPreview]);
@@ -93,15 +105,6 @@ export default function EditorialDeveloperEditor({ template }: { template: Templ
     if (text.includes("add") && (text.includes("experience") || text.includes("role"))) { addExperience(); return "A new role is ready in the Content panel."; }
     return null;
   };
-  const importCv = async (file: File) => {
-    const extraction = await import("@/utils/FileExtraction");
-    const raw = await extraction.extractFileContent(file);
-    const parsed = extraction.extractOCRJSON(typeof raw === "string" ? raw : JSON.stringify(raw));
-    const tools = typeof parsed.skills === "string" ? parsed.skills.split(/[,\n•]/).map((item: string) => item.trim()).filter(Boolean).slice(0, 20) : [];
-    set((current) => ({ ...current, personal: { ...current.personal, name: parsed.name || current.personal.name, email: parsed.email || current.personal.email }, social: { ...current.social, github: parsed.github || current.social.github, linkedin: parsed.linkedin || current.social.linkedin }, skills: tools.length ? { ...current.skills, tools: tools.map((name: string) => ({ name })) } : current.skills }), true);
-    return "Imported the contact details and skills I could identify. Review them in the Content panel — you can undo this from the toolbar.";
-  };
-
   const panel = (name: MobilePanel) => (mobilePanel === name ? "flex" : "hidden");
 
   return <div className="flex h-dvh flex-col overflow-hidden bg-slate-100 text-slate-900">
@@ -180,7 +183,7 @@ export default function EditorialDeveloperEditor({ template }: { template: Templ
       </main>
 
       <aside className={`${panel("ai")} ${aiOpen ? "xl:flex" : "xl:hidden"} min-h-0 flex-col border-l border-slate-200 bg-white`}>
-        <AssistantPanel templateId={template.id} content={data} signedIn={persistence.signedIn} onContent={(content) => set(() => content, true)} quickAction={quickAction} onImportCv={importCv} onClose={() => setAiOpen(false)} intro="I can rewrite your hero statement, about section, projects, and experience, or fill details from your CV." />
+        <AssistantPanel templateId={template.id} content={data} signedIn={persistence.signedIn} onContent={(content) => set(() => content, true)} quickAction={quickAction} onImport={(profile) => set((current) => mergeIntoEditorial(current, profile), true)} onClose={() => setAiOpen(false)} intro="Import your details above, or ask me to rewrite your hero statement, about section, projects, and experience." />
       </aside>
     </div>
 
