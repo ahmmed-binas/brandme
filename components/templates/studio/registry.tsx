@@ -8,7 +8,17 @@ import type { StudioProps } from "./kit";
  * One lazily loaded component per studio template, so a published site only
  * downloads its own template's code and fonts.
  */
-const load = (loader: () => Promise<{ default: ComponentType<StudioProps> }>) => dynamic(loader);
+/** Shown for the moment a template’s code is downloading, so a preview is never blank. */
+function Loading() {
+  return <div role="status" aria-label="Loading the design" className="grid min-h-[60vh] place-items-center bg-[#f4f2ec]">
+    <div className="flex flex-col items-center gap-4 text-[#6b675e]">
+      <span className="size-9 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      <span className="text-[13px] tracking-wide">Loading the design…</span>
+    </div>
+  </div>;
+}
+
+const load = (loader: () => Promise<{ default: ComponentType<StudioProps> }>) => dynamic(loader, { loading: Loading });
 
 export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   terminal: load(() => import("./developer/Terminal")),

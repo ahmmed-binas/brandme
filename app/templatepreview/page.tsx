@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { getTemplate, DEFAULT_TEMPLATE_ID } from "@/lib/templates/catalog";
 import { ROLES, roleById } from "@/lib/templates/roles";
+import PreviewFrame from "@/components/templates/PreviewFrame";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ template?: string }> }): Promise<Metadata> {
   const selected = getTemplate((await searchParams).template ?? "") ?? getTemplate(DEFAULT_TEMPLATE_ID)!;
@@ -37,7 +38,7 @@ export default async function TemplatePreviewPage({ searchParams }: { searchPara
       <div className="lg:col-span-8">
         <div className="overflow-hidden rounded-xl border border-rule bg-card shadow-[0_40px_80px_-40px_rgb(21_20_15/0.4)]">
           <div className="flex items-center gap-3 border-b border-rule px-4 py-2.5"><span aria-hidden className="flex gap-1.5">{[0, 1, 2].map((dot) => <span key={dot} className="size-2.5 rounded-full border border-rule" />)}</span><span className="flex-1 truncate rounded-md bg-paper-deep px-3 py-1.5 font-mono text-[12px] text-ink-faint">{role ? `Sample portfolio for a ${role.label.toLowerCase()}` : "Live preview with sample content"}</span></div>
-          <iframe key={role?.id ?? "default"} src={`/templates/${selected.id}?sample=1&demo=true${withRole}`} title={`${selected.name} live preview`} className="h-[70vh] min-h-[480px] w-full border-0 bg-white" />
+          <PreviewFrame src={`/templates/${selected.id}?sample=1&demo=true${withRole}`} title={`${selected.name} live preview`} />
         </div>
       </div>
     </div>
