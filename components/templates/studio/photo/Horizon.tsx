@@ -29,7 +29,7 @@ export default function Horizon({ content, template, embedded }: StudioProps) {
 
   return <StudioRoot studio={studio} className="text-[15px] leading-relaxed">
     <header className="flex items-baseline justify-between px-5 py-6 @3xl:px-10">
-      <span className="text-[15px] font-semibold tracking-tight" {...ed("name")}>{c.name}</span>
+      <h1 className="text-[15px] font-semibold tracking-tight" {...ed("name")}>{c.name}</h1>
       <nav className="flex gap-6 text-[14px] tm"><a href="#info" className="hover-a">Information</a><a href="#contact" className="hover-a">Contact</a></nav>
     </header>
 

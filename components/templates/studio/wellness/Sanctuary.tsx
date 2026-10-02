@@ -25,7 +25,7 @@ export default function Sanctuary({ content, template, embedded }: StudioProps) 
   const intro = c.email ? `mailto:${c.email}?subject=${encodeURIComponent("Introduction")}` : "#contact";
 
   return <StudioRoot studio={studio} className="text-[17px] leading-[1.7]">
-    <header className="mx-auto flex max-w-[66rem] items-center justify-between px-6 py-6 text-[15px]"><span className="fd text-[1.3rem]">{c.name}</span><a href={intro} className="rounded-full bs px-5 py-2 transition-colors hover:bg-[var(--t-accent)] hover:text-[var(--t-bg)]">Get in touch</a></header>
+    <header className="mx-auto flex max-w-[66rem] items-center justify-between px-6 py-6 text-[15px]"><span className="fd text-[1.3rem]" {...ed("name")}>{c.name}</span><a href={intro} className="rounded-full bs px-5 py-2 transition-colors hover:bg-[var(--t-accent)] hover:text-[var(--t-bg)]">Get in touch</a></header>
 
     <section className="mx-auto grid max-w-[66rem] items-center gap-12 px-6 py-16 @4xl:grid-cols-[1.2fr_1fr]">
       <div>

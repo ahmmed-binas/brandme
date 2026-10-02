@@ -98,7 +98,9 @@ export default function StudioEditor({ template, sample: initialSample, role: in
     window.setTimeout(() => {
       const target = panel.current?.querySelector<HTMLElement>(`[data-field="${path}"]`) ?? panel.current?.querySelector<HTMLElement>(`[data-section="${section}"]`);
       target?.scrollIntoView({ behavior: "smooth", block: "center" });
-      (target?.matches("input, textarea") ? target : target?.querySelector<HTMLElement>("input, textarea"))?.focus({ preventScroll: true });
+      // Prefer a text box; an image-only item focuses its upload button (the file input itself is hidden).
+      const typeable = "input:not([type=file]):not([type=hidden]), textarea, select";
+      (target?.matches(typeable) ? target : target?.querySelector<HTMLElement>(typeable) ?? target?.querySelector<HTMLElement>("[data-field] button, button:not([aria-label^='Move']):not([aria-label^='Delete']):not([aria-label^='Duplicate'])"))?.focus({ preventScroll: true });
     }, 80);
   };
   const onPreviewClick = (event: React.MouseEvent) => {

@@ -16,9 +16,14 @@
 | `/DetailExtractorPage` | CV/document detail extraction | `app/DetailExtractorPage/page.tsx` |
 | `/tools` | Free document tools directory | `app/tools/page.tsx` |
 | `/tools/pdf-editor` | Browser-local PDF visual editor | `app/tools/pdf-editor/page.tsx` |
-| `/blog` | Journal page one | `app/blog/page.tsx` |
-| `/blog/page/[page]` | SEO-friendly journal pagination | `app/blog/page/[page]/page.tsx` |
-| `/blog/[slug]` | SEO-friendly individual article | `app/blog/[slug]/page.tsx` |
+| `/blog` | Journal: built-in articles (`lib/content/articles.ts`) plus posts written at `/admin/journal` (`lib/content/journal.ts`) | `app/blog/page.tsx` |
+| `/blog/page/[page]` | Journal pagination | `app/blog/page/[page]/page.tsx` |
+| `/blog/[slug]` | Journal article | `app/blog/[slug]/page.tsx` |
+| `/blog/rss.xml` | Journal RSS feed | `app/blog/rss.xml/route.ts` |
+| `/p/[slug]/blog`, `/p/[slug]/blog/[post]` | A customer's portfolio blog (also `/blog` on their own domain via `app/sites/[host]/blog`) | `lib/portfolio/posts.ts`, `lib/portfolio/blog-pages.tsx` |
+| `/admin` | Admin tools and the go-live checklist (`lib/setup-checks.ts`) | `app/admin/page.tsx` |
+| `/admin/journal` | Write and edit Journal posts | `app/admin/journal/page.tsx` |
+| `/account/domains` | Bought domains: expiry and renewal | `app/account/domains/page.tsx` |
 | `/contact` | Contact page | `app/contact/page.tsx` |
 
 ## Directory responsibilities

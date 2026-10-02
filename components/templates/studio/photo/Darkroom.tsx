@@ -20,16 +20,16 @@ export default function Darkroom({ content, template, embedded }: StudioProps) {
   return <StudioRoot studio={studio} className="text-[15px] leading-relaxed">
     <header className="fm flex items-center justify-between px-5 py-5 text-[11px] uppercase tracking-[0.2em] @3xl:px-10"><span className="flex items-center gap-2"><span className="size-2 rounded-full ba shadow-[0_0_12px_var(--t-accent)]" />{c.name}</span><nav className="flex gap-6"><a href="#sheet" className="hover-a">Contact sheet</a><a href="#about" className="hidden hover-a @2xl:inline">About</a><a href="#book" className="hover-a">Book</a></nav></header>
 
-    {current && <section className="px-5 @3xl:px-10" aria-live="polite">
-      <div className="relative" {...ed(`gallery.${selected}`)}>
+    <section className="px-5 @3xl:px-10" aria-live="polite">
+      {current && <div className="relative" {...ed(`gallery.${selected}`)}>
         <Picture src={current.image} alt={current.caption ?? ""} embedded={embedded} className="aspect-[3/2] max-h-[78vh] w-full" />
         <span className="fm absolute bottom-3 left-3 text-[11px] uppercase tracking-[0.2em] text-white/80 mix-blend-difference">Frame {frameNo(selected)}</span>
-      </div>
+      </div>}
       <div className="mt-4 grid gap-4 @3xl:grid-cols-[1fr_auto]">
         <div><h1 className="fd text-[clamp(2.4rem,7cqw,6rem)] font-semibold leading-[0.9] tracking-[-0.04em]" {...ed("name")}>{c.name}</h1><p className="mt-2 tm" {...ed("professional_title")}>{c.professional_title}</p></div>
-        <p className="fm self-end text-[12px] uppercase tracking-[0.14em] @3xl:text-right"><span className="ta">●</span> {current.caption}<br /><span className="tm">{current.year}</span></p>
+        {current && <p className="fm self-end text-[12px] uppercase tracking-[0.14em] @3xl:text-right"><span className="ta">●</span> {current.caption}<br /><span className="tm">{current.year}</span></p>}
       </div>
-    </section>}
+    </section>
 
     {frames.length > 0 && <section id="sheet" className="px-5 py-16 @3xl:px-10">
       <h2 className="fm text-[11px] uppercase tracking-[0.24em] tm">{label("gallery", "Contact sheet")} — select a frame</h2>

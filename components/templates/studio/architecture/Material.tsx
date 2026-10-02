@@ -23,7 +23,7 @@ export default function Material({ content, template, embedded }: StudioProps) {
   const cover = c.cover || c.gallery?.[0]?.image || hero?.image;
 
   return <StudioRoot studio={studio} className="text-[16px] leading-[1.7]">
-    <header className="flex items-center justify-between px-6 py-6 text-[14px] @3xl:px-12"><span className="fd text-[1.4rem]">{c.name}</span><nav className="flex gap-7 tm"><a href="#work" className="hover-a">Work</a><a href="#studio" className="hidden hover-a @2xl:inline">Studio</a><a href="#contact" className="hover-a">Contact</a></nav></header>
+    <header className="flex items-center justify-between px-6 py-6 text-[14px] @3xl:px-12"><span className="fd text-[1.4rem]" {...ed("name")}>{c.name}</span><nav className="flex gap-7 tm"><a href="#work" className="hover-a">Work</a><a href="#studio" className="hidden hover-a @2xl:inline">Studio</a><a href="#contact" className="hover-a">Contact</a></nav></header>
 
     <section className="grid gap-10 px-6 pb-20 pt-6 @3xl:px-12 @4xl:grid-cols-[1fr_1.15fr] @4xl:items-end">
       <div>

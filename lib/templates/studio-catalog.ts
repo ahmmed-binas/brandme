@@ -73,7 +73,7 @@ const SPECS: StudioSpec[] = [
   // ——— Design ———
   { id: "swiss", name: "Swiss", persona: "design", professions: ["design", "marketing", "architecture"], styles: ["Bold", "Minimal"], mood: "light",
     description: "International Typographic Style: a strict grid, one red, huge numerals, and nothing that isn’t needed.",
-    idealFor: ["Graphic designers", "Brand designers", "Art directors"], sections: ["about", "projects", "services", "experience", "highlights", "testimonials", "contact"],
+    idealFor: ["Graphic designers", "Brand designers", "Art directors"], sections: ["about", "stats", "projects", "services", "experience", "highlights", "testimonials", "contact"],
     palettes: [p("rot", "Rot", "#f2f0eb", "#111111", "#e3241b", "#6b6b66", "#e6e3dc"), p("blau", "Blau", "#f4f4f2", "#0b0b0b", "#1f3fd6", "#6b6b6b", "#e7e7e3"), p("schwarz", "Schwarz", "#0f0f0f", "#f2f0eb", "#ff3b1f", "#8a8a85", "#1b1b1b")],
     fonts: [f("archivo", "Archivo", F.archivo, F.archivo), f("inter", "Inter Tight", F.interTight, F.interTight)] },
   { id: "specimen", name: "Specimen", persona: "design", professions: ["design", "art", "marketing"], styles: ["Artsy", "Editorial"], mood: "light",

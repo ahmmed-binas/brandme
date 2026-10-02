@@ -19,16 +19,16 @@ export default function Credits({ content, template, embedded }: StudioProps) {
   return <StudioRoot studio={studio} className="text-[15px] leading-relaxed">
     <header className="fm flex items-center justify-between px-5 py-5 text-[12px] uppercase tracking-[0.2em] @3xl:px-10"><span>{c.name}</span><nav className="flex gap-6"><a href="#films" className="hover-a">Films</a><a href="#contact" className="hover-a">Contact</a></nav></header>
 
-    {films[0] && <section className="px-5 @3xl:px-10">
-      <div className="relative bg-black" {...ed("projects.0")}>
+    <section className="px-5 @3xl:px-10">
+      {films[0] && <div className="relative bg-black" {...ed("projects.0")}>
         <div className="h-[6cqw] bg-black" /><Picture src={films[0].image} alt={films[0].title ?? ""} embedded={embedded} className="aspect-[2.39/1] w-full" /><div className="h-[6cqw] bg-black" />
         <p className="fm absolute bottom-[1.5cqw] left-0 right-0 text-center text-[clamp(11px,1.4cqw,15px)] text-[#f4e9c8]">“{c.tagline}”</p>
-      </div>
+      </div>}
       <div className="grid gap-4 py-10 @3xl:grid-cols-[1fr_auto] @3xl:items-end">
         <h1 className="fd text-[clamp(2.6rem,8cqw,6.5rem)] leading-[0.9] tracking-[-0.02em]" {...ed("name")}>{c.name}</h1>
         <p className="fm text-[12px] uppercase tracking-[0.2em] @3xl:text-right" {...ed("professional_title")}>{c.professional_title}<br /><span className="tm">{c.location}</span></p>
       </div>
-    </section>}
+    </section>
 
     {has("projects") && <section id="films" className="border-t rule px-5 py-16 @3xl:px-10">
       <h2 className="fm text-[12px] uppercase tracking-[0.24em] tm">{label("projects", "Films")}</h2>

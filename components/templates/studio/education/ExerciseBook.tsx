@@ -34,6 +34,7 @@ export default function ExerciseBook({ content, template, embedded }: StudioProp
   return <StudioRoot studio={studio} className="text-[16px] leading-[32px]">
     {/* The cover: a coloured board with a white name label. */}
     <header className="ba px-5 pb-10 pt-8 text-[var(--t-bg)] @3xl:px-10">
+      <h1 className="sr-only">{[c.name, c.professional_title].filter(Boolean).join(", ")}</h1>
       <div className="flex items-center justify-between text-[12px] font-semibold uppercase tracking-[0.2em] opacity-80"><span>Exercise book</span><span>{c.location}</span></div>
       <div className="mx-auto mt-8 max-w-[34rem] rotate-[-1deg] rounded-[14px] border-2 border-[var(--t-fg)] bg-[#fffef9] p-6 text-[#1f2a44] shadow-[0_14px_0_-6px_rgba(0,0,0,.18)]">
         {[["Name", "name", c.name], ["Subject", "professional_title", c.professional_title], ["Where", "location", c.location]].map(([field, path, value]) => <p key={field} className="flex items-baseline gap-3 border-b border-dashed border-[#1f2a44]/35 py-1">

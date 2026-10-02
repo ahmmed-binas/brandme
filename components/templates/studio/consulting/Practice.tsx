@@ -12,7 +12,7 @@ export default function Practice({ content, template, embedded }: StudioProps) {
 
   return <StudioRoot studio={studio} className="text-[16.5px] leading-[1.65]">
     <header className="mx-auto flex max-w-[72rem] items-center justify-between px-5 py-5">
-      <span className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-full ba text-[13px] font-semibold text-[var(--t-bg)]">{initials(c.name)}</span><span className="font-semibold">{c.name}</span></span>
+      <span className="flex items-center gap-3"><span className="grid size-9 place-items-center rounded-full ba text-[13px] font-semibold text-[var(--t-bg)]">{initials(c.name)}</span><span className="font-semibold" {...ed("name")}>{c.name}</span></span>
       <nav className="flex items-center gap-6 text-[14px]"><a href="#services" className="hidden tm hover-a @2xl:inline">Services</a><a href="#proof" className="hidden tm hover-a @2xl:inline">Clients</a><a href={book} className="rounded-full bg-[var(--t-fg)] px-4 py-2 font-medium text-[var(--t-bg)] transition-opacity hover:opacity-85">Book a call</a></nav>
     </header>
 

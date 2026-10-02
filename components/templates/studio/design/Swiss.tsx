@@ -22,9 +22,9 @@ export default function Swiss({ content, template, embedded }: StudioProps) {
         <h1 className="fd relative z-10 text-[clamp(3.4rem,15.5cqw,15rem)] font-[750] leading-[0.82] tracking-[-0.055em] @3xl:col-span-12" {...ed("name")}>{first}<br />{rest.join(" ")}<span className="ta">.</span></h1>
         <div className="absolute right-[2%] top-[5%] -z-0 aspect-square w-[24cqw] rounded-full ba opacity-95 mix-blend-multiply" aria-hidden />
         <p className="text-[1.45rem] font-medium leading-[1.15] tracking-[-0.02em] @3xl:col-span-5 @3xl:col-start-1 pretty" {...ed("tagline")}>{c.tagline}</p>
-        <dl className="grid grid-cols-2 gap-x-5 gap-y-4 self-end text-[13px] @3xl:col-span-5 @3xl:col-start-8">
+        {has("stats") && <dl className="grid grid-cols-2 gap-x-5 gap-y-4 self-end text-[13px] @3xl:col-span-5 @3xl:col-start-8">
           {(c.stats ?? []).slice(0, 4).map((stat, index) => <div key={index} className="border-t border-[var(--t-fg)] pt-2" {...ed(`stats.${index}`)}><dt className="tm">{stat.label}</dt><dd className="text-[2rem] font-[750] leading-none tracking-tight">{stat.value}</dd></div>)}
-        </dl>
+        </dl>}
       </section>
 
       {has("about") && <section className="grid gap-5 border-t-2 border-[var(--t-fg)] py-12 @3xl:grid-cols-12">
