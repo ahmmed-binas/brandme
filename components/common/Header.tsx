@@ -1,48 +1,79 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Menu, Moon, Sparkles, Sun, UserRound, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
 import { brand, primaryNavigation } from "@/lib/brand";
 
 export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setMounted(true), 0);
-    return () => window.clearTimeout(timer);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.clearTimeout(timer); window.removeEventListener("scroll", onScroll); };
   }, []);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   const isDark = resolvedTheme === "dark";
-  const closeMenu = () => setMenuOpen(false);
+  const isActive = (href: string) => !href.includes("#") && (pathname === href || pathname.startsWith(`${href}/`));
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/80 bg-[color:var(--background)]/90 backdrop-blur-xl dark:border-white/10">
-      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-6">
-        <Link href="/" className="group flex items-center gap-2.5" aria-label={`${brand.name} home`}>
-          <span className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white shadow-sm transition-transform group-hover:rotate-[-5deg] dark:bg-white dark:text-slate-950"><Sparkles size={17} strokeWidth={2.4} /></span>
-          <span className="text-lg font-semibold tracking-[-0.045em] text-slate-950 dark:text-white">{brand.name}</span>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-300 ${scrolled || menuOpen ? "border-b border-rule bg-paper/92 backdrop-blur-md" : "border-b border-transparent bg-paper/0"}`}>
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-ink focus:px-3 focus:py-2 focus:text-paper">Skip to content</a>
+      <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between px-5 sm:px-8">
+        <Link href="/" className="group flex items-baseline gap-2" aria-label={`${brand.name}, home`}>
+          <span className="font-display text-[1.6rem] leading-none tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_72]">{brand.name}</span>
+          <span aria-hidden className="size-1.5 translate-y-[-0.2rem] rounded-full bg-signal transition-transform duration-300 group-hover:scale-150" />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
-          {primaryNavigation.map((item) => <Link key={item.href} href={item.href} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200/60 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white">{item.label}</Link>)}
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
+          {primaryNavigation.map((item) => (
+            <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className={`relative text-[0.94rem] text-ink-soft transition-colors hover:text-ink after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-ink after:transition-transform after:duration-300 hover:after:scale-x-100 ${isActive(item.href) ? "text-ink after:scale-x-100" : ""}`}>
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setTheme(isDark ? "light" : "dark")} className="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10" aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}>
-            {mounted && (isDark ? <Sun size={17} /> : <Moon size={17} />)}
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={() => setTheme(isDark ? "light" : "dark")} className="grid size-9 place-items-center rounded-full text-ink-soft transition hover:bg-ink/5 hover:text-ink" aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}>
+            {mounted && (isDark ? <Sun size={16} /> : <Moon size={16} />)}
           </button>
-          {status !== "loading" && (session?.user ? <><Link href="/account" className="hidden items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-slate-800 sm:inline-flex dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"><UserRound size={16} /> Account</Link><button type="button" onClick={() => void signOut({ callbackUrl: "/" })} className="hidden rounded-xl border border-slate-200 px-3 py-2.5 text-slate-600 sm:inline-flex dark:border-white/10 dark:text-slate-300" aria-label="Sign out"><LogOut size={16} /></button></> : <Link href="/login" className="hidden rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-px hover:bg-slate-800 sm:inline-flex dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">Sign in</Link>)}
-          <button type="button" className="grid size-10 place-items-center rounded-xl border border-slate-200 text-slate-700 md:hidden dark:border-white/10 dark:text-slate-200" onClick={() => setMenuOpen((open) => !open)} aria-label="Toggle navigation menu" aria-expanded={menuOpen}>
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          {status !== "loading" && (session?.user
+            ? <Link href="/account" className="hidden rounded-full border border-rule px-4 py-2 text-sm text-ink transition hover:border-ink sm:inline-flex">Your portfolios</Link>
+            : <Link href="/login" className="hidden px-3 py-2 text-sm text-ink-soft transition hover:text-ink sm:inline-flex">Sign in</Link>)}
+          <Link href="/templatechooser" className="hidden rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:bg-signal hover:text-signal-ink sm:inline-flex">Start free</Link>
+          <button type="button" className="relative grid size-9 place-items-center md:hidden" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="mobile-menu">
+            <span className={`absolute h-px w-5 bg-ink transition-transform duration-300 ${menuOpen ? "rotate-45" : "-translate-y-1"}`} />
+            <span className={`absolute h-px w-5 bg-ink transition-transform duration-300 ${menuOpen ? "-rotate-45" : "translate-y-1"}`} />
           </button>
         </div>
       </div>
-      {menuOpen && <div className="border-t border-slate-200 bg-[color:var(--background)] px-5 py-4 shadow-xl md:hidden dark:border-white/10"><nav className="mx-auto grid max-w-7xl gap-1" aria-label="Mobile navigation">{primaryNavigation.map((item) => <Link key={item.href} href={item.href} onClick={closeMenu} className="rounded-xl px-3 py-3 text-sm font-medium text-slate-700 hover:bg-slate-200/60 dark:text-slate-200 dark:hover:bg-white/10">{item.label}</Link>)}{session?.user ? <><Link href="/account" onClick={closeMenu} className="mt-2 rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-semibold text-white dark:bg-white dark:text-slate-950">My account</Link><button type="button" onClick={() => void signOut({ callbackUrl: "/" })} className="rounded-xl border px-4 py-3 text-sm font-semibold">Sign out</button></> : <Link href="/login" onClick={closeMenu} className="mt-2 rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-semibold text-white dark:bg-white dark:text-slate-950">Sign in</Link>}</nav></div>}
+
+      {menuOpen && <nav id="mobile-menu" aria-label="Mobile" className="border-t border-rule bg-paper px-5 pb-6 pt-2 md:hidden">
+        {primaryNavigation.map((item) => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="block border-b border-rule py-4 font-display text-2xl text-ink">{item.label}</Link>)}
+        <div className="mt-5 flex gap-2">
+          <Link href="/templatechooser" onClick={() => setMenuOpen(false)} className="flex-1 rounded-full bg-ink px-4 py-3 text-center text-sm font-medium text-paper">Start free</Link>
+          {session?.user
+            ? <><Link href="/account" onClick={() => setMenuOpen(false)} className="flex-1 rounded-full border border-rule px-4 py-3 text-center text-sm">Your portfolios</Link><button type="button" onClick={() => void signOut({ callbackUrl: "/" })} className="rounded-full border border-rule px-4 py-3 text-sm">Sign out</button></>
+            : <Link href="/login" onClick={() => setMenuOpen(false)} className="flex-1 rounded-full border border-rule px-4 py-3 text-center text-sm">Sign in</Link>}
+        </div>
+      </nav>}
     </header>
   );
 }

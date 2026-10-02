@@ -1,29 +1,47 @@
-/* Formora’s visual foundation. All app surfaces inherit these semantic tokens. */
+/*
+ * Formora's visual foundation: warm paper, ink, and one ultramarine accent.
+ * Semantic tokens (background, foreground, primary…) feed Tailwind and the
+ * component library; the named tokens (paper, ink, signal…) are for brand surfaces.
+ */
 :root {
   color-scheme: light;
-  --background: oklch(0.985 0.006 95); --foreground: oklch(0.22 0.018 275);
-  --card: oklch(1 0 0); --card-foreground: oklch(0.22 0.018 275);
-  --popover: oklch(1 0 0); --popover-foreground: oklch(0.22 0.018 275);
-  --primary: oklch(0.29 0.07 280); --primary-foreground: oklch(0.99 0.003 95);
-  --secondary: oklch(0.95 0.014 280); --secondary-foreground: oklch(0.29 0.07 280);
-  --muted: oklch(0.955 0.008 95); --muted-foreground: oklch(0.51 0.025 275);
-  --accent: oklch(0.93 0.035 280); --accent-foreground: oklch(0.29 0.07 280);
-  --destructive: oklch(0.577 0.245 27.325); --border: oklch(0.89 0.012 275);
-  --input: oklch(0.89 0.012 275); --ring: oklch(0.52 0.14 280); --radius: 0.875rem;
+  --paper: #f4f0e8;
+  --paper-deep: #ebe5d9;
+  --ink: #15140f;
+  --ink-soft: #57534a;
+  --ink-faint: #8b867a;
+  --rule: rgb(21 20 15 / 0.14);
+  --signal: #2338e0;
+  --signal-ink: #ffffff;
+  --signal-soft: rgb(35 56 224 / 0.09);
+
+  --background: var(--paper); --foreground: var(--ink);
+  --card: #fbf9f4; --card-foreground: var(--ink);
+  --popover: #fbf9f4; --popover-foreground: var(--ink);
+  --primary: var(--ink); --primary-foreground: var(--paper);
+  --secondary: var(--paper-deep); --secondary-foreground: var(--ink);
+  --muted: var(--paper-deep); --muted-foreground: var(--ink-soft);
+  --accent: var(--signal-soft); --accent-foreground: var(--signal);
+  --destructive: #c2341b; --border: var(--rule);
+  --input: rgb(21 20 15 / 0.22); --ring: var(--signal); --radius: 0.5rem;
   --sidebar: var(--card); --sidebar-foreground: var(--foreground); --sidebar-primary: var(--primary); --sidebar-primary-foreground: var(--primary-foreground); --sidebar-accent: var(--accent); --sidebar-accent-foreground: var(--accent-foreground); --sidebar-border: var(--border); --sidebar-ring: var(--ring);
 }
 .dark {
   color-scheme: dark;
-  --background: oklch(0.17 0.014 275); --foreground: oklch(0.95 0.008 95);
-  --card: oklch(0.215 0.018 275); --card-foreground: oklch(0.95 0.008 95);
-  --popover: oklch(0.215 0.018 275); --popover-foreground: oklch(0.95 0.008 95);
-  --primary: oklch(0.83 0.075 280); --primary-foreground: oklch(0.205 0.026 275);
-  --secondary: oklch(0.27 0.035 275); --secondary-foreground: oklch(0.95 0.008 95);
-  --muted: oklch(0.25 0.02 275); --muted-foreground: oklch(0.72 0.018 275);
-  --accent: oklch(0.3 0.07 280); --accent-foreground: oklch(0.95 0.008 95);
-  --destructive: oklch(0.704 0.191 22.216); --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%); --ring: oklch(0.72 0.11 280);
-  --sidebar: var(--card); --sidebar-foreground: var(--foreground); --sidebar-primary: var(--primary); --sidebar-primary-foreground: var(--primary-foreground); --sidebar-accent: var(--accent); --sidebar-accent-foreground: var(--accent-foreground); --sidebar-border: var(--border); --sidebar-ring: var(--ring);
+  --paper: #13120f;
+  --paper-deep: #1c1b17;
+  --ink: #ece7dc;
+  --ink-soft: #aaa496;
+  --ink-faint: #767165;
+  --rule: rgb(236 231 220 / 0.13);
+  --signal: #8a98ff;
+  --signal-ink: #0d0f2a;
+  --signal-soft: rgb(138 152 255 / 0.12);
+
+  --card: #1a1915; --popover: #1a1915;
+  --destructive: #f2785f;
+  --input: rgb(236 231 220 / 0.2);
 }
 html { background: var(--background); }
 body { min-height: 100vh; background: var(--background); color: var(--foreground); }
+::selection { background: var(--signal); color: var(--signal-ink); }

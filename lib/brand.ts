@@ -1,13 +1,14 @@
 /** The single source of truth for the public-facing product identity. */
 export const brand = {
   name: "Formora",
-  tagline: "Make your work and documents work harder.",
-  description: "A thoughtful workspace for polished portfolios and practical document tools.",
-  contactEmail: "hello@formora.example",
+  tagline: "Portfolios at your own address.",
+  description: "Turn your CV, GitHub or LinkedIn into a well-designed portfolio and publish it at your own domain.",
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@formora.example",
 } as const;
 
 export const primaryNavigation = [
-  { href: "/templatechooser", label: "Portfolios" },
-  { href: "/domains", label: "Domains" },
+  { href: "/templatechooser", label: "Templates" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/community", label: "Community" },
   { href: "/blog", label: "Journal" },
 ] as const;
