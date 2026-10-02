@@ -9,7 +9,7 @@ Formora is a portfolio builder. A visitor chooses a template, previews the real 
 1. Choose one profession and a visual direction. For example: "architect / warm editorial" or "developer / dark technical". Do not ask Claude to copy a named designer or live site.
 2. Give Claude the prompt and compatibility contract in `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`. It must use the common portfolio data shape, safe fallbacks, accessible markup, and local template styles.
 3. Create `components/templates/<template-id>/`. Put the template component, its components, optional data adapter, and template-local CSS/tokens there. Never import styles from another template.
-4. Add the template id to `lib/templates/types.ts` and its metadata to `lib/templates/catalog.ts`. The chooser uses that catalog, so this creates the card automatically.
+4. Add the template id to `lib/templates/types.ts` and its metadata to `lib/templates/catalog.ts` (including `colorThemes`). If the template has its own content model, add its shape check to `validateContent` in `lib/portfolio/schema.ts`, or saving and publishing will reject it. The chooser uses that catalog, so this creates the card automatically.
 5. Register the renderer in `components/templates/TemplateRenderer.tsx`. A simple template can share the common PortfolioData object. A complex template should have its own adapter and editor, like `editorial-developer`.
 6. Use `/templates/<template-id>` for the full preview and `/editor/<template-id>` for editing. Verify chooser -> preview -> customize -> editor -> save -> full-page preview.
 7. Keep design rules out of editable data. Users may edit text, lists, links, images, and content order. Only the template controls CSS tokens, layout, section structure, transitions, and navigation.
@@ -30,6 +30,8 @@ Ask for one complete TSX template. Require: original art direction; responsive, 
 - A complex template may have a special editor, but it must use the same save, preview, and publish contract as every other template.
 
 ## Monetization plan
+
+> The current plan, pricing, and roadmap are in `docs/BUSINESS_PLAN.md`. The notes below are the original thinking and are kept for context.
 
 Start with a free tier that proves the core value: one published portfolio, a small set of free templates, Formora branding, and browser-local editing. Charge only for useful outcomes:
 

@@ -1,6 +1,8 @@
 import { db } from "@/utils/db";
 
 export async function GET() {
+  // Development diagnostic only; production should not describe its database to the public.
+  if (process.env.NODE_ENV === "production") return new Response(null, { status: 404 });
   try {
     const result = await db.query("SELECT NOW() AS current_time, current_database() AS database");
 

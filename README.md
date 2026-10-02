@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Formora
 
-## Getting Started
+A portfolio builder: choose a designed template, fill it with your content (by hand, from a CV, or with AI help), and publish it at your own address. It also includes free, browser-only document tools.
 
-First, run the development server:
+## Run it locally
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in the values
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Without any environment variables**, the template chooser, editor, and document tools work, and drafts are saved in the browser.
+- **`DATABASE_URL` + Google sign-in** (`AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`) enable accounts, saving to the account, and publishing to `/p/<address>`. Tables are created automatically. See `docs/GOOGLE_AUTH_SETUP.md`.
+- **`ANTHROPIC_API_KEY`** turns on the AI assistant in the editor.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Before committing
 
-## Learn More
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Docs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `docs/PROJECT_STRUCTURE.md`: where things live and how a portfolio flows from editor to published page
+- `docs/BUSINESS_PLAN.md`: positioning, pricing, unit economics, and roadmap
+- `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`: how to add a new template
+- `docs/GOOGLE_AUTH_SETUP.md`: sign-in and database setup

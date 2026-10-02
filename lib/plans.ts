@@ -15,8 +15,10 @@ export interface PlanLimits {
 }
 
 export const PLANS: Record<PlanId, PlanLimits> = {
-  free: { name: "Free", publishedPortfolios: 1, aiEditsPerDay: 10, showsBranding: true },
-  pro: { name: "Pro", publishedPortfolios: 10, aiEditsPerDay: 200, showsBranding: false },
+  // An AI edit costs roughly $0.03–0.06 in model usage (see docs/BUSINESS_PLAN.md), so the
+  // free allowance is sized to show the value without making heavy free users expensive.
+  free: { name: "Free", publishedPortfolios: 1, aiEditsPerDay: 3, showsBranding: true },
+  pro: { name: "Pro", publishedPortfolios: 10, aiEditsPerDay: 50, showsBranding: false },
 };
 
 export function planFor(value: string | null | undefined): PlanLimits {

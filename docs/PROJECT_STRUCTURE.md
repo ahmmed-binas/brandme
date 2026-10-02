@@ -8,6 +8,8 @@
 | `/templatechooser` | Browse, filter, paginate, and select templates | `app/templatechooser/page.tsx` |
 | `/templates/[templateId]` | Public portfolio preview | `app/templates/[templateId]/page.tsx` |
 | `/editor/[templateId]` | Private portfolio editor; intentionally no-index | `app/editor/[templateId]/page.tsx` |
+| `/p/[slug]` | A user's published portfolio (server-rendered from the database) | `app/p/[slug]/page.tsx` |
+| `/account` | Signed-in user's portfolios, live status, and plan | `app/account/page.tsx` |
 | `/DetailExtractorPage` | CV/document detail extraction | `app/DetailExtractorPage/page.tsx` |
 | `/tools` | Free document tools directory | `app/tools/page.tsx` |
 | `/tools/pdf-editor` | Browser-local PDF visual editor | `app/tools/pdf-editor/page.tsx` |
@@ -26,6 +28,11 @@ components/editor/   The portfolio editing experience.
 components/tools/    Browser-only document-tool interfaces.
 lib/brand.ts         Product name, contact email, and primary navigation.
 lib/templates/       Template catalog, IDs, and template metadata types.
+lib/portfolio/       Content validation (schema.ts), database access (repository.ts), browser drafts.
+lib/ai/              Server-side AI copy editing (Claude). Never imported by client code.
+lib/plans.ts         Plan limits (live portfolios, AI edits). The only place pricing rules live.
+app/api/portfolios/  Save, load, publish, and unpublish portfolios (owner only).
+app/api/ai/assist/   AI copy-editing endpoint, metered per plan.
 lib/content/         Editorial content and pagination data.
 utils/               File extraction and legacy helper code.
 public/              Static images and assets served from the site root.
@@ -42,7 +49,11 @@ docs/                Developer documentation for this project.
 
 ## Template flow
 
-`templateCatalog` → Template chooser → `/editor/[templateId]` → `PortfolioEditor` → local/session storage → `/templates/[templateId]` → `TemplateRenderer` → template component.
+`templateCatalog` → Template chooser → `/editor/[templateId]` → `PortfolioEditor` (or a dedicated editor) → `usePortfolioPersistence` autosaves to the browser and, when signed in, to `PUT /api/portfolios/[templateId]` → Publish snapshots the draft → `/p/[slug]` renders the snapshot with `TemplateRenderer`.
+
+`/templates/[templateId]` is the template's own preview. It shows the visitor's browser draft or demo content, and is never the published page.
+
+Every save (including AI output) goes through `validateContent` in `lib/portfolio/schema.ts`. A new template with its own content model must add its shape check there.
 
 To add a new portfolio design, follow `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`.
 
@@ -50,6 +61,8 @@ To add a new portfolio design, follow `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`.
 
 `/tools` is the directory. Each tool must be its own route and component. For privacy, tools that run fully in the browser should say so clearly. Do not market a visual whiteout as secure redaction, and do not promise an exact source-font rewrite unless the implementation truly parses and rewrites PDF text objects.
 
-## Before adding authentication or payments
+## Accounts, saving, and payments
 
-Keep browser-local creation working. When adding accounts, create server-side ownership for portfolios first, then add Google OAuth, data deletion, privacy policy, and protected save/publish actions. Payments should be added only for features that are complete and cost-effective to provide.
+Browser-local editing works without an account; signing in adds account saving and publishing. Tables (`app_users`, `portfolios`, `ai_usage`) are created automatically on first use by `utils/db-schema.ts`. Owners are identified by their Google account id, carried in the session by `auth.ts`.
+
+Payments are not built yet. When they are, a payment webhook should only set `app_users.plan`; every limit already reads from `lib/plans.ts`. See `docs/BUSINESS_PLAN.md` for the plan and roadmap.
