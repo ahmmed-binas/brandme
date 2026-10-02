@@ -33,7 +33,7 @@ export default function Contributions({ content, template, embedded }: StudioPro
   const [hover, setHover] = useState<number | null>(null);
   const roleThen = roles.find((role) => (yearOf(role.start_date) ?? 0) <= selected && selected <= (yearOf(role.end_date) ?? now));
   const cells = useMemo(() => activity(selected, roleThen ? 1.05 : 0.6), [selected, roleThen]);
-  const total = cells.reduce((sum, level) => sum + level * 3, 0);
+  const total = cells.reduce<number>((sum, level) => sum + level * 3, 0);
   const level = (n: number) => ["color-mix(in oklab,var(--t-fg) 7%,var(--t-bg))", "color-mix(in oklab,var(--t-accent) 30%,var(--t-bg))", "color-mix(in oklab,var(--t-accent) 55%,var(--t-bg))", "color-mix(in oklab,var(--t-accent) 80%,var(--t-bg))", "var(--t-accent)"][n];
 
   return <StudioRoot studio={studio} className="text-[15px] leading-relaxed">

@@ -9,7 +9,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Picture, StudioRoot, contactLinks, ed, external, pad, paragraphs, useStudio, type StudioProps } from "../kit";
 
 function Slide({ n, total, title, children, dark }: { n: number; total: number; title: string; children: ReactNode; dark?: boolean }) {
-  return <section aria-label={`Slide ${n}: ${title}`} className={`relative flex min-h-[min(46rem,92vh)] w-full shrink-0 snap-start flex-col overflow-hidden rounded-[10px] p-7 @3xl:aspect-[16/9] @3xl:min-h-0 @3xl:w-[min(100%,72rem)] @3xl:p-14 ${dark ? "bg-[var(--t-surface)] text-[var(--t-bg)]" : "bg-[color-mix(in_oklab,var(--t-bg)_92%,white)] shadow-[0_1px_0_var(--t-rule),0_30px_60px_-30px_rgba(0,0,0,.35)]"}`}>
+  return <section aria-label={`Slide ${n}: ${title}`} className={`relative flex min-h-[24rem] w-full shrink-0 snap-start flex-col overflow-hidden rounded-[10px] p-7 @3xl:aspect-[16/9] @3xl:min-h-0 @3xl:w-[min(100%,72rem)] @3xl:p-14 ${dark ? "bg-[var(--t-surface)] text-[var(--t-bg)]" : "bg-[color-mix(in_oklab,var(--t-bg)_92%,white)] shadow-[0_1px_0_var(--t-rule),0_30px_60px_-30px_rgba(0,0,0,.35)]"}`}>
     <header className="flex justify-between text-[12px] uppercase tracking-[0.18em] opacity-60"><span>{title}</span><span className="tabular-nums">{pad(n)} / {pad(total)}</span></header>
     <div className="flex min-h-0 flex-1 flex-col justify-center py-6">{children}</div>
   </section>;
