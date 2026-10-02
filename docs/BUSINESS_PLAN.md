@@ -78,7 +78,7 @@ Domains bought through Formora: registrar price + 20% + $3, prepaid (a $12 .com 
 
 ## 7. What exists today (October 2026)
 
-- 48 templates (45 profession-specific, five of them animated, across 30 professions from software to law, trades, healthcare, teaching and hospitality) with palettes, font pairings, accent colour, section show/hide and renaming; a gallery filtered by field, profession, style and light/dark; an approval desk for the owner.
+- 49 templates (46 profession-specific, five of them animated, across 30 professions from software to law, trades, healthcare, teaching and hospitality) with palettes, font pairings, accent colour, section show/hide and renaming; a gallery filtered by field, profession, style and light/dark; an approval desk for the owner.
 - A fast editor with autosave (browser + account, conflict-safe), undo/redo, click-in-preview to edit, device previews, image uploads, AI writing help and imports.
 - Plans, trial, grace and resting sites; Stripe Checkout for plans and credits with saved cards, automatic renewal and receipts; customers' own Claude keys.
 - Lifecycle email over your own SMTP mailbox; an hourly job for emails, renewals, monthly credits, auto-updates and clean-up.
