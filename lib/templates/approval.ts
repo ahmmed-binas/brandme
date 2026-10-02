@@ -2,9 +2,11 @@ import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 import { templateCatalog } from "./catalog";
 import type { TemplateDefinition } from "./types";
+import { OWNER_DECISIONS } from "./decisions";
 
 /**
- * Templates go live only after the owner approves them on /templates/review.
+ * Templates go live only after the owner approves them on /templates/review
+ * (or ship approved in decisions.ts).
  * The three original templates are always available. Set
  * TEMPLATES_REQUIRE_APPROVAL=false to show every template without review.
  */
@@ -26,8 +28,13 @@ export async function templateReviews(): Promise<Map<string, TemplateReview>> {
   return reviews;
 }
 
-export const reviewOf = (reviews: Map<string, TemplateReview>, template: TemplateDefinition): TemplateReview =>
-  template.collection === "studio" ? reviews.get(template.id) ?? { status: "pending", note: null, reviewedAt: null } : { status: "approved", note: null, reviewedAt: null };
+export function reviewOf(reviews: Map<string, TemplateReview>, template: TemplateDefinition): TemplateReview {
+  if (template.collection !== "studio") return { status: "approved", note: null, reviewedAt: null };
+  const stored = reviews.get(template.id);
+  if (stored) return stored;
+  const shipped = OWNER_DECISIONS[template.id];
+  return shipped ? { status: shipped.status, note: shipped.note ?? null, reviewedAt: null } : { status: "pending", note: null, reviewedAt: null };
+}
 
 /** Templates a visitor may see and use. Moderators see everything so they can review it. */
 export async function availableTemplates(moderator = false): Promise<Array<TemplateDefinition & { review: TemplateReview }>> {

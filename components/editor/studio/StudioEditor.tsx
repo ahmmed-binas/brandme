@@ -70,7 +70,7 @@ export default function StudioEditor({ template }: { template: TemplateDefinitio
   /** Click in the preview → open the matching section and focus its field. */
   const focusPath = (path: string) => {
     const [root, index] = path.split(".");
-    const section = root === "summary" ? "about" : ["name", "professional_title", "tagline", "location", "availability", "avatar", "cover"].includes(root!) ? "identity" : root === "email" ? "contact" : root!;
+    const section = root === "summary" ? "about" : ["name", "professional_title", "tagline", "location", "availability", "avatar", "cover"].includes(root!) ? "identity" : root === "email" || root === "phone" ? "contact" : root!;
     setTab("content"); setMobileView("edit"); setOpenSection(section);
     if (index !== undefined && root !== "summary") setOpenItem(`${root}.${index}`);
     window.setTimeout(() => {
@@ -139,7 +139,7 @@ export default function StudioEditor({ template }: { template: TemplateDefinitio
         {(data.summary ?? []).length < 10 && <button type="button" onClick={() => set({ summary: [...(data.summary ?? []), ""] }, true)} className="text-[13px] font-medium text-ink underline decoration-rule underline-offset-4">Add a paragraph</button>}</Section>;
       case "skills": return <Section key={section} {...sectionProps("skills", data.skills?.length)}><TagsField label="Skills, tools or specialisms" value={data.skills} onChange={(skills) => set({ skills })} path="skills" /></Section>;
       case "contact": return <Section key={section} {...sectionProps("contact")}>
-        <Field label="Email" type="email" value={data.email} onChange={(email) => set({ email })} path="email" />
+        <div className="grid grid-cols-2 gap-3"><Field label="Email" type="email" value={data.email} onChange={(email) => set({ email })} path="email" /><Field label="Phone" type="tel" value={data.phone} onChange={(phone) => set({ phone })} path="phone" placeholder="+44 7700 900123" /></div>
         <Field label="Website" type="url" value={data.website} onChange={(website) => set({ website })} placeholder="https://" />
         <div className="grid grid-cols-3 gap-3"><Field label="GitHub" type="url" value={data.github} onChange={(github) => set({ github })} /><Field label="LinkedIn" type="url" value={data.linkedin} onChange={(linkedin) => set({ linkedin })} /><Field label="Instagram" type="url" value={data.instagram} onChange={(instagram) => set({ instagram })} /></div>
         <p className="text-[12px] font-medium text-ink-soft">Other links</p>{list("links")}

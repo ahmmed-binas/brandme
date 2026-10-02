@@ -100,6 +100,8 @@ export const standardContentSchema = z.object({
   linkedin: link,
   instagram: link,
   email: text(320),
+  /** Shown as a tap-to-call link; trades, clinics and agents live on the phone. */
+  phone: text(40),
   skills: list(40, 60),
   projects: z.array(standardProjectSchema).max(30).optional(),
   experience: z.array(standardExperienceSchema).max(30).optional(),

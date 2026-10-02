@@ -7,6 +7,7 @@ import sharp from "sharp";
 import { mkdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { moreCanvasLib, moreCanvasScenes, moreFonts, moreHtml } from "./scenes-more.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const out = path.join(root, "public/samples");
@@ -24,6 +25,7 @@ const FONTS = {
   Inter: font("@fontsource-variable/inter-tight", "inter-tight-latin-wght-normal.woff2"),
   Bodoni: font("@fontsource-variable/bodoni-moda", "bodoni-moda-latin-wght-normal.woff2"),
 };
+Object.assign(FONTS, moreFonts(font));
 const fontFaces = (await Promise.all(Object.entries(FONTS).map(async ([family, file]) => `@font-face{font-family:"${family}";src:url(data:font/woff2;base64,${(await readFile(file)).toString("base64")}) format("woff2");font-weight:100 900;font-display:block}`))).join("");
 
 /* ---------- Canvas helpers, executed in the page ---------- */
@@ -199,6 +201,8 @@ const canvasScenes = {
   "still-snow": `still({seed:7,grade:['#cfd8de','#e8ecee','#f6f7f7'],ground:'#2a2d33',horizon:.66,figure:.3})`,
   "still-night": `still({seed:12,grade:['#05070d','#14213d','#3a2e5f'],ground:'#020203',horizon:.78,figure:.5,light:'rgba(120,160,255,.45)',lightX:.5})`,
 };
+Object.assign(canvasScenes, moreCanvasScenes);
+Object.assign(html, moreHtml);
 const sizes = { ui: [1600, 1000], cover: [1000, 1500], poster: [1200, 1500], album: [1200, 1200], arch: [1600, 1100], chart: [1600, 1000], slide: [1600, 1000], brand: [1600, 1000], calm: [1600, 1067] };
 
 const filter = process.argv[2];
@@ -212,7 +216,7 @@ const save = async (name, png, width) => {
 
 for (const [name, call] of Object.entries(canvasScenes)) {
   if (filter && !name.includes(filter)) continue;
-  await page.setContent(`<html><body style="margin:0;background:#000"><script>${canvasLib}</script></body></html>`);
+  await page.setContent(`<html><body style="margin:0;background:#000"><script>${canvasLib}${moreCanvasLib}</script></body></html>`);
   const data = await page.evaluate(`(()=>{const c=${call};return c.toDataURL('image/png')})()`);
   const buffer = Buffer.from(data.split(",")[1], "base64");
   await save(name, buffer, 1600);

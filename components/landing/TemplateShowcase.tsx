@@ -13,9 +13,11 @@ const SHOWCASE = [
 
 /** A slow moving wall of the profession collection, each linking to its gallery filter. */
 const COLLECTION: Array<[string, string, string]> = [
-  ["darkroom", "Photographers", "photo"], ["salon", "Painters", "art"], ["plan-section", "Architects", "architecture"], ["preprint", "Researchers", "academic"],
+  ["darkroom", "Photographers", "photo"], ["salon", "Painters", "art"], ["plan-section", "Architects", "architecture"], ["seminar", "Researchers", "academic"],
   ["terminal", "Engineers", "developer"], ["broadsheet", "Journalists", "writing"], ["liner-notes", "Musicians", "music"], ["swiss", "Designers", "design"],
   ["credits", "Film-makers", "film"], ["practice", "Consultants", "consulting"], ["sanctuary", "Therapists", "wellness"], ["notebook", "Data scientists", "data"],
+  ["brief", "Lawyers", "legal"], ["clinic", "Doctors", "healthcare"], ["site-board", "Electricians", "trades"], ["open-house", "Estate agents", "realestate"],
+  ["exercise-book", "Teachers", "education"], ["carte", "Chefs", "food"], ["lookbook", "Hair stylists", "beauty"], ["prospectus", "Accountants", "finance"],
 ];
 
 export function CollectionStrip() {

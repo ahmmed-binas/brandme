@@ -3,23 +3,50 @@ import type { SectionKey } from "@/lib/portfolio/schema";
 /** Template ids are validated against the catalog at runtime (see isTemplateId). */
 export type TemplateId = string;
 
-export const PROFESSIONS = [
-  { id: "developer", label: "Software & engineering" },
-  { id: "design", label: "Product & brand design" },
-  { id: "art", label: "Art & illustration" },
-  { id: "photo", label: "Photography" },
-  { id: "writing", label: "Writing & journalism" },
-  { id: "architecture", label: "Architecture & interiors" },
-  { id: "academic", label: "Research & academia" },
-  { id: "data", label: "Data & AI" },
-  { id: "marketing", label: "Marketing & growth" },
-  { id: "consulting", label: "Consulting & freelance" },
-  { id: "music", label: "Music & audio" },
-  { id: "film", label: "Film & motion" },
-  { id: "leadership", label: "Founders & executives" },
-  { id: "student", label: "Students & graduates" },
-  { id: "wellness", label: "Health, wellness & coaching" },
+/** Fields group professions so the gallery filter stays short. */
+export const FIELDS = [
+  { id: "tech", label: "Tech" },
+  { id: "creative", label: "Creative" },
+  { id: "business", label: "Business" },
+  { id: "care", label: "Health & care" },
+  { id: "services", label: "Trades & hospitality" },
+  { id: "learning", label: "Education" },
+  { id: "public", label: "Public sector" },
 ] as const;
+export type FieldId = (typeof FIELDS)[number]["id"];
+
+export const PROFESSIONS = [
+  { id: "developer", label: "Software & engineering", field: "tech" },
+  { id: "data", label: "Data & AI", field: "tech" },
+  { id: "product", label: "Product management", field: "tech" },
+  { id: "engineering", label: "Civil, mechanical & electrical engineering", field: "tech" },
+  { id: "design", label: "Product & brand design", field: "creative" },
+  { id: "art", label: "Art & illustration", field: "creative" },
+  { id: "photo", label: "Photography", field: "creative" },
+  { id: "writing", label: "Writing & journalism", field: "creative" },
+  { id: "architecture", label: "Architecture & interiors", field: "creative" },
+  { id: "music", label: "Music & audio", field: "creative" },
+  { id: "film", label: "Film & motion", field: "creative" },
+  { id: "marketing", label: "Marketing & growth", field: "business" },
+  { id: "sales", label: "Sales & business development", field: "business" },
+  { id: "consulting", label: "Consulting & freelance", field: "business" },
+  { id: "leadership", label: "Founders & executives", field: "business" },
+  { id: "finance", label: "Finance & accounting", field: "business" },
+  { id: "legal", label: "Law & legal", field: "business" },
+  { id: "realestate", label: "Real estate", field: "business" },
+  { id: "hr", label: "HR & recruiting", field: "business" },
+  { id: "language", label: "Translation & languages", field: "business" },
+  { id: "healthcare", label: "Medicine & healthcare", field: "care" },
+  { id: "wellness", label: "Wellness, fitness & coaching", field: "care" },
+  { id: "beauty", label: "Hair, beauty & styling", field: "care" },
+  { id: "trades", label: "Trades & construction", field: "services" },
+  { id: "food", label: "Chefs & hospitality", field: "services" },
+  { id: "events", label: "Events & weddings", field: "services" },
+  { id: "education", label: "Teaching & tutoring", field: "learning" },
+  { id: "academic", label: "Research & academia", field: "learning" },
+  { id: "student", label: "Students & graduates", field: "learning" },
+  { id: "nonprofit", label: "Nonprofit & public service", field: "public" },
+] as const satisfies ReadonlyArray<{ id: string; label: string; field: FieldId }>;
 export type ProfessionId = (typeof PROFESSIONS)[number]["id"];
 
 export const STYLES = ["Minimal", "Editorial", "Bold", "Technical", "Artsy", "Classic", "Playful"] as const;

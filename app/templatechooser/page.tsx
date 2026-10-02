@@ -31,7 +31,7 @@ export default async function TemplateChooser({ searchParams }: { searchParams: 
       <p className="max-w-[34rem] text-[1.08rem] leading-[1.7] text-ink-soft">A photographer needs a contact sheet, not a skills bar. A researcher needs a references list. Each design here was drawn for a profession, then made yours with colours, type and the sections you choose.</p>
     </header>
     {moderator && <p className="mt-8 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-[0.92rem] text-amber-950">You’re seeing every template because you’re an admin. Customers only see the ones you’ve approved. <Link href="/templates/review" className="font-medium underline">Review templates →</Link></p>}
-    <Gallery templates={templates} moderator={moderator} initial={{ profession: params.for, style: params.style, mood: params.mood, q: params.q }} />
+    <Gallery templates={templates} moderator={moderator} initial={{ profession: params.for, field: params.field, style: params.style, mood: params.mood, q: params.q }} />
     <p className="mt-20 border-t border-rule pt-8 text-[0.98rem] text-ink-soft">Designed a template of your own? <Link href="/community?kind=design" className="text-ink underline underline-offset-4">Submit it to the community.</Link></p>
   </div>;
 }

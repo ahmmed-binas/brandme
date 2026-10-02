@@ -1,4 +1,5 @@
 import type { StandardContent } from "@/lib/portfolio/schema";
+import { MORE_PERSONAS } from "./personas-more";
 
 /**
  * Sample people used to fill template previews and as a new portfolio's
@@ -414,6 +415,8 @@ PERSONAS.trainer = {
   highlights: [{ title: "CSCS, NSCA", year: "2014" }, { title: "Coach, Brazilian national rowing squad", year: "2019–2021" }],
   experience: [{ job_title: "Head Coach", company: "Costa Strength", start_date: "2018", end_date: "Present" }, { job_title: "S&C Coach", company: "Confederação Brasileira de Remo", start_date: "2019", end_date: "2021" }],
 };
+
+Object.assign(PERSONAS, MORE_PERSONAS);
 
 export function personaFor(id: string | undefined): StandardContent {
   return structuredClone(PERSONAS[id ?? "developer"] ?? PERSONAS.developer);

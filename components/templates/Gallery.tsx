@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Search, X } from "lucide-react";
-import { PROFESSIONS, STYLES, type ProfessionId, type StyleTag } from "@/lib/templates/types";
+import { FIELDS, PROFESSIONS, STYLES, type ProfessionId, type StyleTag } from "@/lib/templates/types";
 
 export interface GalleryTemplate {
   id: string; name: string; description: string; professions: ProfessionId[]; styles: StyleTag[]; mood: "light" | "dark"; idealFor: string[];
@@ -13,18 +13,22 @@ export interface GalleryTemplate {
 const STATUS_LABEL = { approved: "Approved", changes: "Changes requested", rejected: "Rejected", pending: "Awaiting your review" } as const;
 
 /**
- * The template gallery with filters for profession, style and light or dark.
+ * The template gallery with filters for field and profession, style and light or dark.
  * Filters live in the URL, so a filtered view can be shared or bookmarked.
  */
-export default function Gallery({ templates, initial, moderator }: { templates: GalleryTemplate[]; initial: { profession?: string; style?: string; mood?: string; q?: string }; moderator: boolean }) {
+const fieldOf = (id: string) => PROFESSIONS.find((item) => item.id === id)?.field ?? "";
+const professionLabel = (id: string) => PROFESSIONS.find((item) => item.id === id)?.label ?? "";
+
+export default function Gallery({ templates, initial, moderator }: { templates: GalleryTemplate[]; initial: { profession?: string; field?: string; style?: string; mood?: string; q?: string }; moderator: boolean }) {
   const [profession, setProfession] = useState<string>(initial.profession ?? "");
+  const [field, setField] = useState<string>(initial.field ?? (initial.profession ? fieldOf(initial.profession) : ""));
   const [style, setStyle] = useState<string>(initial.style ?? "");
   const [mood, setMood] = useState<string>(initial.mood ?? "");
   const [query, setQuery] = useState(initial.q ?? "");
 
   const sync = (next: Record<string, string>) => {
     const params = new URLSearchParams();
-    for (const [key, value] of Object.entries({ for: profession, style, mood, q: query, ...next })) if (value) params.set(key, value);
+    for (const [key, value] of Object.entries({ field, for: profession, style, mood, q: query, ...next })) if (value) params.set(key, value);
     window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
   };
   const choose = (setter: (value: string) => void, key: string) => (value: string) => { setter(value); sync({ [key]: value }); };
@@ -33,13 +37,16 @@ export default function Gallery({ templates, initial, moderator }: { templates: 
     const needle = query.trim().toLowerCase();
     return templates.filter((template) =>
       (!profession || template.professions.includes(profession as ProfessionId))
+      && (!field || template.professions.some((id) => fieldOf(id) === field))
       && (!style || template.styles.includes(style as StyleTag))
       && (!mood || template.mood === mood)
-      && (!needle || [template.name, template.description, ...template.idealFor].join(" ").toLowerCase().includes(needle)));
-  }, [templates, profession, style, mood, query]);
+      && (!needle || [template.name, template.description, ...template.idealFor, ...template.professions.map(professionLabel)].join(" ").toLowerCase().includes(needle)));
+  }, [templates, profession, field, style, mood, query]);
   const count = (id: string) => templates.filter((template) => template.professions.includes(id as ProfessionId)).length;
-  const clear = () => { setProfession(""); setStyle(""); setMood(""); setQuery(""); window.history.replaceState(null, "", window.location.pathname); };
-  const filtered = Boolean(profession || style || mood || query);
+  const fieldCount = (id: string) => templates.filter((template) => template.professions.some((item) => fieldOf(item) === id)).length;
+  const chooseField = (id: string) => { setField(id); setProfession(""); sync({ field: id, for: "" }); };
+  const clear = () => { setField(""); setProfession(""); setStyle(""); setMood(""); setQuery(""); window.history.replaceState(null, "", window.location.pathname); };
+  const filtered = Boolean(field || profession || style || mood || query);
 
   const chip = (active: boolean) => `shrink-0 rounded-full border px-3.5 py-1.5 text-[0.88rem] transition-colors ${active ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink hover:text-ink"}`;
 
@@ -53,10 +60,14 @@ export default function Gallery({ templates, initial, moderator }: { templates: 
         {filtered && <button type="button" onClick={clear} className="inline-flex items-center gap-1 text-[0.88rem] text-ink-soft underline underline-offset-4 hover:text-ink"><X size={13} /> Clear</button>}
         <span className="ml-auto text-[0.88rem] text-ink-faint" aria-live="polite">{matches.length} template{matches.length === 1 ? "" : "s"}</span>
       </div>
-      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none]" role="group" aria-label="Profession">
-        <button type="button" onClick={() => choose(setProfession, "for")("")} aria-pressed={!profession} className={chip(!profession)}>Everyone</button>
-        {PROFESSIONS.filter((item) => count(item.id)).map((item) => <button key={item.id} type="button" onClick={() => choose(setProfession, "for")(item.id)} aria-pressed={profession === item.id} className={chip(profession === item.id)}>{item.label} <span className="opacity-60">{count(item.id)}</span></button>)}
+      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none]" role="group" aria-label="Field">
+        <button type="button" onClick={() => chooseField("")} aria-pressed={!field} className={chip(!field)}>Everyone</button>
+        {FIELDS.filter((item) => fieldCount(item.id)).map((item) => <button key={item.id} type="button" onClick={() => chooseField(item.id)} aria-pressed={field === item.id} className={chip(field === item.id)}>{item.label} <span className="opacity-60">{fieldCount(item.id)}</span></button>)}
       </div>
+      {field && <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none]" role="group" aria-label="Profession">
+        <button type="button" onClick={() => choose(setProfession, "for")("")} aria-pressed={!profession} className={`${chip(!profession)} !py-1 text-[0.82rem]`}>All {FIELDS.find((item) => item.id === field)?.label.toLowerCase()}</button>
+        {PROFESSIONS.filter((item) => item.field === field && count(item.id)).map((item) => <button key={item.id} type="button" onClick={() => choose(setProfession, "for")(item.id)} aria-pressed={profession === item.id} className={`${chip(profession === item.id)} !py-1 text-[0.82rem]`}>{item.label} <span className="opacity-60">{count(item.id)}</span></button>)}
+      </div>}
     </div>
 
     {matches.length ? <ul className="mt-12 grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3">

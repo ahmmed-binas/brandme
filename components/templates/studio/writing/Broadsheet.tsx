@@ -20,7 +20,9 @@ export default function Broadsheet({ content, template, embedded }: StudioProps)
   return <StudioRoot studio={studio} className="text-[16px] leading-[1.55]">
     <div className="mx-auto max-w-[80rem] px-4 py-6 @3xl:px-8">
       <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] tm"><span>Vol. {new Date().getFullYear() - 2000} · No. {(c.highlights ?? []).length + (c.projects ?? []).length}</span><span className="hidden @2xl:inline">{c.location}</span><span>Free to read</span></div>
-      <h1 className="mt-3 text-center font-['UnifrakturMaguntia',serif] text-[clamp(2.6rem,10cqw,7.5rem)] leading-[1] tracking-[0.01em]" {...ed("name")}>The {c.name}</h1>
+      {studio.font?.id === "blackletter"
+        ? <h1 className="mt-3 text-center font-['UnifrakturMaguntia',serif] text-[clamp(2.6rem,10cqw,7.5rem)] leading-[1] tracking-[0.01em]" {...ed("name")}>The {c.name}</h1>
+        : <h1 className="fd mt-4 text-center text-[clamp(2.4rem,9.4cqw,7rem)] font-[700] uppercase leading-[0.92] tracking-[-0.015em] [font-feature-settings:'kern','liga'] balance" {...ed("name")}><span className="mb-2 block text-[0.2em] font-[400] italic normal-case tracking-[0.04em] tm">The</span>{c.name}</h1>}
       <Rule double />
       <div className="flex items-center justify-between py-1.5 text-[12px] italic"><span suppressHydrationWarning>{date}</span><span className="hidden @2xl:inline" {...ed("professional_title")}>{c.professional_title}</span><a href="#classifieds" className="not-italic hover-a">Contact ▸</a></div>
       <Rule />

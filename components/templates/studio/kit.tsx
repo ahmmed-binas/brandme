@@ -34,7 +34,7 @@ const filled = (value: unknown): boolean => {
 const SECTION_FIELDS: Record<SectionKey, (keyof StandardContent)[]> = {
   about: ["summary"], projects: ["projects"], experience: ["experience"], skills: ["skills"], education: ["education"],
   services: ["services"], testimonials: ["testimonials"], highlights: ["highlights"], gallery: ["gallery"], stats: ["stats"],
-  contact: ["email", "links", "github", "linkedin", "instagram", "website"],
+  contact: ["email", "phone", "links", "github", "linkedin", "instagram", "website"],
 };
 
 export function useStudio(content: StandardContent, template: TemplateDefinition, embedded = false) {
@@ -108,6 +108,7 @@ export const roman = (value: number) => {
 export function contactLinks(content: StandardContent): Array<{ label: string; url: string }> {
   const links: Array<{ label: string; url: string }> = [];
   if (content.email) links.push({ label: "Email", url: `mailto:${content.email}` });
+  if (content.phone) links.push({ label: content.phone, url: `tel:${content.phone.replace(/[^\d+]/g, "")}` });
   if (content.website) links.push({ label: hostname(content.website) || "Website", url: content.website });
   if (content.github) links.push({ label: "GitHub", url: content.github });
   if (content.linkedin) links.push({ label: "LinkedIn", url: content.linkedin });
