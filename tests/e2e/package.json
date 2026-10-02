@@ -1,0 +1,9 @@
+{
+  "name": "formora-e2e",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end tests. See tests/e2e/README.md.",
+  "dependencies": {
+    "dns2": "^2.4.0"
+  }
+}
