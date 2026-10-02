@@ -162,8 +162,9 @@ export default function AccountPage() {
       {billing ? <Plan billing={billing} reload={load} /> : <p className="mt-10 text-sm text-ink-soft">Loading your plan…</p>}
       <Portfolios />
       {billing && <Ai billing={billing} reload={load} />}
-      <section className="mt-12"><Heading id="updates" title="Automatic updates" /><p className="mt-4 text-[0.95rem] text-ink-soft">New GitHub projects, talks, awards and roles we find for you appear in the editor under <b className="font-medium text-ink">AI &amp; import</b>, ready to add with one click. Nothing changes on your site until you add it.</p></section>
+      <section className="mt-12"><Heading id="updates" title="Automatic updates" /><p className="mt-4 text-[0.95rem] text-ink-soft">New GitHub projects, talks, awards and roles we find for you appear in the editor under the <b className="font-medium text-ink">AI</b> tab, ready to add with one click. Nothing changes on your site until you add it.</p></section>
       {billing && <Emails billing={billing} reload={load} />}
+      <section className="mt-12"><Heading id="domains" title="Domains" /><p className="mt-4 text-[0.95rem] text-ink-soft">See when the domains you bought here expire, and renew them. <Link href="/account/domains" className="text-ink underline underline-offset-4">Your domains</Link></p></section>
       <section className="mt-12"><Heading id="help" title="Help" /><p className="mt-4 text-[0.95rem] text-ink-soft">Questions about billing, domains or anything else? <Link href="/community/support" className="text-ink underline underline-offset-4">Open a support request</Link>; a person replies, usually within a working day.</p></section>
       <DeleteAccount />
     </div>

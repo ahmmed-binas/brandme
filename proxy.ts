@@ -34,12 +34,15 @@ export function proxy(request: NextRequest) {
   // Clone nextUrl rather than building from request.url: behind a TLS proxy the public
   // URL is https://<domain>, and a rewrite to a different origin is treated as external.
   const url = request.nextUrl.clone();
-  url.pathname = `/sites/${encodeURIComponent(host)}`;
+  // "/" is the portfolio, "/blog/…" its blog, plus its own sitemap and robots.txt. Anything else 404s.
+  const path = request.nextUrl.pathname.replace(/\/+$/, "");
+  url.pathname = `/sites/${encodeURIComponent(host)}${path}`;
   url.search = "";
   return NextResponse.rewrite(url);
 }
 
 export const config = {
   // Skip Next.js internals and static files (anything with an extension) so templates' assets still load.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)"],
+  // sitemap.xml and robots.txt are included so each custom domain gets its own.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)", "/sitemap.xml", "/robots.txt"],
 };

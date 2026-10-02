@@ -146,6 +146,7 @@ export async function unpublish(ownerId: string, templateId: TemplateId): Promis
 }
 
 export interface PublishedPortfolio {
+  ownerId: string;
   templateId: TemplateId;
   content: Record<string, unknown>;
   theme: ColorTheme | null;
@@ -167,8 +168,8 @@ export async function getPublishedFor(ownerId: string, templateId: TemplateId): 
 
 async function findPublished(where: string, params: unknown[]): Promise<PublishedPortfolio | null> {
   await ensureSchema();
-  const result = await db.query<{ template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; name: string | null }>(
-    `SELECT p.template_id, p.published_content, p.published_theme, p.published_at, u.plan, u.trial_ends_at, u.plan_expires_at, u.name
+  const result = await db.query<{ owner_id: string; template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; name: string | null }>(
+    `SELECT p.owner_id, p.template_id, p.published_content, p.published_theme, p.published_at, u.plan, u.trial_ends_at, u.plan_expires_at, u.name
      FROM portfolios p JOIN app_users u ON u.id = p.owner_id
      WHERE ${where} AND p.published_at IS NOT NULL`,
     params,
@@ -177,7 +178,7 @@ async function findPublished(where: string, params: unknown[]): Promise<Publishe
   if (!row) return null;
   const standing = standingOf(row);
   return {
-    templateId: row.template_id, content: row.published_content, theme: row.published_theme, updatedAt: row.published_at.toISOString(),
+    ownerId: row.owner_id, templateId: row.template_id, content: row.published_content, theme: row.published_theme, updatedAt: row.published_at.toISOString(),
     showsBranding: standing.plan.showsBranding, resting: !isLive(standing.standing), ownerName: (row.published_content.name as string | undefined) ?? row.name,
   };
 }

@@ -111,3 +111,13 @@ export async function pointDomainAtServer(domain: string, ipv4: string): Promise
     }
   }
 }
+
+/**
+ * Renews a domain for one more year at `expectedPrice` (the renewal price).
+ * Endpoint per Vercel's registrar API; if it is rejected, the caller keeps the
+ * customer's payment and flags the renewal for the owner to do by hand.
+ */
+export async function renewDomain(domain: string, expectedPrice: number): Promise<{ orderId: string | null }> {
+  const data = await vercel<{ orderId?: string }>("POST", `/v1/registrar/domains/${enc(domain)}/renew`, { years: 1, expectedPrice });
+  return { orderId: data.orderId ?? null };
+}

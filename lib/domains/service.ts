@@ -8,6 +8,9 @@ import { randomBytes } from "node:crypto";
 import { apexOf } from "./names";
 import { checkDomain, recordsFor, type DnsRecord } from "./dns";
 import * as vercel from "./vercel";
+import { emails } from "@/lib/email/templates";
+import { sendMail, sendOnce, supportInbox } from "@/lib/email/mailer";
+import { getUserById } from "@/utils/user-account";
 
 /**
  * Custom-domain business rules.
@@ -186,9 +189,10 @@ export async function startPurchase(user: CurrentUser, templateId: TemplateId, d
 }
 
 /** Premium, active, a domain within the included price, and none claimed in the last year. */
-async function includedDomainAvailable(user: CurrentUser, registrarPrice: number): Promise<boolean> {
+async function includedDomainAvailable(user: CurrentUser, registrarPrice: number, renewing?: string): Promise<boolean> {
   if (!user.plan.includedDomain || user.standing.standing !== "active" || registrarPrice * 100 > INCLUDED_DOMAIN_MAX_CENTS) return false;
-  const used = await db.query("SELECT 1 FROM domain_orders WHERE owner_id = $1 AND charged_cents = 0 AND status NOT IN ('refunded', 'refund_failed') AND created_at > NOW() - INTERVAL '1 year'", [user.id]);
+  // Renewing the included domain itself is covered; its own earlier registration doesn't count against it.
+  const used = await db.query("SELECT 1 FROM domain_orders WHERE owner_id = $1 AND charged_cents = 0 AND status NOT IN ('refunded', 'refund_failed') AND created_at > NOW() - INTERVAL '1 year' AND domain IS DISTINCT FROM $2", [user.id, renewing ?? null]);
   return !used.rowCount;
 }
 
@@ -211,13 +215,14 @@ async function refund(orderId: string, paymentIntent: string | null, reason: str
  */
 export async function fulfilPaidOrder(orderId: string, paymentIntent: string | null): Promise<void> {
   await ensureSchema();
-  const claimed = await db.query<{ owner_id: string; template_id: TemplateId; domain: string; registrar_price: string; contact: vercel.RegistrantContact }>(
+  const claimed = await db.query<{ owner_id: string; template_id: TemplateId; domain: string; registrar_price: string; contact: vercel.RegistrantContact; renewal_of: string | null }>(
     `UPDATE domain_orders SET status = 'purchasing', stripe_payment_intent = $2, updated_at = NOW()
-     WHERE id = $1 AND status = 'awaiting_payment' RETURNING owner_id, template_id, domain, registrar_price, contact`,
+     WHERE id = $1 AND status = 'awaiting_payment' RETURNING owner_id, template_id, domain, registrar_price, contact, renewal_of`,
     [orderId, paymentIntent],
   );
   const order = claimed.rows[0];
   if (!order) return;
+  if (order.renewal_of) return fulfilRenewal(orderId, order.renewal_of, order.domain, Number(order.registrar_price));
   // Reserve the domain for this portfolio before spending money on it.
   const reserved = await db.query(
     "INSERT INTO custom_domains (domain, owner_id, template_id, source, verification_token) VALUES ($1, $2, $3, 'purchased', $4) ON CONFLICT DO NOTHING",
@@ -253,7 +258,7 @@ export async function advanceOrders(ownerId: string): Promise<void> {
     if (state.state === "completed") {
       try {
         await vercel.pointDomainAtServer(order.domain, process.env.SERVER_IPV4!);
-        await db.query("UPDATE domain_orders SET status = 'completed', updated_at = NOW() WHERE id = $1", [order.id]);
+        await db.query("UPDATE domain_orders SET status = 'completed', expires_at = COALESCE(expires_at, NOW() + INTERVAL '1 year'), updated_at = NOW() WHERE id = $1", [order.id]);
       } catch (error) {
         console.error("Pointing purchased domain at the server failed; will retry", order.domain, error);
       }
@@ -288,4 +293,122 @@ export async function tlsAllowed(host: string): Promise<boolean> {
     [host, apexOf(host)],
   );
   return Boolean(result.rowCount);
+}
+
+// ---------------------------------------------------------------------------
+// Renewals. Bought domains are registered for a year with auto-renew off, so
+// nobody is charged without agreeing. From 30 days before expiry the owner is
+// reminded (cron) and renews from /account/domains; payment then renews the
+// domain at the registrar. If the registrar refuses, the payment is kept and
+// the site owner is emailed to renew by hand, so the customer never loses the
+// domain over an API problem.
+// ---------------------------------------------------------------------------
+
+export interface OwnedDomain { orderId: string; domain: string; expiresAt: string; daysLeft: number; renewalCents: number | null; included: boolean; renewing: boolean; manual: boolean }
+
+/** The latest completed registration per bought domain, with its expiry and renewal price. */
+async function latestRegistrations(where: string, params: unknown[]) {
+  return (await db.query<{ id: string; owner_id: string; domain: string; expires_at: Date; reminded_at: Date | null }>(
+    `SELECT DISTINCT ON (domain) id, owner_id, domain, expires_at, reminded_at FROM domain_orders
+     WHERE status = 'completed' AND expires_at IS NOT NULL AND ${where} ORDER BY domain, expires_at DESC`,
+    params,
+  )).rows;
+}
+
+async function renewalInProgress(domain: string): Promise<{ renewing: boolean; manual: boolean }> {
+  const row = (await db.query<{ status: string }>("SELECT status FROM domain_orders WHERE domain = $1 AND renewal_of IS NOT NULL AND status IN ('purchasing', 'renewal_manual') ORDER BY created_at DESC LIMIT 1", [domain])).rows[0];
+  return { renewing: row?.status === "purchasing", manual: row?.status === "renewal_manual" };
+}
+
+async function renewalPrice(domain: string): Promise<number | null> {
+  const price = await vercel.getPrice(domain).catch(() => null);
+  return price ? price.renewalPrice : null;
+}
+
+export async function ownedDomains(user: CurrentUser): Promise<OwnedDomain[]> {
+  await ensureSchema();
+  const rows = await latestRegistrations("owner_id = $1", [user.id]);
+  return Promise.all(rows.map(async (row) => {
+    const registrar = vercel.registrarConfigured() ? await renewalPrice(row.domain) : null;
+    return {
+      orderId: row.id, domain: row.domain, expiresAt: row.expires_at.toISOString(), daysLeft: Math.ceil((row.expires_at.getTime() - Date.now()) / 86_400_000),
+      renewalCents: registrar === null ? null : customerPriceCents(registrar),
+      included: registrar !== null && await includedDomainAvailable(user, registrar, row.domain),
+      ...(await renewalInProgress(row.domain)),
+    };
+  }));
+}
+
+/** Starts a renewal for one of the owner's domains. Returns a Stripe Checkout URL, or the account page when it's included. */
+export async function startRenewal(user: CurrentUser, orderId: string, origin: string): Promise<string> {
+  await ensureSchema();
+  const [current] = await latestRegistrations("owner_id = $1 AND id = $2", [user.id, orderId]);
+  if (!current) throw new DomainError("We couldn’t find that domain on your account.", 404);
+  if ((await renewalInProgress(current.domain)).renewing) throw new DomainError("This domain is already being renewed.", 409);
+  if (current.expires_at.getTime() - Date.now() > 90 * 86_400_000) throw new DomainError("You can renew from 90 days before the domain expires.", 409);
+  const registrar = await renewalPrice(current.domain);
+  if (registrar === null) throw new DomainError("We couldn’t get a renewal price for this domain. Please try again shortly.", 502);
+  const cents = customerPriceCents(registrar);
+  const order = await db.query<{ id: string }>(
+    `INSERT INTO domain_orders (owner_id, template_id, domain, registrar_price, charged_cents, renewal_of)
+     SELECT owner_id, template_id, domain, $2, $3, id FROM domain_orders WHERE id = $1 RETURNING id`,
+    [current.id, registrar, cents],
+  );
+  const renewalId = order.rows[0]!.id;
+  if (await includedDomainAvailable(user, registrar, current.domain)) {
+    await db.query("UPDATE domain_orders SET charged_cents = 0, updated_at = NOW() WHERE id = $1", [renewalId]);
+    await fulfilPaidOrder(renewalId, null);
+    return `${origin}/account/domains?renewed=${renewalId}`;
+  }
+  const session = await stripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email ?? undefined,
+    client_reference_id: renewalId,
+    metadata: { orderId: renewalId, domain: current.domain, renewal: "1" },
+    line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: cents, product_data: { name: `${current.domain} — renewal, 1 year`, description: "Keeps your domain registered and connected to your portfolio." } } }],
+    success_url: `${origin}/account/domains?renewed=${renewalId}`,
+    cancel_url: `${origin}/account/domains`,
+  });
+  await db.query("UPDATE domain_orders SET stripe_session_id = $2, updated_at = NOW() WHERE id = $1", [renewalId, session.id]);
+  if (!session.url) throw new DomainError("Payment could not be started.", 502);
+  return session.url;
+}
+
+async function fulfilRenewal(orderId: string, previousId: string, domain: string, registrarPrice: number): Promise<void> {
+  const previous = (await db.query<{ expires_at: Date; owner_id: string }>("SELECT expires_at, owner_id FROM domain_orders WHERE id = $1", [previousId])).rows[0];
+  const from = previous && previous.expires_at > new Date() ? previous.expires_at : new Date();
+  const expires = new Date(from.getTime() + 365 * 86_400_000);
+  try {
+    const current = await vercel.getPrice(domain);
+    await vercel.renewDomain(domain, current?.renewalPrice ?? registrarPrice);
+    await db.query("UPDATE domain_orders SET status = 'completed', expires_at = $2, updated_at = NOW() WHERE id = $1", [orderId, expires]);
+    const owner = previous ? await db.query<{ email: string | null; name: string | null }>("SELECT email, name FROM app_users WHERE id = $1", [previous.owner_id]) : null;
+    const person = owner?.rows[0];
+    if (person?.email) await sendOnce(`domain-renewed:${orderId}`, previous!.owner_id, "domain-renewed", { to: person.email, ...emails.domainRenewed(person.name, domain, expires) }).catch(() => undefined);
+  } catch (error) {
+    console.error("Domain renewal at the registrar failed; renew it by hand", domain, error);
+    await db.query("UPDATE domain_orders SET status = 'renewal_manual', error = $2, updated_at = NOW() WHERE id = $1", [orderId, (error as Error).message.slice(0, 500)]);
+    const inbox = supportInbox();
+    if (inbox) await sendMail({ to: inbox, subject: `Renew ${domain} by hand`, text: `A customer paid to renew ${domain} (order ${orderId}), but the registrar refused the renewal: ${(error as Error).message}\n\nRenew it for one year in your Vercel dashboard (Domains), then run in the database:\nUPDATE domain_orders SET status = 'completed', expires_at = '${expires.toISOString()}' WHERE id = '${orderId}';` }).catch(() => undefined);
+  }
+}
+
+/** Cron: reminds owners from 30 days before expiry, at most once a week, until they renew. */
+export async function remindRenewals(): Promise<number> {
+  if (!vercel.registrarConfigured()) return 0;
+  const due = await latestRegistrations("expires_at < NOW() + INTERVAL '30 days' AND expires_at > NOW() - INTERVAL '30 days' AND (reminded_at IS NULL OR reminded_at < NOW() - INTERVAL '7 days')", []);
+  let sent = 0;
+  for (const row of due) {
+    const state = await renewalInProgress(row.domain);
+    if (state.renewing || state.manual) continue;
+    const user = await getUserById(row.owner_id);
+    if (!user?.email) continue;
+    const registrar = await renewalPrice(row.domain);
+    if (registrar === null) continue;
+    const included = await includedDomainAvailable(user, registrar, row.domain);
+    const week = new Date().toISOString().slice(0, 10);
+    if (await sendOnce(`domain-renewal:${row.id}:${week}`, user.id, "domain-renewal", { to: user.email, ...emails.domainRenewalDue(user.name, row.domain, row.expires_at, `$${(customerPriceCents(registrar) / 100).toFixed(0)}`, included) })) sent += 1;
+    await db.query("UPDATE domain_orders SET reminded_at = NOW() WHERE id = $1", [row.id]);
+  }
+  return sent;
 }

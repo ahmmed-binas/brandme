@@ -1,6 +1,56 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Clock3, Sparkles, Tag } from "lucide-react";
-import { articles, getArticlePage, totalArticlePages } from "@/lib/content/articles";
-import { brand } from "@/lib/brand";
-const pageUrl = (page: number) => page === 1 ? "/blog" : `/blog/page/${page}`;
-export default function BlogListing({ page }: { page: number }) { const posts = getArticlePage(page); return <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white"><section className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950"><div className="mx-auto max-w-7xl px-6 py-16 sm:py-24"><p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300"><Sparkles size={16} /> {brand.name} journal</p><div className="mt-5 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end"><div><h1 className="max-w-3xl text-5xl font-black tracking-tight sm:text-7xl">Better portfolios, one useful idea at a time.</h1><p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-400">Practical thinking for people making a body of work worth sharing.</p></div><div className="rounded-2xl bg-violet-700 p-6 text-white shadow-xl shadow-violet-700/20"><p className="text-sm font-bold text-violet-100">Journal page {page}</p><p className="mt-2 text-xl font-bold leading-7">Clear stories make meaningful work easier to find.</p></div></div></div></section><main className="mx-auto max-w-7xl px-6 py-12 sm:py-16"><div className="mb-8 flex items-end justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Latest writing</p><h2 className="mt-2 text-3xl font-black tracking-tight">Ideas for your next shareable portfolio</h2></div><p className="shrink-0 text-sm text-slate-500">{articles.length} articles</p></div><div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{posts.map((post) => <article key={post.slug} className="group flex min-h-72 flex-col rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-violet-300 hover:shadow-xl dark:border-white/10 dark:bg-slate-900"><div className="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300"><span className="flex items-center gap-1.5"><Tag size={13} /> {post.category}</span><span>Journal</span></div><h3 className="mt-5 text-2xl font-black leading-8 tracking-tight text-slate-950 dark:text-white">{post.title}</h3><p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">{post.excerpt}</p><div className="mt-auto flex items-center justify-between border-t border-slate-200 pt-5 text-xs font-semibold text-slate-500 dark:border-white/10"><span>{post.date}</span><span className="flex items-center gap-1"><Clock3 size={13} /> {post.readTime}</span></div><Link href={`/blog/${post.slug}`} className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-violet-700 transition group-hover:gap-3 dark:text-violet-300">Read article <ArrowRight size={16} /></Link></article>)}</div><nav className="mt-12 flex items-center justify-between border-t border-slate-200 pt-6 dark:border-white/10" aria-label="Journal pagination"><div>{page > 1 && <Link href={pageUrl(page - 1)} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold hover:border-violet-400 dark:border-white/15"><ArrowLeft size={16} /> Previous</Link>}</div><p className="text-sm text-slate-500">Page {page} of {totalArticlePages}</p><div>{page < totalArticlePages && <Link href={pageUrl(page + 1)} className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-800 dark:bg-white dark:text-slate-950">Next <ArrowRight size={16} /></Link>}</div></nav></main></div>; }
+import { notFound } from "next/navigation";
+import { ArrowRight, ArrowLeft, Rss } from "lucide-react";
+import { listJournal, POSTS_PER_PAGE, type JournalPost } from "@/lib/content/journal";
+
+const pageUrl = (page: number) => (page === 1 ? "/blog" : `/blog/page/${page}`);
+export const formatDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "Draft");
+
+function Meta({ post }: { post: JournalPost }) {
+  return <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">{post.category} · {formatDate(post.publishedAt)} · {post.readMinutes} min read</p>;
+}
+
+/** The Journal index: the newest post large, then the rest in a grid. */
+export default async function BlogListing({ page }: { page: number }) {
+  const posts = await listJournal();
+  const pages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+  if (page > pages) notFound();
+  const shown = posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
+  const [lead, ...rest] = page === 1 ? shown : [undefined, ...shown];
+
+  return <div className="mx-auto max-w-[1180px] px-5 pb-24 pt-14 sm:px-8 lg:pt-20">
+    <header className="flex flex-wrap items-end justify-between gap-6 border-b border-rule pb-10">
+      <div>
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Journal{page > 1 ? ` · page ${page}` : ""}</p>
+        <h1 className="mt-4 font-display text-[clamp(2.8rem,6.4vw,5rem)] font-[400] leading-[0.95] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">Better portfolios, <em className="font-[300] text-signal">one idea at a time.</em></h1>
+        <p className="mt-5 max-w-[36rem] text-[1.08rem] leading-[1.7] text-ink-soft">Practical advice on showing your work, whatever your work is: writing, case studies, design and getting online.</p>
+      </div>
+      <a href="/blog/rss.xml" className="inline-flex items-center gap-2 text-[0.92rem] text-ink-soft hover:text-ink"><Rss size={15} /> RSS feed</a>
+    </header>
+
+    {posts.length === 0 && <p className="mt-16 text-center text-ink-soft">No posts yet.</p>}
+
+    {lead && <article className="group mt-12 grid gap-6 border-b border-rule pb-12 lg:grid-cols-[1.4fr_1fr] lg:gap-14">
+      <div>
+        <Meta post={lead} />
+        <h2 className="mt-4 font-display text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-ink"><Link href={`/blog/${lead.slug}`} className="hover:text-signal">{lead.title}</Link></h2>
+      </div>
+      <div className="lg:pt-8">
+        <p className="text-[1.08rem] leading-[1.7] text-ink-soft">{lead.description}</p>
+        <Link href={`/blog/${lead.slug}`} className="mt-5 inline-flex items-center gap-2 text-[0.95rem] font-medium text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Read the article <ArrowRight size={15} /></Link>
+      </div>
+    </article>}
+
+    {rest.length > 0 && <ul className="mt-12 grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">{rest.map((post) => post && <li key={post.slug} className="flex flex-col border-t border-ink pt-5">
+      <Meta post={post} />
+      <h2 className="mt-3 font-display text-[1.6rem] leading-[1.1] tracking-[-0.015em] text-ink"><Link href={`/blog/${post.slug}`} className="hover:text-signal">{post.title}</Link></h2>
+      <p className="mt-3 text-[0.98rem] leading-relaxed text-ink-soft">{post.description}</p>
+    </li>)}</ul>}
+
+    {pages > 1 && <nav className="mt-16 flex items-center justify-between border-t border-rule pt-6 text-[0.92rem]" aria-label="Journal pages">
+      <span>{page > 1 && <Link href={pageUrl(page - 1)} className="inline-flex items-center gap-2 text-ink hover:text-signal"><ArrowLeft size={15} /> Newer</Link>}</span>
+      <span className="text-ink-soft">Page {page} of {pages}</span>
+      <span>{page < pages && <Link href={pageUrl(page + 1)} className="inline-flex items-center gap-2 text-ink hover:text-signal">Older <ArrowRight size={15} /></Link>}</span>
+    </nav>}
+  </div>;
+}

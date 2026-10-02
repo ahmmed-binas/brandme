@@ -9,7 +9,7 @@ import { deleteOrphanedAssets } from "@/lib/assets/repository";
 import { syncGitHub } from "@/lib/autoupdate/github-sync";
 import { runResearch } from "@/lib/autoupdate/research";
 import { openAi, platformAiConfigured, settleAi, sumUsage } from "@/lib/ai/metering";
-import { advanceOrders } from "@/lib/domains/service";
+import { advanceOrders, remindRenewals } from "@/lib/domains/service";
 import { standardContentSchema } from "@/lib/portfolio/schema";
 import { getUserById } from "@/utils/user-account";
 
@@ -131,6 +131,7 @@ export async function runScheduledJobs(): Promise<Record<string, unknown>> {
     await step("monthlyCredits", monthlyCredits);
     await step("autoUpdates", autoUpdates);
     await step("domainOrders", domainOrders);
+    await step("domainRenewals", remindRenewals);
     await step("orphanedImages", deleteOrphanedAssets);
     return summary;
   } finally {

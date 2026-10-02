@@ -1,9 +1,61 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Clock3, Tag } from "lucide-react";
-import { articles, getArticle } from "@/lib/content/articles";
 import { notFound } from "next/navigation";
+import { cache } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { formatDate } from "@/components/blog/BlogListing";
+import { getJournalPost, listJournal } from "@/lib/content/journal";
+import { Markdown } from "@/lib/content/markdown";
+import { brand } from "@/lib/brand";
+import { siteUrl } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
-export function generateStaticParams() { return articles.map(({ slug }) => ({ slug })); }
-export async function generateMetadata({ params }: Props): Promise<Metadata> { const { slug } = await params; const article = getArticle(slug); if (!article) return {}; return { title: article.title, description: article.excerpt, alternates: { canonical: `/blog/${article.slug}` }, openGraph: { title: article.title, description: article.excerpt, type: "article" } }; }
-export default async function ArticlePage({ params }: Props) { const { slug } = await params; const article = getArticle(slug); if (!article) notFound(); const schema = { "@context": "https://schema.org", "@type": "Article", headline: article.title, description: article.excerpt, datePublished: "2026-09-20", author: { "@type": "Organization", name: "Formora" } }; return <article className="min-h-screen bg-slate-50 px-6 py-16 dark:bg-slate-950 sm:py-24"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} /><div className="mx-auto max-w-3xl"><Link href="/blog" className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 hover:underline dark:text-violet-300"><ArrowLeft size={16} /> Back to journal</Link><p className="mt-12 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-300"><Tag size={14} /> {article.category}</p><h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-6xl">{article.title}</h1><div className="mt-6 flex items-center gap-4 text-sm text-slate-500"><span>{article.date}</span><span className="flex items-center gap-1"><Clock3 size={14} /> {article.readTime}</span></div><div className="mt-12 space-y-6 text-lg leading-8 text-slate-700 dark:text-slate-300">{article.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div></div></article>; }
+const load = cache((slug: string) => getJournalPost(slug));
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await load((await params).slug);
+  if (!post) return { title: "Article not found", robots: { index: false } };
+  return {
+    title: post.title, description: post.description, alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: { title: post.title, description: post.description, type: "article", publishedTime: post.publishedAt ?? undefined, modifiedTime: post.updatedAt ?? undefined, url: `/blog/${post.slug}` },
+  };
+}
+
+export default async function ArticlePage({ params }: Props) {
+  const post = await load((await params).slug);
+  if (!post) notFound();
+  const others = (await listJournal()).filter((item) => item.slug !== post.slug);
+  const related = [...others.filter((item) => item.category === post.category), ...others.filter((item) => item.category !== post.category)].slice(0, 3);
+  const schema = {
+    "@context": "https://schema.org", "@type": "BlogPosting", headline: post.title, description: post.description,
+    datePublished: post.publishedAt, dateModified: post.updatedAt ?? post.publishedAt, mainEntityOfPage: `${siteUrl}/blog/${post.slug}`,
+    author: { "@type": "Organization", name: brand.name, url: siteUrl }, publisher: { "@type": "Organization", name: brand.name, url: siteUrl },
+  };
+
+  return <article className="mx-auto max-w-[1180px] px-5 pb-24 pt-10 sm:px-8 lg:pt-14">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
+    <Link href="/blog" className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft hover:text-ink"><ArrowLeft size={13} /> Journal</Link>
+    <header className="mx-auto mt-10 max-w-[44rem]">
+      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">{post.category} · {formatDate(post.publishedAt)} · {post.readMinutes} min read</p>
+      <h1 className="mt-5 font-display text-[clamp(2.4rem,5.4vw,4rem)] font-[400] leading-[1.0] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">{post.title}</h1>
+      <p className="mt-6 text-[1.2rem] leading-[1.6] text-ink-soft">{post.description}</p>
+    </header>
+    <Markdown source={post.body} className="post-body mx-auto mt-12 max-w-[44rem] border-t border-rule pt-10 text-ink [--post-display:var(--font-display)] [&_a]:text-signal [&_h2]:font-display [&_h3]:font-display" />
+
+    <aside className="mx-auto mt-16 max-w-[44rem] rounded-xl border border-rule bg-card p-7">
+      <p className="font-display text-[1.6rem] leading-tight text-ink">Make a portfolio that fits your work.</p>
+      <p className="mt-2 text-ink-soft">Designs drawn for 150+ job titles, sample content written for yours, and your own domain.</p>
+      <Link href="/templatechooser" className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[0.92rem] font-medium text-paper hover:bg-signal hover:text-signal-ink">Browse templates <ArrowRight size={15} /></Link>
+    </aside>
+
+    {related.length > 0 && <section className="mt-20 border-t border-rule pt-10" aria-labelledby="more">
+      <h2 id="more" className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">Keep reading</h2>
+      <ul className="mt-6 grid gap-10 md:grid-cols-3">{related.map((item) => <li key={item.slug}>
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">{item.category}</p>
+        <h3 className="mt-2 font-display text-[1.4rem] leading-[1.15] text-ink"><Link href={`/blog/${item.slug}`} className="hover:text-signal">{item.title}</Link></h3>
+      </li>)}</ul>
+    </section>}
+  </article>;
+}

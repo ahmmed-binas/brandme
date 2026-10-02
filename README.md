@@ -4,6 +4,8 @@ A portfolio builder: choose a designed template, fill it with your content (by h
 
 ## Run it locally
 
+Step-by-step with a database and a test account: **`docs/LOCAL.md`**. Going live on your domain: **`docs/LAUNCH.md`**.
+
 ```bash
 npm install
 cp .env.example .env.local   # then fill in the values
@@ -30,3 +32,5 @@ npm run build
 - `docs/BUSINESS_PLAN.md`: positioning, pricing, unit economics, and roadmap
 - `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`: how to add a new template
 - `docs/GOOGLE_AUTH_SETUP.md`: sign-in and database setup
+- `docs/LOCAL.md`: run everything on your computer with a test account
+- `docs/LAUNCH.md`: hosting choice, server setup, and how customers get their own domain

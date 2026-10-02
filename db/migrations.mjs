@@ -272,6 +272,55 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "006_ratings_blogs_renewals",
+  statements: [
+    // One star rating (1–5) per person per template. A person can change theirs.
+    `CREATE TABLE IF NOT EXISTS template_ratings (
+      user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      template_id TEXT NOT NULL,
+      stars SMALLINT NOT NULL CHECK (stars BETWEEN 1 AND 5),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (user_id, template_id)
+    )`,
+    `CREATE INDEX IF NOT EXISTS template_ratings_template ON template_ratings (template_id)`,
+    // The site's own Journal, written by admins at /admin/journal.
+    `CREATE TABLE IF NOT EXISTS journal_posts (
+      slug TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      category TEXT NOT NULL DEFAULT 'Guides',
+      body TEXT NOT NULL DEFAULT '',
+      author_id UUID REFERENCES app_users(id) ON DELETE SET NULL,
+      published_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    // Customers' own blog posts, shown on their portfolio at /blog.
+    `CREATE TABLE IF NOT EXISTS portfolio_posts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      template_id TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      title TEXT NOT NULL,
+      excerpt TEXT NOT NULL DEFAULT '',
+      body TEXT NOT NULL DEFAULT '',
+      cover TEXT,
+      published_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (owner_id, template_id, slug)
+    )`,
+    `CREATE INDEX IF NOT EXISTS portfolio_posts_site ON portfolio_posts (owner_id, template_id, published_at DESC)`,
+    // Bought domains last a year; renewals are paid by the customer before this date.
+    `ALTER TABLE domain_orders ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ`,
+    `ALTER TABLE domain_orders ADD COLUMN IF NOT EXISTS renewal_of UUID REFERENCES domain_orders(id) ON DELETE SET NULL`,
+    `ALTER TABLE domain_orders ADD COLUMN IF NOT EXISTS reminded_at TIMESTAMPTZ`,
+    `UPDATE domain_orders SET expires_at = created_at + INTERVAL '1 year' WHERE status = 'completed' AND expires_at IS NULL`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

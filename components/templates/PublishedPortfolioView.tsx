@@ -5,7 +5,8 @@ import TemplateRenderer from "./TemplateRenderer";
 import type { PortfolioData } from "./template-one/TemplateOne";
 import type { PortfolioData as EditorialData } from "./editorial-developer/data";
 import type { TemplateId } from "@/lib/templates/types";
-import type { ColorTheme } from "@/lib/portfolio/schema";
+import type { ColorTheme, StandardContent } from "@/lib/portfolio/schema";
+import { PortfolioWriting, type PublicPost } from "./PortfolioBlog";
 
 /** Renders a published snapshot. Content comes from the server; nothing is read from the visitor's browser. */
 /** Shown instead of the portfolio while the owner's trial or plan has lapsed. Nothing is deleted. */
@@ -20,7 +21,7 @@ function Resting({ name }: { name: string | null }) {
   </main>;
 }
 
-export default function PublishedPortfolioView({ templateId, content, theme, showsBranding, resting = false, ownerName = null }: { templateId: TemplateId; content: Record<string, unknown>; theme: ColorTheme | null; showsBranding: boolean; resting?: boolean; ownerName?: string | null }) {
+export default function PublishedPortfolioView({ templateId, content, theme, showsBranding, resting = false, ownerName = null, posts = [], home = "" }: { templateId: TemplateId; content: Record<string, unknown>; theme: ColorTheme | null; showsBranding: boolean; resting?: boolean; ownerName?: string | null; posts?: PublicPost[]; home?: string }) {
   if (resting) return <Resting name={ownerName} />;
   const isEditorial = templateId === "editorial-developer";
   return <>
@@ -30,6 +31,7 @@ export default function PublishedPortfolioView({ templateId, content, theme, sho
       editorialData={isEditorial ? (content as unknown as EditorialData) : undefined}
       theme={theme ?? undefined}
     />
+    <PortfolioWriting templateId={templateId} content={content as StandardContent} home={home} posts={posts} />
     {showsBranding && <Link href="/" className="fixed bottom-4 right-4 z-[60] rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 backdrop-blur transition hover:bg-white">Made with Formora</Link>}
   </>;
 }

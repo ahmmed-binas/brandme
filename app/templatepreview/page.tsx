@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { getTemplate, DEFAULT_TEMPLATE_ID } from "@/lib/templates/catalog";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import PreviewFrame from "@/components/templates/PreviewFrame";
+import { RateTemplate } from "@/components/templates/Rating";
+import { ratingSummary } from "@/lib/templates/ratings";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ template?: string }> }): Promise<Metadata> {
   const selected = getTemplate((await searchParams).template ?? "") ?? getTemplate(DEFAULT_TEMPLATE_ID)!;
@@ -23,6 +25,7 @@ export default async function TemplatePreviewPage({ searchParams }: { searchPara
       <div className="lg:col-span-4 lg:pt-6">
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">{selected.style} · {selected.category}</p>
         <h1 className="mt-4 font-display text-[clamp(2.4rem,4.4vw,3.6rem)] font-[400] leading-[0.98] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">{selected.name}</h1>
+        <div className="mt-4"><RateTemplate templateId={selected.id} initial={await ratingSummary(selected.id)} /></div>
         <p className="mt-5 text-[1.05rem] leading-[1.7] text-ink-soft">{selected.description}</p>
         <ul className="mt-6 space-y-2 text-[0.95rem] text-ink-soft">{selected.idealFor.map((role) => <li key={role} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{role}</li>)}</ul>
         <div className="mt-9 flex flex-wrap items-center gap-5">

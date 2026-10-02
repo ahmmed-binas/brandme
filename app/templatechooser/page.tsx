@@ -5,6 +5,7 @@ import { availableTemplates } from "@/lib/templates/approval";
 import { isModeratorEmail } from "@/lib/community/rules";
 import { getCurrentUser } from "@/utils/user-account";
 import { ROLE_SUMMARIES } from "@/lib/templates/roles";
+import { ratingSummaries } from "@/lib/templates/ratings";
 
 export const metadata: Metadata = {
   title: "Portfolio templates for every kind of work",
@@ -17,10 +18,11 @@ export default async function TemplateChooser({ searchParams }: { searchParams: 
   const viewer = await getCurrentUser().catch(() => null);
   const moderator = isModeratorEmail(viewer?.email);
   // The professional collection first; the three original templates follow.
+  const ratings = await ratingSummaries();
   const templates: GalleryTemplate[] = (await availableTemplates(moderator)).sort((a, b) => Number(a.collection !== "studio") - Number(b.collection !== "studio")).map((template) => ({
     id: template.id, name: template.name, description: template.description, idealFor: template.idealFor,
     professions: template.professions ?? [], styles: template.styles ?? [], mood: template.mood ?? "light",
-    palettes: (template.palettes ?? []).map((palette) => palette.accent), status: template.review.status,
+    palettes: (template.palettes ?? []).map((palette) => palette.accent), status: template.review.status, rating: ratings[template.id],
   }));
 
   return <div className="mx-auto max-w-[1320px] px-5 pb-24 pt-14 sm:px-8 lg:pt-20">

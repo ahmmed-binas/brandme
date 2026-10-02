@@ -43,7 +43,9 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
         <p className="mt-6 max-w-[36rem] text-[1.08rem] leading-[1.7] text-ink-soft">Suggest a feature, review the templates, or submit a design of your own. Every post is read, and the most-wanted ideas get built first.</p>
       </div>
       <div className="flex flex-col items-start gap-5 lg:col-span-4 lg:items-end">
-        {stats.count > 0 && stats.average !== null && <p className="text-right text-[0.95rem] text-ink-soft"><span className="font-display text-[2.4rem] leading-none text-ink">{stats.average.toFixed(1)}</span> / 5 from {stats.count} {stats.count === 1 ? "review" : "reviews"}</p>}
+        {stats.count > 0 && stats.average !== null
+          ? <p className="text-right text-[0.95rem] text-ink-soft"><span className="font-display text-[2.4rem] leading-none text-ink">{stats.average.toFixed(1)}</span> / 5 from {stats.count} {stats.count === 1 ? "review" : "reviews"}</p>
+          : <p className="text-right text-[0.95rem] text-ink-soft">No reviews yet</p>}
         <WriteButton signedIn={Boolean(viewer)} label={viewer ? "Write a post" : "Sign in to post"} />
         <Link href="/community/support" className="text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Need help? Contact support →</Link>
       </div>

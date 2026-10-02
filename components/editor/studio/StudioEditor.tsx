@@ -15,10 +15,11 @@ import { ConflictBanner, PublishDialog, SaveStatus } from "../EditorControls";
 import { Field, ImageField, ListEditor, Section, TagsField, TextArea, type ListSpec } from "./fields";
 import { TrialBanner } from "./TrialBanner";
 import { SuggestionsPanel } from "./SuggestionsPanel";
+import { BlogPanel } from "./BlogPanel";
 
 type Content = StandardContent;
 type Item<K extends keyof Content> = NonNullable<Content[K]> extends Array<infer T> ? T : never;
-type Tab = "content" | "design" | "ai";
+type Tab = "content" | "design" | "blog" | "ai";
 type Device = "desktop" | "tablet" | "phone";
 
 const DEVICE_WIDTH: Record<Device, string> = { desktop: "100%", tablet: "820px", phone: "390px" };
@@ -194,11 +195,11 @@ export default function StudioEditor({ template, sample: initialSample, role: in
 
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[400px_minmax(0,1fr)]">
       <aside className={`${mobileView === "edit" ? "flex" : "hidden"} min-h-0 flex-col border-r border-rule bg-paper lg:flex`}>
-        <div role="tablist" aria-label="Editor panels" className="grid shrink-0 grid-cols-3 border-b border-rule text-[13px]">{(["content", "design", "ai"] as Tab[]).map((value) => <button key={value} role="tab" type="button" aria-selected={tab === value} onClick={() => setTab(value)} className={`flex items-center justify-center gap-1.5 py-3 ${tab === value ? "border-b-2 border-ink font-semibold text-ink" : "text-ink-soft hover:text-ink"}`}>{value === "ai" && <Sparkles size={13} />}{value === "ai" ? "AI & import" : value[0]!.toUpperCase() + value.slice(1)}</button>)}</div>
+        <div role="tablist" aria-label="Editor panels" className="grid shrink-0 grid-cols-4 border-b border-rule text-[13px]">{(["content", "design", "blog", "ai"] as Tab[]).map((value) => <button key={value} role="tab" type="button" aria-selected={tab === value} onClick={() => setTab(value)} className={`flex items-center justify-center gap-1.5 py-3 ${tab === value ? "border-b-2 border-ink font-semibold text-ink" : "text-ink-soft hover:text-ink"}`}>{value === "ai" && <Sparkles size={13} />}{value === "ai" ? "AI" : value[0]!.toUpperCase() + value.slice(1)}</button>)}</div>
         <div ref={panel} className="min-h-0 flex-1 overflow-y-auto">
           {tab === "content" && <>
             {isSample && <div className="m-4 rounded-xl border border-dashed border-ink/30 bg-white/60 p-4 text-[13px] leading-relaxed">
-              <p><b className="font-semibold">This is sample content</b> so you can see the design. Import your details in <button type="button" onClick={() => setTab("ai")} className="underline">AI & import</button>, or start from blank.</p>
+              <p><b className="font-semibold">This is sample content</b> so you can see the design. Import your details in the <button type="button" onClick={() => setTab("ai")} className="underline">AI tab</button>, or start from blank.</p>
               <label className="mt-3 block"><span className="text-[12px] font-medium text-ink-soft">Show sample content for</span>
                 <select value={role} disabled={switching} onChange={(event) => void switchRole(event.target.value)} aria-label="Job title for the sample content" className="mt-1 w-full rounded-lg border border-rule bg-white px-2.5 py-2 text-[13px] outline-none focus:border-ink disabled:opacity-60">
                   <option value="">This design’s own sample</option>
@@ -234,6 +235,8 @@ export default function StudioEditor({ template, sample: initialSample, role: in
               <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule bg-white/60">{sections.map((section) => <li key={section} className="flex items-center justify-between px-3 py-2 text-[13px]"><span className={hidden.has(section) ? "text-ink-faint line-through" : ""}>{sectionLabel(section) || SECTION_TITLES[section]}</span>
                 <button type="button" role="switch" aria-checked={!hidden.has(section)} aria-label={`Show ${SECTION_TITLES[section]}`} onClick={() => toggleHidden(section)(!hidden.has(section))} className={`relative h-5 w-9 rounded-full transition ${hidden.has(section) ? "bg-ink/15" : "bg-ink"}`}><span className={`absolute top-0.5 size-4 rounded-full bg-paper transition-all ${hidden.has(section) ? "left-0.5" : "left-[18px]"}`} /></button></li>)}</ul></div>
           </div>}
+
+          {tab === "blog" && <BlogPanel templateId={template.id} signedIn={persistence.signedIn} liveUrl={persistence.publishInfo.publishedAt && persistence.publishInfo.slug ? `${typeof window === "undefined" ? "" : window.location.origin}/p/${persistence.publishInfo.slug}` : null} />}
 
           {tab === "ai" && <div className="flex min-h-full flex-col">
             <SuggestionsPanel signedIn={persistence.signedIn} templateId={template.id} content={data} onApply={(next) => update(() => next, { checkpoint: true })} />

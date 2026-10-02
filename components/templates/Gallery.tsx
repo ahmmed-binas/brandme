@@ -5,10 +5,11 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Search, X } from "lucide-react";
 import { FIELDS, PROFESSIONS, STYLES, type ProfessionId, type StyleTag } from "@/lib/templates/types";
 import { rankRoles, type RoleSummary } from "@/lib/templates/roles/search";
+import { RatingBadge, type RatingSummary } from "./Rating";
 
 export interface GalleryTemplate {
   id: string; name: string; description: string; professions: ProfessionId[]; styles: StyleTag[]; mood: "light" | "dark"; idealFor: string[];
-  palettes: string[]; status?: "approved" | "changes" | "rejected" | "pending";
+  palettes: string[]; status?: "approved" | "changes" | "rejected" | "pending"; rating?: RatingSummary;
 }
 
 const STATUS_LABEL = { approved: "Approved", changes: "Changes requested", rejected: "Rejected", pending: "Awaiting your review" } as const;
@@ -112,6 +113,7 @@ export default function Gallery({ templates, roles, initial, moderator }: { temp
           <h2 className="font-display text-[1.7rem] leading-none tracking-[-0.02em] text-ink">{template.name}</h2>
           <span className="flex gap-1" aria-label="Colour options">{template.palettes.slice(0, 3).map((colour, index) => <span key={index} className="size-3.5 rounded-full border border-black/10" style={{ background: colour }} />)}</span>
         </div>
+        <RatingBadge rating={template.rating} className="mt-2" />
         <p className="mt-3 text-[0.98rem] leading-relaxed text-ink-soft">{template.description}</p>
         <p className="mt-3 text-[0.86rem] text-ink-faint">For {template.idealFor.join(", ").toLowerCase()}</p>
         <div className="mt-auto flex items-center gap-5 pt-6">

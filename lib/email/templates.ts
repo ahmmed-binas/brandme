@@ -53,6 +53,18 @@ export const emails = {
     `It takes a minute, and Basic is $10 a year.`,
   ], { label: "Choose a plan", url: `${siteUrl}/pricing` }),
 
+  domainRenewalDue: (name: string | null, domain: string, expires: Date, price: string, included: boolean) => layout(`${domain} needs renewing by ${date(expires)}`, [
+    `Hi ${first(name)},`,
+    `Your domain ${domain} is registered until ${date(expires)}. Renew it before then to keep your portfolio at that address.`,
+    included ? `Your Premium plan includes the renewal, so there’s nothing to pay; just confirm it.` : `Renewing costs ${price} for another year. Domains don’t renew on their own, so you’re never charged without saying yes.`,
+    `If it expires, the address stops working and someone else could register it.`,
+  ], { label: `Renew ${domain}`, url: `${siteUrl}/account/domains` }),
+
+  domainRenewed: (name: string | null, domain: string, expires: Date) => layout(`${domain} is renewed`, [
+    `Hi ${first(name)},`,
+    `${domain} is renewed and now registered until ${date(expires)}. Nothing else changes; your portfolio stays at the same address.`,
+  ], { label: "Your domains", url: `${siteUrl}/account/domains` }),
+
   paused: (name: string | null) => layout("Your portfolio is resting", [
     `Hi ${first(name)},`,
     `Your portfolio is now resting. Nothing has been deleted: your content, images and address are all kept.`,

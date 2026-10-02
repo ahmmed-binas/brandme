@@ -6,6 +6,7 @@ import { isValidDomain } from "@/lib/domains/names";
 import { portfolioForHost } from "@/lib/domains/service";
 import { getPublishedFor } from "@/lib/portfolio/repository";
 import { databaseConfigured } from "@/utils/db-schema";
+import { siteForHost, sitePosts } from "@/lib/portfolio/site";
 
 /** A published portfolio served on its owner's custom domain (reached via the rewrite in proxy.ts). */
 const load = cache(async (rawHost: string) => {
@@ -32,6 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ host: str
 export default async function CustomDomainPage({ params }: { params: Promise<{ host: string }> }) {
   const { host } = await params;
   const portfolio = await load(host);
-  if (!portfolio) notFound();
-  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} />;
+  const site = await siteForHost(host);
+  if (!portfolio || !site) notFound();
+  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} posts={await sitePosts(site, 3)} home={site.home} />;
 }

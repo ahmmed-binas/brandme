@@ -5,6 +5,7 @@ import PublishedPortfolioView from "@/components/templates/PublishedPortfolioVie
 import { getPublished } from "@/lib/portfolio/repository";
 import { SLUG_PATTERN } from "@/lib/portfolio/schema";
 import { databaseConfigured } from "@/utils/db-schema";
+import { sitePathFor, sitePosts } from "@/lib/portfolio/site";
 
 const load = cache(async (slug: string) => {
   if (!databaseConfigured() || !SLUG_PATTERN.test(slug)) return null;
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PublishedPortfolioPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const portfolio = await load(slug);
-  if (!portfolio) notFound();
-  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} />;
+  const site = await sitePathFor(slug);
+  if (!portfolio || !site) notFound();
+  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} posts={await sitePosts(site, 3)} home={site.home} />;
 }

@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { PortfolioBlogIndex, PortfolioBlogPost } from "@/components/templates/PortfolioBlog";
+import type { StandardContent } from "./schema";
+import { sitePost, sitePosts, type Site } from "./site";
+
+/** Shared by /p/<slug>/blog and the custom-domain /blog, so both behave the same. */
+const ownerName = (site: Site) => (site.portfolio.content as StandardContent).name || site.portfolio.ownerName || "Blog";
+const base = (site: Site) => (site.canonical.startsWith("https://") ? { metadataBase: new URL(site.canonical) } : {});
+
+export async function blogIndexMetadata(site: Site | null): Promise<Metadata> {
+  if (!site || site.portfolio.resting) return { title: "Blog not found", robots: { index: false } };
+  const name = ownerName(site);
+  const url = `${site.canonical.replace(/\/$/, "")}/blog`;
+  return { ...base(site), title: { absolute: `Blog — ${name}` }, description: `Writing by ${name}.`, alternates: { canonical: url }, openGraph: { type: "website", title: `Blog — ${name}`, url } };
+}
+
+export async function BlogIndex({ site }: { site: Site | null }) {
+  if (!site || site.portfolio.resting) notFound();
+  return <PortfolioBlogIndex templateId={site.portfolio.templateId} content={site.portfolio.content as StandardContent} home={site.home} posts={await sitePosts(site)} />;
+}
+
+export async function blogPostMetadata(site: Site | null, slug: string): Promise<Metadata> {
+  const post = site ? await sitePost(site, slug) : null;
+  if (!site || !post) return { title: "Post not found", robots: { index: false } };
+  const url = `${site.canonical.replace(/\/$/, "")}/blog/${post.slug}`;
+  const name = ownerName(site);
+  return {
+    ...base(site), title: { absolute: `${post.title} — ${name}` }, description: post.summary.slice(0, 160), alternates: { canonical: url },
+    openGraph: { type: "article", title: post.title, description: post.summary.slice(0, 160), url, publishedTime: post.publishedAt ?? undefined, authors: [name], ...(post.cover ? { images: [post.cover] } : {}) },
+  };
+}
+
+export async function BlogPost({ site, slug }: { site: Site | null; slug: string }) {
+  const post = site ? await sitePost(site, slug) : null;
+  if (!site || !post) notFound();
+  const more = (await sitePosts(site, 4)).filter((item) => item.slug !== post.slug).slice(0, 3);
+  const schema = { "@context": "https://schema.org", "@type": "BlogPosting", headline: post.title, description: post.summary, datePublished: post.publishedAt, author: { "@type": "Person", name: ownerName(site) }, ...(post.cover ? { image: post.cover } : {}) };
+  return <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
+    <PortfolioBlogPost templateId={site.portfolio.templateId} content={site.portfolio.content as StandardContent} home={site.home} post={post} more={more} />
+  </>;
+}
