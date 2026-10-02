@@ -1,0 +1,24 @@
+# HTTPS for the Formora site and for customers' custom domains.
+{
+	email {$ACME_EMAIL}
+	# Certificates for customer domains are issued on their first visit, but only
+	# after the app confirms the domain is verified and published.
+	on_demand_tls {
+		ask http://app:3000/api/domains/tls-allowed
+	}
+}
+
+# The site itself.
+{$APP_DOMAIN}, www.{$APP_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}
+
+# Every other hostname is a customer domain pointed at this server.
+https:// {
+	tls {
+		on_demand
+	}
+	encode zstd gzip
+	reverse_proxy app:3000
+}

@@ -81,6 +81,19 @@ export const migrations = [
       `ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS version INTEGER NOT NULL DEFAULT 1`,
     ],
   },
+  {
+    id: "003_self_hosted_domains",
+    statements: [
+      // Domains now point at our own server. Connected domains prove ownership
+      // with a TXT record containing this token before they are served.
+      `ALTER TABLE custom_domains ADD COLUMN IF NOT EXISTS verification_token TEXT`,
+      `UPDATE custom_domains SET verification_token = md5(random()::text || domain) WHERE verification_token IS NULL`,
+      `ALTER TABLE custom_domains ALTER COLUMN verification_token SET NOT NULL`,
+      `ALTER TABLE custom_domains ADD COLUMN IF NOT EXISTS checked_at TIMESTAMPTZ`,
+      // Domains set up under the old Vercel-hosted flow must re-verify against this server.
+      `UPDATE custom_domains SET verified_at = NULL`,
+    ],
+  },
 ];
 
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.

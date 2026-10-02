@@ -2,7 +2,8 @@ import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
 import { domainErrorResponse } from "@/lib/domains/http";
 import { isValidDomain, normaliseDomain } from "@/lib/domains/names";
 import { connectDomain, domainOverview, removeDomain } from "@/lib/domains/service";
-import { vercelConfigured } from "@/lib/domains/vercel";
+import { serverDomainsConfigured } from "@/lib/domains/dns";
+import { registrarConfigured } from "@/lib/domains/vercel";
 import { stripeConfigured } from "@/lib/payments/stripe";
 
 type Context = { params: Promise<{ templateId: string }> };
@@ -11,8 +12,8 @@ type Context = { params: Promise<{ templateId: string }> };
 export const GET = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  const capabilities = { canBuy: vercelConfigured() && stripeConfigured(), canConnect: vercelConfigured() && owner.user.plan.connectOwnDomain, planName: owner.user.plan.name };
-  if (!vercelConfigured()) return Response.json({ domain: null, orders: [], capabilities });
+  const capabilities = { canBuy: serverDomainsConfigured() && registrarConfigured() && stripeConfigured(), canConnect: serverDomainsConfigured() && owner.user.plan.connectOwnDomain, planName: owner.user.plan.name };
+  if (!serverDomainsConfigured()) return Response.json({ domain: null, orders: [], capabilities });
   try {
     return Response.json({ ...(await domainOverview(owner.user, owner.templateId)), capabilities });
   } catch (error) {
@@ -24,7 +25,7 @@ export const GET = route(async (_request: Request, { params }: Context) => {
 export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  if (!vercelConfigured()) return jsonError(503, "Custom domains aren’t set up on this server yet.");
+  if (!serverDomainsConfigured()) return jsonError(503, "Custom domains aren’t set up on this server yet.");
   const body = await readJson(request, 1_000);
   if (body instanceof Response) return body;
   const domain = normaliseDomain(String((body as { domain?: unknown } | null)?.domain ?? ""));
@@ -40,7 +41,7 @@ export const POST = route(async (request: Request, { params }: Context) => {
 export const DELETE = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  if (!vercelConfigured()) return jsonError(503, "Custom domains aren’t set up on this server yet.");
+  if (!serverDomainsConfigured()) return jsonError(503, "Custom domains aren’t set up on this server yet.");
   try {
     await removeDomain(owner.user, owner.templateId);
     return Response.json({ domain: null });

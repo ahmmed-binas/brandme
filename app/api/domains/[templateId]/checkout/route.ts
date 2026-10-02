@@ -3,14 +3,15 @@ import { contactSchema } from "@/lib/domains/contact";
 import { domainErrorResponse } from "@/lib/domains/http";
 import { isValidDomain, normaliseDomain } from "@/lib/domains/names";
 import { startPurchase } from "@/lib/domains/service";
-import { vercelConfigured } from "@/lib/domains/vercel";
+import { serverDomainsConfigured } from "@/lib/domains/dns";
+import { registrarConfigured } from "@/lib/domains/vercel";
 import { appOrigin, stripeConfigured } from "@/lib/payments/stripe";
 
 /** Starts buying a domain: validates registrant details, re-prices on the server, and returns a Stripe Checkout URL. */
 export const POST = route(async (request: Request, { params }: { params: Promise<{ templateId: string }> }) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  if (!vercelConfigured() || !stripeConfigured()) return jsonError(503, "Buying domains isn’t set up on this server yet.");
+  if (!(serverDomainsConfigured() && registrarConfigured()) || !stripeConfigured()) return jsonError(503, "Buying domains isn’t set up on this server yet.");
   const body = await readJson(request, 5_000);
   if (body instanceof Response) return body;
   const { domain: rawDomain, contact } = (body ?? {}) as { domain?: unknown; contact?: unknown };

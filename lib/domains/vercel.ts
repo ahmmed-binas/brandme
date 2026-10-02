@@ -1,15 +1,15 @@
 /**
- * Vercel API client for domains: the registrar (search, price, buy) and
- * attaching domains to this project so Vercel serves them with HTTPS.
+ * Vercel API client used only as a domain registrar: search, price, buy, and
+ * set DNS records on bought domains. Portfolios are served by our own server,
+ * not Vercel, so no Vercel project or hosting is involved.
  *
- * Requires VERCEL_API_TOKEN and VERCEL_PROJECT_ID (and VERCEL_TEAM_ID when the
- * project belongs to a team). Responses are parsed defensively because only
- * the fields used here are relied on.
+ * Requires VERCEL_API_TOKEN (and VERCEL_TEAM_ID when the token is for a team).
+ * Responses are parsed defensively; only the fields used here are relied on.
  */
 
 const API = process.env.VERCEL_API_URL ?? "https://api.vercel.com";
 
-export const vercelConfigured = () => Boolean(process.env.VERCEL_API_TOKEN && process.env.VERCEL_PROJECT_ID);
+export const registrarConfigured = () => Boolean(process.env.VERCEL_API_TOKEN);
 
 export class VercelError extends Error {
   constructor(message: string, readonly status: number, readonly code?: string) { super(message); }
@@ -32,7 +32,6 @@ async function vercel<T>(method: string, path: string, body?: unknown): Promise<
   return data as T;
 }
 
-const project = () => encodeURIComponent(process.env.VERCEL_PROJECT_ID!);
 const enc = encodeURIComponent;
 
 // ---------------------------------------------------------------------------
@@ -96,61 +95,19 @@ export async function getOrder(orderId: string): Promise<{ state: OrderState; er
 }
 
 // ---------------------------------------------------------------------------
-// Project domains
+// DNS for bought domains (they use Vercel's nameservers)
 // ---------------------------------------------------------------------------
 
-export interface VerificationRecord { type: string; domain: string; value: string; reason?: string }
-export interface ProjectDomain { name: string; verified: boolean; verification: VerificationRecord[] }
-
-const toProjectDomain = (data: Partial<ProjectDomain> & { name?: string }): ProjectDomain => ({ name: String(data.name ?? ""), verified: data.verified === true, verification: Array.isArray(data.verification) ? data.verification : [] });
-
-/** Adds the domain to this project. Adding one that is already on this project is not an error. */
-export async function addProjectDomain(domain: string): Promise<ProjectDomain> {
-  try {
-    return toProjectDomain(await vercel("POST", `/v10/projects/${project()}/domains`, { name: domain }));
-  } catch (error) {
-    if (error instanceof VercelError && error.status === 409) {
-      const existing = await getProjectDomain(domain).catch(() => null);
-      if (existing) return existing;
-      throw new VercelError("This domain is already connected to another Vercel project. Remove it there first.", 409, error.code);
+/**
+ * Points a bought domain (and its www) at our server. An existing identical
+ * record is not an error, so this is safe to retry.
+ */
+export async function pointDomainAtServer(domain: string, ipv4: string): Promise<void> {
+  for (const name of ["", "www"]) {
+    try {
+      await vercel("POST", `/v2/domains/${enc(domain)}/records`, { name, type: "A", value: ipv4, ttl: 60 });
+    } catch (error) {
+      if (!(error instanceof VercelError && error.status === 409)) throw error;
     }
-    throw error;
   }
-}
-
-export async function getProjectDomain(domain: string): Promise<ProjectDomain> {
-  return toProjectDomain(await vercel("GET", `/v9/projects/${project()}/domains/${enc(domain)}`));
-}
-
-export async function verifyProjectDomain(domain: string): Promise<ProjectDomain> {
-  try {
-    return toProjectDomain(await vercel("POST", `/v9/projects/${project()}/domains/${enc(domain)}/verify`));
-  } catch (error) {
-    // Not yet verifiable is a normal state while DNS propagates.
-    if (error instanceof VercelError && error.status < 500) return getProjectDomain(domain);
-    throw error;
-  }
-}
-
-export async function removeProjectDomain(domain: string): Promise<void> {
-  try {
-    await vercel("DELETE", `/v9/projects/${project()}/domains/${enc(domain)}`);
-  } catch (error) {
-    if (!(error instanceof VercelError && error.status === 404)) throw error;
-  }
-}
-
-/** Whether DNS for the domain points at Vercel. */
-export async function isMisconfigured(domain: string): Promise<boolean> {
-  const data = await vercel<{ misconfigured?: boolean }>("GET", `/v6/domains/${enc(domain)}/config`);
-  return data.misconfigured !== false;
-}
-
-/** The DNS records a user adds at their registrar to point a domain at Vercel. */
-export function dnsRecordsFor(domain: string, apex: boolean, verification: VerificationRecord[]) {
-  const pointing = apex
-    ? { type: "A", name: "@", value: "76.76.21.21" }
-    : { type: "CNAME", name: domain.split(".").slice(0, -2).join("."), value: "cname.vercel-dns.com" };
-  const ownership = verification.map((record) => ({ type: record.type, name: record.domain.replace(new RegExp(`\\.?${domain.replace(/\./g, "\\.")}$`), "") || "@", value: record.value }));
-  return [pointing, ...ownership];
 }

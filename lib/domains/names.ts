@@ -20,8 +20,18 @@ export function isValidDomain(domain: string): boolean {
 /** The bare domain without "www.", which is how domains are stored. */
 export const apexOf = (domain: string) => domain.replace(/^www\./, "");
 
-/** Whether the domain is the root of a name ("ada.dev") rather than a subdomain ("me.ada.dev"). Assumes single-label TLDs. */
-export const isApex = (domain: string) => apexOf(domain).split(".").length === 2;
+/** Common two-part endings, so "ada.co.uk" is treated as a root domain rather than a subdomain of "co.uk". */
+const TWO_PART_SUFFIXES = new Set(["co.uk", "org.uk", "me.uk", "ac.uk", "com.au", "net.au", "org.au", "co.nz", "co.za", "com.br", "co.in", "co.jp", "com.mx", "com.pl", "com.tr", "com.sg", "com.ar", "co.il", "co.kr", "com.cn"]);
+
+/** The registrable root of a hostname: "me.ada.dev" → "ada.dev", "www.ada.co.uk" → "ada.co.uk". */
+export function rootDomain(domain: string): string {
+  const labels = domain.split(".");
+  const size = TWO_PART_SUFFIXES.has(labels.slice(-2).join(".")) ? 3 : 2;
+  return labels.slice(-size).join(".");
+}
+
+/** Whether the domain is the root of a name ("ada.dev") rather than a subdomain ("me.ada.dev"). "www." counts as the root. */
+export const isApex = (domain: string) => rootDomain(apexOf(domain)) === apexOf(domain);
 
 /** The TLDs offered in suggestions, in order of how professional they read. */
 export const SUGGESTED_TLDS = ["com", "dev", "me", "io", "co", "site"];

@@ -1,23 +1,26 @@
 # Custom domains and profile import: setup
 
+Portfolios are served by **your own server** (see `SELF_HOSTING.md`). Caddy issues HTTPS certificates for customer domains automatically.
+
 ## How custom domains work
 
-1. **Buy a domain** (any plan). In the editor's Publish dialog the user searches a name; suggestions such as `adalovelace.com` and `adalovelace.dev` are checked against the Vercel registrar, with the customer's price shown. They enter the registrant details ICANN requires (they become the legal owner) and pay through Stripe Checkout. The Stripe webhook then buys the domain, attaches it (and `www.`) to the project, and Vercel issues HTTPS automatically. If registration fails, the payment is refunded automatically.
-2. **Connect a domain they already own** (plans with `connectOwnDomain`, Pro by default). The domain is added to the Vercel project, and the user sees the exact DNS records to add (an `A` record for a root domain, a `CNAME` for a subdomain, plus a `TXT` record if Vercel needs ownership proof). The status updates by itself once DNS is correct.
-3. **Serving.** `proxy.ts` rewrites any request whose host isn't the site's own (`APP_URL` / `APP_HOSTS`) to `/sites/<host>`, which renders that person's published portfolio. Unpublished portfolios and unknown domains return 404.
+1. **Buy a domain** (any plan). In the editor's Publish dialog the user searches a name; suggestions such as `adalovelace.com` and `adalovelace.dev` are checked against the Vercel registrar, with the customer's price shown. They enter the registrant details ICANN requires (they become the legal owner) and pay through Stripe Checkout. The Stripe webhook buys the domain, then sets its DNS (`@` and `www`) to `SERVER_IPV4`. If registration fails, the payment is refunded automatically. Vercel is only the registrar; nothing is hosted there.
+2. **Connect a domain they already own** (plans with `connectOwnDomain`, Pro by default). The editor shows two records to add at their DNS provider:
+   - `TXT _formora.<domain>` = `formora-verify=<token>`. This proves they control the domain, so nobody can claim someone else's.
+   - `A <domain>` and `A www.<domain>` → `SERVER_IPV4` (or `CNAME` → `SITES_CNAME_TARGET` for a subdomain like `me.ada.dev`).
+   The app checks DNS itself and turns the domain "Live" once both are correct.
+3. **Serving.** `proxy.ts` rewrites requests for customer hosts to `/sites/<host>`, which renders the published portfolio. Only verified domains are served. Caddy asks `/api/domains/tls-allowed` before issuing a certificate and gets a yes only for verified domains with a published portfolio.
 
-Code: `lib/domains/` (names, Vercel client, business rules), `app/api/domains/`, `app/api/webhooks/stripe/`, `components/editor/DomainPanel.tsx`.
+Code: `lib/domains/` (names, DNS checks, registrar client, business rules), `app/api/domains/`, `app/api/webhooks/stripe/`, `components/editor/DomainPanel.tsx`, `proxy.ts`, `Caddyfile`.
 
 ## One-time setup
 
-The site must be hosted on **Vercel** (it attaches domains to the Vercel project and Vercel provides the certificates).
-
-1. **Vercel token:** Vercel → Account Settings → Tokens → create a token with access to the team that owns the project → `VERCEL_API_TOKEN`.
-2. **Project id:** Vercel → Project → Settings → General → Project ID → `VERCEL_PROJECT_ID`. If the project belongs to a team, also set `VERCEL_TEAM_ID` (Team Settings → General).
-3. **Payment method on Vercel:** domain purchases are charged to the Vercel account, so add a card there. Formora charges the customer first, so purchases are always pre-paid.
-4. **Stripe:** Dashboard → Developers → API keys → `STRIPE_SECRET_KEY`. Then Developers → Webhooks → Add endpoint `https://YOUR-DOMAIN/api/webhooks/stripe` with the events `checkout.session.completed` and `checkout.session.async_payment_succeeded` → copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
-5. **`APP_URL`:** the site's own URL (e.g. `https://formora.app`). Without it, custom-domain routing stays off.
-6. Optional pricing: `DOMAIN_MARKUP_PERCENT` (default 20) and `DOMAIN_SERVICE_FEE_CENTS` (default 300). A $12 domain sells for $18.
+1. **`SERVER_IPV4`**: your server's public IPv4 address. Without it, custom domains are switched off.
+2. **`APP_URL`**: your site's own URL (e.g. `https://formora.app`), so the app can tell its own domain from customers' domains.
+3. To **sell** domains:
+   - **Vercel token:** Vercel → Account Settings → Tokens → `VERCEL_API_TOKEN` (plus `VERCEL_TEAM_ID` if the token belongs to a team). Add a card on Vercel; domain purchases are charged there, after your customer has already paid you.
+   - **Stripe:** Dashboard → Developers → API keys → `STRIPE_SECRET_KEY`. Then Developers → Webhooks → endpoint `https://YOUR-DOMAIN/api/webhooks/stripe` with the events `checkout.session.completed` and `checkout.session.async_payment_succeeded` → signing secret into `STRIPE_WEBHOOK_SECRET`.
+   - Optional pricing: `DOMAIN_MARKUP_PERCENT` (default 20) and `DOMAIN_SERVICE_FEE_CENTS` (default 300). A $12 domain sells for $18.
 
 ## Not built yet
 

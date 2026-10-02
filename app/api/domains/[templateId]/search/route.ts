@@ -2,13 +2,14 @@ import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
 import { domainErrorResponse } from "@/lib/domains/http";
 import { suggestDomains } from "@/lib/domains/names";
 import { priceDomains } from "@/lib/domains/service";
-import { vercelConfigured } from "@/lib/domains/vercel";
+import { serverDomainsConfigured } from "@/lib/domains/dns";
+import { registrarConfigured } from "@/lib/domains/vercel";
 
 /** Domain ideas from a search term (or the person's name), with availability and the customer's price. */
 export const POST = route(async (request: Request, { params }: { params: Promise<{ templateId: string }> }) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  if (!vercelConfigured()) return jsonError(503, "Domain search isn’t set up on this server yet.");
+  if (!(serverDomainsConfigured() && registrarConfigured())) return jsonError(503, "Domain search isn’t set up on this server yet.");
   const body = await readJson(request, 1_000);
   if (body instanceof Response) return body;
   const { query, name } = (body ?? {}) as { query?: unknown; name?: unknown };

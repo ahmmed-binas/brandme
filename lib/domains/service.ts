@@ -3,7 +3,9 @@ import { ensureSchema } from "@/utils/db-schema";
 import type { CurrentUser } from "@/utils/user-account";
 import type { TemplateId } from "@/lib/templates/types";
 import { stripe } from "@/lib/payments/stripe";
-import { apexOf, isApex } from "./names";
+import { randomBytes } from "node:crypto";
+import { apexOf } from "./names";
+import { checkDomain, recordsFor, type DnsRecord } from "./dns";
 import * as vercel from "./vercel";
 
 /**
@@ -14,7 +16,11 @@ import * as vercel from "./vercel";
  *   buy the domain, with the customer as the legal registrant. If registration
  *   fails, the payment is refunded automatically.
  * - Connected domains (already owned) require a plan that includes them.
- * - A domain shows the portfolio only while the portfolio is published.
+ * - A domain shows the portfolio only while the portfolio is published, and
+ *   only after it is verified: it resolves to this server and, for connected
+ *   domains, carries the owner's TXT token (so nobody can claim a domain they
+ *   don't control). HTTPS certificates are issued by Caddy only for verified
+ *   domains (see tlsAllowed).
  */
 
 /** Customer price for one year: registrar price + margin + flat fee, rounded up to a whole dollar. */
@@ -31,16 +37,16 @@ export interface DomainView {
   source: "connected" | "purchased";
   status: DomainStatus;
   /** DNS records to add at the registrar (connected domains that aren't live yet). */
-  records: Array<{ type: string; name: string; value: string }>;
+  records: DnsRecord[];
   message?: string;
 }
 
 export interface OrderView { id: string; domain: string; status: string; chargedCents: number; error: string | null; createdAt: string }
 
-interface DomainRow { domain: string; source: "connected" | "purchased"; verified_at: Date | null }
+interface DomainRow { domain: string; source: "connected" | "purchased"; verified_at: Date | null; verification_token: string }
 
 async function domainRow(ownerId: string, templateId: TemplateId): Promise<DomainRow | null> {
-  const result = await db.query<DomainRow>("SELECT domain, source, verified_at FROM custom_domains WHERE owner_id = $1 AND template_id = $2", [ownerId, templateId]);
+  const result = await db.query<DomainRow>("SELECT domain, source, verified_at, verification_token FROM custom_domains WHERE owner_id = $1 AND template_id = $2", [ownerId, templateId]);
   return result.rows[0] ?? null;
 }
 
@@ -49,27 +55,32 @@ export async function portfolioExists(ownerId: string, templateId: TemplateId): 
   return Boolean((await db.query("SELECT 1 FROM portfolios WHERE owner_id = $1 AND template_id = $2", [ownerId, templateId])).rowCount);
 }
 
-/** Checks the live state of a domain with Vercel and records when it first goes live. */
+async function registrationPending(domain: string): Promise<boolean> {
+  const result = await db.query("SELECT 1 FROM domain_orders WHERE domain = $1 AND status IN ('purchasing', 'registering')", [domain]);
+  return Boolean(result.rowCount);
+}
+
+/**
+ * Checks a domain's DNS and records when it first goes live. A verified domain
+ * that later stops pointing here is shown as needing attention but keeps
+ * serving, so a brief DNS hiccup doesn't take a portfolio offline.
+ */
 async function describeDomain(row: DomainRow): Promise<DomainView> {
-  let projectDomain: vercel.ProjectDomain;
-  try {
-    projectDomain = await vercel.verifyProjectDomain(row.domain);
-  } catch (error) {
-    // Bought domains can't be attached until registration finishes.
-    if (row.source === "purchased") return { domain: row.domain, source: row.source, status: "registering", records: [], message: "Your domain is being registered. This usually takes a few minutes." };
-    return { domain: row.domain, source: row.source, status: "pending_dns", records: vercel.dnsRecordsFor(row.domain, isApex(row.domain), []), message: (error as Error).message };
+  const base = { domain: row.domain, source: row.source };
+  if (row.source === "purchased" && await registrationPending(row.domain)) return { ...base, status: "registering", records: [], message: "Your domain is being registered. This usually takes a few minutes." };
+  const token = row.source === "connected" ? row.verification_token : null;
+  const check = await checkDomain(row.domain, token);
+  await db.query("UPDATE custom_domains SET checked_at = NOW() WHERE domain = $1", [row.domain]);
+  if (check.ownershipVerified && check.pointsHere) {
+    if (!row.verified_at) await db.query("UPDATE custom_domains SET verified_at = NOW() WHERE domain = $1", [row.domain]);
+    return { ...base, status: "active", records: [], message: "HTTPS is set up automatically on the first visit." };
   }
-  const misconfigured = await vercel.isMisconfigured(row.domain).catch(() => true);
-  const live = projectDomain.verified && !misconfigured;
-  if (live && !row.verified_at) await db.query("UPDATE custom_domains SET verified_at = NOW() WHERE domain = $1", [row.domain]);
-  if (live) return { domain: row.domain, source: row.source, status: "active", records: [] };
-  return {
-    domain: row.domain,
-    source: row.source,
-    status: "pending_dns",
-    records: row.source === "purchased" ? [] : vercel.dnsRecordsFor(row.domain, isApex(row.domain), projectDomain.verification),
-    message: row.source === "purchased" ? "Your domain is registered and its secure certificate is being issued. This can take up to an hour." : "Add these records at your domain provider. Changes usually apply within an hour, sometimes up to 48 hours.",
-  };
+  if (row.source === "purchased") return { ...base, status: "pending_dns", records: [], message: "Your domain is registered and its settings are spreading across the internet. This usually takes a few minutes, occasionally up to an hour." };
+  const missing = [
+    !check.ownershipVerified && "the TXT record",
+    !check.pointsHere && (check.foundAddresses.length ? `the address record (it currently points to ${check.foundAddresses.join(", ")})` : "the address record"),
+  ].filter(Boolean).join(" and ");
+  return { ...base, status: "pending_dns", records: recordsFor(row.domain, token), message: `Waiting for ${missing}. Changes usually apply within an hour, sometimes up to 48 hours.` };
 }
 
 /** The portfolio's domain (with live status) and its recent purchase orders. Also advances any orders in progress. */
@@ -104,10 +115,9 @@ export async function connectDomain(user: CurrentUser, templateId: TemplateId, d
   if (!user.plan.connectOwnDomain) throw new DomainError(`Connecting a domain you already own isn’t included in the ${user.plan.name} plan.`, 402);
   if (!(await portfolioExists(user.id, templateId))) throw new DomainError("Save your portfolio before adding a domain.", 404);
   await assertDomainFree(domain, user.id, templateId);
-  await vercel.addProjectDomain(domain);
   await db.query(
-    "INSERT INTO custom_domains (domain, owner_id, template_id, source) VALUES ($1, $2, $3, 'connected') ON CONFLICT (domain) DO NOTHING",
-    [domain, user.id, templateId],
+    "INSERT INTO custom_domains (domain, owner_id, template_id, source, verification_token) VALUES ($1, $2, $3, 'connected', $4) ON CONFLICT (domain) DO NOTHING",
+    [domain, user.id, templateId, randomBytes(12).toString("hex")],
   );
   return describeDomain((await domainRow(user.id, templateId))!);
 }
@@ -117,7 +127,6 @@ export async function removeDomain(user: CurrentUser, templateId: TemplateId): P
   await ensureSchema();
   const row = await domainRow(user.id, templateId);
   if (!row) return;
-  await vercel.removeProjectDomain(row.domain);
   await db.query("DELETE FROM custom_domains WHERE domain = $1 AND owner_id = $2", [row.domain, user.id]);
 }
 
@@ -197,8 +206,8 @@ export async function fulfilPaidOrder(orderId: string, paymentIntent: string | n
   if (!order) return;
   // Reserve the domain for this portfolio before spending money on it.
   const reserved = await db.query(
-    "INSERT INTO custom_domains (domain, owner_id, template_id, source) VALUES ($1, $2, $3, 'purchased') ON CONFLICT DO NOTHING",
-    [order.domain, order.owner_id, order.template_id],
+    "INSERT INTO custom_domains (domain, owner_id, template_id, source, verification_token) VALUES ($1, $2, $3, 'purchased', $4) ON CONFLICT DO NOTHING",
+    [order.domain, order.owner_id, order.template_id, randomBytes(12).toString("hex")],
   );
   if (!reserved.rowCount) {
     await refund(orderId, paymentIntent, `${order.domain} is already connected to a portfolio, so your payment has been refunded.`);
@@ -229,11 +238,10 @@ export async function advanceOrders(ownerId: string): Promise<void> {
     const state = await vercel.getOrder(order.registrar_order_id).catch(() => ({ state: "pending" as const, error: undefined }));
     if (state.state === "completed") {
       try {
-        await vercel.addProjectDomain(order.domain);
-        if (order.domain === apexOf(order.domain)) await vercel.addProjectDomain(`www.${order.domain}`).catch(() => undefined);
+        await vercel.pointDomainAtServer(order.domain, process.env.SERVER_IPV4!);
         await db.query("UPDATE domain_orders SET status = 'completed', updated_at = NOW() WHERE id = $1", [order.id]);
       } catch (error) {
-        console.error("Attaching purchased domain failed; will retry", order.domain, error);
+        console.error("Pointing purchased domain at the server failed; will retry", order.domain, error);
       }
     } else if (state.state === "failed") {
       await db.query("DELETE FROM custom_domains WHERE domain = $1 AND owner_id = $2 AND source = 'purchased'", [order.domain, ownerId]);
@@ -242,13 +250,28 @@ export async function advanceOrders(ownerId: string): Promise<void> {
   }
 }
 
-/** Finds the published portfolio for a custom-domain request ("www." is accepted). */
+/** Finds the portfolio behind a verified custom domain ("www." is accepted). */
 export async function portfolioForHost(host: string): Promise<{ ownerId: string; templateId: TemplateId } | null> {
   await ensureSchema();
   const result = await db.query<{ owner_id: string; template_id: TemplateId }>(
-    "SELECT owner_id, template_id FROM custom_domains WHERE domain = $1 OR domain = $2 LIMIT 1",
+    "SELECT owner_id, template_id FROM custom_domains WHERE (domain = $1 OR domain = $2) AND verified_at IS NOT NULL LIMIT 1",
     [host, apexOf(host)],
   );
   const row = result.rows[0];
   return row ? { ownerId: row.owner_id, templateId: row.template_id } : null;
+}
+
+/**
+ * Whether Caddy may request an HTTPS certificate for this host: only verified
+ * domains whose portfolio is published. Anything else is refused, so strangers
+ * can't make the server request certificates for arbitrary names.
+ */
+export async function tlsAllowed(host: string): Promise<boolean> {
+  await ensureSchema();
+  const result = await db.query(
+    `SELECT 1 FROM custom_domains d JOIN portfolios p ON p.owner_id = d.owner_id AND p.template_id = d.template_id
+     WHERE (d.domain = $1 OR d.domain = $2) AND d.verified_at IS NOT NULL AND p.published_at IS NOT NULL LIMIT 1`,
+    [host, apexOf(host)],
+  );
+  return Boolean(result.rowCount);
 }
