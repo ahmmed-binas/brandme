@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
-import { templateCatalog } from "@/lib/templates/catalog";
+import { availableTemplates } from "@/lib/templates/approval";
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 
@@ -12,10 +12,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages: MetadataRoute.Sitemap = [
     { url: `${siteUrl}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${siteUrl}/templatechooser`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${siteUrl}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${siteUrl}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${siteUrl}/community`, lastModified: now, changeFrequency: "daily", priority: 0.6 },
     { url: `${siteUrl}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.5 },
     { url: `${siteUrl}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    ...templateCatalog.map((template) => ({ url: `${siteUrl}/templates/${template.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 })),
+    ...(await availableTemplates()).map((template) => ({ url: `${siteUrl}/templates/${template.id}`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 })),
   ];
   if (!databaseConfigured()) return pages;
   try {

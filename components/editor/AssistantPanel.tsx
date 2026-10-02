@@ -29,13 +29,14 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
   const [messages, setMessages] = useState<Message[]>([{ role: "assistant", text: intro }]);
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
-  const [remaining, setRemaining] = useState<number | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [ownKey, setOwnKey] = useState(false);
   const log = useRef<HTMLDivElement | null>(null);
   const say = (message: Message) => setMessages((current) => [...current, message]);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/ai/assist").then((response) => response.json()).then((body: { available?: boolean }) => { if (!cancelled) setAvailable(Boolean(body.available)); }).catch(() => undefined);
+    fetch("/api/ai/assist").then((response) => response.json()).then((body: { available?: boolean; credits?: number | null; ownKey?: boolean }) => { if (cancelled) return; setAvailable(Boolean(body.available)); if (typeof body.credits === "number") setCredits(body.credits); setOwnKey(Boolean(body.ownKey)); }).catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
   useEffect(() => { log.current?.scrollTo({ top: log.current.scrollHeight, behavior: "smooth" }); }, [messages]);
@@ -52,7 +53,7 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error ?? "The assistant could not complete that request.");
         if (body.changed) onContent(body.content as T);
-        if (typeof body.remaining === "number") setRemaining(body.remaining);
+        if (typeof body.credits === "number") setCredits(body.credits);
         say({ role: "assistant", text: body.reply || (body.changed ? "Done." : "I didn’t change anything.") });
       } catch (error) {
         say({ role: "assistant", text: (error as Error).message });
@@ -90,7 +91,7 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
         <input value={prompt} onChange={(event) => setPrompt(event.target.value)} maxLength={1000} placeholder={available && signedIn ? "e.g. Make my bio warmer and shorter" : "Ask for a content change…"} className="min-w-0 flex-1 px-2 py-2 text-sm outline-none" />
         <button disabled={busy} className="rounded-lg bg-violet-600 p-2 text-white hover:bg-violet-700 disabled:opacity-50" aria-label="Send"><Send size={16} /></button>
       </div>
-      <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400"><Sparkles size={11} /> {available && signedIn ? (remaining === null ? "AI edits are included in your plan" : `${remaining} AI edits left today`) : "Local quick actions are enabled"}</p>
+      <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400"><Sparkles size={11} /> {available && signedIn ? (ownKey ? "Using your own Claude API key" : credits === null ? "AI is paid with credits" : <>{credits} credits left · <Link href="/account#ai" className="underline">add more</Link></>) : "Local quick actions are enabled"}</p>
     </form>
   </>;
 }

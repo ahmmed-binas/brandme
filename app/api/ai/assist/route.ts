@@ -1,19 +1,25 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
-import { assistantConfigured, assistWithContent } from "@/lib/ai/portfolio-assistant";
-import { consumeAiEdit, refundAiEdit } from "@/lib/portfolio/repository";
+import { assistWithContent } from "@/lib/ai/portfolio-assistant";
+import { openAi, platformAiConfigured, releaseRequest, settleAi } from "@/lib/ai/metering";
 import { MAX_CONTENT_BYTES, validateContent } from "@/lib/portfolio/schema";
 import { isTemplateId } from "@/lib/templates/catalog";
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 
-/** Whether the AI assistant is available, so the editor can offer it or fall back to quick actions. */
+/** Whether the assistant can run for this visitor, and how it would be paid for. */
 export const GET = route(async () => {
-  return Response.json({ available: assistantConfigured() && databaseConfigured() });
+  if (!databaseConfigured()) return Response.json({ available: false });
+  const user = await getCurrentUser().catch(() => null);
+  return Response.json({
+    available: platformAiConfigured() || Boolean(user?.hasOwnKey),
+    credits: user?.credits ?? null,
+    ownKey: user?.hasOwnKey ?? false,
+  });
 });
 
-/** Rewrites portfolio copy from a plain-language request. Signed-in users only, metered per plan. */
+/** Rewrites portfolio copy from a plain-language request. Paid with credits or the user's own key. */
 export const POST = route(async (request: Request) => {
-  if (!assistantConfigured() || !databaseConfigured()) return jsonError(503, "The AI assistant is not configured on this server.");
+  if (!databaseConfigured()) return jsonError(503, "The AI assistant is not configured on this server.");
   const user = await getCurrentUser();
   if (!user) return jsonError(401, "Sign in to use the AI assistant.");
 
@@ -26,25 +32,21 @@ export const POST = route(async (request: Request) => {
   const validation = validateContent(templateId, content);
   if (!validation.ok) return jsonError(422, validation.error);
 
-  const usage = await consumeAiEdit(user);
-  if (!usage.allowed) return jsonError(429, `You've used today's ${user.plan.aiEditsPerDay} AI edits on the ${user.plan.name} plan. They reset at midnight UTC.`);
-
+  const gate = await openAi(user);
+  if (!gate.ok) return jsonError(gate.status, gate.error);
   try {
-    const result = await assistWithContent(validation.content, instruction.trim());
+    const result = await assistWithContent(gate.access.client, validation.content, instruction.trim());
+    const bill = await settleAi(gate.access, result.usage, "AI edit");
     if (!result.ok) {
-      await refundAiEdit(user.id);
+      if (!result.usage) await releaseRequest(user.id);
       return jsonError(result.status, result.error);
     }
     // Re-validate: the assistant's output passes the same gate as anything a user types.
     const checked = validateContent(templateId, result.content);
-    if (!checked.ok) {
-      await refundAiEdit(user.id);
-      return jsonError(502, "The assistant produced content that could not be used. Please try again.");
-    }
-    if (!result.changed) await refundAiEdit(user.id);
-    return Response.json({ content: checked.content, reply: result.reply, changed: result.changed, remaining: result.changed ? usage.remaining : usage.remaining + 1 });
+    if (!checked.ok) return jsonError(502, "The assistant produced content that could not be used. Please try again.");
+    return Response.json({ content: checked.content, reply: result.reply, changed: result.changed, charged: bill.charged, credits: bill.balance });
   } catch (error) {
-    await refundAiEdit(user.id);
+    await releaseRequest(user.id);
     throw error;
   }
 });

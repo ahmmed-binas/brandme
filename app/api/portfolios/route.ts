@@ -10,7 +10,10 @@ export const GET = route(async () => {
   if (!user) return jsonError(401, "Sign in to see your portfolios.");
   const drafts = await listDrafts(user.id);
   return Response.json({
-    plan: { id: user.planId, ...user.plan },
+    plan: user.plan,
+    standing: { state: user.standing.standing, daysLeft: user.standing.daysLeft, endsAt: user.standing.endsAt.toISOString() },
+    credits: user.credits,
+    ownKey: user.hasOwnKey,
     portfolios: drafts.map(({ content, ...draft }) => ({ ...draft, name: (content.name ?? (content.personal as { name?: string } | undefined)?.name ?? "") as string })),
   });
 });

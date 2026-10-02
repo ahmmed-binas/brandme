@@ -26,3 +26,19 @@ export async function compressImage(file: File): Promise<string> {
   }
   throw new Error("That image is too detailed to store. Try a smaller or simpler image.");
 }
+
+/**
+ * Downsizes an image and, for signed-in users, uploads it so the portfolio
+ * stores a short URL instead of the image itself. Signed-out drafts keep the
+ * image inline (they live only in this browser until the person signs in).
+ */
+export async function prepareImage(file: File, signedIn: boolean): Promise<string> {
+  const dataUrl = await compressImage(file);
+  if (!signedIn) return dataUrl;
+  const blob = await (await fetch(dataUrl)).blob();
+  const response = await fetch("/api/assets", { method: "POST", headers: { "Content-Type": blob.type }, body: blob });
+  const body = await response.json().catch(() => ({}));
+  if (response.status === 401) return dataUrl;
+  if (!response.ok) throw new Error(body.error ?? "That image couldn’t be uploaded. Please try again.");
+  return body.url as string;
+}

@@ -54,7 +54,7 @@ export function ListField({ label, value, onChange, max = 30, className = "" }: 
 }
 
 /** Publish / update / unpublish flow. Requires an account so the page has an owner. */
-export function PublishDialog({ open, onClose, signedIn, templateId, info, suggestedSlug, publish, unpublish }: {
+export function PublishDialog({ open, onClose, signedIn, templateId, info, suggestedSlug, publish, unpublish, warning }: {
   open: boolean;
   onClose: () => void;
   signedIn: boolean;
@@ -63,6 +63,8 @@ export function PublishDialog({ open, onClose, signedIn, templateId, info, sugge
   suggestedSlug: string;
   publish: (slug: string) => Promise<string>;
   unpublish: () => Promise<void>;
+  /** Shown above the publish button, e.g. when the portfolio still has sample content. */
+  warning?: string;
 }) {
   // Follows the saved address (which may load after the dialog opens) until the user types their own.
   const [typedSlug, setSlug] = useState<string | null>(null);
@@ -118,6 +120,7 @@ export function PublishDialog({ open, onClose, signedIn, templateId, info, sugge
           </div>
           {localError && slug && <span className="mt-1 block text-xs text-red-600">{localError}</span>}
         </label>
+        {warning && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{warning}</p>}
         {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
         <button disabled={busy || Boolean(localError)} onClick={() => void run(() => publish(slug))} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50">
           {busy && <Loader2 size={16} className="animate-spin" />}{live ? (info.slug === slug ? "Publish latest changes" : "Move to this address") : "Publish portfolio"}

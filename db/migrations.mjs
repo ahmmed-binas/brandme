@@ -149,6 +149,129 @@ export const migrations = [
   },
 ];
 
+migrations.push({
+  id: "005_studio_billing",
+  statements: [
+    // Images uploaded in the editor. Stored once and referenced by URL, so autosaves stay small.
+    `CREATE TABLE IF NOT EXISTS portfolio_assets (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      mime TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      data BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS portfolio_assets_owner ON portfolio_assets (owner_id)`,
+    // The owner approves each template before customers can choose it.
+    `CREATE TABLE IF NOT EXISTS template_reviews (
+      template_id TEXT PRIMARY KEY,
+      status TEXT NOT NULL CHECK (status IN ('approved', 'changes', 'rejected')),
+      note TEXT,
+      reviewed_by UUID REFERENCES app_users(id) ON DELETE SET NULL,
+      reviewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    // Plans: trial (14 days), then a 14-day grace period, then paused until paid.
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`,
+    `UPDATE app_users SET trial_ends_at = GREATEST(created_at, NOW()) + INTERVAL '14 days' WHERE trial_ends_at IS NULL`,
+    `ALTER TABLE app_users ALTER COLUMN trial_ends_at SET DEFAULT NOW() + INTERVAL '14 days'`,
+    `ALTER TABLE app_users ALTER COLUMN trial_ends_at SET NOT NULL`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS plan_expires_at TIMESTAMPTZ`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN NOT NULL DEFAULT TRUE`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS stripe_payment_method TEXT`,
+    // Old 'free' and 'pro' values map onto the new plans.
+    `UPDATE app_users SET plan = 'trial' WHERE plan = 'free'`,
+    `UPDATE app_users SET plan_expires_at = NOW() + INTERVAL '1 year' WHERE plan = 'pro' AND plan_expires_at IS NULL`,
+    `ALTER TABLE app_users ALTER COLUMN plan SET DEFAULT 'trial'`,
+    // AI: prepaid credits, or the user's own Anthropic key (encrypted at rest).
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS credits INTEGER NOT NULL DEFAULT 0 CHECK (credits >= 0)`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS anthropic_key_enc TEXT`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS anthropic_key_hint TEXT`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS emails_opt_out BOOLEAN NOT NULL DEFAULT FALSE`,
+    // Auto-update settings.
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS github_username TEXT`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS auto_update BOOLEAN NOT NULL DEFAULT TRUE`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS last_synced_at TIMESTAMPTZ`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS last_research_at TIMESTAMPTZ`,
+    `CREATE TABLE IF NOT EXISTS credit_ledger (
+      id BIGSERIAL PRIMARY KEY,
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      delta INTEGER NOT NULL,
+      balance_after INTEGER NOT NULL,
+      reason TEXT NOT NULL,
+      reference TEXT UNIQUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS credit_ledger_owner ON credit_ledger (owner_id, created_at DESC)`,
+    // What the platform key spent per day, so a hard budget can stop AI before it costs too much.
+    `CREATE TABLE IF NOT EXISTS ai_spend (day DATE PRIMARY KEY, micro_usd BIGINT NOT NULL DEFAULT 0, requests INTEGER NOT NULL DEFAULT 0)`,
+    `CREATE TABLE IF NOT EXISTS billing_orders (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      kind TEXT NOT NULL CHECK (kind IN ('plan', 'credits', 'renewal')),
+      plan TEXT,
+      term_years SMALLINT,
+      credits INTEGER,
+      amount_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'usd',
+      status TEXT NOT NULL DEFAULT 'awaiting_payment' CHECK (status IN ('awaiting_payment', 'paid', 'failed', 'refunded')),
+      stripe_session_id TEXT UNIQUE,
+      stripe_payment_intent TEXT,
+      error TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      paid_at TIMESTAMPTZ
+    )`,
+    `CREATE INDEX IF NOT EXISTS billing_orders_owner ON billing_orders (owner_id, created_at DESC)`,
+    // Every lifecycle email is sent at most once per key (e.g. trial-ending:<user>).
+    `CREATE TABLE IF NOT EXISTS email_log (
+      id BIGSERIAL PRIMARY KEY,
+      owner_id UUID REFERENCES app_users(id) ON DELETE CASCADE,
+      kind TEXT NOT NULL,
+      dedupe_key TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL,
+      error TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS support_tickets (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      subject TEXT NOT NULL,
+      category TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'answered', 'closed')),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS support_tickets_owner ON support_tickets (owner_id, updated_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS support_tickets_open ON support_tickets (status, updated_at)`,
+    `CREATE TABLE IF NOT EXISTS support_messages (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      ticket_id UUID NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+      author_id UUID REFERENCES app_users(id) ON DELETE SET NULL,
+      from_staff BOOLEAN NOT NULL DEFAULT FALSE,
+      body TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS support_messages_ticket ON support_messages (ticket_id, created_at)`,
+    // Proposed updates from GitHub sync or the research agent. Nothing changes until the owner applies them.
+    `CREATE TABLE IF NOT EXISTS profile_suggestions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      source TEXT NOT NULL CHECK (source IN ('github', 'research')),
+      kind TEXT NOT NULL,
+      title TEXT NOT NULL,
+      detail TEXT,
+      payload JSONB NOT NULL,
+      source_url TEXT,
+      fingerprint TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'applied', 'dismissed')),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      decided_at TIMESTAMPTZ,
+      UNIQUE (owner_id, fingerprint)
+    )`,
+    `CREATE INDEX IF NOT EXISTS profile_suggestions_owner ON profile_suggestions (owner_id, status, created_at DESC)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

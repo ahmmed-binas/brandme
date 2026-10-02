@@ -19,6 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ host: str
   const { host } = await params;
   const portfolio = await load(host);
   if (!portfolio) return { title: "Portfolio not found", robots: { index: false } };
+  if (portfolio.resting) return { title: portfolio.ownerName ?? "Portfolio", robots: { index: false } };
   const content = portfolio.content as { name?: string; professional_title?: string; tagline?: string; personal?: { name?: string; title?: string; positioning?: string } };
   const name = content.personal?.name ?? content.name;
   const title = content.personal?.title ?? content.professional_title;
@@ -32,5 +33,5 @@ export default async function CustomDomainPage({ params }: { params: Promise<{ h
   const { host } = await params;
   const portfolio = await load(host);
   if (!portfolio) notFound();
-  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} />;
+  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} />;
 }

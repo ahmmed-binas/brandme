@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const portfolio = await load(slug);
   if (!portfolio) return { title: "Portfolio not found", robots: { index: false } };
+  if (portfolio.resting) return { title: portfolio.ownerName ?? "Portfolio", robots: { index: false } };
   const { name, title, summary } = describe(portfolio.content);
   const heading = [name, title].filter(Boolean).join(" — ") || "Portfolio";
   return {
@@ -36,5 +37,5 @@ export default async function PublishedPortfolioPage({ params }: { params: Promi
   const { slug } = await params;
   const portfolio = await load(slug);
   if (!portfolio) notFound();
-  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} />;
+  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} />;
 }

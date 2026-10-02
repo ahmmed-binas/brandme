@@ -21,13 +21,13 @@ export default async function TemplatePreviewPage({ searchParams }: { searchPara
         <ul className="mt-6 space-y-2 text-[0.95rem] text-ink-soft">{selected.idealFor.map((role) => <li key={role} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{role}</li>)}</ul>
         <div className="mt-9 flex flex-wrap items-center gap-5">
           <Link href={`/editor/${selected.id}`} className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Use this template <ArrowRight size={16} /></Link>
-          <Link href={`/templates/${selected.id}?demo=true`} target="_blank" className="inline-flex items-center gap-1 text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Full screen <ArrowUpRight size={14} /></Link>
+          <Link href={`/templates/${selected.id}?sample=1&demo=true`} target="_blank" className="inline-flex items-center gap-1 text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Full screen <ArrowUpRight size={14} /></Link>
         </div>
       </div>
       <div className="lg:col-span-8">
         <div className="overflow-hidden rounded-xl border border-rule bg-card shadow-[0_40px_80px_-40px_rgb(21_20_15/0.4)]">
           <div className="flex items-center gap-3 border-b border-rule px-4 py-2.5"><span aria-hidden className="flex gap-1.5">{[0, 1, 2].map((dot) => <span key={dot} className="size-2.5 rounded-full border border-rule" />)}</span><span className="flex-1 truncate rounded-md bg-paper-deep px-3 py-1.5 font-mono text-[12px] text-ink-faint">Live preview with sample content</span></div>
-          <iframe src={`/templates/${selected.id}?demo=true`} title={`${selected.name} live preview`} className="h-[70vh] min-h-[480px] w-full border-0 bg-white" />
+          <iframe src={`/templates/${selected.id}?sample=1&demo=true`} title={`${selected.name} live preview`} className="h-[70vh] min-h-[480px] w-full border-0 bg-white" />
         </div>
       </div>
     </div>

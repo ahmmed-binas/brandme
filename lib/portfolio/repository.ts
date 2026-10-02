@@ -3,6 +3,7 @@ import { ensureSchema } from "@/utils/db-schema";
 import type { CurrentUser } from "@/utils/user-account";
 import type { TemplateId } from "@/lib/templates/types";
 import type { ColorTheme } from "./schema";
+import { isLive, standingOf } from "@/lib/plans";
 
 /**
  * Server-only data access for portfolios.
@@ -93,6 +94,7 @@ export type PublishResult =
 
 export async function publish(user: CurrentUser, templateId: TemplateId, slug: string): Promise<PublishResult> {
   await ensureSchema();
+  if (user.standing.standing === "paused") return { ok: false, status: 402, error: "Your free trial has ended. Choose a plan to put your portfolio back online; everything you made is still here." };
   const client = await db.connect();
   try {
     await client.query("BEGIN");
@@ -148,6 +150,9 @@ export interface PublishedPortfolio {
   content: Record<string, unknown>;
   theme: ColorTheme | null;
   showsBranding: boolean;
+  /** The owner's trial or plan has lapsed; visitors see a holding page, not the portfolio. */
+  resting: boolean;
+  ownerName: string | null;
   updatedAt: string;
 }
 
@@ -162,33 +167,17 @@ export async function getPublishedFor(ownerId: string, templateId: TemplateId): 
 
 async function findPublished(where: string, params: unknown[]): Promise<PublishedPortfolio | null> {
   await ensureSchema();
-  const result = await db.query<{ template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string }>(
-    `SELECT p.template_id, p.published_content, p.published_theme, p.published_at, u.plan
+  const result = await db.query<{ template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; name: string | null }>(
+    `SELECT p.template_id, p.published_content, p.published_theme, p.published_at, u.plan, u.trial_ends_at, u.plan_expires_at, u.name
      FROM portfolios p JOIN app_users u ON u.id = p.owner_id
      WHERE ${where} AND p.published_at IS NOT NULL`,
     params,
   );
   const row = result.rows[0];
   if (!row) return null;
-  return { templateId: row.template_id, content: row.published_content, theme: row.published_theme, showsBranding: row.plan !== "pro", updatedAt: row.published_at.toISOString() };
-}
-
-/** Consumes one AI edit from today's allowance. Returns false when the allowance is used up. */
-export async function consumeAiEdit(user: CurrentUser): Promise<{ allowed: boolean; remaining: number }> {
-  await ensureSchema();
-  const result = await db.query<{ requests: number }>(
-    `INSERT INTO ai_usage (owner_id, day, requests) VALUES ($1, CURRENT_DATE, 1)
-     ON CONFLICT (owner_id, day) DO UPDATE SET requests = ai_usage.requests + 1
-     WHERE ai_usage.requests < $2
-     RETURNING requests`,
-    [user.id, user.plan.aiEditsPerDay],
-  );
-  const used = result.rows[0]?.requests;
-  if (used === undefined) return { allowed: false, remaining: 0 };
-  return { allowed: true, remaining: Math.max(0, user.plan.aiEditsPerDay - used) };
-}
-
-/** Gives back an AI edit when the model call failed, so users are not charged for errors. */
-export async function refundAiEdit(ownerId: string): Promise<void> {
-  await db.query("UPDATE ai_usage SET requests = GREATEST(0, requests - 1) WHERE owner_id = $1 AND day = CURRENT_DATE", [ownerId]);
+  const standing = standingOf(row);
+  return {
+    templateId: row.template_id, content: row.published_content, theme: row.published_theme, updatedAt: row.published_at.toISOString(),
+    showsBranding: standing.plan.showsBranding, resting: !isLive(standing.standing), ownerName: (row.published_content.name as string | undefined) ?? row.name,
+  };
 }
