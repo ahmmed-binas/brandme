@@ -10,12 +10,11 @@ const ALL = "All";
 
 function TemplateArtwork({ template }: { template: TemplateDefinition }) {
   const editorial = template.id === "editorial-developer";
-  return <div className={`relative h-56 overflow-hidden p-5 ${editorial ? "bg-[#0e0f0b] text-[#ecebe1]" : "bg-slate-950 text-white"}`}>
-    <div className={`absolute -right-14 -top-14 size-44 rounded-full blur-3xl ${editorial ? "bg-[#c9a14a]/20" : "bg-violet-500/30"}`} />
-    <div className="relative flex h-full flex-col justify-between border border-white/10 bg-white/[0.04] p-4">
-      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[.18em]"><span className={editorial ? "text-[#c9a14a]" : "text-violet-200"}>{template.style}</span><span className="text-white/60">{template.category}</span></div>
-      <div><div className={`mb-3 h-px w-10 ${editorial ? "bg-[#c9a14a]" : "bg-violet-300"}`} /><h3 className="text-3xl font-semibold tracking-tight">{template.name}</h3><p className="mt-2 max-w-[85%] text-xs leading-5 text-white/55">{template.description}</p></div>
-      <div className="grid grid-cols-3 gap-2"><span className="h-12 border border-white/10 bg-white/5" /><span className="h-12 border border-white/10 bg-white/5" /><span className="h-12 border border-white/10 bg-white/5" /></div>
+  return <div className={`relative h-56 overflow-hidden p-5 ${editorial ? "bg-[#f2f0e7] text-[#20251f]" : "bg-slate-950 text-white"}`}>
+    <div className={`relative flex h-full flex-col justify-between border p-4 ${editorial ? "border-black/10 bg-black/[0.02]" : "border-white/10 bg-white/[0.04]"}`}>
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[.18em]"><span className={editorial ? "text-[#b94f38]" : "text-violet-200"}>{template.style}</span><span className={editorial ? "text-black/50" : "text-white/60"}>{template.category}</span></div>
+      <div><div className={`mb-3 h-px w-10 ${editorial ? "bg-[#b94f38]" : "bg-violet-300"}`} /><h3 className="text-3xl font-semibold">{template.name}</h3><p className={`mt-2 max-w-[85%] text-xs leading-5 ${editorial ? "text-black/60" : "text-white/55"}`}>{template.description}</p></div>
+      <div className="grid grid-cols-3 gap-2">{[0, 1, 2].map((item) => <span key={item} className={`h-12 border ${editorial ? "border-black/10 bg-black/[0.03]" : "border-white/10 bg-white/5"}`} />)}</div>
     </div>
   </div>;
 }

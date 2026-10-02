@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { useInView } from "framer-motion";
 import { useEditorialData } from "../EditorialDataContext";
 
 function useCountUp(target: number, active: boolean, duration = 1200) {
@@ -39,24 +39,28 @@ function Stat({ value, label, suffix = "" }: { value: number; label: string; suf
 
 export default function DeveloperSnapshot() {
   const portfolioData = useEditorialData();
-  const { snapshot, personal } = portfolioData;
-  const yearsNum = parseInt(snapshot.yearsBuilding, 10);
+  const { snapshot, personal, projects, skills } = portfolioData;
+  const yearsNum = Number.parseInt(snapshot.yearsBuilding, 10);
+  const technologyCount = new Set([
+    ...skills.frontend,
+    ...skills.backend,
+    ...skills.database,
+    ...skills.devops,
+    ...skills.ai,
+    ...skills.tools,
+  ].map((skill) => skill.name.trim()).filter(Boolean)).size;
+  const stats = [
+    Number.isFinite(yearsNum) ? { value: yearsNum, suffix: "+", label: "Years building" } : null,
+    projects.length ? { value: projects.length, suffix: "+", label: "Projects" } : null,
+    technologyCount ? { value: technologyCount, suffix: "", label: "Core technologies" } : null,
+  ].filter((stat): stat is { value: number; suffix: string; label: string } => stat !== null);
 
   return (
     <section id="snapshot" className="border-b border-line px-6 py-20 md:px-10">
-      <div className="mx-auto grid max-w-content grid-cols-2 gap-x-8 md:grid-cols-4">
-        {!isNaN(yearsNum) ? (
-          <Stat value={yearsNum} suffix="+" label="Years building" />
-        ) : (
-          <div className="border-t border-line py-6">
-            <div className="font-display text-4xl md:text-5xl font-medium text-muted">[ADD]</div>
-            <div className="mt-2 font-mono text-xs text-muted">Years building</div>
-          </div>
-        )}
-        <Stat value={parseInt(snapshot.projectsCount, 10)} suffix="+" label="Projects" />
-        <Stat value={parseInt(snapshot.coreTechnologies, 10)} label="Core technologies" />
+      <div className="mx-auto grid max-w-content grid-cols-2 gap-x-8 lg:grid-cols-4">
+        {stats.map((stat) => <Stat key={stat.label} {...stat} />)}
         <div className="border-t border-line py-6">
-          <div className="font-display text-xl md:text-2xl font-medium leading-tight">
+          <div className="font-display text-xl font-medium leading-tight md:text-2xl">
             {personal.availability}
           </div>
           <div className="mt-2 font-mono text-xs text-muted">Availability</div>

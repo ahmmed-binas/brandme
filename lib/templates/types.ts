@@ -1,4 +1,4 @@
-export type TemplateId = "template-one" | "editorial-developer";
+export type TemplateId = "template-one" | "editorial-developer" | "kinetic-portfolio";
 
 export interface TemplateDefinition {
   id: TemplateId;
@@ -10,4 +10,5 @@ export interface TemplateDefinition {
   style: "Editorial" | "Minimal" | "Modern" | "Classic";
   idealFor: string[];
   tags: string[];
+  editor: "standard" | "dedicated";
 }

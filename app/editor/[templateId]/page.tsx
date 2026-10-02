@@ -8,5 +8,5 @@ export default async function EditorPage({ params }: { params: Promise<{ templat
   const template = getTemplate(templateId);
   if (!template) notFound();
 
-  return template.id === "editorial-developer" ? <EditorialDeveloperEditor template={template} /> : <PortfolioEditor template={template} />;
+  return template.editor === "dedicated" ? <EditorialDeveloperEditor template={template} /> : <PortfolioEditor template={template} />;
 }

@@ -6,13 +6,14 @@ export const templateCatalog: TemplateDefinition[] = [
   {
     id: "editorial-developer",
     name: "Editorial Developer",
-    description: "A detailed, dark editorial portfolio for developers who want to show their craft, systems, and case studies.",
+    description: "A personal, systems-minded portfolio for developers who care about the work behind the interface.",
     category: "Developer",
     author: "CV Gen Studio",
     createdAt: "2026-09-27",
     style: "Editorial",
     idealFor: ["Software developers", "Full-stack developers", "Backend engineers"],
     tags: ["Dark", "Editorial", "Case studies"],
+    editor: "dedicated",
   },
   {
     id: "template-one",
@@ -25,6 +26,19 @@ export const templateCatalog: TemplateDefinition[] = [
     style: "Editorial",
     idealFor: ["Developers", "Product designers", "Creative technologists"],
     tags: ["Dark", "Editorial", "Portfolio"],
+    editor: "standard",
+  },
+  {
+    id: "kinetic-portfolio",
+    name: "Kinetic Portfolio",
+    description: "A high-impact typographic portfolio with animated name treatment, expandable work, and a calm editorial rhythm.",
+    category: "Creative",
+    author: "CV Gen Studio",
+    createdAt: "2026-09-30",
+    style: "Modern",
+    idealFor: ["Creative developers", "Designers", "Independent consultants"],
+    tags: ["Typography", "Motion", "Minimal"],
+    editor: "standard",
   },
 ];
 

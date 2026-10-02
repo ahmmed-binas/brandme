@@ -23,17 +23,17 @@ export default function Hero() {
     <section id="top" className="relative flex min-h-screen items-center border-b border-line px-6 pt-28 md:px-10">
       <div className="mx-auto grid w-full max-w-content items-center gap-14 md:grid-cols-[1.3fr_1fr]">
         <motion.div variants={container} initial="hidden" animate="show">
-          <motion.p variants={item} className="mb-6 font-mono text-xs text-muted">
-            {personal.title} / {personal.subtitle}
+          <motion.p variants={item} className="mb-6 font-mono text-xs uppercase text-muted">
+            {personal.name} / {personal.title} / {personal.subtitle}
           </motion.p>
 
           <motion.h1
             variants={item}
-            className="font-display text-4xl font-medium leading-[1.05] tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl"
+            className="font-display text-4xl font-medium leading-[1.02] text-balance sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            Software that works
+            I build the parts
             <br />
-            before it looks good.
+            people can count on.
           </motion.h1>
 
           <motion.p variants={item} className="mt-7 max-w-lg text-muted leading-relaxed">
@@ -61,7 +61,7 @@ export default function Hero() {
               data-cursor="interactive"
               className="border border-line px-6 py-3 font-mono text-xs tracking-wide text-text transition-colors hover:border-accent hover:text-accent"
             >
-              Let's talk
+              Let&apos;s talk
             </a>
           </motion.div>
         </motion.div>

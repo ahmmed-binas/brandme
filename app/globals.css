@@ -8,8 +8,8 @@
 /* Template-local tokens. They are deliberately scoped so future templates
    cannot inherit, overwrite, or collide with this editorial design. */
 .editorial-developer {
-  --ed-bg: #0e0f0b; --ed-surface: #15160f; --ed-line: #2b2c21;
-  --ed-text: #ecebe1; --ed-muted: #8f9187; --ed-accent: #c9a14a; --ed-signal: #6feab0;
+  --ed-bg: #f2f0e7; --ed-surface: #e7e4d9; --ed-line: #d2cfc3;
+  --ed-text: #20251f; --ed-muted: #62685f; --ed-accent: #b94f38; --ed-signal: #477653;
   background: var(--ed-bg); color: var(--ed-text); font-family: var(--font-sans), sans-serif;
 }
 .editorial-developer .bg-bg { background-color: var(--ed-bg) !important; }
@@ -26,8 +26,15 @@
 .editorial-developer .border-line { border-color: var(--ed-line) !important; }
 .editorial-developer .border-accent { border-color: var(--ed-accent) !important; }
 .editorial-developer .border-text { border-color: var(--ed-text) !important; }
-.editorial-developer .font-display { font-family: var(--font-sans), sans-serif !important; }
+.editorial-developer .font-display { font-family: Georgia, "Times New Roman", serif !important; }
 .editorial-developer .max-w-content { max-width: 1200px; }
+
+.kinetic-portfolio { --kp-paper: 217 221 211; --kp-ink: 21 24 26; --kp-accent: 43 51 255; background: rgb(var(--kp-paper)); color: rgb(var(--kp-ink)); font-family: Georgia, "Times New Roman", serif; }
+.kinetic-portfolio .kp-display { font-family: Arial, Helvetica, sans-serif; }
+.kinetic-portfolio ::selection { background: rgb(var(--kp-accent)); color: rgb(var(--kp-paper)); }
+/* Embedded previews are visually and behaviorally contained by the studio. */
+.template-embedded .kinetic-portfolio nav { display: none !important; }
+.template-embedded .kinetic-portfolio main { padding-left: 0 !important; padding-bottom: 0 !important; }
 
 @theme inline {
   --color-background: var(--background);

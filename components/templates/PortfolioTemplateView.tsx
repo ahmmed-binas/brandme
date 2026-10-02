@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import TemplateRenderer from "./TemplateRenderer";
 import type { PortfolioData } from "./template-one/TemplateOne";
 import type { TemplateId } from "@/lib/templates/types";
-import EditorialDeveloperTemplate from "./editorial-developer/EditorialDeveloperTemplate";
 import { portfolioData as editorialDefaultData, type PortfolioData as EditorialData } from "./editorial-developer/data";
 
 const EMPTY_PORTFOLIO: PortfolioData = {
@@ -86,7 +84,11 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
         const savedTheme = localStorage.getItem("portfolioTheme") ?? sessionStorage.getItem("portfolioTheme");
         const activeTheme = requestedTheme || savedTheme;
         if (activeTheme === "classic" || activeTheme === "dark" || activeTheme === "light" || activeTheme === "midnight") setTheme(activeTheme);
-        if (!saved) return;
+        if (!saved) {
+          // A public template should look finished before a customer connects CV data.
+          if (templateId === "kinetic-portfolio") setPortfolio(DEMO_PORTFOLIO);
+          return;
+        }
         const parsed: unknown = JSON.parse(saved);
         if (parsed && typeof parsed === "object") setPortfolio({ ...EMPTY_PORTFOLIO, ...(parsed as PortfolioData) });
       } catch {
@@ -111,13 +113,7 @@ export default function PortfolioTemplateView({ templateId }: { templateId: Temp
 
   return (
     <>
-      <Link
-        href="/templatechooser"
-        className="fixed left-5 top-5 z-[1000] rounded-full border border-white/20 bg-slate-950/85 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur transition hover:-translate-y-0.5 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-      >
-        ← Browse templates
-      </Link>
-      {templateId === "editorial-developer" ? <EditorialDeveloperTemplate data={editorialData} /> : <TemplateRenderer templateId={templateId} portfolio={portfolio} theme={theme} />}
+      <TemplateRenderer templateId={templateId} portfolio={portfolio} theme={theme} editorialData={editorialData} />
     </>
   );
 }

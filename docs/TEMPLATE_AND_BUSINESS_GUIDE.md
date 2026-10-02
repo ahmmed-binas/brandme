@@ -25,6 +25,7 @@ Ask for one complete TSX template. Require: original art direction; responsive, 
 - One directory per template; no cross-template CSS imports.
 - Template id prefixes browser storage keys and database records.
 - Preview uses the same renderer as the published page.
+- A rendered portfolio preview is a destination, never a template-library surface: do not render “Browse templates”, chooser links, template switchers, or any other route back into the product UI inside it.
 - Editor content is validated before saving. Never let a user paste CSS, scripts, or arbitrary component names into portfolio content.
 - A complex template may have a special editor, but it must use the same save, preview, and publish contract as every other template.
 
