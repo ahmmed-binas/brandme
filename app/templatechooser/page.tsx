@@ -1,27 +1,42 @@
-"use client";
-
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ArrowRight, CalendarDays, Grid2X2, List, Search, SlidersHorizontal, Sparkles, UserRound } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import Reveal from "@/components/landing/Reveal";
+import { TEMPLATE_MOCKS } from "@/components/landing/TemplateMocks";
 import { templateCatalog } from "@/lib/templates/catalog";
-import type { TemplateDefinition } from "@/lib/templates/types";
 
-const ALL = "All";
-
-function TemplateArtwork({ template }: { template: TemplateDefinition }) {
-  const editorial = template.id === "editorial-developer";
-  return <div className={`relative h-56 overflow-hidden p-5 ${editorial ? "bg-[#f2f0e7] text-[#20251f]" : "bg-slate-950 text-white"}`}>
-    <div className={`relative flex h-full flex-col justify-between border p-4 ${editorial ? "border-black/10 bg-black/[0.02]" : "border-white/10 bg-white/[0.04]"}`}>
-      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[.18em]"><span className={editorial ? "text-[#b94f38]" : "text-violet-200"}>{template.style}</span><span className={editorial ? "text-black/50" : "text-white/60"}>{template.category}</span></div>
-      <div><div className={`mb-3 h-px w-10 ${editorial ? "bg-[#b94f38]" : "bg-violet-300"}`} /><h3 className="text-3xl font-semibold">{template.name}</h3><p className={`mt-2 max-w-[85%] text-xs leading-5 ${editorial ? "text-black/60" : "text-white/55"}`}>{template.description}</p></div>
-      <div className="grid grid-cols-3 gap-2">{[0, 1, 2].map((item) => <span key={item} className={`h-12 border ${editorial ? "border-black/10 bg-black/[0.03]" : "border-white/10 bg-white/5"}`} />)}</div>
-    </div>
-  </div>;
-}
-
+/** Server-rendered for search engines; each card shows a live-styled miniature of the template. */
 export default function TemplateChooser() {
-  const [search, setSearch] = useState(""); const [style, setStyle] = useState(ALL); const [view, setView] = useState<"grid" | "list">("grid");
-  const templates = useMemo(() => { const term = search.trim().toLowerCase(); return templateCatalog.filter((template) => (!term || [template.name, template.description, template.category, template.style, ...template.tags, ...template.idealFor].join(" ").toLowerCase().includes(term)) && (style === ALL || template.style === style)); }, [search, style]);
-  const styles = [ALL, ...new Set(templateCatalog.map((template) => template.style))];
-  return <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white"><section className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950"><div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 sm:py-20"><p className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-[.16em] text-violet-700 dark:text-violet-300"><Sparkles size={16} /> Template library</p><h1 className="text-4xl font-black tracking-tight sm:text-6xl">Find a portfolio that feels like you.</h1><p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-400">Choose a design, see its real interactive preview, then customize its content.</p></div></section><section className="mx-auto max-w-7xl px-5 py-8 sm:px-6"><div className="mb-8 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row dark:border-white/10 dark:bg-slate-900"><label className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search templates" className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-violet-500 dark:border-white/10 dark:bg-white/5" /></label><label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 dark:border-white/10"><SlidersHorizontal size={16} /><select value={style} onChange={(event) => setStyle(event.target.value)} className="bg-transparent py-3 text-sm outline-none"><option>{ALL}</option>{styles.slice(1).map((item) => <option key={item}>{item}</option>)}</select></label><div className="flex rounded-xl border border-slate-200 p-1 dark:border-white/10"><button onClick={() => setView("grid")} className={`grid size-9 place-items-center rounded-lg ${view === "grid" ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950" : "text-slate-500"}`} aria-label="Grid view"><Grid2X2 size={16} /></button><button onClick={() => setView("list")} className={`grid size-9 place-items-center rounded-lg ${view === "list" ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950" : "text-slate-500"}`} aria-label="List view"><List size={16} /></button></div></div><p className="mb-5 text-sm text-slate-500">{templates.length} {templates.length === 1 ? "template" : "templates"} found</p><div className={view === "grid" ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-3" : "grid gap-4"}>{templates.map((template) => <article key={template.id} className={`overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-slate-900 ${view === "list" ? "md:grid md:grid-cols-[19rem_1fr]" : ""}`}><Link href={`/templatepreview?template=${template.id}`} aria-label={`Preview ${template.name}`}><TemplateArtwork template={template} /></Link><div className="p-5"><h2 className="text-xl font-bold">{template.name}</h2><p className="mt-1 text-sm text-slate-500">by {template.author}</p><p className="mt-4 min-h-12 text-sm leading-6 text-slate-600 dark:text-slate-400">{template.description}</p><div className="mt-4 flex flex-wrap gap-2">{template.tags.map((tag) => <span key={tag} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-white/10 dark:text-slate-300">{tag}</span>)}</div><div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-500 dark:border-white/10"><span className="flex items-center gap-1"><UserRound size={13} /> {template.idealFor[0]}</span><span className="flex items-center gap-1"><CalendarDays size={13} /> {new Date(`${template.createdAt}T00:00:00`).toLocaleDateString(undefined, { month: "short", year: "numeric" })}</span></div><Link href={`/templatepreview?template=${template.id}`} className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-violet-700 hover:gap-3 dark:text-violet-300">Preview template <ArrowRight size={16} /></Link></div></article>)}</div>{!templates.length && <p className="rounded-2xl border border-dashed p-12 text-center text-slate-500">No templates match that search.</p>}</section></main>;
+  return <div className="mx-auto max-w-[1320px] px-5 pb-24 pt-14 sm:px-8 lg:pt-20">
+    <header className="max-w-[48rem]">
+      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Templates</p>
+      <h1 className="mt-4 font-display text-[clamp(2.8rem,6.4vw,5.2rem)] font-[400] leading-[0.95] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">Pick a design. <em className="font-[300] text-signal">Keep your words.</em></h1>
+      <p className="mt-6 max-w-[36rem] text-[1.08rem] leading-[1.7] text-ink-soft">Each template is set by a designer and protected from breakage. Start with one; standard templates share your content, so you can switch later without retyping.</p>
+    </header>
+
+    <ul className="mt-16 grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
+      {templateCatalog.map((template, index) => {
+        const mock = TEMPLATE_MOCKS.find((item) => item.id === template.id);
+        return <li key={template.id}>
+          <Reveal delay={index * 0.08} className="flex h-full flex-col">
+            <Link href={`/templatepreview?template=${template.id}`} className="group relative block h-[380px] overflow-hidden rounded-xl border border-rule" aria-label={`Preview ${template.name}`}>
+              {mock && <div className="absolute inset-0 transition-transform duration-[900ms] ease-[cubic-bezier(0.2,0.7,0.1,1)] group-hover:scale-[1.03]"><mock.Mock name="Ada Lovelace" role={template.idealFor[0]?.replace(/s$/, "") ?? "Designer"} /></div>}
+              <span className="absolute bottom-4 right-4 inline-flex translate-y-1 items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[0.85rem] text-paper opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">Preview <ArrowUpRight size={14} /></span>
+            </Link>
+            <div className="mt-5 flex items-baseline justify-between gap-4">
+              <h2 className="font-display text-[1.7rem] leading-none tracking-[-0.02em] text-ink">{template.name}</h2>
+              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">{template.style}</p>
+            </div>
+            <p className="mt-3 text-[0.98rem] leading-relaxed text-ink-soft">{template.description}</p>
+            <p className="mt-3 text-[0.88rem] text-ink-faint">For {template.idealFor.join(", ").toLowerCase()}</p>
+            <div className="mt-auto flex items-center gap-5 pt-6">
+              <Link href={`/editor/${template.id}`} className="group/cta inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[0.92rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Use this template <ArrowRight size={15} className="transition-transform group-hover/cta:translate-x-0.5" /></Link>
+              <Link href={`/templatepreview?template=${template.id}`} className="text-[0.92rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Preview</Link>
+            </div>
+          </Reveal>
+        </li>;
+      })}
+    </ul>
+
+    <p className="mt-20 border-t border-rule pt-8 text-[0.98rem] text-ink-soft">Designed a template of your own? <Link href="/community?kind=design" className="text-ink underline underline-offset-4">Submit it to the community.</Link></p>
+  </div>;
 }
