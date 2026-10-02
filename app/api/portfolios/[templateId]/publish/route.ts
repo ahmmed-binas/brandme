@@ -1,12 +1,12 @@
 import { revalidatePath } from "next/cache";
-import { jsonError, readJson, requireOwner } from "@/lib/api/http";
+import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
 import { getDraft, publish, unpublish } from "@/lib/portfolio/repository";
 import { normaliseSlug, slugError } from "@/lib/portfolio/schema";
 
 type Context = { params: Promise<{ templateId: string }> };
 
 /** Publishes the saved draft at /p/<slug>, snapshotting it so later edits stay private until republished. */
-export async function POST(request: Request, { params }: Context) {
+export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   const body = await readJson(request, 2_000);
@@ -20,13 +20,13 @@ export async function POST(request: Request, { params }: Context) {
   revalidatePath(`/p/${slug}`);
   if (previous?.slug && previous.slug !== slug) revalidatePath(`/p/${previous.slug}`);
   return Response.json({ draft: result.draft, url: `/p/${slug}` });
-}
+});
 
 /** Takes the portfolio offline. */
-export async function DELETE(_request: Request, { params }: Context) {
+export const DELETE = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   const draft = await unpublish(owner.user.id, owner.templateId);
   if (draft?.slug) revalidatePath(`/p/${draft.slug}`);
   return Response.json({ draft });
-}
+});

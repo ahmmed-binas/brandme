@@ -1,4 +1,4 @@
-import { jsonError, readJson, requireOwner } from "@/lib/api/http";
+import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
 import { contactSchema } from "@/lib/domains/contact";
 import { domainErrorResponse } from "@/lib/domains/http";
 import { isValidDomain, normaliseDomain } from "@/lib/domains/names";
@@ -7,7 +7,7 @@ import { vercelConfigured } from "@/lib/domains/vercel";
 import { appOrigin, stripeConfigured } from "@/lib/payments/stripe";
 
 /** Starts buying a domain: validates registrant details, re-prices on the server, and returns a Stripe Checkout URL. */
-export async function POST(request: Request, { params }: { params: Promise<{ templateId: string }> }) {
+export const POST = route(async (request: Request, { params }: { params: Promise<{ templateId: string }> }) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   if (!vercelConfigured() || !stripeConfigured()) return jsonError(503, "Buying domains isn’t set up on this server yet.");
@@ -23,4 +23,4 @@ export async function POST(request: Request, { params }: { params: Promise<{ tem
   } catch (error) {
     return domainErrorResponse(error);
   }
-}
+});

@@ -12,7 +12,7 @@ import { mergeIntoStandard } from "@/lib/import/profile";
 import { usePortfolioPersistence } from "./usePortfolioPersistence";
 import { useUndoableState } from "./useUndoableState";
 import { AssistantPanel } from "./AssistantPanel";
-import { ListField, PublishDialog, SaveStatus } from "./EditorControls";
+import { ConflictBanner, ListField, PublishDialog, SaveStatus } from "./EditorControls";
 
 type EditField = "name" | "professional-title" | "about-you" | "projects" | "experience" | "skills" | "email";
 type MobilePanel = "content" | "preview" | "ai";
@@ -144,6 +144,7 @@ export default function PortfolioEditor({ template }: { template: TemplateDefini
       </div>
     </header>
     {persistence.save.kind === "error" && <p className="shrink-0 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800" role="alert">{persistence.save.message}</p>}
+    {persistence.save.kind === "conflict" && <ConflictBanner onLoadOther={persistence.loadOtherVersion} onKeepMine={() => void persistence.keepThisVersion()} />}
     {notice && <p className="flex shrink-0 justify-between gap-3 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700" role="alert">{notice}<button onClick={() => setNotice(null)} className="underline">Dismiss</button></p>}
 
     <nav className="grid shrink-0 grid-cols-3 border-b border-slate-200 bg-white text-sm font-bold xl:hidden" aria-label="Editor panels">

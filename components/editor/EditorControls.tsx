@@ -15,8 +15,20 @@ export function SaveStatus({ save, signedIn }: { save: SaveState; signedIn: bool
     saving: { icon: <Loader2 size={14} className="animate-spin" />, text: "Saving…", tone: "text-slate-500" },
     cloud: { icon: <Cloud size={14} />, text: "Saved to your account", tone: "text-emerald-700" },
     error: { icon: <CloudOff size={14} />, text: "Not saved to your account", tone: "text-amber-700" },
+    conflict: { icon: <AlertCircle size={14} />, text: "Edited elsewhere", tone: "text-amber-700" },
   }[save.kind];
   return <span role="status" title={save.kind === "error" ? save.message : undefined} className={`inline-flex items-center gap-1.5 text-xs font-semibold ${view.tone}`}>{view.icon}<span className="hidden md:inline">{view.text}</span></span>;
+}
+
+/** Shown when another tab or device saved this portfolio more recently. */
+export function ConflictBanner({ onLoadOther, onKeepMine }: { onLoadOther: () => void; onKeepMine: () => void }) {
+  return <div role="alert" className="flex shrink-0 flex-wrap items-center justify-between gap-2 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+    <span><b>This portfolio was changed in another tab or on another device.</b> Your edits here are safe on this device. Which version do you want to keep?</span>
+    <span className="flex gap-2">
+      <button type="button" onClick={onLoadOther} className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 font-bold">Load the other version</button>
+      <button type="button" onClick={onKeepMine} className="rounded-lg bg-amber-600 px-2.5 py-1 font-bold text-white">Keep this one</button>
+    </span>
+  </div>;
 }
 
 /** A comma-separated list input that lets people type commas and spaces naturally. */

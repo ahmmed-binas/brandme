@@ -47,6 +47,31 @@ function Portfolios() {
   </section>;
 }
 
+function DeleteAccount() {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const remove = async () => {
+    setBusy(true); setError(null);
+    const response = await fetch("/api/account", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: typed }) });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) { setError(body.error ?? "Your account could not be deleted."); setBusy(false); return; }
+    await signOut({ callbackUrl: "/" });
+  };
+  return <section className="mt-12 border-t border-slate-200 pt-6 dark:border-white/10">
+    <h2 className="text-sm font-bold text-slate-900 dark:text-white">Delete account</h2>
+    <p className="mt-1 text-sm text-slate-500">Removes your profile, every portfolio (published pages go offline), domain connections, and community posts. This can’t be undone. Domains you bought stay registered in your name.</p>
+    {!open ? <button onClick={() => setOpen(true)} className="mt-3 rounded-xl border border-red-200 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-50 dark:border-red-900">Delete my account…</button>
+      : <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input value={typed} onChange={(event) => setTyped(event.target.value)} placeholder="Type DELETE" aria-label="Type DELETE to confirm" className="rounded-xl border border-slate-300 bg-transparent px-3 py-2 text-sm" />
+        <button disabled={typed !== "DELETE" || busy} onClick={() => void remove()} className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">{busy ? "Deleting…" : "Permanently delete"}</button>
+        <button onClick={() => { setOpen(false); setTyped(""); }} className="px-2 text-sm text-slate-500">Cancel</button>
+        {error && <p className="w-full text-sm text-red-600">{error}</p>}
+      </div>}
+  </section>;
+}
+
 export default function AccountPage() {
   const { data: session, status } = useSession();
   if (status === "loading") return <main className="min-h-screen bg-slate-50 p-10 dark:bg-slate-950"><p className="mx-auto max-w-3xl text-slate-600 dark:text-slate-300">Loading your account…</p></main>;
@@ -58,6 +83,7 @@ export default function AccountPage() {
         <button onClick={() => void signOut({ callbackUrl: "/" })} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold"><LogOut size={16} /> Sign out</button>
       </div>
       <Portfolios />
+      <DeleteAccount />
     </div>
   </main>;
 }

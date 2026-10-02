@@ -10,7 +10,7 @@ import { mergeIntoEditorial } from "@/lib/import/profile";
 import { usePortfolioPersistence } from "./usePortfolioPersistence";
 import { useUndoableState } from "./useUndoableState";
 import { AssistantPanel } from "./AssistantPanel";
-import { ListField, PublishDialog, SaveStatus } from "./EditorControls";
+import { ConflictBanner, ListField, PublishDialog, SaveStatus } from "./EditorControls";
 
 type MobilePanel = "content" | "preview" | "ai";
 type Contact = PortfolioData["contact"];
@@ -119,6 +119,7 @@ export default function EditorialDeveloperEditor({ template }: { template: Templ
       </div>
     </header>
     {persistence.save.kind === "error" && <p className="shrink-0 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-800" role="alert">{persistence.save.message}</p>}
+    {persistence.save.kind === "conflict" && <ConflictBanner onLoadOther={persistence.loadOtherVersion} onKeepMine={() => void persistence.keepThisVersion()} />}
     <nav className="grid shrink-0 grid-cols-3 border-b border-slate-200 bg-white text-sm font-bold xl:hidden" aria-label="Editor panels">
       {(["content", "preview", "ai"] as const).map((name) => <button key={name} onClick={() => setMobilePanel(name)} aria-pressed={mobilePanel === name} className={`py-2.5 ${mobilePanel === name ? "border-b-2 border-violet-600 text-violet-700" : "text-slate-500"}`}>{name === "ai" ? "AI" : name[0].toUpperCase() + name.slice(1)}</button>)}
     </nav>

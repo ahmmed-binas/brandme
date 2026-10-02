@@ -1,3 +1,4 @@
+import { route } from "@/lib/api/http";
 import type Stripe from "stripe";
 import { fulfilPaidOrder } from "@/lib/domains/service";
 import { stripe, stripeConfigured } from "@/lib/payments/stripe";
@@ -7,7 +8,7 @@ import { stripe, stripeConfigured } from "@/lib/payments/stripe";
  * `checkout.session.completed` and `checkout.session.async_payment_succeeded`
  * to /api/webhooks/stripe. The signature is verified before anything runs.
  */
-export async function POST(request: Request) {
+export const POST = route(async (request: Request) => {
   if (!stripeConfigured()) return new Response("Payments are not configured.", { status: 503 });
   const signature = request.headers.get("stripe-signature");
   if (!signature) return new Response("Missing signature.", { status: 400 });
@@ -27,4 +28,4 @@ export async function POST(request: Request) {
     }
   }
   return Response.json({ received: true });
-}
+});

@@ -1,4 +1,4 @@
-import { jsonError, readJson, requireOwner } from "@/lib/api/http";
+import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
 import { domainErrorResponse } from "@/lib/domains/http";
 import { isValidDomain, normaliseDomain } from "@/lib/domains/names";
 import { connectDomain, domainOverview, removeDomain } from "@/lib/domains/service";
@@ -8,7 +8,7 @@ import { stripeConfigured } from "@/lib/payments/stripe";
 type Context = { params: Promise<{ templateId: string }> };
 
 /** The portfolio's custom domain, its live status, recent purchases, and what this account can do. */
-export async function GET(_request: Request, { params }: Context) {
+export const GET = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   const capabilities = { canBuy: vercelConfigured() && stripeConfigured(), canConnect: vercelConfigured() && owner.user.plan.connectOwnDomain, planName: owner.user.plan.name };
@@ -18,10 +18,10 @@ export async function GET(_request: Request, { params }: Context) {
   } catch (error) {
     return domainErrorResponse(error);
   }
-}
+});
 
 /** Connect a domain the user already owns. */
-export async function POST(request: Request, { params }: Context) {
+export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   if (!vercelConfigured()) return jsonError(503, "Custom domains aren’t set up on this server yet.");
@@ -34,10 +34,10 @@ export async function POST(request: Request, { params }: Context) {
   } catch (error) {
     return domainErrorResponse(error);
   }
-}
+});
 
 /** Disconnect the portfolio's domain. */
-export async function DELETE(_request: Request, { params }: Context) {
+export const DELETE = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   if (!vercelConfigured()) return jsonError(503, "Custom domains aren’t set up on this server yet.");
@@ -47,4 +47,4 @@ export async function DELETE(_request: Request, { params }: Context) {
   } catch (error) {
     return domainErrorResponse(error);
   }
-}
+});

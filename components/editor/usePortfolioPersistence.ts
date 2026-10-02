@@ -10,11 +10,15 @@ export type SaveState =
   | { kind: "local" }
   | { kind: "saving" }
   | { kind: "cloud"; at: number }
-  | { kind: "error"; message: string };
+  | { kind: "error"; message: string }
+  /** Another tab or device saved a newer version; the user chooses which to keep. */
+  | { kind: "conflict" };
 
 export interface PublishInfo { slug: string | null; publishedAt: string | null; hasUnpublishedChanges: boolean }
 
-interface RemoteDraft extends PublishInfo { content: unknown; theme: string | null; updatedAt: string }
+interface RemoteDraft extends PublishInfo { content: unknown; theme: string | null; updatedAt: string; version: number }
+
+const publishInfoOf = (draft: RemoteDraft): PublishInfo => ({ slug: draft.slug, publishedAt: draft.publishedAt, hasUnpublishedChanges: draft.hasUnpublishedChanges });
 
 const LOCAL_DELAY_MS = 300;
 const CLOUD_DELAY_MS = 1500;
@@ -22,7 +26,7 @@ const CLOUD_DELAY_MS = 1500;
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw Object.assign(new Error(body.error ?? "Something went wrong."), { status: response.status });
+  if (!response.ok) throw Object.assign(new Error(body.error ?? "Something went wrong."), { status: response.status, body });
   return body as T;
 }
 
@@ -32,6 +36,10 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
  * Every change is written to this browser immediately. Signed-in users also get
  * a debounced save to their account, which is what publishing reads from.
  * On load, whichever copy (browser or account) was saved last wins.
+ *
+ * Account saves are versioned: if another tab or device saved in the meantime,
+ * the save is refused and the user picks which version to keep, instead of
+ * one silently overwriting the other.
  */
 export function usePortfolioPersistence<T>({ templateId, content, theme, apply, parse }: {
   templateId: TemplateId;
@@ -49,6 +57,9 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
   const [save, setSave] = useState<SaveState>({ kind: "loading" });
   const [publishInfo, setPublishInfo] = useState<PublishInfo>({ slug: null, publishedAt: null, hasUnpublishedChanges: false });
   const skipNextSave = useRef(true);
+  /** The account version this editor last loaded or saved; sent with every save. */
+  const serverVersion = useRef<number | null>(null);
+  const conflict = useRef<RemoteDraft | null>(null);
   const localTimer = useRef<number | undefined>(undefined);
   const cloudTimer = useRef<number | undefined>(undefined);
   const latest = useRef({ content, theme });
@@ -73,7 +84,8 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
         try {
           const { draft } = await request<{ draft: RemoteDraft | null }>(`/api/portfolios/${templateId}`);
           if (draft) {
-            setPublishInfo({ slug: draft.slug, publishedAt: draft.publishedAt, hasUnpublishedChanges: draft.hasUnpublishedChanges });
+            serverVersion.current = draft.version;
+            setPublishInfo(publishInfoOf(draft));
             const remoteContent = parseRef.current(draft.content);
             if (remoteContent && (!chosen || Date.parse(draft.updatedAt) >= (local?.savedAt ?? 0))) {
               chosen = { content: remoteContent, theme: draft.theme };
@@ -94,22 +106,48 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
     return () => { cancelled = true; };
   }, [status, signedIn, loaded, templateId, keys]);
 
-  const saveToCloud = useCallback(async () => {
+  const saveToCloud = useCallback(async (force = false) => {
     window.clearTimeout(cloudTimer.current);
+    cloudTimer.current = undefined;
+    if (conflict.current && !force) return false;
     setSave({ kind: "saving" });
     try {
       const { draft } = await request<{ draft: RemoteDraft }>(`/api/portfolios/${templateId}`, {
         method: "PUT",
-        body: JSON.stringify({ content: latest.current.content, theme: latest.current.theme ?? null }),
+        body: JSON.stringify({ content: latest.current.content, theme: latest.current.theme ?? null, baseVersion: serverVersion.current, force }),
       });
-      setPublishInfo({ slug: draft.slug, publishedAt: draft.publishedAt, hasUnpublishedChanges: draft.hasUnpublishedChanges });
+      serverVersion.current = draft.version;
+      conflict.current = null;
+      setPublishInfo(publishInfoOf(draft));
       setSave({ kind: "cloud", at: Date.now() });
       return true;
     } catch (error) {
-      setSave({ kind: "error", message: `${(error as Error).message} Your changes are still saved on this device.` });
+      const { status, body } = error as { status?: number; body?: { draft?: RemoteDraft } };
+      if (status === 409 && body?.draft) {
+        conflict.current = body.draft;
+        setSave({ kind: "conflict" });
+      } else {
+        const message = (error as Error).message;
+        setSave({ kind: "error", message: /this device/i.test(message) ? message : `${message} Your changes are still saved on this device.` });
+      }
       return false;
     }
   }, [templateId]);
+
+  /** Resolve a conflict by loading the version saved elsewhere. */
+  const loadOtherVersion = useCallback(() => {
+    const remote = conflict.current;
+    if (!remote) return;
+    const content = parseRef.current(remote.content);
+    conflict.current = null;
+    serverVersion.current = remote.version;
+    setPublishInfo(publishInfoOf(remote));
+    if (content) { skipNextSave.current = true; applyRef.current(content, remote.theme); }
+    setSave({ kind: "cloud", at: Date.now() });
+  }, []);
+
+  /** Resolve a conflict by overwriting the other version with this editor's content. */
+  const keepThisVersion = useCallback(() => saveToCloud(true), [saveToCloud]);
 
   const writeLocal = useCallback(() => {
     window.clearTimeout(localTimer.current);
@@ -126,7 +164,7 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
     window.clearTimeout(localTimer.current);
     localTimer.current = window.setTimeout(() => {
       writeLocal();
-      if (!signedIn) return;
+      if (!signedIn || conflict.current) return;
       setSave({ kind: "saving" });
       window.clearTimeout(cloudTimer.current);
       cloudTimer.current = window.setTimeout(() => void saveToCloud(), CLOUD_DELAY_MS);
@@ -141,29 +179,30 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
       if (document.visibilityState !== "hidden") return;
       const pending = Boolean(localTimer.current || cloudTimer.current);
       if (localTimer.current) writeLocal();
-      if (!pending || !signedIn) return;
+      if (!pending || !signedIn || conflict.current) return;
       window.clearTimeout(cloudTimer.current);
       cloudTimer.current = undefined;
-      void fetch(`/api/portfolios/${templateId}`, { method: "PUT", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: latest.current.content, theme: latest.current.theme ?? null }) });
+      void fetch(`/api/portfolios/${templateId}`, { method: "PUT", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: latest.current.content, theme: latest.current.theme ?? null, baseVersion: serverVersion.current }) });
     };
     document.addEventListener("visibilitychange", flush);
     return () => document.removeEventListener("visibilitychange", flush);
   }, [signedIn, templateId, writeLocal]);
 
   const publish = useCallback(async (slug: string) => {
+    if (conflict.current) throw new Error("Choose which version to keep before publishing.");
     if (!(await saveToCloud())) throw new Error("Save your portfolio before publishing.");
     const result = await request<{ draft: RemoteDraft; url: string }>(`/api/portfolios/${templateId}/publish`, { method: "POST", body: JSON.stringify({ slug }) });
-    setPublishInfo({ slug: result.draft.slug, publishedAt: result.draft.publishedAt, hasUnpublishedChanges: result.draft.hasUnpublishedChanges });
+    setPublishInfo(publishInfoOf(result.draft));
     return result.url;
   }, [saveToCloud, templateId]);
 
   const unpublish = useCallback(async () => {
     const result = await request<{ draft: RemoteDraft }>(`/api/portfolios/${templateId}/publish`, { method: "DELETE" });
-    setPublishInfo({ slug: result.draft.slug, publishedAt: result.draft.publishedAt, hasUnpublishedChanges: result.draft.hasUnpublishedChanges });
+    setPublishInfo(publishInfoOf(result.draft));
   }, [templateId]);
 
   /** Write now without waiting for the debounce (used before opening the full preview). */
   const flushLocal = writeLocal;
 
-  return { loaded, save, signedIn, sessionLoading: status === "loading", publishInfo, publish, unpublish, saveToCloud, flushLocal };
+  return { loaded, save, signedIn, sessionLoading: status === "loading", publishInfo, publish, unpublish, saveToCloud, flushLocal, loadOtherVersion, keepThisVersion };
 }

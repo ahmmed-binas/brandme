@@ -1,4 +1,4 @@
-import { jsonError, readJson } from "@/lib/api/http";
+import { jsonError, readJson, route } from "@/lib/api/http";
 import { assistantConfigured, assistWithContent } from "@/lib/ai/portfolio-assistant";
 import { consumeAiEdit, refundAiEdit } from "@/lib/portfolio/repository";
 import { MAX_CONTENT_BYTES, validateContent } from "@/lib/portfolio/schema";
@@ -7,12 +7,12 @@ import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 
 /** Whether the AI assistant is available, so the editor can offer it or fall back to quick actions. */
-export async function GET() {
+export const GET = route(async () => {
   return Response.json({ available: assistantConfigured() && databaseConfigured() });
-}
+});
 
 /** Rewrites portfolio copy from a plain-language request. Signed-in users only, metered per plan. */
-export async function POST(request: Request) {
+export const POST = route(async (request: Request) => {
   if (!assistantConfigured() || !databaseConfigured()) return jsonError(503, "The AI assistant is not configured on this server.");
   const user = await getCurrentUser();
   if (!user) return jsonError(401, "Sign in to use the AI assistant.");
@@ -47,4 +47,4 @@ export async function POST(request: Request) {
     await refundAiEdit(user.id);
     throw error;
   }
-}
+});

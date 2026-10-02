@@ -1,4 +1,4 @@
-import { jsonError, readJson } from "@/lib/api/http";
+import { jsonError, readJson, route } from "@/lib/api/http";
 import { assistantConfigured, extractProfile } from "@/lib/ai/portfolio-assistant";
 import { compactProfile } from "@/lib/import/profile";
 import { consumeAiEdit, refundAiEdit } from "@/lib/portfolio/repository";
@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/utils/user-account";
 const MAX_TEXT = 40_000;
 
 /** Free text (CV, LinkedIn About, bio) → structured portfolio content. Counts as one AI edit. */
-export async function POST(request: Request) {
+export const POST = route(async (request: Request) => {
   if (!assistantConfigured() || !databaseConfigured()) return jsonError(503, "The AI assistant is not configured on this server.");
   const user = await getCurrentUser();
   if (!user) return jsonError(401, "Sign in to import with AI.");
@@ -33,4 +33,4 @@ export async function POST(request: Request) {
     await refundAiEdit(user.id);
     throw error;
   }
-}
+});

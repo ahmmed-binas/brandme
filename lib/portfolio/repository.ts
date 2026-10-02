@@ -23,6 +23,8 @@ export interface PortfolioDraft {
   updatedAt: string;
   /** True when the draft differs from what visitors currently see. */
   hasUnpublishedChanges: boolean;
+  /** Increases on every save; a save must name the version it was based on. */
+  version: number;
 }
 
 interface PortfolioRow {
@@ -33,9 +35,10 @@ interface PortfolioRow {
   published_at: Date | null;
   updated_at: Date;
   has_unpublished_changes: boolean;
+  version: number;
 }
 
-const SELECT_DRAFT = `SELECT template_id, content, theme, slug, published_at, updated_at,
+const SELECT_DRAFT = `SELECT template_id, content, theme, slug, published_at, updated_at, version,
   (published_at IS NOT NULL AND (published_content IS DISTINCT FROM content OR published_theme IS DISTINCT FROM theme)) AS has_unpublished_changes
   FROM portfolios`;
 
@@ -47,6 +50,7 @@ const toDraft = (row: PortfolioRow): PortfolioDraft => ({
   publishedAt: row.published_at?.toISOString() ?? null,
   updatedAt: row.updated_at.toISOString(),
   hasUnpublishedChanges: row.has_unpublished_changes,
+  version: row.version,
 });
 
 export async function getDraft(ownerId: string, templateId: TemplateId): Promise<PortfolioDraft | null> {
@@ -61,14 +65,26 @@ export async function listDrafts(ownerId: string): Promise<PortfolioDraft[]> {
   return result.rows.map(toDraft);
 }
 
-export async function saveDraft(ownerId: string, templateId: TemplateId, content: Record<string, unknown>, theme: ColorTheme | null): Promise<PortfolioDraft> {
+export type SaveResult = { ok: true; draft: PortfolioDraft } | { ok: false; conflict: PortfolioDraft };
+
+/**
+ * Saves a draft with optimistic locking. `baseVersion` is the version the
+ * editor last loaded or saved; if the stored draft has moved on (another tab
+ * or device saved since), nothing is written and the newer draft is returned
+ * so the user can choose. `force` overwrites after the user chose to.
+ */
+export async function saveDraft(ownerId: string, templateId: TemplateId, content: Record<string, unknown>, theme: ColorTheme | null, baseVersion: number | null, force = false): Promise<SaveResult> {
   await ensureSchema();
-  await db.query(
+  const result = await db.query(
     `INSERT INTO portfolios (owner_id, template_id, content, theme) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (owner_id, template_id) DO UPDATE SET content = EXCLUDED.content, theme = EXCLUDED.theme, updated_at = NOW()`,
-    [ownerId, templateId, JSON.stringify(content), theme],
+     ON CONFLICT (owner_id, template_id) DO UPDATE
+       SET content = EXCLUDED.content, theme = EXCLUDED.theme, updated_at = NOW(), version = portfolios.version + 1
+       WHERE $6 OR portfolios.version = $5
+     RETURNING id`,
+    [ownerId, templateId, JSON.stringify(content), theme, baseVersion, force],
   );
-  return (await getDraft(ownerId, templateId))!;
+  const draft = (await getDraft(ownerId, templateId))!;
+  return result.rowCount ? { ok: true, draft } : { ok: false, conflict: draft };
 }
 
 export type PublishResult =
