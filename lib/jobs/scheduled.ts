@@ -11,6 +11,7 @@ import { runResearch } from "@/lib/autoupdate/research";
 import { openAi, platformAiConfigured, settleAi, sumUsage } from "@/lib/ai/metering";
 import { advanceOrders, remindRenewals } from "@/lib/domains/service";
 import { runDueInvestigations } from "@/lib/investigator/run";
+import { pruneViews } from "@/lib/analytics/track";
 import { standardContentSchema } from "@/lib/portfolio/schema";
 import { getUserById } from "@/utils/user-account";
 
@@ -136,6 +137,7 @@ export async function runScheduledJobs(): Promise<Record<string, unknown>> {
     await step("domainRenewals", remindRenewals);
     await step("investigator", () => runDueInvestigations());
     await step("orphanedImages", deleteOrphanedAssets);
+    await step("oldVisits", pruneViews);
     return summary;
   } finally {
     await client.query("SELECT pg_advisory_unlock($1)", [LOCK]).catch(() => undefined);

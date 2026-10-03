@@ -19,18 +19,26 @@ sql("DELETE FROM app_users WHERE lower(email) IN ('owner@company.test', 'mod@exa
 mkdirSync(MAIL, { recursive: true });
 for (const file of readdirSync(MAIL)) rmSync(`${MAIL}/${file}`);
 const created = execSync(`printf 'A calm long passphrase 42\\nA calm long passphrase 42\\n' | node scripts/create-superadmin.mjs --email owner@company.test --name "Site Owner"`, { cwd: ROOT }).toString();
-log("command:", created.includes("Done. Sign in at /login"));
+log("command:", created.includes("is the superadmin") && created.includes("the normal /login refuses this account"));
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
 const page = await (await browser.newContext()).newPage();
 page.on("pageerror", (error) => errors.push(error.message));
 
-// 2) Sign in with the password, like on the live site.
-await page.goto(`${BASE}/login?callbackUrl=/admin`);
+// 2) The normal sign-in refuses the superadmin; the console's secret address (SUPERADMIN_PATH) signs them in.
+const CONSOLE = process.env.SUPERADMIN_PATH || "/console";
+await page.goto(`${BASE}/login`);
 await page.getByLabel("Email or username").fill("owner@company.test");
 await page.locator("input[name=password]").fill("A calm long passphrase 42");
 await page.getByRole("button", { name: "Sign in", exact: true }).click();
-await page.waitForURL(`${BASE}/admin`);
+await page.getByRole("alert").first().waitFor();
+log("normal /login refuses the superadmin:", page.url().endsWith("/login"));
+await page.goto(`${BASE}${CONSOLE}`);
+await page.getByLabel("Email").fill("owner@company.test");
+await page.getByLabel("Password").fill("A calm long passphrase 42");
+await page.getByRole("button", { name: "Sign in to the console" }).click();
+await page.getByText("How the business is doing").waitFor({ timeout: 30000 });
+await page.goto(`${BASE}/admin`);
 log("signed in → admin home:", await page.getByRole("link", { name: /Email settings/ }).isVisible(), "| checklist lists superadmin:", await page.getByText("owner@company.test").first().isVisible());
 await page.goto(`${BASE}/templates/review`);
 log("can open template approvals:", (await page.title()) !== "404" && !(await page.getByText("This page could not be found").count()));

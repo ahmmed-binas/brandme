@@ -98,11 +98,18 @@ http.createServer(async (req, res) => {
     if (typeof body.system === "string" && body.system.includes("You are the Investigator")) {
       const prompt = String(body.messages[0].content);
       log.push(`INVESTIGATOR tools=${body.tools?.map((tool) => tool.type).join(",")}`);
+      log.push(`INVESTIGATOR already-read=${prompt.includes("Already read")} spa-text=${prompt.includes("Lagos and Dubai")}`);
       const urls = [...prompt.matchAll(/: (https?:\/\/\S+)/g)].map((match) => match[1]);
       const result = {
         findings: [
-          { kind: "role", title: "Head of Platform", detail: "Leads the platform group of 40 engineers.", year: "2026", organisation: "Northwind Pay", source_url: "https://example.org/northwind-head-of-platform", confidence: "high" },
-          { kind: "highlight", title: "Speaker at DevConf Dubai 2026", detail: "Talk on calm on-call rotations", year: "2026", organisation: "DevConf Dubai", source_url: "https://example.org/devconf-dubai", confidence: "medium" },
+          { kind: "role", title: "Head of Platform", detail: "Leads the platform group of 40 engineers.", year: "2026", organisation: "Northwind Pay", source_url: "http://localhost:4010/news/northwind", confidence: "high" },
+          { kind: "highlight", title: "Speaker at DevConf Dubai 2026", detail: "Talk on calm on-call rotations", year: "2026", organisation: "DevConf Dubai", source_url: "http://localhost:4010/news/devconf", confidence: "medium" },
+          // Confident, but the cited page is about another Ada: the check must drop it.
+          { kind: "highlight", title: "Keynote at RustConf 2026", detail: "Opening keynote", year: "2026", organisation: "RustConf", source_url: "http://localhost:4010/news/other-ada", confidence: "high" },
+          // Confident, but years old: dropped as old news.
+          { kind: "highlight", title: "Engineering Excellence Award", detail: "Company award", year: "2019", organisation: "Northwind Pay", source_url: "http://localhost:4010/news/northwind", confidence: "high" },
+          // Confident, but its page can't be read: kept, waits for the owner.
+          { kind: "highlight", title: "Interview in Platform Weekly", detail: "On calm on-call", year: "2026", organisation: "Platform Weekly", source_url: "http://localhost:4010/news/missing", confidence: "high" },
           { kind: "highlight", title: "A different person entirely", detail: "same name", year: "2026", organisation: "", source_url: "https://example.org/someone-else", confidence: "low" },
         ],
         sources: urls.map((url) => ({ url, status: /linkedin|instagram/.test(url) ? "partly" : "read", note: /linkedin|instagram/.test(url) ? "Only the name and headline are visible without logging in" : "" })),
@@ -127,6 +134,25 @@ http.createServer(async (req, res) => {
     const fields = JSON.parse(body.messages[0].content.split("\n")[1]);
     const title = fields.find((field) => field.path === "professional_title");
     return message({ reply: "Tightened your title.", changes: [{ path: title.path, value: "Computer Scientist" }, { path: "name", value: "Hacked Name" }, { path: "github", value: "javascript:alert(1)" }] });
+  }
+
+  // News pages the Investigator's findings cite (it reads them to check each finding).
+  const NEWS = {
+    "/news/northwind": "<h1>Northwind Pay appoints Ada Okafor as Head of Platform</h1><p>Ada Okafor will lead the platform group of 40 engineers at Northwind Pay.</p>",
+    "/news/devconf": "<h1>DevConf Dubai 2026 speakers</h1><ul><li>Ada Okafor: calm on-call rotations</li><li>Sam Lee: queues</li></ul>",
+    "/news/other-ada": "<h1>RustConf 2026 keynote</h1><p>Ada Smith, a compiler engineer from Lisbon, opens RustConf this year.</p>",
+  };
+  if (NEWS[path]) { res.writeHead(200, { "Content-Type": "text/html" }); return res.end(`<!doctype html><html><head><title>News</title></head><body>${NEWS[path]}</body></html>`); }
+  // A portfolio page that only shows its content once JavaScript runs (like many site builders).
+  if (path === "/spa/ada") {
+    res.writeHead(200, { "Content-Type": "text/html" });
+    return res.end(`<!doctype html><html><head><title>Loading…</title></head><body><div id="app"></div><script>
+      document.title = "Ada Okafor";
+      document.getElementById("app").innerHTML = "<h1>Ada Okafor</h1><p>Staff Engineer at Northwind Pay, based in Lagos and Dubai.</p>";
+      const ld = document.createElement("script"); ld.type = "application/ld+json";
+      ld.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "Person", name: "Ada Okafor", jobTitle: "Staff Engineer", worksFor: { "@type": "Organization", name: "Northwind Pay" } });
+      document.head.appendChild(ld);
+    </script></body></html>`);
   }
 
   // A public RSS feed for the Investigator tests (two recent posts, one old one).

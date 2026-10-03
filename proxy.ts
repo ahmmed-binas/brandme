@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { INTERNAL_CONSOLE, consoleBase } from "@/lib/console/path";
 
 /**
  * Serves custom domains. A request for any host that isn't the app's own is
@@ -27,10 +28,29 @@ function isAppHost(host: string) {
   return configuredHosts.has(host) || configuredHosts.has(host.replace(/^www\./, "")) || !host.includes(".") || /^[\d.]+$/.test(host) || host.startsWith("[");
 }
 
+const under = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
+
+/** The superadmin console: reachable only at its secret address (SUPERADMIN_PATH). */
+function consoleRoute(request: NextRequest): NextResponse | null {
+  const base = consoleBase();
+  if (base === INTERNAL_CONSOLE) return null;
+  const path = request.nextUrl.pathname;
+  const url = request.nextUrl.clone();
+  if (under(path, INTERNAL_CONSOLE)) {
+    url.pathname = "/__not-found";
+    return NextResponse.rewrite(url);
+  }
+  if (under(path, base)) {
+    url.pathname = `${INTERNAL_CONSOLE}${path.slice(base.length)}`;
+    return NextResponse.rewrite(url, { headers: { "X-Robots-Tag": "noindex, nofollow" } });
+  }
+  return null;
+}
+
 export function proxy(request: NextRequest) {
   // The Host header is what the visitor typed; nextUrl may reflect the server's own address.
   const host = (request.headers.get("host") ?? request.nextUrl.host).toLowerCase().replace(/:\d+$/, "");
-  if (!configuredHosts.size || isAppHost(host)) return NextResponse.next();
+  if (!configuredHosts.size || isAppHost(host)) return consoleRoute(request) ?? NextResponse.next();
   // Clone nextUrl rather than building from request.url: behind a TLS proxy the public
   // URL is https://<domain>, and a rewrite to a different origin is treated as external.
   const url = request.nextUrl.clone();

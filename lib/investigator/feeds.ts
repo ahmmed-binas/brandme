@@ -22,7 +22,7 @@ function privateAddress(ip: string): boolean {
   return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224;
 }
 
-async function assertPublic(url: URL): Promise<void> {
+export async function assertPublic(url: URL): Promise<void> {
   if (process.env.INVESTIGATOR_ALLOW_PRIVATE_FETCH === "true") return;
   if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("Only web addresses can be read.");
   const host = url.hostname.replace(/^\[|\]$/g, "");
@@ -36,7 +36,7 @@ export async function safeFetchText(raw: string): Promise<string> {
     await assertPublic(url);
     const response = await fetch(url, { redirect: "manual", signal: AbortSignal.timeout(12_000), headers: { "User-Agent": "FormoraInvestigator/1.0 (reads public feeds the profile owner asked us to watch)", Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5" } });
     if (response.status >= 300 && response.status < 400 && response.headers.get("location")) { url = new URL(response.headers.get("location")!, url); continue; }
-    if (!response.ok) throw new Error(`The feed answered ${response.status}.`);
+    if (!response.ok) throw new Error(`The address answered ${response.status}.`);
     if (Number(response.headers.get("content-length") ?? 0) > MAX_BYTES) throw new Error("The feed is too large.");
     const reader = response.body?.getReader();
     if (!reader) return "";

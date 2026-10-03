@@ -26,6 +26,12 @@ export function compactProfile(profile: ImportedProfile): ImportedProfile {
   if (projects?.length) output.projects = projects.slice(0, 30);
   const experience = profile.experience?.filter((item) => filled(item.job_title) || filled(item.company));
   if (experience?.length) output.experience = experience.slice(0, 30);
+  const education = profile.education?.filter((item) => filled(item.school) || filled(item.degree));
+  if (education?.length) output.education = education.slice(0, 12);
+  const highlights = profile.highlights?.filter((item) => filled(item.title));
+  if (highlights?.length) output.highlights = highlights.slice(0, 40);
+  const links = profile.links?.filter((item) => filled(item.url));
+  if (links?.length) output.links = [...new Map(links.map((item) => [item.url!.replace(/\/+$/, "").toLowerCase(), item])).values()].slice(0, 12);
   return output;
 }
 
@@ -38,7 +44,9 @@ export function describeProfile(profile: ImportedProfile): string {
     profile.skills?.length && `${profile.skills.length} skills`,
     profile.projects?.length && `${profile.projects.length} projects`,
     profile.experience?.length && `${profile.experience.length} roles`,
-    (profile.github || profile.linkedin || profile.email) && "contact links",
+    profile.education?.length && `${profile.education.length} education`,
+    profile.highlights?.length && `${profile.highlights.length} highlights`,
+    (profile.github || profile.linkedin || profile.email || profile.links?.length) && "contact links",
   ].filter(Boolean);
   return parts.length ? parts.join(", ") : "nothing usable";
 }
@@ -60,6 +68,10 @@ export function mergeIntoStandard(current: StandardContent, imported: ImportedPr
     // Imported projects keep any image the user already added to a project of the same name.
     projects: nonEmpty(profile.projects)?.map((project) => ({ ...project, image: project.image || current.projects?.find((existing) => existing.title === project.title)?.image })) ?? current.projects,
     experience: nonEmpty(profile.experience) ?? current.experience,
+    education: nonEmpty(profile.education) ?? current.education,
+    // Highlights and links are added to (not replaced), skipping ones already there.
+    highlights: profile.highlights ? [...(current.highlights ?? []), ...profile.highlights.filter((item) => !current.highlights?.some((existing) => existing.title?.toLowerCase() === item.title?.toLowerCase()))].slice(0, 40) : current.highlights,
+    links: profile.links ? [...(current.links ?? []), ...profile.links.filter((item) => !current.links?.some((existing) => existing.url?.replace(/\/+$/, "").toLowerCase() === item.url?.replace(/\/+$/, "").toLowerCase()))].slice(0, 12) : current.links,
   };
 }
 

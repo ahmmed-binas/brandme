@@ -432,6 +432,26 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "011_page_views",
+  statements: [
+    // Cookie-less visitor counts: no IP addresses or cookies, only a daily-rotating hash.
+    `CREATE TABLE IF NOT EXISTS page_views (
+      id BIGSERIAL PRIMARY KEY,
+      at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      host TEXT NOT NULL,
+      path TEXT NOT NULL,
+      kind TEXT NOT NULL CHECK (kind IN ('site', 'portfolio')),
+      portfolio_slug TEXT,
+      referrer TEXT,
+      visitor TEXT NOT NULL,
+      device TEXT NOT NULL CHECK (device IN ('mobile', 'tablet', 'desktop'))
+    )`,
+    `CREATE INDEX IF NOT EXISTS page_views_at ON page_views (at)`,
+    `CREATE INDEX IF NOT EXISTS page_views_kind_at ON page_views (kind, at)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

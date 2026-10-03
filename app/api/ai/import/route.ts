@@ -2,6 +2,7 @@ import { jsonError, readJson, route } from "@/lib/api/http";
 import { extractProfile } from "@/lib/ai/portfolio-assistant";
 import { openAi, releaseRequest, settleAi } from "@/lib/ai/metering";
 import { compactProfile } from "@/lib/import/profile";
+import { groundProfile } from "@/lib/import/grounding";
 import { standardContentSchema } from "@/lib/portfolio/schema";
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
@@ -32,7 +33,10 @@ export const POST = route(async (request: Request) => {
     const { location, ...content } = result.profile;
     const parsed = standardContentSchema.safeParse(content);
     if (!parsed.success) return jsonError(502, "The assistant returned content that could not be used. Please try again.");
-    return Response.json({ profile: compactProfile({ ...parsed.data, location: typeof location === "string" ? location : undefined }), charged: bill.charged, credits: bill.balance });
+    // Anything the text doesn't actually contain (a link, an employer, a year…) is dropped.
+    const { profile, removed } = groundProfile({ ...parsed.data, location: typeof location === "string" ? location : undefined }, text);
+    if (removed.length) console.info(`AI import: dropped ${removed.length} unsupported item(s)`);
+    return Response.json({ profile: compactProfile(profile), removed: removed.length, charged: bill.charged, credits: bill.balance });
   } catch (error) {
     await releaseRequest(user.id);
     throw error;

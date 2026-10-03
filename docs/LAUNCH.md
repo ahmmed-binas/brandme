@@ -56,8 +56,9 @@ Pick a data-centre region close to most of your customers. Turn on the provider'
    ```bash
    docker compose exec -it app node scripts/create-superadmin.mjs
    ```
-   It asks for your email, name and a password (at least 12 characters, typed hidden). Run it again to change the password; `--remove <email>` takes the role away. Then sign in at `https://<your domain>/login`.
-7. **Check email:** open `/admin/email` and press **Send a test email**. If it fails, the message says which setting to fix; change `.env`, run `docker compose up -d`, and try again.
+   It asks for your email, name and a password (at least 12 characters, typed hidden). Run it again to change the password; `--remove <email>` takes the role away.
+   Before this, choose a secret console address and put it in `.env`, e.g. `SUPERADMIN_PATH=/hq-7c41e9` (letters, numbers, - and _), then `docker compose up -d`. You sign in at `https://<your domain>/hq-7c41e9`, **not** at `/login` (which refuses the superadmin). `/console` itself then answers "not found". Five wrong passwords pause console sign-in for 15 minutes. See `CONSOLE.md`.
+7. **Check email:** in the console, open **Email settings** (`/admin/email`) and press **Send a test email**. If it fails, the message says which setting to fix; change `.env`, run `docker compose up -d`, and try again.
 8. *(Optional)* **Google sign-in:** in Google Cloud Console add `https://<your domain>/api/auth/callback/google` as a redirect URI (see `GOOGLE_AUTH_SETUP.md`).
 9. **Open `/admin`.** The go-live checklist checks every setting from the live server and tells you what's left: Stripe, email, selling domains, AI.
 10. **Approve templates** at `/templates/review` and write your first Journal post at `/admin/journal`.

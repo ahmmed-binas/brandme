@@ -44,9 +44,9 @@ interface UserRow { id: string; email: string | null; name: string | null; plan:
 
 export const USER_COLUMNS = "id, email, name, plan, trial_ends_at, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified, is_superadmin";
 
-export function toCurrentUser(row: UserRow): CurrentUser {
+export function toCurrentUser(row: UserRow, consoleSession = false): CurrentUser {
   const standing = standingOf(row);
-  return { id: row.id, email: row.email, name: row.name, plan: standing.plan, planId: row.plan, standing, credits: row.credits, hasOwnKey: row.has_key, username: row.username, emailVerified: row.verified, isSuperadmin: row.is_superadmin && row.verified, isAdmin: row.verified && (row.is_superadmin || isModeratorEmail(row.email)) };
+  return { id: row.id, email: row.email, name: row.name, plan: standing.plan, planId: row.plan, standing, credits: row.credits, hasOwnKey: row.has_key, username: row.username, emailVerified: row.verified, isSuperadmin: consoleSession && row.is_superadmin && row.verified, isAdmin: row.verified && ((consoleSession && row.is_superadmin) || isModeratorEmail(row.email)) };
 }
 
 export async function getUserById(id: string): Promise<CurrentUser | null> {
@@ -64,7 +64,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const provider = session.user?.provider === "password" ? "password" : "google";
   const result = await db.query<UserRow>(`SELECT ${USER_COLUMNS} FROM app_users WHERE provider = $1 AND provider_account_id = $2`, [provider, providerAccountId]);
   const row = result.rows[0];
-  if (row) return toCurrentUser(row);
+  if (row) return toCurrentUser(row, session.user?.console === true);
   if (provider === "password") return null; // Deleted account: the session no longer maps to anyone.
   // The sign-in event may have failed to write (e.g. the database was briefly down); repair it now.
   await saveGoogleUser({ providerAccountId, email: session.user?.email, name: session.user?.name, image: session.user?.image });

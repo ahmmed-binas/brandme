@@ -12,6 +12,8 @@ import { emails } from "@/lib/email/templates";
 import { sendMail } from "@/lib/email/mailer";
 import { siteUrl } from "@/lib/site";
 import { investigate } from "./agent";
+import { readPage, type PageRead } from "./reader";
+import { verifyFindings, type Verdict } from "./verify";
 import { feedUrl, githubUser, kindInfo, linkUrl, type InvestigatorLink } from "./links";
 import { parseFeed, safeFetchText } from "./feeds";
 import { accessFor, getSettings, nextRun } from "./settings";
@@ -83,6 +85,22 @@ async function targetPortfolio(ownerId: string, preferred: string | null) {
 }
 
 /** Stores new suggestions for this run; returns only the ones that weren't seen before. */
+/** Lower-case words only, for comparing titles. */
+const titleKey = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+/** Already known if a known title matches closely: same words, or one contains the other, or 80% word overlap. */
+function isKnown(key: string, known: Set<string>): boolean {
+  if (!key) return true;
+  if (known.has(key)) return true;
+  const words = new Set(key.split(" "));
+  for (const other of known) {
+    if (other.length > 5 && (key.includes(other) || other.includes(key))) return true;
+    const otherWords = new Set(other.split(" "));
+    const shared = [...words].filter((word) => otherWords.has(word)).length;
+    if (shared / Math.max(words.size, otherWords.size) >= 0.8) return true;
+  }
+  return false;
+}
+
 async function store(ownerId: string, runId: string, candidates: Candidate[]): Promise<Array<Candidate & { id: string }>> {
   const stored: Array<Candidate & { id: string }> = [];
   for (const candidate of candidates) {
@@ -141,11 +159,20 @@ export async function runInvestigator(userId: string, trigger: "schedule" | "man
     }
     // 2. Everything else (and a web search around them) through Claude, paid from credits or their own key.
     const pageLinks = settings.links.filter((link) => !githubUser(link) && !feedUrl(link));
+    // Read the owner's open pages ourselves first (a real browser when OBSCURA_URL is set), so
+    // pages that build their content with JavaScript aren't missed. Login-walled sites are left to the AI.
+    const pageCache = new Map<string, Promise<PageRead>>();
+    const ownPages = await Promise.all(pageLinks.filter((link) => !kindInfo(link.kind).limited).slice(0, 6).map((link) => {
+      const url = linkUrl(link)!;
+      const read = readPage(url);
+      pageCache.set(url.replace(/#.*$/, "").replace(/\/+$/, ""), read);
+      return read;
+    }));
     const gate = await openAi(user);
     if (!gate.ok) {
       for (const link of pageLinks) sources.push({ label: kindInfo(link.kind).label, url: linkUrl(link)!, status: "skipped", note: gate.error });
     } else {
-      const outcome = await investigate(gate.access.client, content, pageLinks);
+      const outcome = await investigate(gate.access.client, content, pageLinks, ownPages);
       await settleAi(gate.access, outcome.usage.length ? sumUsage(outcome.usage) : null, "Investigator check");
       // If the AI step fails, keep what the free sources found and say so per source.
       if (!outcome.ok) for (const link of pageLinks) sources.push({ label: kindInfo(link.kind).label, url: linkUrl(link)!, status: "error", note: outcome.error });
@@ -153,13 +180,36 @@ export async function runInvestigator(userId: string, trigger: "schedule" | "man
       for (const link of outcome.ok ? pageLinks : []) {
         const url = linkUrl(link)!;
         const report = reported.get(url.replace(/\/+$/, ""));
-        sources.push({ label: kindInfo(link.kind).label, url, status: report?.status ?? "read", note: report?.note ?? "" });
+        const own = ownPages.find((page) => page.url.replace(/\/+$/, "") === url.replace(/\/+$/, ""));
+        const status = own?.ok ? "read" : report?.status ?? "read";
+        const note = own?.ok ? (own.via === "browser" ? "Read in a browser" : report?.note ?? "") : report?.note ?? own?.error ?? "";
+        sources.push({ label: kindInfo(link.kind).label, url, status, note });
       }
       const known = await knownTitles(userId);
-      for (const finding of outcome.ok ? outcome.findings : []) {
-        if (finding.confidence === "low" || !safeLink(finding.source_url) || known.has(finding.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim())) continue;
-        candidates.push({ item: findingToSuggestion(finding, "investigator"), confident: finding.confidence === "high" });
+      // Roles already on the portfolio count as known too ("Head of Platform" at the same employer).
+      for (const role of content.experience ?? []) if (role.job_title) known.add(titleKey(role.job_title));
+      const seen = new Set<string>();
+      const fresh = (outcome.ok ? outcome.findings : []).filter((finding) => {
+        const key = titleKey(finding.title);
+        if (finding.confidence === "low" || !safeLink(finding.source_url) || isKnown(key, known) || isKnown(key, seen)) return false;
+        seen.add(key);
+        return true;
+      });
+      // Check each finding against the page it cites before it can reach the site.
+      const checked = await verifyFindings(fresh, content.name ?? "", pageCache);
+      const tally: Partial<Record<Verdict, number>> = {};
+      for (const { finding, verdict } of checked) {
+        tally[verdict] = (tally[verdict] ?? 0) + 1;
+        if (verdict === "someone_else" || verdict === "old") continue;
+        const confident = finding.confidence === "high" && verdict === "confirmed";
+        candidates.push({ item: findingToSuggestion({ ...finding, confidence: confident ? "high" : "medium" }, "investigator"), confident });
       }
+      if (checked.length) sources.push({ label: "Checked against their sources", url: "", status: "read", note: [
+        tally.confirmed && `${tally.confirmed} confirmed`,
+        (tally.unconfirmed || tally.unreadable) && `${(tally.unconfirmed ?? 0) + (tally.unreadable ?? 0)} not confirmed (left for you to check)`,
+        tally.someone_else && `${tally.someone_else} left out (the page wasn’t about you)`,
+        tally.old && `${tally.old} left out (old news)`,
+      ].filter(Boolean).join(", ") });
     }
 
     // 3. Save what's new; apply the confident ones if the owner chose automatic updates.

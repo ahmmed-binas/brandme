@@ -11,7 +11,7 @@ import type { ImportedProfile } from "./profile";
  */
 
 const MAX_ARCHIVE_BYTES = 50 * 1024 * 1024;
-const WANTED = /^(?:.*\/)?(profile|positions|skills|projects|email addresses)\.csv$/i;
+const WANTED = /^(?:.*\/)?(profile|positions|skills|projects|email addresses|education|certifications|honors|publications)\.csv$/i;
 
 /** RFC 4180 CSV parsing: quoted fields may contain commas, quotes ("") and newlines. */
 export function parseCsv(text: string): string[][] {
@@ -45,8 +45,25 @@ function records(text: string, headerColumn: string): Array<Record<string, strin
   return rows.slice(headerIndex + 1).map((cells) => Object.fromEntries(header.map((name, index) => [name, (cells[index] ?? "").trim()])));
 }
 
-/** LinkedIn dates look like "Mar 2021" or "2021". */
-const year = (value?: string) => value?.match(/\d{4}/)?.[0] ?? value ?? "";
+/** LinkedIn dates look like "Mar 2021", "2021" or "03/2021"; kept as month and year when given. */
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export function linkedInDate(value?: string): string {
+  const raw = value?.trim() ?? "";
+  if (!raw) return "";
+  const numeric = raw.match(/^(\d{1,2})\/(\d{4})$/);
+  if (numeric) return `${MONTHS[Number(numeric[1]) - 1] ?? ""} ${numeric[2]}`.trim();
+  const named = raw.match(/^([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{4})$/);
+  if (named) return `${named[1]![0]!.toUpperCase()}${named[1]!.slice(1).toLowerCase()} ${named[2]}`;
+  return raw.match(/\d{4}/)?.[0] ?? raw;
+}
+/** For sorting: "Mar 2021" → 2021.17. */
+const when = (value?: string) => { const date = linkedInDate(value); const y = Number(date.match(/\d{4}/)?.[0] ?? 0); const m = MONTHS.indexOf(date.slice(0, 3)); return y + (m >= 0 ? (m + 1) / 13 : 0); };
+
+/** Profile.csv "Websites" looks like "[PORTFOLIO:https://ada.dev,OTHER:https://x.y]" (or plain URLs). */
+function websites(value: string): { label: string; url: string }[] {
+  const LABEL: Record<string, string> = { PORTFOLIO: "Portfolio", PERSONAL: "Website", COMPANY: "Company", BLOG: "Blog", RSS: "Feed", OTHER: "Website" };
+  return [...value.matchAll(/(?:([A-Z]+):)?(https?:\/\/[^\s,\]]+)/g)].map((match) => ({ label: LABEL[match[1] ?? ""] ?? "Website", url: match[2]! }));
+}
 
 export async function readLinkedInExport(file: File): Promise<ImportedProfile> {
   if (file.size > MAX_ARCHIVE_BYTES) throw new Error("That archive is larger than 50 MB. Request just Profile, Positions and Skills from LinkedIn.");
@@ -68,9 +85,15 @@ export async function readLinkedInExport(file: File): Promise<ImportedProfile> {
   const projects = records(files["projects.csv"] ?? "", "Title");
   const emails = records(files["email addresses.csv"] ?? "", "Email Address");
   const email = emails.find((row) => row.Primary?.toLowerCase() === "yes")?.["Email Address"] ?? emails[0]?.["Email Address"];
-  const websites = profile?.Websites ?? "";
-  const github = websites.match(/https?:\/\/(www\.)?github\.com\/[^\s,\]]+/i)?.[0];
-  const summary = profile?.Summary?.split(/\n\s*\n/).map((paragraph) => paragraph.replace(/\s+/g, " ").trim()).filter(Boolean);
+  const sites = websites(profile?.Websites ?? "");
+  const github = sites.find((site) => /github\.com\//i.test(site.url))?.url;
+  const summary = profile?.Summary?.split(/\n\s*\n|\n(?=\s*[•\-–]\s)/).map((paragraph) => paragraph.replace(/\s+/g, " ").trim()).filter(Boolean);
+  const education = records(files["education.csv"] ?? "", "School Name");
+  const certifications = records(files["certifications.csv"] ?? "", "Name");
+  const honors = records(files["honors.csv"] ?? "", "Title");
+  const publications = records(files["publications.csv"] ?? "", "Name");
+  // Current roles first, then newest start date.
+  positions.sort((a, b) => Number(Boolean(a["Finished On"])) - Number(Boolean(b["Finished On"])) || when(b["Started On"]) - when(a["Started On"]));
 
   return {
     name: [profile?.["First Name"], profile?.["Last Name"]].filter(Boolean).join(" "),
@@ -84,11 +107,18 @@ export async function readLinkedInExport(file: File): Promise<ImportedProfile> {
       job_title: row.Title,
       company: row["Company Name"],
       location: row.Location,
-      start_date: year(row["Started On"]),
-      end_date: row["Finished On"] ? year(row["Finished On"]) : "Present",
+      start_date: linkedInDate(row["Started On"]),
+      end_date: row["Finished On"] ? linkedInDate(row["Finished On"]) : "Present",
       description: row.Description,
       technologies: [],
     })),
     projects: projects.map((row) => ({ title: row.Title, description: row.Description, live_url: row.Url, technologies: [] })),
+    education: education.map((row) => ({ school: row["School Name"], degree: row["Degree Name"], start_date: linkedInDate(row["Start Date"]), end_date: linkedInDate(row["End Date"]), description: [row.Notes, row.Activities].filter(Boolean).join(" ") })),
+    highlights: [
+      ...certifications.map((row) => ({ title: row.Name, detail: row.Authority ?? "", year: linkedInDate(row["Started On"]).match(/\d{4}/)?.[0] ?? "", url: row.Url ?? "" })),
+      ...honors.map((row) => ({ title: row.Title, detail: row.Description ?? "", year: linkedInDate(row["Issued On"]).match(/\d{4}/)?.[0] ?? "", url: "" })),
+      ...publications.map((row) => ({ title: row.Name, detail: row.Publisher ?? "", year: linkedInDate(row["Published On"]).match(/\d{4}/)?.[0] ?? "", url: row.Url ?? "" })),
+    ].filter((item) => item.title),
+    links: sites.filter((site) => site.url !== github),
   };
 }

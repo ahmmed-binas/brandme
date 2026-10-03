@@ -23,11 +23,17 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   const kind = isPostKind(params.kind) ? params.kind : undefined;
   const sort = params.sort === "new" ? "new" : "top";
   const page = Math.max(1, Math.min(500, Number(params.page) || 1));
-  const viewer = await getViewer();
-  const configured = databaseConfigured();
+  // If the database is down, show the page with a short note instead of an error screen.
+  const viewer = await getViewer().catch(() => null);
+  const empty = [{ posts: [], total: 0 }, { count: 0, average: null }, []] as const;
+  let configured = databaseConfigured();
   const [{ posts, total }, stats, mine] = configured
-    ? await Promise.all([listPosts({ kind, sort, limit: PAGE_SIZE * page, offset: 0, viewerId: viewer?.id }), reviewStats(), viewer ? myUnpublished(viewer) : Promise.resolve([])])
-    : [{ posts: [], total: 0 }, { count: 0, average: null }, []];
+    ? await Promise.all([listPosts({ kind, sort, limit: PAGE_SIZE * page, offset: 0, viewerId: viewer?.id }), reviewStats(), viewer ? myUnpublished(viewer) : Promise.resolve([])]).catch((error) => {
+      console.error("Community board unavailable", error);
+      configured = false;
+      return empty;
+    })
+    : empty;
   const href = (next: { kind?: string | null; sort?: string; page?: number }) => {
     const query = new URLSearchParams();
     const nextKind = next.kind === undefined ? kind : next.kind;
@@ -77,7 +83,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
       </p>
     </nav>
 
-    {!configured ? <p className="py-20 text-center text-ink-soft">The community board isn’t set up on this server yet.</p>
+    {!configured ? <p className="py-20 text-center text-ink-soft">The community board can’t be reached right now. Please try again in a few minutes.</p>
       : posts.length === 0 ? <div className="py-24 text-center">
         <p className="font-display text-[2rem] text-ink">Nothing here yet.</p>
         <p className="mt-3 text-ink-soft">Be the first to {kind === "review" ? "leave a review" : kind === "design" ? "submit a design" : "start the conversation"}.</p>

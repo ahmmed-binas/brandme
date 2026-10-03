@@ -1,13 +1,14 @@
-// Creates the superadmin: the one account that runs the whole site, signing in
-// with an email and password at /login (no Google keys or test login needed).
+// Creates the superadmin: the one account that runs the whole site. It signs in
+// with an email and password at the console's secret address (SUPERADMIN_PATH,
+// default /console), never at the normal /login.
 //
 //   npm run admin:create                      asks for email, name and password
 //   npm run admin:create -- --email you@company.com --name "Your Name"
 //   npm run admin:create -- --remove you@company.com
 //
 // Running it again for the same email changes the password. If the email
-// already has a Google account, that account is made superadmin instead and
-// keeps signing in with Google. The password is typed hidden, or read from
+// already has a Google account, that account as it is (an ordinary customer account) and a separate superadmin login
+// is created for the console. The password is typed hidden, or read from
 // standard input when piped (for scripts), and is never stored, only its hash.
 import pg from "pg";
 import { randomBytes, randomUUID, scrypt as scryptCallback } from "node:crypto";
@@ -69,13 +70,7 @@ try {
   const email = (flag("email") ?? (await ask("Email you'll sign in with: "))).trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fail("That isn't a valid email address.");
 
-  const existing = (await pool.query("SELECT id, provider, name FROM app_users WHERE lower(email) = $1 ORDER BY (provider = 'password') DESC, created_at LIMIT 1", [email])).rows[0];
-
-  if (existing && existing.provider !== "password") {
-    await pool.query("UPDATE app_users SET is_superadmin = TRUE WHERE id = $1", [existing.id]);
-    console.log(`\nDone. ${email} already signs in with ${existing.provider === "google" ? "Google" : existing.provider}; that account is now the superadmin.`);
-    process.exit(0);
-  }
+  const existing = (await pool.query("SELECT id, provider, name FROM app_users WHERE lower(email) = $1 AND provider = 'password' LIMIT 1", [email])).rows[0];
 
   const name = (flag("name") ?? (existing?.name || (await ask("Your name: ")))).trim().slice(0, 120) || email.split("@")[0];
   const password = await readPassword(existing ? "New password (hidden): " : "Password (hidden): ");
@@ -99,9 +94,12 @@ try {
        VALUES ('password', $1, $2, $3, $4, $5, NOW(), TRUE, 'premium', NOW() + INTERVAL '100 years')`,
       [`pw_${randomUUID()}`, email, name, username, hash],
     );
-    console.log(`\nDone. Sign in at /login with ${email} (or the username ${username}) and your password.`);
+    console.log(`\nDone. ${email} is the superadmin.`);
   }
-  console.log("The admin pages are at /admin, and the email settings at /admin/email.");
+  const path = (process.env.SUPERADMIN_PATH ?? "").trim().replace(/^\/+|\/+$/g, "");
+  const consolePath = /^[A-Za-z0-9_-]{3,64}$/.test(path) ? `/${path}` : "/console";
+  console.log(`Sign in at ${(process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "")}${consolePath} (the normal /login refuses this account).`);
+  if (consolePath === "/console") console.log("Tip: set SUPERADMIN_PATH in .env to a secret address, e.g. SUPERADMIN_PATH=/hq-" + randomBytes(4).toString("hex"));
 } catch (error) {
   fail(error.message);
 } finally {

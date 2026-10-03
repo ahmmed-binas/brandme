@@ -46,7 +46,7 @@ Then:
 
 Add SPF and DKIM records for your domain as your mail provider describes, so reminders and receipts don’t land in spam. `SMTP_FROM` should be the same mailbox as `SMTP_USER` (or an alias of it), e.g. `Formora <hello@yourdomain.com>`.
 
-After changing these, restart the app (`docker compose up -d`), sign in as the superadmin and open **`/admin/email`**: it shows the settings the server is using (never the password) and has a **Send a test email** button that reports exactly what the mail server said.
+After changing these, restart the app (`docker compose up -d`), sign in to the console (your `SUPERADMIN_PATH`) and open **Email settings** (`/admin/email`): it shows the settings the server is using (never the password) and has a **Send a test email** button that reports exactly what the mail server said.
 
 ## How custom domains reach the server
 

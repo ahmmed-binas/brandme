@@ -61,6 +61,10 @@ export async function importFromGitHub(username: string): Promise<ImportedProfil
     email: user.email ?? undefined,
     github: user.html_url,
     linkedin: website && /linkedin\.com/i.test(website) ? website : undefined,
+    links: [
+      ...(website && !/linkedin\.com/i.test(website) ? [{ label: "Website", url: website }] : []),
+      ...(user.twitter_username ? [{ label: "X", url: `https://x.com/${user.twitter_username}` }] : []),
+    ],
     skills: [...languages, ...topics.map(humanise)].slice(0, 20),
     projects: original.sort((a, b) => score(b) - score(a)).slice(0, MAX_PROJECTS).map((repo) => ({
       title: humanise(repo.name),

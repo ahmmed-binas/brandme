@@ -27,7 +27,7 @@ await page.getByText("Free trial").first().waitFor();
 const userId = sql(`SELECT id FROM app_users WHERE provider_account_id = '${account}'`);
 const content = { name: "Ada Okafor", professional_title: "Staff Engineer", tagline: "Calm infrastructure.", summary: ["I make payment systems boring."], experience: [{ job_title: "Staff Engineer", company: "Northwind Pay", start_date: "2021", end_date: "Present" }], highlights: [], projects: [] };
 log("portfolio saved:", (await api("/api/portfolios/brief", "PUT", { content, theme: null, baseVersion: null })).status, "| published:", (await api("/api/portfolios/brief/publish", "POST", { slug: "ada-investigator" })).status);
-const links = [{ kind: "linkedin", value: "ada-okafor-test" }, { kind: "website", value: "https://ada.example.org" }, { kind: "feed", value: "http://localhost:4010/feeds/demo.xml" }, { kind: "github", value: "ada" }];
+const links = [{ kind: "linkedin", value: "ada-okafor-test" }, { kind: "website", value: "http://localhost:4010/spa/ada" }, { kind: "feed", value: "http://localhost:4010/feeds/demo.xml" }, { kind: "github", value: "ada" }];
 
 // 1) Plans: Basic has no Investigator; the trial gets one free check.
 sql(`UPDATE app_users SET plan = 'basic', plan_expires_at = NOW() + INTERVAL '1 year' WHERE id = '${userId}'`);
@@ -63,7 +63,10 @@ await page.getByRole("button", { name: "Check now" }).click();
 await page.getByText(/^Done:/).waitFor({ timeout: 120000 });
 log("check result:", await page.getByText(/^Done:/).textContent());
 log("suggestions waiting:", sql(`SELECT string_agg(title, ' | ' ORDER BY title) FROM profile_suggestions WHERE owner_id = '${userId}' AND source = 'investigator' AND status = 'pending'`));
-log("low-confidence and old items left out:", !sql(`SELECT count(*) FROM profile_suggestions WHERE owner_id = '${userId}' AND (title LIKE '%different person%' OR title LIKE '%years ago%')`).startsWith("1"));
+log("left out: low confidence, old post, other Ada, 2019 award:", sql(`SELECT count(*) FROM profile_suggestions WHERE owner_id = '${userId}' AND (title LIKE '%different person%' OR title LIKE '%years ago%' OR title LIKE '%RustConf%' OR title LIKE '%Excellence Award%')`) === "0");
+log("unconfirmable source kept but not confident:", sql(`SELECT count(*) FROM profile_suggestions WHERE owner_id = '${userId}' AND title LIKE '%Platform Weekly%' AND status = 'pending'`) === "1");
+const mockLog = await (await fetch("http://localhost:4010/__log")).json();
+log("own page read first, JS content seen:", mockLog.filter((line) => line.startsWith("INVESTIGATOR already-read")).pop(), `(browser: ${Boolean(process.env.OBSCURA_URL)})`);
 log("AI used web_fetch + web_search:", (await (await fetch("http://localhost:4010/__log")).json()).some((line) => line.includes("INVESTIGATOR tools=web_fetch_20260209,web_search_20260209")));
 await page.getByText("Sources checked").first().click();
 log("sources reported:", (await page.locator("details li").allTextContents()).map((text) => text.replace(/\s+/g, " ").trim()).join(" / "));

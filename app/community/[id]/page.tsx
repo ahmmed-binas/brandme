@@ -12,8 +12,9 @@ import { databaseConfigured } from "@/utils/db-schema";
 
 const load = cache(async (id: string) => {
   if (!databaseConfigured()) return { post: null, viewer: null };
-  const viewer = await getViewer();
-  return { post: await getPost(id, viewer), viewer };
+  const viewer = await getViewer().catch(() => null);
+  // A database outage shows "not found" rather than an error screen.
+  return { post: await getPost(id, viewer).catch(() => null), viewer };
 });
 
 // Depends on who is signed in; never pre-render at build time.

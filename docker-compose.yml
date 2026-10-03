@@ -28,9 +28,21 @@ services:
     environment:
       DATABASE_URL: postgres://formora:${POSTGRES_PASSWORD}@db:5432/formora
       DATABASE_SSL: disable
+      # The Investigator reads customers' own pages in this headless browser (JavaScript runs).
+      # Remove this line (and the obscura service) to read pages with a plain fetch instead.
+      OBSCURA_URL: ws://obscura:9222/devtools/browser
     depends_on:
       db:
         condition: service_healthy
+
+  # Obscura (github.com/h4ckf0r0day/obscura, Apache-2.0): a small headless browser.
+  # Only the app can reach it (no ports published). It refuses private/internal
+  # addresses by default; stealth mode stays off on purpose.
+  obscura:
+    image: h4ckf0r0day/obscura:latest
+    restart: unless-stopped
+    command: ["serve", "--port", "9222", "--workers", "2"]
+    mem_limit: 512m
 
   # Runs the scheduled jobs every hour: trial and renewal emails, renewals,
   # monthly credits, automatic portfolio updates and clean-up.

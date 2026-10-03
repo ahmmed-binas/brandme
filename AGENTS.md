@@ -19,7 +19,7 @@ Business model: free trial (14 days, everything in Pro) → Basic $10/yr, Pro $2
 - Next.js 16 App Router (Promise `params`/`searchParams`, `proxy.ts` instead of middleware), React 19, TypeScript, Tailwind v4 (container queries `@3xl:`, `cqw` units in templates).
 - PostgreSQL via `pg` (`utils/db.ts`), migrations in `db/migrations.mjs` (append a new `{ id, statements }`; never edit an applied one). They run on start and with `npm run db:migrate`.
 - Auth.js v5 (`auth.ts`): Google, email + password (`lib/accounts/passwords.ts`, scrypt), and a localhost-only test login (`DEV_LOGIN=true`, `lib/dev-login.ts`). JWT sessions; `getCurrentUser()` in `utils/user-account.ts` maps the session to an `app_users` row.
-- Admin access: `user.isAdmin` (the superadmin, or a confirmed email in `ADMIN_EMAILS`); `user.isSuperadmin` for owner-only pages such as `/admin/email`. The superadmin is created with `npm run admin:create` (`scripts/create-superadmin.mjs`). Never check `ADMIN_EMAILS` directly.
+- Admin access: `user.isAdmin` (the superadmin, or a confirmed email in `ADMIN_EMAILS`); `user.isSuperadmin` for owner-only pages such as `/admin/email` and the console. The superadmin is created with `npm run admin:create` (`scripts/create-superadmin.mjs`) and signs in **only** at the console's secret address (`SUPERADMIN_PATH`, `lib/console/path.ts`, rewritten in `proxy.ts`); superadmin powers exist only in a console session. Never check `ADMIN_EMAILS` directly. See `docs/CONSOLE.md`.
 - Stripe (checkout + webhook), Vercel as domain **registrar only**, Anthropic SDK (model `claude-opus-5-5`), SMTP via nodemailer, Caddy on-demand TLS for customer domains, docker-compose for production (`docs/SELF_HOSTING.md`, `docs/LAUNCH.md`).
 
 ```bash
@@ -48,11 +48,13 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Ratings | `lib/templates/ratings.ts`, `lib/templates/rating-route.ts` |
 | Plans, billing, credits, AI metering | `lib/plans.ts`, `lib/billing/*`, `lib/ai/*`, `app/api/webhooks/stripe` |
 | Auto-updates (GitHub, research agent) | `lib/autoupdate/*`, hourly jobs `lib/jobs/scheduled.ts` (`POST /api/cron`) |
-| The Investigator (checks the owner's own profiles on a schedule, updates the site) | `lib/investigator/*`, `/account/investigator`, `app/api/investigator/*`, `docs/INVESTIGATOR.md` |
+| The Investigator (checks the owner's own profiles on a schedule, updates the site) | `lib/investigator/*` (page reader `reader.ts` with optional Obscura headless browser, fact-check `verify.ts`), `/account/investigator`, `app/api/investigator/*`, `docs/INVESTIGATOR.md` |
+| Imports' accuracy | `lib/import/grounding.ts` (drops AI-imported facts not in the source text), `lib/import/linkedin-export.ts`, `tests/e2e/accuracy.mts` |
 | Community and support | `lib/community/*`, `lib/support/*`, `app/community/*` |
+| Superadmin console (dashboard, users, visitor counts) | `app/console/*` behind `SUPERADMIN_PATH`, `components/console/*`, `lib/console/metrics.ts`, `lib/analytics/track.ts` (+ `/api/t`, `components/common/VisitBeacon.tsx`), `docs/CONSOLE.md` |
 | Admin | `/admin` (go-live checklist `lib/setup-checks.ts`), moderators = `ADMIN_EMAILS` |
 
-More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
+More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CONSOLE.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
 
 ## Rules the owner has set
 
@@ -61,7 +63,7 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 3. **Don't open pull requests unless asked.** Work on the current branch (`improve-editor-and-business`; not merged into `main` yet), commit with clear messages, push.
 4. **Never put AI model identifiers in commits, PR text or code comments.**
 5. **Test like a user.** Every change was checked end to end before pushing; keep doing that and report results honestly (what passed, what didn't, what you couldn't test).
-6. Customers' data is theirs: only the account owner's own public information may be fetched or researched, with their consent. Don't build scraping of other people or logged-in social accounts.
+6. Customers' data is theirs: only the account owner's own public information may be fetched or researched, with their consent. Don't build scraping of other people or logged-in social accounts, and don't turn on Obscura's stealth mode or other ways round sites that block automated visitors.
 
 ## Conventions
 
@@ -79,7 +81,9 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 - Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) at `/templates/review`.
 - Pricing (the owner was advised $10/yr is too low to pay for ads; a “done for you” offer was suggested).
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
+- A privacy notice page (none yet). It should cover accounts, payments, the Investigator and the cookie-less visitor counts (`docs/CONSOLE.md`).
+- The Journal's new-tab option for agents (asked for, parked for later).
 
 ## Next work, in order
 
-See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics, a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).
+See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics (owner side done: the console; still to do: views per portfolio for customers), a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).

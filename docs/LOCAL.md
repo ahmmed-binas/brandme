@@ -42,7 +42,9 @@ TEMPLATES_REQUIRE_APPROVAL=true
 
 - `npx auth secret` prints a random secret; paste it as `AUTH_SECRET`.
 - `DEV_LOGIN=true` adds **Sign in for testing** to the login page: type any email and you're in, no Google setup needed. It only works while `APP_URL` is `localhost`, so it can't be left on by accident on your live site.
-- Put the email you'll sign in with into `ADMIN_EMAILS` to get the admin pages. Or create the owner's account the way the live site does it: `npm run admin:create` (email + password, then sign in at `/login`). Only that superadmin sees `/admin/email`, where you can send a test email once `SMTP_…` is filled in.
+- Put the email you'll sign in with into `ADMIN_EMAILS` to get the admin pages. Or create the owner's account the way the live site does it: `npm run admin:create`, then sign in at http://localhost:3000/console (or your `SUPERADMIN_PATH`), not at `/login`. That opens the superadmin console: the business dashboard, users, and every admin tool, including **Email settings** with a test email once `SMTP_…` is filled in.
+- *(Optional)* **Obscura**, the headless browser the Investigator uses to read pages built with JavaScript: download it from https://github.com/h4ckf0r0day/obscura/releases (Windows: the `.zip`), run `obscura serve --port 9222`, and add `OBSCURA_URL=ws://127.0.0.1:9222/devtools/browser` to `.env.local`. Without it, pages are read with a plain fetch.
+- **A page shows an error?** Usually the database isn't running: start Docker Desktop, then `docker start formora-db`, and reload. The Community page now says "can't be reached right now" instead of failing.
 
 ## 4. Start it
 

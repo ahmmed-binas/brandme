@@ -96,16 +96,23 @@ export async function signUp(input: SignUpInput): Promise<{ userId: string }> {
   return { userId };
 }
 
-/** For the sign-in form: the account's sign-in id when the password is right, else null. */
-export async function checkCredentials(emailOrUsername: string, password: string): Promise<{ providerAccountId: string; email: string; name: string } | null> {
+/**
+ * For the sign-in forms: the account's sign-in id when the password is right, else null.
+ * The superadmin signs in only at the console's own address (`as: "console"`); the
+ * normal form refuses that account with the same answer as a wrong password, and the
+ * console refuses everyone else.
+ */
+export async function checkCredentials(emailOrUsername: string, password: string, as: "customer" | "console" = "customer"): Promise<{ providerAccountId: string; email: string; name: string } | null> {
   await ensureSchema();
   const login = emailOrUsername.trim().toLowerCase().replace(/^@/, "");
-  const row = (await db.query<{ provider_account_id: string; email: string; name: string | null; password_hash: string | null }>(
-    "SELECT provider_account_id, email, name, password_hash FROM app_users WHERE provider = 'password' AND (lower(email) = $1 OR lower(username) = $1) LIMIT 1",
+  const row = (await db.query<{ provider_account_id: string; email: string; name: string | null; password_hash: string | null; is_superadmin: boolean; verified: boolean }>(
+    "SELECT provider_account_id, email, name, password_hash, is_superadmin, email_verified_at IS NOT NULL AS verified FROM app_users WHERE provider = 'password' AND (lower(email) = $1 OR lower(username) = $1) LIMIT 1",
     [login],
   )).rows[0];
   const ok = await verifyPassword(password, row?.password_hash ?? null);
-  return ok && row ? { providerAccountId: row.provider_account_id, email: row.email, name: row.name ?? row.email } : null;
+  if (!ok || !row) return null;
+  if (as === "console" ? !(row.is_superadmin && row.verified) : row.is_superadmin) return null;
+  return { providerAccountId: row.provider_account_id, email: row.email, name: row.name ?? row.email };
 }
 
 const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
@@ -185,4 +192,17 @@ export function tooManyAttempts(key: string, limit = 10, windowMs = 15 * 60_000)
   attempts.set(key, recent);
   if (attempts.size > 10_000) for (const [entry, times] of attempts) if (!times.some((time) => now - time < windowMs)) attempts.delete(entry);
   return recent.length > limit;
+}
+
+/** Like tooManyAttempts, but only failures count: check with `blockedAfterFailures`, record with `noteFailure`. */
+const failures = new Map<string, number[]>();
+export function blockedAfterFailures(key: string, limit: number, windowMs = 15 * 60_000): boolean {
+  const now = Date.now();
+  const recent = (failures.get(key) ?? []).filter((time) => now - time < windowMs);
+  failures.set(key, recent);
+  return recent.length >= limit;
+}
+export function noteFailure(key: string): void {
+  failures.set(key, [...(failures.get(key) ?? []), Date.now()]);
+  if (failures.size > 10_000) failures.clear();
 }
