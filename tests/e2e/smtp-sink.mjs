@@ -14,7 +14,8 @@ net.createServer((socket) => {
       if (data) { if (line === ".") { data = false; fs.writeFileSync(`${process.argv[2]}/mail-${++count}.eml`, message); message = ""; say("250 OK queued"); } else message += line + "\n"; continue; }
       const verb = line.split(" ")[0].toUpperCase();
       if (verb === "EHLO") { socket.write("250-sink\r\n250-AUTH PLAIN LOGIN\r\n250 OK\r\n"); }
-      else if (verb === "AUTH") say("235 Authentication successful");
+      // A password containing "wrong" is refused, to test the error messages.
+      else if (verb === "AUTH") say(Buffer.from(line.split(" ")[2] ?? "", "base64").toString().includes("wrong") ? "535 5.7.8 Authentication failed" : "235 Authentication successful");
       else if (verb === "DATA") { data = true; say("354 End with ."); }
       else if (verb === "QUIT") { say("221 Bye"); socket.end(); }
       else say("250 OK");

@@ -7,6 +7,8 @@ import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 
 export const metadata: Metadata = { title: "Your domains", robots: { index: false } };
+// Per visitor; never pre-render (a build without DATABASE_URL would bake in the sign-in redirect).
+export const dynamic = "force-dynamic";
 
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 

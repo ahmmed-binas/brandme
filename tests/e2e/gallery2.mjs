@@ -166,7 +166,7 @@ await page.waitForTimeout(800);
 log("community rating stored:", sql(`SELECT stars FROM template_ratings WHERE template_id = 'community:harbour'`));
 // Community composer points designs to the gallery
 await page.goto(`${BASE}/community`);
-await page.getByRole("button", { name: /Write a post/ }).click();
+await page.getByRole("button", { name: /Write a post/ }).first().click();
 await page.getByRole("radio", { name: "Design" }).click();
 log("community 'Design' → gallery link:", await page.getByRole("link", { name: "Submit a template" }).isVisible());
 await v.goto(`${BASE}/`);

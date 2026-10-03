@@ -1,5 +1,4 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { setTemplateReview, templateReviews, reviewOf } from "@/lib/templates/approval";
 import { getTemplate, templateCatalog } from "@/lib/templates/catalog";
 import { databaseConfigured } from "@/utils/db-schema";
@@ -11,7 +10,7 @@ const STATUSES = ["approved", "changes", "rejected"] as const;
 export const POST = route(async (request: Request) => {
   if (!databaseConfigured()) return jsonError(503, "Reviews need the database.");
   const user = await getCurrentUser();
-  if (!user || !isModeratorEmail(user.email)) return jsonError(404, "Not found.");
+  if (!user || !user.isAdmin) return jsonError(404, "Not found.");
   const body = await readJson(request, 2_000);
   if (body instanceof Response) return body;
   const { templateId, status, note, bulk } = (body ?? {}) as { templateId?: unknown; status?: unknown; note?: unknown; bulk?: unknown };

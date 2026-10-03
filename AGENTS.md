@@ -19,6 +19,7 @@ Business model: free trial (14 days, everything in Pro) → Basic $10/yr, Pro $2
 - Next.js 16 App Router (Promise `params`/`searchParams`, `proxy.ts` instead of middleware), React 19, TypeScript, Tailwind v4 (container queries `@3xl:`, `cqw` units in templates).
 - PostgreSQL via `pg` (`utils/db.ts`), migrations in `db/migrations.mjs` (append a new `{ id, statements }`; never edit an applied one). They run on start and with `npm run db:migrate`.
 - Auth.js v5 (`auth.ts`): Google, email + password (`lib/accounts/passwords.ts`, scrypt), and a localhost-only test login (`DEV_LOGIN=true`, `lib/dev-login.ts`). JWT sessions; `getCurrentUser()` in `utils/user-account.ts` maps the session to an `app_users` row.
+- Admin access: `user.isAdmin` (the superadmin, or a confirmed email in `ADMIN_EMAILS`); `user.isSuperadmin` for owner-only pages such as `/admin/email`. The superadmin is created with `npm run admin:create` (`scripts/create-superadmin.mjs`). Never check `ADMIN_EMAILS` directly.
 - Stripe (checkout + webhook), Vercel as domain **registrar only**, Anthropic SDK (model `claude-opus-5-5`), SMTP via nodemailer, Caddy on-demand TLS for customer domains, docker-compose for production (`docs/SELF_HOSTING.md`, `docs/LAUNCH.md`).
 
 ```bash
@@ -66,7 +67,8 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 
 - **Writing:** plain, warm, specific British English (colour, organise, “ ” quotes, en dash for ranges). No marketing filler. UI copy explains what happens next.
 - **Templates:** size with container queries (`@3xl:`, `cqw`), never viewport breakpoints or `position: fixed` (they render inside the editor and phone preview). Every visible piece of content gets `{...ed("path")}` so clicking it opens its field. Empty sections hide via `has()`. Respect `motionOff()` (static captures, reduced motion). Each template must show the name in an `<h1>` even with almost no content (`tests/e2e/blank.mjs`).
-- **APIs:** wrap handlers in `route()` from `lib/api/http.ts`; validate everything on the server; owner-only routes use `requireOwner`; admin routes check `isModeratorEmail` and return 404 otherwise.
+- **APIs:** wrap handlers in `route()` from `lib/api/http.ts`; validate everything on the server; owner-only routes use `requireOwner`; admin routes check `user.isAdmin` (or `isSuperadmin`) and return 404 otherwise.
+- **Pages that depend on who is signed in** export `dynamic = "force-dynamic"`. Without it, a build without `DATABASE_URL` (as in Docker) pre-renders them once, baking in a sign-in redirect or a 404.
 - **Security:** no secrets in the repo; uploads are checked by content (magic bytes), size and, for ZIPs, paths and file types; one-time tokens are stored hashed; rate limits on sign-in, sign-up and uploads.
 - **Money:** prices are calculated on the server; a domain is never bought before the customer has paid; renewals never happen without the customer paying.
 

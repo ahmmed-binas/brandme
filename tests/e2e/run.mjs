@@ -1,10 +1,13 @@
 import { chromium } from "playwright";
+import { execSync } from "node:child_process";
 import { encode } from "../../node_modules/@auth/core/jwt.js";
 
 const BASE = "http://localhost:3100";
 const shots = process.env.SHOTS;
 const log = (...args) => console.log("•", ...args);
 
+// Start from a clean account (domains.mjs uses the same one and leaves it published).
+execSync(`su postgres -c "psql -d formora -At -c \\"DELETE FROM app_users WHERE provider_account_id = 'google-test-1'\\""`);
 const token = await encode({
   token: { name: "Test User", email: "test@example.com", providerAccountId: "google-test-1", sub: "x" },
   secret: process.env.AUTH_SECRET,

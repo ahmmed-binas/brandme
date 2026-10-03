@@ -1,5 +1,4 @@
 import { jsonError, route } from "@/lib/api/http";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { getSubmission, submissionFile } from "@/lib/gallery/submissions";
 import { countDownload } from "@/lib/templates/ratings";
 import { getCurrentUser } from "@/utils/user-account";
@@ -15,7 +14,7 @@ export const GET = route(async (_request: Request, { params }: { params: Promise
   if (!submission) return jsonError(404, "Not found.");
   if (submission.status !== "approved") {
     const user = await getCurrentUser();
-    if (!user || (user.id !== submission.owner.id && !isModeratorEmail(user.email))) return jsonError(404, "Not found.");
+    if (!user || (user.id !== submission.owner.id && !user.isAdmin)) return jsonError(404, "Not found.");
   }
   const stored = await submissionFile(id, file);
   if (!stored) return jsonError(404, "Not found.");

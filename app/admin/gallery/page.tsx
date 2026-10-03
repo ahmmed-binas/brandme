@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReviewActions from "@/components/gallery/ReviewActions";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { listSubmissions, LICENSES, type SubmissionStatus } from "@/lib/gallery/submissions";
 import { getCurrentUser } from "@/utils/user-account";
 
@@ -15,7 +14,7 @@ const kb = (bytes: number) => (bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).to
 /** Admin review of community templates: read the story, download and run the ZIP, then decide. */
 export default async function GalleryReview({ searchParams }: { searchParams: Promise<{ show?: string }> }) {
   const viewer = await getCurrentUser().catch(() => null);
-  if (!isModeratorEmail(viewer?.email)) notFound();
+  if (!Boolean(viewer?.isAdmin)) notFound();
   const wanted = (await searchParams).show;
   const show = (FILTERS.find(([id]) => id === wanted)?.[0] ?? "pending") as SubmissionStatus;
   const submissions = await listSubmissions({ status: show });

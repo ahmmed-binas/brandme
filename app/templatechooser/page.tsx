@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Gallery, { type GalleryTemplate } from "@/components/templates/Gallery";
 import { availableTemplates } from "@/lib/templates/approval";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { getCurrentUser } from "@/utils/user-account";
 import { ROLE_SUMMARIES } from "@/lib/templates/roles";
 import { ratingSummaries } from "@/lib/templates/ratings";
+
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Portfolio templates for every kind of work",
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
 export default async function TemplateChooser({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams;
   const viewer = await getCurrentUser().catch(() => null);
-  const moderator = isModeratorEmail(viewer?.email);
+  const moderator = Boolean(viewer?.isAdmin);
   // The professional collection first; the three original templates follow.
   const ratings = await ratingSummaries();
   const templates: GalleryTemplate[] = (await availableTemplates(moderator)).sort((a, b) => Number(a.collection !== "studio") - Number(b.collection !== "studio")).map((template) => ({

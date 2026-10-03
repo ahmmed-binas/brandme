@@ -45,16 +45,22 @@ Pick a data-centre region close to most of your customers. Turn on the provider'
    cp .env.example .env
    nano .env
    ```
-   Fill in at least: `POSTGRES_PASSWORD`, `APP_DOMAIN`, `APP_URL=https://<your domain>`, `ACME_EMAIL`, `SERVER_IPV4`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `ADMIN_EMAILS`, `CRON_SECRET`. Leave `DEV_LOGIN` empty.
+   Fill in at least: `POSTGRES_PASSWORD`, `APP_DOMAIN`, `APP_URL=https://<your domain>`, `ACME_EMAIL`, `SERVER_IPV4`, `AUTH_SECRET`, `CRON_SECRET`, and the `SMTP_…` settings for your company mailbox (`SELF_HOSTING.md` has a table). Google sign-in (`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`) and `ADMIN_EMAILS` are optional. Leave `DEV_LOGIN` empty.
 5. **Start:**
    ```bash
    docker compose up -d --build
    curl https://<your domain>/api/health     # {"ok":true,"database":"ok"}
    ```
    Caddy gets your HTTPS certificate on the first request; give it a minute.
-6. **Google sign-in:** in Google Cloud Console add `https://<your domain>/api/auth/callback/google` as a redirect URI (see `GOOGLE_AUTH_SETUP.md`). Sign in with the email in `ADMIN_EMAILS`.
-7. **Open `/admin`.** The go-live checklist checks every setting from the live server and tells you what's left: Stripe, email, selling domains, AI.
-8. **Approve templates** at `/templates/review` and write your first Journal post at `/admin/journal`.
+6. **Create your superadmin account** (the owner's login, email and password, no Google needed):
+   ```bash
+   docker compose exec -it app node scripts/create-superadmin.mjs
+   ```
+   It asks for your email, name and a password (at least 12 characters, typed hidden). Run it again to change the password; `--remove <email>` takes the role away. Then sign in at `https://<your domain>/login`.
+7. **Check email:** open `/admin/email` and press **Send a test email**. If it fails, the message says which setting to fix; change `.env`, run `docker compose up -d`, and try again.
+8. *(Optional)* **Google sign-in:** in Google Cloud Console add `https://<your domain>/api/auth/callback/google` as a redirect URI (see `GOOGLE_AUTH_SETUP.md`).
+9. **Open `/admin`.** The go-live checklist checks every setting from the live server and tells you what's left: Stripe, email, selling domains, AI.
+10. **Approve templates** at `/templates/review` and write your first Journal post at `/admin/journal`.
 
 Updates later:
 

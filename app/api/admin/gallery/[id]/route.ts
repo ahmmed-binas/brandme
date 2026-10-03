@@ -1,5 +1,4 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { reviewSubmission } from "@/lib/gallery/submissions";
 import { sendMail } from "@/lib/email/mailer";
 import { siteUrl } from "@/lib/site";
@@ -11,7 +10,7 @@ const STATUSES = ["approved", "changes", "rejected"] as const;
 /** Approve, ask for changes on, or decline a gallery submission. The designer is emailed. */
 export const POST = route(async (request: Request, { params }: { params: Promise<{ id: string }> }) => {
   const user = await getCurrentUser();
-  if (!user || !isModeratorEmail(user.email)) return jsonError(404, "Not found.");
+  if (!user || !user.isAdmin) return jsonError(404, "Not found.");
   const body = await readJson(request, 4_000);
   if (body instanceof Response) return body;
   const { status, note } = (body ?? {}) as { status?: unknown; note?: unknown };

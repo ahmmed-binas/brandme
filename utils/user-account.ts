@@ -1,6 +1,7 @@
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import { auth } from "@/auth";
+import { isModeratorEmail } from "@/lib/community/rules";
 import { WELCOME_CREDITS, standingOf, type AccountStanding, type PlanLimits } from "@/lib/plans";
 
 /** Creates or refreshes the account row on sign-in. New accounts get welcome credits, once. */
@@ -33,15 +34,19 @@ export interface CurrentUser {
   username: string | null;
   /** Google accounts are verified by Google; password accounts once they click the link we email. */
   emailVerified: boolean;
+  /** Runs the whole site: created with `npm run admin:create`, sees the email settings. */
+  isSuperadmin: boolean;
+  /** Can use the admin pages: the superadmin, or a confirmed email listed in ADMIN_EMAILS. */
+  isAdmin: boolean;
 }
 
-interface UserRow { id: string; email: string | null; name: string | null; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; credits: number; has_key: boolean; username: string | null; verified: boolean }
+interface UserRow { id: string; email: string | null; name: string | null; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; credits: number; has_key: boolean; username: string | null; verified: boolean; is_superadmin: boolean }
 
-export const USER_COLUMNS = "id, email, name, plan, trial_ends_at, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified";
+export const USER_COLUMNS = "id, email, name, plan, trial_ends_at, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified, is_superadmin";
 
 export function toCurrentUser(row: UserRow): CurrentUser {
   const standing = standingOf(row);
-  return { id: row.id, email: row.email, name: row.name, plan: standing.plan, planId: row.plan, standing, credits: row.credits, hasOwnKey: row.has_key, username: row.username, emailVerified: row.verified };
+  return { id: row.id, email: row.email, name: row.name, plan: standing.plan, planId: row.plan, standing, credits: row.credits, hasOwnKey: row.has_key, username: row.username, emailVerified: row.verified, isSuperadmin: row.is_superadmin && row.verified, isAdmin: row.verified && (row.is_superadmin || isModeratorEmail(row.email)) };
 }
 
 export async function getUserById(id: string): Promise<CurrentUser | null> {

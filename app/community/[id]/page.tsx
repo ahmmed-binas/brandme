@@ -16,6 +16,9 @@ const load = cache(async (id: string) => {
   return { post: await getPost(id, viewer), viewer };
 });
 
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const { post } = await load(id);

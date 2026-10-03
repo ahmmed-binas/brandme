@@ -24,6 +24,33 @@ function transport(): Transporter {
   return transporter;
 }
 
+/** What the email settings look like, for the superadmin's email page. Never includes the password. */
+export function mailSettings() {
+  return {
+    configured: mailConfigured(),
+    host: process.env.SMTP_HOST || null,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === "true",
+    user: process.env.SMTP_USER || null,
+    passwordSet: Boolean(process.env.SMTP_PASSWORD),
+    from: fromAddress(),
+    supportInbox: supportInbox(),
+  };
+}
+
+/** Logs in to the mail server and sends one test email, so the superadmin can check the settings. */
+export async function sendTestMail(to: string): Promise<void> {
+  if (!mailConfigured()) throw new Error("SMTP isn’t set up yet: add SMTP_HOST, SMTP_USER and SMTP_PASSWORD to .env and restart.");
+  // A fresh connection each time, so a changed password or port is really tested.
+  const test = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT ?? 587), secure: process.env.SMTP_SECURE === "true", auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD }, connectionTimeout: 15_000, greetingTimeout: 15_000, socketTimeout: 20_000 });
+  try {
+    await test.verify();
+    await test.sendMail({ from: fromAddress(), to, subject: "Test email: your email settings work", text: `This is a test from your website's email settings.\n\nIf you can read this, sign-up confirmations, password resets, receipts and Investigator reports will reach your customers.\n\nSent through ${process.env.SMTP_HOST}:${process.env.SMTP_PORT ?? 587} as ${process.env.SMTP_USER}.` });
+  } finally {
+    test.close();
+  }
+}
+
 export const fromAddress = () => process.env.SMTP_FROM || process.env.SMTP_USER || "Formora <no-reply@localhost>";
 export const supportInbox = () => process.env.SMTP_TO || process.env.SMTP_USER || null;
 

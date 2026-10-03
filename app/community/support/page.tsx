@@ -8,6 +8,9 @@ import { databaseConfigured } from "@/utils/db-schema";
 
 export const metadata: Metadata = { title: "Support", description: "Get help with your portfolio, domain, plan or the editor. A person replies, usually within one working day.", alternates: { canonical: "/community/support" } };
 
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
+
 const STATUS = { open: "Waiting for us", answered: "We replied", closed: "Closed" } as const;
 
 export default async function SupportPage({ searchParams }: { searchParams: Promise<{ view?: string; ticket?: string }> }) {

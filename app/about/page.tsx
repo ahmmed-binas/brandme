@@ -6,6 +6,9 @@ import { getViewer } from "@/lib/community/viewer";
 
 export const metadata: Metadata = { title: `About ${brand.name}`, description: about.headline, alternates: { canonical: "/about" } };
 
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
+
 const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
 
 export default async function AboutPage() {

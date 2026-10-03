@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReviewActions, ApproveRemaining } from "./ReviewActions";
 import { availableTemplates } from "@/lib/templates/approval";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { PROFESSIONS } from "@/lib/templates/types";
 import { getCurrentUser } from "@/utils/user-account";
 
@@ -11,10 +10,13 @@ export const metadata: Metadata = { title: "Review templates", robots: { index: 
 
 const FILTERS = [["pending", "Waiting"], ["changes", "Changes requested"], ["approved", "Approved"], ["rejected", "Rejected"], ["all", "All"]] as const;
 
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
+
 /** The owner's approval desk: nothing reaches customers until it's approved here. */
 export default async function ReviewTemplates({ searchParams }: { searchParams: Promise<{ show?: string }> }) {
   const viewer = await getCurrentUser().catch(() => null);
-  if (!isModeratorEmail(viewer?.email)) notFound();
+  if (!Boolean(viewer?.isAdmin)) notFound();
   const show = (await searchParams).show ?? "pending";
   const all = (await availableTemplates(true)).filter((template) => template.collection === "studio");
   const counts = Object.fromEntries(FILTERS.map(([id]) => [id, id === "all" ? all.length : all.filter((template) => template.review.status === id).length]));

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle2, CircleAlert, CircleDashed } from "lucide-react";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { runSetupChecks, type CheckState } from "@/lib/setup-checks";
 import { getCurrentUser } from "@/utils/user-account";
 
@@ -26,7 +25,7 @@ const ICON: Record<CheckState, React.ReactNode> = {
 /** Admin home: tools, and a live go-live checklist. */
 export default async function AdminHome() {
   const viewer = await getCurrentUser().catch(() => null);
-  if (!isModeratorEmail(viewer?.email)) notFound();
+  if (!Boolean(viewer?.isAdmin)) notFound();
   const checks = await runSetupChecks();
   const groups = [...new Set(checks.map((check) => check.group))];
   const todo = checks.filter((check) => check.state === "todo").length;
@@ -34,7 +33,7 @@ export default async function AdminHome() {
   return <div className="mx-auto max-w-[1100px] px-5 pb-24 pt-12 sm:px-8">
     <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Admin</p>
     <h1 className="mt-3 font-display text-[clamp(2.2rem,4.4vw,3.4rem)] leading-[1] tracking-[-0.02em]">{todo ? `${todo} thing${todo === 1 ? "" : "s"} to set up before launch` : "Ready to launch"}</h1>
-    <ul className="mt-10 grid gap-4 sm:grid-cols-2">{TOOLS.map(([href, title, text]) => <li key={href}><Link href={href} className="block rounded-xl border border-rule bg-card p-5 hover:border-ink"><span className="font-display text-[1.3rem]">{title}</span><span className="mt-1 block text-[0.92rem] text-ink-soft">{text}</span></Link></li>)}</ul>
+    <ul className="mt-10 grid gap-4 sm:grid-cols-2">{[...(viewer!.isSuperadmin ? [["/admin/email", "Email settings", "Check the SMTP settings and send a test email."] as const] : []), ...TOOLS].map(([href, title, text]) => <li key={href}><Link href={href} className="block rounded-xl border border-rule bg-card p-5 hover:border-ink"><span className="font-display text-[1.3rem]">{title}</span><span className="mt-1 block text-[0.92rem] text-ink-soft">{text}</span></Link></li>)}</ul>
     <h2 className="mt-16 font-display text-[1.9rem]">Go-live checklist</h2>
     <p className="mt-2 text-ink-soft">Read live from this server’s settings. Change a value in <code>.env</code>, restart, and reload this page. The full steps are in docs/LAUNCH.md.</p>
     {groups.map((group) => <section key={group} className="mt-8" aria-labelledby={`g-${group}`}>

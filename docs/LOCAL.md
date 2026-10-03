@@ -42,7 +42,7 @@ TEMPLATES_REQUIRE_APPROVAL=true
 
 - `npx auth secret` prints a random secret; paste it as `AUTH_SECRET`.
 - `DEV_LOGIN=true` adds **Sign in for testing** to the login page: type any email and you're in, no Google setup needed. It only works while `APP_URL` is `localhost`, so it can't be left on by accident on your live site.
-- Put the email you'll sign in with into `ADMIN_EMAILS` to get the admin pages.
+- Put the email you'll sign in with into `ADMIN_EMAILS` to get the admin pages. Or create the owner's account the way the live site does it: `npm run admin:create` (email + password, then sign in at `/login`). Only that superadmin sees `/admin/email`, where you can send a test email once `SMTP_…` is filled in.
 
 ## 4. Start it
 

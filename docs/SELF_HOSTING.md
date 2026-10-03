@@ -42,8 +42,11 @@ Then:
 | Microsoft 365 | smtp.office365.com | 587 | false | Enable “Authenticated SMTP” for the mailbox in the admin centre. |
 | Zoho Mail | smtp.zoho.com (or .eu) | 465 | true | Use an app-specific password. |
 | Fastmail | smtp.fastmail.com | 465 | true | Create an app password with SMTP access. |
+| Web host mailbox (cPanel, SupremeBox and similar) | the “outgoing server” shown in your host’s email settings (often `mail.<your domain>` or a server name like `server123.<host>.com`) | 465 | true | `SMTP_USER` is the full mailbox address. Some hosts limit how many emails an hour a mailbox may send. |
 
-Add SPF and DKIM records for your domain as your mail provider describes, so reminders and receipts don’t land in spam. `SMTP_FROM` should be an address on that domain, e.g. `Formora <hello@yourdomain.com>`.
+Add SPF and DKIM records for your domain as your mail provider describes, so reminders and receipts don’t land in spam. `SMTP_FROM` should be the same mailbox as `SMTP_USER` (or an alias of it), e.g. `Formora <hello@yourdomain.com>`.
+
+After changing these, restart the app (`docker compose up -d`), sign in as the superadmin and open **`/admin/email`**: it shows the settings the server is using (never the password) and has a **Send a test email** button that reports exactly what the mail server said.
 
 ## How custom domains reach the server
 

@@ -425,6 +425,13 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "010_superadmin",
+  statements: [
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_superadmin BOOLEAN NOT NULL DEFAULT FALSE`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

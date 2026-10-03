@@ -4,7 +4,6 @@ import EditorialDeveloperEditor from "@/components/editor/EditorialDeveloperEdit
 import StudioEditor from "@/components/editor/studio/StudioEditor";
 import { getTemplate } from "@/lib/templates/catalog";
 import { isTemplateAvailable } from "@/lib/templates/approval";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { getCurrentUser } from "@/utils/user-account";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { sampleFor } from "@/lib/templates/samples";
@@ -15,7 +14,7 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
   if (!template) notFound();
   // Templates waiting for the owner's approval can only be opened by admins.
   const viewer = await getCurrentUser().catch(() => null);
-  if (!(await isTemplateAvailable(template, isModeratorEmail(viewer?.email)))) notFound();
+  if (!(await isTemplateAvailable(template, Boolean(viewer?.isAdmin)))) notFound();
 
   if (template.collection === "studio") {
     // Sample content is written for the chosen job title; suggest the titles this design suits first.
@@ -26,3 +25,6 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
   }
   return template.editor === "dedicated" ? <EditorialDeveloperEditor template={template} /> : <PortfolioEditor template={template} />;
 }
+
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";

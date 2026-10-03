@@ -1,6 +1,5 @@
 import { revalidatePath } from "next/cache";
 import { jsonError, readJson, route } from "@/lib/api/http";
-import { isModeratorEmail } from "@/lib/community/rules";
 import { deleteJournalPost, JournalError, listJournal, saveJournalPost } from "@/lib/content/journal";
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
@@ -8,7 +7,7 @@ import { getCurrentUser } from "@/utils/user-account";
 async function admin() {
   if (!databaseConfigured()) return jsonError(503, "The Journal editor needs the database.");
   const user = await getCurrentUser();
-  return user && isModeratorEmail(user.email) ? user : jsonError(404, "Not found.");
+  return user && user.isAdmin ? user : jsonError(404, "Not found.");
 }
 
 const refresh = (slug?: string) => { revalidatePath("/blog"); if (slug) revalidatePath(`/blog/${slug}`); revalidatePath("/sitemap.xml"); };

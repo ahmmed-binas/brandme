@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/community" },
 };
 
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 20;
 
 export default async function CommunityPage({ searchParams }: { searchParams: Promise<{ kind?: string; sort?: string; page?: string }> }) {

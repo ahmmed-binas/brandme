@@ -9,6 +9,9 @@ import { getViewer } from "@/lib/community/viewer";
 
 export const metadata: Metadata = { title: "Moderation", robots: { index: false, follow: false } };
 
+// Depends on who is signed in; never pre-render at build time.
+export const dynamic = "force-dynamic";
+
 /** Moderators only (ADMIN_EMAILS). Everyone else gets a 404, so the page's existence isn't advertised. */
 export default async function ModerationPage() {
   const viewer = await getViewer();

@@ -45,6 +45,7 @@ BASE=http://localhost:3100 node tests/e2e/blog.mjs
 | `blog.mjs` | Test login, ratings, Journal admin, portfolio blogs (+ custom domain), domain renewals, Pro-only blog |
 | `gallery2.mjs` | Password accounts, template submissions + admin review, gallery tiles/search, article pages, downloads |
 | `investigator.mjs` | The Investigator: plan rules, settings page, ask and automatic modes, live site, emails, undo, cron, private-address blocking (server needs `INVESTIGATOR_ALLOW_PRIVATE_FETCH=true`, set in `test.env`) |
+| `superadmin.mjs` | `npm run admin:create`, password sign-in, admin access rules, `/admin/email` and the test email. Start the server with `SMTP_HOST=127.0.0.1 SMTP_PORT=2525 SMTP_USER=owner@company.test SMTP_PASSWORD=right-password` and run `node tests/e2e/smtp-sink.mjs tests/e2e/.out/mail` (other suites read emails from the server log, so run them without SMTP) |
 | `edit-all.mjs` | Every studio template: every click-to-edit spot opens a field, autosave to the database, reload |
 | `blank.mjs` | Every studio template still shows a name and heading with almost no content |
 | `previews.mjs` | Every template preview renders |
