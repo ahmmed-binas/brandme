@@ -38,7 +38,21 @@ Rules:
 
 Finish with only a JSON object, no other text: {"findings": [{"kind": "role" | "highlight" | "project" | "title", "title": string, "detail": string, "year": string, "organisation": string, "source_url": string, "confidence": "high" | "medium" | "low"}]}. Use "role" for a new job (title = job title, organisation = employer), "title" for a changed headline, "project" for something they made or launched, and "highlight" for talks, publications, awards and press. Return {"findings": []} when you find nothing new.`;
 
-function describePerson(content: StandardContent): string {
+export type Finding = z.infer<typeof findingSchema>;
+export { findingSchema };
+
+/** Turns a cited finding into a suggestion the owner can apply (or that the Investigator applies for them). */
+export function findingToSuggestion(finding: Finding, source: "research" | "investigator"): NewSuggestion {
+  const base = { source, sourceUrl: finding.source_url, fingerprint: fingerprint("research", finding.kind, finding.title, finding.organisation) };
+  switch (finding.kind) {
+    case "role": return { ...base, title: `New role: ${finding.title}${finding.organisation ? ` at ${finding.organisation}` : ""}`, detail: finding.detail, payload: { kind: "add_experience", experience: { job_title: finding.title, company: finding.organisation, start_date: finding.year, end_date: "Present", description: finding.detail } } };
+    case "title": return { ...base, title: `Update your headline to “${finding.title}”`, detail: finding.detail, payload: { kind: "set_field", field: "professional_title", value: finding.title } };
+    case "project": return { ...base, title: `Add project: ${finding.title}`, detail: finding.detail, payload: { kind: "add_project", project: { title: finding.title, description: finding.detail, year: finding.year, client: finding.organisation || undefined, live_url: finding.source_url } } };
+    default: return { ...base, title: finding.title, detail: finding.detail, payload: { kind: "add_highlight", highlight: { title: finding.title, detail: [finding.organisation, finding.detail].filter(Boolean).join(" — ").slice(0, 400), year: finding.year, url: finding.source_url } } };
+  }
+}
+
+export function describePerson(content: StandardContent): string {
   const role = content.experience?.[0];
   return [
     `Name: ${content.name}`, content.professional_title && `Headline: ${content.professional_title}`, content.location && `Location: ${content.location}`,
@@ -84,15 +98,7 @@ export async function runResearch(client: Anthropic, ownerId: string, content: S
 
   const known = await knownTitles(ownerId);
   const findings = parseFindings(text).filter((finding) => finding.confidence !== "low" && safeLink(finding.source_url) && !known.has(finding.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()));
-  const items: NewSuggestion[] = findings.map((finding): NewSuggestion => {
-    const base = { source: "research" as const, sourceUrl: finding.source_url, fingerprint: fingerprint("research", finding.kind, finding.title, finding.organisation) };
-    switch (finding.kind) {
-      case "role": return { ...base, title: `New role: ${finding.title}${finding.organisation ? ` at ${finding.organisation}` : ""}`, detail: finding.detail, payload: { kind: "add_experience", experience: { job_title: finding.title, company: finding.organisation, start_date: finding.year, end_date: "Present", description: finding.detail } } };
-      case "title": return { ...base, title: `Update your headline to “${finding.title}”`, detail: finding.detail, payload: { kind: "set_field", field: "professional_title", value: finding.title } };
-      case "project": return { ...base, title: `Add project: ${finding.title}`, detail: finding.detail, payload: { kind: "add_project", project: { title: finding.title, description: finding.detail, year: finding.year, client: finding.organisation || undefined, live_url: finding.source_url } } };
-      default: return { ...base, title: finding.title, detail: finding.detail, payload: { kind: "add_highlight", highlight: { title: finding.title, detail: [finding.organisation, finding.detail].filter(Boolean).join(" — ").slice(0, 400), year: finding.year, url: finding.source_url } } };
-    }
-  });
+  const items = findings.map((finding) => findingToSuggestion(finding, "research"));
   const added = await addSuggestions(ownerId, items);
   await db.query("UPDATE app_users SET last_research_at = NOW() WHERE id = $1", [ownerId]);
   return { ok: true, added, usage };

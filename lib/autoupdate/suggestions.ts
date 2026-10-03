@@ -5,7 +5,7 @@ import type { Suggestion, SuggestionPayload } from "./apply";
 
 export const fingerprint = (...parts: string[]) => createHash("sha256").update(parts.map((part) => part.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()).join("|")).digest("hex").slice(0, 32);
 
-export interface NewSuggestion { source: "github" | "research"; title: string; detail?: string | null; sourceUrl?: string | null; payload: SuggestionPayload; fingerprint: string }
+export interface NewSuggestion { source: "github" | "research" | "investigator"; title: string; detail?: string | null; sourceUrl?: string | null; payload: SuggestionPayload; fingerprint: string }
 
 /** Stores suggestions, skipping any the owner has already seen (applied, dismissed or pending). */
 export async function addSuggestions(ownerId: string, items: NewSuggestion[]): Promise<number> {
@@ -24,7 +24,7 @@ export async function addSuggestions(ownerId: string, items: NewSuggestion[]): P
 
 export async function pendingSuggestions(ownerId: string): Promise<Suggestion[]> {
   await ensureSchema();
-  const result = await db.query<{ id: string; source: "github" | "research"; title: string; detail: string | null; source_url: string | null; payload: SuggestionPayload; created_at: Date }>(
+  const result = await db.query<{ id: string; source: "github" | "research" | "investigator"; title: string; detail: string | null; source_url: string | null; payload: SuggestionPayload; created_at: Date }>(
     "SELECT id, source, title, detail, source_url, payload, created_at FROM profile_suggestions WHERE owner_id = $1 AND status = 'pending' ORDER BY created_at DESC LIMIT 50",
     [ownerId],
   );

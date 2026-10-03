@@ -64,9 +64,10 @@ Open http://localhost:3000. The database tables are created on first use.
 8. **Ratings:** open any template preview and click the stars.
 9. **Gallery:** http://localhost:3000/gallery. Hover a tile to play its clip; open one to read about it, rate it and download it free.
 10. **A real account with a password:** http://localhost:3000/signup. The confirmation link is printed in the terminal running `npm run dev` (look for `[email body]`). Then submit a template at http://localhost:3000/gallery/submit and approve it as admin at http://localhost:3000/admin/gallery.
-11. **A second, normal customer:** sign out (Account → Sign out) and sign in for testing with a different email that isn't in `ADMIN_EMAILS`.
+11. **The Investigator:** http://localhost:3000/account/investigator. Add your own GitHub username or a blog feed (those are read without AI), tick the box, press **Check now**. LinkedIn, websites and the web search need an Anthropic key in `.env.local`. What it finds waits in the editor's **AI** tab, or goes straight onto your site if you chose *Update my website automatically*. The report email is printed in the terminal. Details: `docs/INVESTIGATOR.md`.
+12. **A second, normal customer:** sign out (Account → Sign out) and sign in for testing with a different email that isn't in `ADMIN_EMAILS`.
 
-What doesn't work locally without more setup: Google sign-in (needs Google keys), payments (Stripe test keys work fine if you add them), buying domains (needs a Vercel token), real emails (they're printed in the terminal instead), the AI assistant (needs an Anthropic key).
+What doesn't work locally without more setup: Google sign-in (needs Google keys), payments (Stripe test keys work fine if you add them), buying domains (needs a Vercel token), real emails (they're printed in the terminal instead), the AI assistant and the Investigator's AI step (need an Anthropic key).
 
 ## Production build (optional)
 

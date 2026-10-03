@@ -14,7 +14,7 @@ export type SuggestionPayload =
 
 export interface Suggestion {
   id: string;
-  source: "github" | "research";
+  source: "github" | "research" | "investigator";
   title: string;
   detail: string | null;
   sourceUrl: string | null;

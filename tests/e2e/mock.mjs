@@ -95,6 +95,20 @@ http.createServer(async (req, res) => {
   if (path === "/v1/messages" && req.method === "POST") {
     const body = JSON.parse(raw);
     log.push(`CLAUDE-KEY ${req.headers["x-api-key"]}`);
+    if (typeof body.system === "string" && body.system.includes("You are the Investigator")) {
+      const prompt = String(body.messages[0].content);
+      log.push(`INVESTIGATOR tools=${body.tools?.map((tool) => tool.type).join(",")}`);
+      const urls = [...prompt.matchAll(/: (https?:\/\/\S+)/g)].map((match) => match[1]);
+      const result = {
+        findings: [
+          { kind: "role", title: "Head of Platform", detail: "Leads the platform group of 40 engineers.", year: "2026", organisation: "Northwind Pay", source_url: "https://example.org/northwind-head-of-platform", confidence: "high" },
+          { kind: "highlight", title: "Speaker at DevConf Dubai 2026", detail: "Talk on calm on-call rotations", year: "2026", organisation: "DevConf Dubai", source_url: "https://example.org/devconf-dubai", confidence: "medium" },
+          { kind: "highlight", title: "A different person entirely", detail: "same name", year: "2026", organisation: "", source_url: "https://example.org/someone-else", confidence: "low" },
+        ],
+        sources: urls.map((url) => ({ url, status: /linkedin|instagram/.test(url) ? "partly" : "read", note: /linkedin|instagram/.test(url) ? "Only the name and headline are visible without logging in" : "" })),
+      };
+      return send(res, 200, { id: "msg_i", type: "message", role: "assistant", model: body.model, stop_reason: "end_turn", stop_sequence: null, usage: { input_tokens: 12000, output_tokens: 1800, server_tool_use: { web_search_requests: 3, web_fetch_requests: urls.length } }, content: [{ type: "text", text: JSON.stringify(result) }] });
+    }
     if (typeof body.system === "string" && body.system.includes("research a person")) {
       log.push(`RESEARCH tools=${body.tools?.map((tool) => tool.type).join(",")}`);
       const findings = { findings: [
@@ -113,6 +127,14 @@ http.createServer(async (req, res) => {
     const fields = JSON.parse(body.messages[0].content.split("\n")[1]);
     const title = fields.find((field) => field.path === "professional_title");
     return message({ reply: "Tightened your title.", changes: [{ path: title.path, value: "Computer Scientist" }, { path: "name", value: "Hacked Name" }, { path: "github", value: "javascript:alert(1)" }] });
+  }
+
+  // A public RSS feed for the Investigator tests (two recent posts, one old one).
+  if (path === "/feeds/demo.xml") {
+    const day = 86400000;
+    const items = [[2, "Why calm on-call wins"], [9, "Indexes you forgot you needed"], [900, "An old post from years ago"]];
+    res.writeHead(200, { "Content-Type": "application/rss+xml" });
+    return res.end(`<?xml version="1.0"?><rss version="2.0"><channel><title>Demo blog</title>${items.map(([ago, title]) => `<item><title><![CDATA[${title}]]></title><link>https://blog.example.org/${encodeURIComponent(title)}</link><pubDate>${new Date(Date.now() - ago * day).toUTCString()}</pubDate><description>&lt;p&gt;${title} &amp;amp; more&lt;/p&gt;</description></item>`).join("")}</channel></rss>`);
   }
 
   // Stripe

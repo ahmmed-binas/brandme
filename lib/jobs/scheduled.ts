@@ -10,6 +10,7 @@ import { syncGitHub } from "@/lib/autoupdate/github-sync";
 import { runResearch } from "@/lib/autoupdate/research";
 import { openAi, platformAiConfigured, settleAi, sumUsage } from "@/lib/ai/metering";
 import { advanceOrders, remindRenewals } from "@/lib/domains/service";
+import { runDueInvestigations } from "@/lib/investigator/run";
 import { standardContentSchema } from "@/lib/portfolio/schema";
 import { getUserById } from "@/utils/user-account";
 
@@ -81,7 +82,8 @@ async function autoUpdates(): Promise<{ github: number; research: number; digest
   }
   // Research: on the plan's schedule, paid with the plan's monthly credits (or the owner's key).
   const research = await db.query<{ id: string; plan: string; last_research_at: Date | null }>(
-    "SELECT id, plan, last_research_at FROM app_users WHERE auto_update AND plan IN ('pro', 'premium') AND plan_expires_at > NOW() ORDER BY last_research_at NULLS FIRST LIMIT 5",
+    // People who use the Investigator get its checks instead, on the schedule they chose.
+    "SELECT id, plan, last_research_at FROM app_users WHERE auto_update AND plan IN ('pro', 'premium') AND plan_expires_at > NOW() AND NOT EXISTS (SELECT 1 FROM investigator_settings s WHERE s.owner_id = app_users.id AND s.enabled) ORDER BY last_research_at NULLS FIRST LIMIT 5",
   );
   for (const row of research.rows) {
     const every = PLANS[row.plan as "pro" | "premium"].researchEveryDays;
@@ -132,6 +134,7 @@ export async function runScheduledJobs(): Promise<Record<string, unknown>> {
     await step("autoUpdates", autoUpdates);
     await step("domainOrders", domainOrders);
     await step("domainRenewals", remindRenewals);
+    await step("investigator", () => runDueInvestigations());
     await step("orphanedImages", deleteOrphanedAssets);
     return summary;
   } finally {

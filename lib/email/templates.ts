@@ -53,6 +53,19 @@ export const emails = {
     `It takes a minute, and Basic is $10 a year.`,
   ], { label: "Choose a plan", url: `${siteUrl}/pricing` }),
 
+  investigatorReport: (name: string | null, changes: { title: string; applied: boolean }[], unreadable: string[], liveUrl: string | null) => {
+    const applied = changes.filter((change) => change.applied);
+    const waiting = changes.filter((change) => !change.applied);
+    return layout(applied.length ? `Your website is up to date: ${applied.length} change${applied.length === 1 ? "" : "s"}` : `The Investigator found ${waiting.length} update${waiting.length === 1 ? "" : "s"} for you`, [
+      `Hi ${first(name)},`,
+      applied.length ? `The Investigator checked your profiles and updated your website:` : `The Investigator checked your profiles and found something new. Nothing changes on your site until you add it:`,
+      ...[...applied, ...waiting].slice(0, 8).map((change) => `• ${change.title}${change.applied ? "" : " (waiting for you)"}`),
+      ...(applied.length && waiting.length ? [`${waiting.length} more ${waiting.length === 1 ? "is" : "are"} waiting for you to check, because we weren’t completely sure.`] : []),
+      ...(applied.length ? ["Not right? You can undo any automatic change for 30 days from the Investigator page."] : []),
+      ...(unreadable.length ? [`We couldn’t read ${unreadable.join(", ")} without logging in, which we never do. If something changed there, add it in the editor or upload your export.`] : []),
+    ], applied.length && liveUrl ? { label: "See your website", url: liveUrl } : { label: "Review the updates", url: `${siteUrl}/account/investigator` });
+  },
+
   domainRenewalDue: (name: string | null, domain: string, expires: Date, price: string, included: boolean) => layout(`${domain} needs renewing by ${date(expires)}`, [
     `Hi ${first(name)},`,
     `Your domain ${domain} is registered until ${date(expires)}. Renew it before then to keep your portfolio at that address.`,

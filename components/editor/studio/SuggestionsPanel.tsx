@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ExternalLink, GitBranch, Loader2, RefreshCw, Search } from "lucide-react";
 import { applySuggestion, type Suggestion } from "@/lib/autoupdate/apply";
@@ -69,6 +70,7 @@ export function SuggestionsPanel({ signedIn, templateId, content, onApply }: { s
 
   const scheduled = state.features.autoSync || state.features.researchEveryDays;
   return <section className="border-b border-rule p-4">
+    <Link href="/account/investigator" className="mb-4 block rounded-xl bg-ink p-4 text-paper hover:bg-ink/90"><span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-paper/60">New</span><span className="mt-1 block font-display text-[1.15rem] leading-tight">The Investigator</span><span className="mt-1 block text-[12.5px] leading-relaxed text-paper/75">Give it your profiles and it keeps this site up to date with your career, on the schedule you choose. Set it up →</span></Link>
     <h3 className="font-display text-[1.25rem] leading-tight">Keep it up to date</h3>
     <p className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">We look for new work and news about you. You decide what goes on your site.</p>
 
@@ -91,7 +93,7 @@ export function SuggestionsPanel({ signedIn, templateId, content, onApply }: { s
     </label> : <p className="mt-4 text-[12px] text-ink-faint">Automatic checks come with Pro and Premium.</p>}
 
     {state.suggestions.length > 0 && <ul className="mt-4 space-y-2">{state.suggestions.map((suggestion) => <li key={suggestion.id} className="rounded-xl border border-rule bg-white/70 p-3">
-      <p className="text-[11px] uppercase tracking-[0.12em] text-ink-faint">{suggestion.source === "github" ? "From GitHub" : "Found on the web"}</p>
+      <p className="text-[11px] uppercase tracking-[0.12em] text-ink-faint">{suggestion.source === "github" ? "From GitHub" : suggestion.source === "investigator" ? "Found by the Investigator" : "Found on the web"}</p>
       <p className="mt-1 text-[13px] font-medium leading-snug">{suggestion.title}</p>
       {suggestion.detail && <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">{suggestion.detail}</p>}
       {suggestion.sourceUrl && <a href={suggestion.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-[12px] text-ink-soft underline">Source <ExternalLink size={11} /></a>}

@@ -44,6 +44,7 @@ BASE=http://localhost:3100 node tests/e2e/blog.mjs
 | `roles.mjs` | 156 job titles, finder, SEO pages |
 | `blog.mjs` | Test login, ratings, Journal admin, portfolio blogs (+ custom domain), domain renewals, Pro-only blog |
 | `gallery2.mjs` | Password accounts, template submissions + admin review, gallery tiles/search, article pages, downloads |
+| `investigator.mjs` | The Investigator: plan rules, settings page, ask and automatic modes, live site, emails, undo, cron, private-address blocking (server needs `INVESTIGATOR_ALLOW_PRIVATE_FETCH=true`, set in `test.env`) |
 | `edit-all.mjs` | Every studio template: every click-to-edit spot opens a field, autosave to the database, reload |
 | `blank.mjs` | Every studio template still shows a name and heading with almost no content |
 | `previews.mjs` | Every template preview renders |

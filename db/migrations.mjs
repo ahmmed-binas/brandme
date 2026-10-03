@@ -384,6 +384,47 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "009_investigator",
+  statements: [
+    // The Investigator: which of their own profiles a customer asks us to watch, and how often.
+    `CREATE TABLE IF NOT EXISTS investigator_settings (
+      owner_id UUID PRIMARY KEY REFERENCES app_users(id) ON DELETE CASCADE,
+      enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      frequency TEXT NOT NULL DEFAULT 'monthly' CHECK (frequency IN ('daily', 'weekly', 'monthly', 'six_months', 'yearly')),
+      mode TEXT NOT NULL DEFAULT 'ask' CHECK (mode IN ('ask', 'auto')),
+      links JSONB NOT NULL DEFAULT '[]',
+      template_id TEXT,
+      next_run_at TIMESTAMPTZ,
+      last_run_at TIMESTAMPTZ,
+      failures INTEGER NOT NULL DEFAULT 0,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS investigator_due ON investigator_settings (next_run_at) WHERE enabled`,
+    // Every check, what it read, what it found and changed, so it can be explained and undone.
+    `CREATE TABLE IF NOT EXISTS investigator_runs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      owner_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      trigger TEXT NOT NULL CHECK (trigger IN ('schedule', 'manual')),
+      status TEXT NOT NULL DEFAULT 'running' CHECK (status IN ('running', 'done', 'failed')),
+      sources JSONB NOT NULL DEFAULT '[]',
+      found INTEGER NOT NULL DEFAULT 0,
+      applied INTEGER NOT NULL DEFAULT 0,
+      template_id TEXT,
+      content_before JSONB,
+      published_before JSONB,
+      error TEXT,
+      started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      finished_at TIMESTAMPTZ,
+      undone_at TIMESTAMPTZ
+    )`,
+    `CREATE INDEX IF NOT EXISTS investigator_runs_owner ON investigator_runs (owner_id, started_at DESC)`,
+    `ALTER TABLE profile_suggestions DROP CONSTRAINT IF EXISTS profile_suggestions_source_check`,
+    `ALTER TABLE profile_suggestions ADD CONSTRAINT profile_suggestions_source_check CHECK (source IN ('github', 'research', 'investigator'))`,
+    `ALTER TABLE profile_suggestions ADD COLUMN IF NOT EXISTS run_id UUID REFERENCES investigator_runs(id) ON DELETE SET NULL`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

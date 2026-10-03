@@ -47,10 +47,11 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Ratings | `lib/templates/ratings.ts`, `lib/templates/rating-route.ts` |
 | Plans, billing, credits, AI metering | `lib/plans.ts`, `lib/billing/*`, `lib/ai/*`, `app/api/webhooks/stripe` |
 | Auto-updates (GitHub, research agent) | `lib/autoupdate/*`, hourly jobs `lib/jobs/scheduled.ts` (`POST /api/cron`) |
+| The Investigator (checks the owner's own profiles on a schedule, updates the site) | `lib/investigator/*`, `/account/investigator`, `app/api/investigator/*`, `docs/INVESTIGATOR.md` |
 | Community and support | `lib/community/*`, `lib/support/*`, `app/community/*` |
 | Admin | `/admin` (go-live checklist `lib/setup-checks.ts`), moderators = `ADMIN_EMAILS` |
 
-More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
+More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
 
 ## Rules the owner has set
 
@@ -72,11 +73,11 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 ## Open decisions (waiting on the owner)
 
 - Brand name (currently Formora; “BrandMe” was considered but is taken by a London agency).
-- The five auto-update questions in `docs/plans/laptop-setup-and-auto-update-plan.pdf` (plan limits, auto-apply, auto-publish, sources, daily checks for Pro).
+- Auto-update: answered by the Investigator (Pro: monthly / 6 months / yearly; Premium: also weekly and daily; trial: one check; the customer chooses “ask me first” or “update automatically”; website only, no PDF CV). Still open: daily Investigator checks cost more AI credits than Premium's monthly allowance covers (see `docs/INVESTIGATOR.md`, “Costs”).
 - Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) at `/templates/review`.
 - Pricing (the owner was advised $10/yr is too low to pay for ads; a “done for you” offer was suggested).
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
 
 ## Next work, in order
 
-See the PDF for detail. In short: configurable auto-update (phase 1), analytics, a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).
+See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics, a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).
