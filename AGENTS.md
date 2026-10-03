@@ -86,4 +86,6 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 
 ## Next work, in order
 
+**Agreed next: `docs/plans/free-first-launch-plan.md`** (free Basic, Pro with the Investigator and up to 3 sites, no Premium, AI at cost + 5%, Agents menu with the Investigator page, blog media upgrade). Planned only; build it when the owner says "implement". It overrides the pricing notes below.
+
 See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics (owner side done: the console; still to do: views per portfolio for customers), a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).
