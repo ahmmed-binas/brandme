@@ -8,13 +8,14 @@ Goal for the first ~6 months: **users and engagement first, money later.** Charg
 
 | Plan | Price | What's in it |
 | --- | --- | --- |
-| **Basic** | **Free** | Every template; 1 published site on `name.<our domain>`; small "Made with Formora" link; ~100 MB images; blog; AI with the customer's own Claude key **or** pay-as-you-go credits |
-| **Pro** | $24 / year (suggested; owner to confirm) | Up to **3 sites/portfolios** (hard maximum); the **Investigator** (all schedules, even daily, since AI is paid by usage); own domain; no branding; more storage |
+| **Basic** | **Free** | Every template; **one portfolio at a time** (one set of content); 1 published site on `name.<our domain>`; small "Made with Formora" link; ~100 MB images; blog; **the Investigator** (each check paid by usage); AI with the customer's own Claude key **or** pay-as-you-go credits |
+| **Pro** | **Monthly or yearly** (yearly cheaper; suggested $24/yr, monthly a little above a twelfth because of the 30¢ card fee) | Up to **3 portfolios side by side** (hard maximum); own domain; no branding; more storage; all Investigator schedules |
 | **Need more?** | — | **"Book a free call"** with the owner (e.g. a Cal.com/Calendly link) for custom websites, teams, more than 3 sites. Price agreed on the call. No "Enterprise" plan |
 
 - **Premium is removed** (no customers on it yet). Code to update: `lib/plans.ts`, pricing page, Investigator access (`lib/investigator/settings.ts`: Pro gets every frequency), included domain, monthly credits, tests (`billing.mjs`, `investigator.mjs`).
 - **Free trial:** open question. Suggested: drop the 14-day trial (Basic is free anyway) but keep **one free Investigator check** so people can see it work.
-- AI usage is **independent of the plan**: same price for everyone.
+- AI usage is **independent of the plan**: same price for everyone. The Investigator is on every plan; its checks are paid like any AI use (credits or own key).
+- **Basic: one set of data.** Switching template **moves the same content to the new design** (no retyping); the old design's own settings (palette, layout options) are replaced. Show a clear warning first. Technically: Basic users keep a single `portfolios` row whose `template_id` changes, instead of one row per template.
 
 ## 2. Money: at cost, fees shown clearly
 
@@ -34,7 +35,7 @@ Card fees (Stripe standard, check the live rate for the account's country): abou
 
 ## 4. The Investigator Agent page
 
-- Character: **the detective with the hat** (owner's choice), a friendly illustrated avatar (hat, magnifying glass). Create it as an SVG/illustration and reuse it in the app (Investigator settings page, emails, editor card).
+- Character: **the detective with the hat** (owner's choice), with a **character name** (to choose: e.g. Inspector Iqbal, Detective Dex, Sherlock Sam, Agent Rafi), a friendly illustrated avatar (hat, magnifying glass). Create it as an SVG/illustration and reuse it in the app (Investigator settings page, emails, editor card).
 - Blog-style page: who he is, what he checks (own website via a real browser, GitHub, blogs/Medium/Substack/YouTube, news, Credly…), how he double-checks findings, what he never does (log in, read private data), technology (Claude with web search, Obscura headless browser, fact-checking), plans and cost, FAQ.
 - **Comments and reviews** on the page (reuse the community/review system, star rating).
 - Visual: images, a short clip of the Investigator updating a site, a call to action ("Let him keep your site up to date").
@@ -42,7 +43,7 @@ Card fees (Stripe standard, check the live rate for the account's country): abou
 ## 5. Sources the Investigator reads (agreed in discussion)
 
 - Remove **Instagram, TikTok, X** (nothing visible without logging in).
-- **Facebook → "Facebook business Page"** only.
+- **Facebook stays for everyone** (personal profiles too): use whatever is public plus name/photo to confirm identity; most personal profiles show little logged out.
 - Keep **LinkedIn** (identity + headline) and make **copy-paste of the profile** the main LinkedIn import (Ctrl+A, Ctrl+C → Paste anything), with the data export for full history. **Never** log in or scrape LinkedIn with credentials.
 - Add: **Credly**, **Stack Overflow**, **Sessionize**, **podcast feeds**; later **Property Finder / Bayut agent profiles** (Dubai real-estate niche). Possibly a different source list per profession.
 
@@ -84,5 +85,5 @@ The blog is where visitors are attracted; today posts have no images.
 
 - Pro price ($24/yr suggested) and whether to also offer monthly.
 - Keep or drop the 14-day trial (suggested: drop, keep one free Investigator check).
-- The booking link for "Book a free call" (Cal.com/Calendly account).
-- The agent's name ("The Investigator", or a character name).
+- "Book a free call": the visitor picks a free time slot; both sides get an automatic confirmation email. Easiest: **Cal.com** (free, open source, sends emails and calendar invites). Alternative: build it in, emailing through our SMTP (or the owner's MCP setup later). Owner to choose and create the account.
+- The agent's character name.
