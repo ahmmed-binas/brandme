@@ -87,3 +87,13 @@ The blog is where visitors are attracted; today posts have no images.
 - Keep or drop the 14-day trial (suggested: drop, keep one free Investigator check).
 - "Book a free call": the visitor picks a free time slot; both sides get an automatic confirmation email. Easiest: **Cal.com** (free, open source, sends emails and calendar invites). Alternative: build it in, emailing through our SMTP (or the owner's MCP setup later). Owner to choose and create the account.
 - The agent's character name.
+
+## Discussion notes (decisions and reasons, so nothing lives only in chat)
+
+- **Why free-first (option A, not open source):** the owner wants users and engagement before revenue. Technical people will build their own site with AI anyway; the buyers are non-technical professionals. Open-sourcing the app (self-host free, AGPL) was considered and **not chosen for now**.
+- **LinkedIn:** never log in with customers' (or the owner's) credentials or scrape LinkedIn; it breaks LinkedIn's terms, LinkedIn has sued scrapers, and storing customers' passwords is a liability. Use copy-paste of the profile, the data export, and "paste your news".
+- **The real problem to solve:** people never update their CV/site by hand, so updates must come from where they already talk: the Investigator (background), email forwarding/monthly reply, a ChatGPT/Claude connector (MCP: the AI asks "add this to your website?"), WhatsApp (UAE). We can't read people's ChatGPT history; the connector works when the app is switched on.
+- **Obscura** (headless browser, v0.2.3 at the time): works for reading JavaScript-built pages and schema.org Person data. Quirks we handled: no real `innerText` (words ran together), script text in the body, and it refuses DevTools connections by host name (connect by IP; done in `lib/investigator/reader.ts`). Not yet tested on many real-world sites or in its Docker image. Stealth mode stays off.
+- **Marketing ideas:** real product screen recordings beat fully AI-generated video. Tools discussed: CapCut (edit, captions), ElevenLabs (voice, incl. Arabic), Canva, Claude for scripts and hooks, Metricool/Buffer for scheduling through official APIs (no bots on new accounts). Video ideas: "CV to website in 60 seconds", free templates, "your website updates itself", one per profession (e.g. Dubai real estate agents).
+- **`.ae` domains** (pending owner's OK): show "buy from a UAE registrar" instead of "taken", a short UAE guide, and `.ae` suggestions.
+- **Hosting advice given:** Hetzner VPS + Cloudflare domain; SMTP via the company mailbox (rubiconinfo.com is on SupremeBox) or Brevo/Resend.
