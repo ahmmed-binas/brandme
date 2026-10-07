@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const usd = (credits: number) => `$${(credits / 100).toFixed(2)}`;
 
 const STEPS = [
-  ["You add your own profiles", "Your website, GitHub, blog or newsletter feed, YouTube, Medium, Substack, LinkedIn and more. You tick a box to confirm they’re yours."],
+  ["You add your own profiles", "Your website, GitHub, Stack Overflow, Credly, Sessionize, a blog, newsletter or podcast feed, YouTube, Medium, Substack, LinkedIn, Facebook and more. You tick a box to confirm they’re yours."],
   ["It checks on your schedule", "Every day, week, month, six months, once a year, or every so many days. You can also press “Check now” whenever you like."],
   ["It reads and searches", "It reads your public pages (in a real browser, so modern sites are understood) and searches the web around you for professional news: a new role, a talk, an award, an article."],
   ["It double-checks", "Every finding is checked against the page it came from. If that page doesn’t mention you, it’s dropped; if it’s not sure, it waits for you."],
@@ -29,7 +29,7 @@ const NEVER = [
 
 const FAQ: Array<[string, string]> = [
   ["What does it cost?", `Your first check is free. After that, reading GitHub and blog feeds is free, and the AI step costs about ${CHECK_CREDITS_ESTIMATE.low}–${CHECK_CREDITS_ESTIMATE.high} credits per check (${usd(CHECK_CREDITS_ESTIMATE.low)}–${usd(CHECK_CREDITS_ESTIMATE.high)}), from credits sold at cost or nothing extra with your own Claude API key. It works on every plan, including free Basic.`],
-  ["Why can’t it read my LinkedIn properly?", "LinkedIn, Instagram, Facebook, X and TikTok show very little to visitors who aren’t logged in, and we never log in as you. Those links still help it be sure it has found you. For LinkedIn job changes, upload your LinkedIn data export in the editor."],
+  ["Why can’t it read my LinkedIn properly?", "LinkedIn and Facebook show very little to visitors who aren’t logged in, and we never log in as you. Those links still help Inspector Iqbal be sure he has found you. For LinkedIn job changes, copy your profile page and paste it into the editor’s LinkedIn import, or upload your LinkedIn data export."],
   ["What if it gets something wrong?", "Anything it isn’t sure about waits for you. Automatic changes are emailed to you and can be undone for 30 days from the Investigator page, which puts your site back exactly as it was."],
   ["Does it update my PDF CV?", "No, only your website."],
 ];

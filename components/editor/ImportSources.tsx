@@ -69,7 +69,7 @@ export function ImportSources({ aiReady, signInHref, busy, setBusy, onImport, on
     };
   });
 
-  const importPasted = () => run("pasted text", async () => { const profile = await structureWithAi(pasted); setPasted(""); setOpen(null); return profile; });
+  const importPasted = (label = "pasted text") => run(label, async () => { const profile = await structureWithAi(pasted); setPasted(""); setOpen(null); return profile; });
 
   const option = (source: Exclude<Source, null>, icon: React.ReactNode, title: string, hint: string) => <button type="button" disabled={busy} onClick={() => setOpen(open === source ? null : source)} aria-expanded={open === source} className="flex w-full items-center gap-3 rounded-xl border border-slate-200 px-3 py-2.5 text-left hover:border-violet-300 hover:bg-violet-50 disabled:opacity-60">
     <span className="text-violet-700">{icon}</span><span className="min-w-0 flex-1"><span className="block text-sm font-bold">{title}</span><span className="block text-xs text-slate-500">{hint}</span></span><ChevronDown size={15} className={`text-slate-400 transition ${open === source ? "rotate-180" : ""}`} />
@@ -89,8 +89,19 @@ export function ImportSources({ aiReady, signInHref, busy, setBusy, onImport, on
       <button disabled={busy || !username.trim()} className="rounded-lg bg-slate-900 px-3 text-sm font-bold text-white disabled:opacity-50">{busy ? <Loader2 size={15} className="animate-spin" /> : "Import"}</button>
     </form>}
 
-    {option("linkedin", <FaLinkedin size={18} />, "LinkedIn", "Experience, skills and headline from your data export")}
+    {option("linkedin", <FaLinkedin size={18} />, "LinkedIn", "Copy your profile page and paste it, or upload your data export")}
     {open === "linkedin" && <div className="space-y-2 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+      <p className="font-bold text-slate-800">The quick way: copy and paste</p>
+      <ol className="list-decimal space-y-0.5 pl-4">
+        <li>Open your LinkedIn profile while signed in (we never ask for your LinkedIn password).</li>
+        <li>Press <b>Ctrl+A</b> then <b>Ctrl+C</b> (on a Mac, <b>⌘A</b> then <b>⌘C</b>) to copy the whole page.</li>
+        <li>Paste it below. Claude keeps your headline, experience, education and skills and ignores the rest.</li>
+      </ol>
+      {aiReady ? <>
+        <textarea value={pasted} onChange={(event) => setPasted(event.target.value)} rows={5} maxLength={40_000} placeholder="Paste your LinkedIn profile page here…" aria-label="Pasted LinkedIn profile" className="w-full resize-y rounded-lg border border-slate-200 bg-white p-2.5 text-sm outline-none focus:border-violet-500" />
+        <button type="button" disabled={busy || pasted.trim().length < 40} onClick={() => void importPasted("LinkedIn")} className="w-full rounded-lg bg-[#0a66c2] px-3 py-2 text-sm font-bold text-white disabled:opacity-50">{busy ? "Organising…" : "Fill my portfolio from LinkedIn"}</button>
+      </> : <p><a href={signInHref} className="font-bold text-violet-700 underline">Sign in</a> to let Claude turn your pasted profile into portfolio content.</p>}
+      <p className="pt-2 font-bold text-slate-800">For your full history: the data export</p>
       <p>LinkedIn doesn’t let apps read your work history directly, but it lets you download it:</p>
       <ol className="list-decimal space-y-0.5 pl-4">
         <li>Open <a href="https://www.linkedin.com/mypreferences/d/download-my-data" target="_blank" rel="noreferrer" className="font-bold text-violet-700 underline">LinkedIn → Get a copy of your data</a>.</li>

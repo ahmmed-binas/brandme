@@ -122,7 +122,7 @@ export default function InvestigatorPanel() {
         <button type="button" onClick={() => setLinks(links.filter((_, i) => i !== index))} aria-label="Remove" className="justify-self-start rounded-lg p-2.5 text-ink-faint hover:bg-red-50 hover:text-red-700"><Trash2 size={16} /></button>
       </li>)}</ul>
       {links.length < 12 && <button type="button" onClick={() => setLinks([...links, { kind: "website", value: "" }])} className="mt-3 inline-flex items-center gap-1.5 text-[0.92rem] text-ink underline underline-offset-4"><Plus size={15} /> Add a profile</button>}
-      {limited && <p className="mt-4 rounded-lg bg-ink/[0.04] px-3 py-2 text-[0.88rem] text-ink-soft">LinkedIn, Instagram, Facebook, X and TikTok show very little to visitors who aren’t logged in, and we never log in as you. Those links still help the Investigator be sure it has found <i>you</i>, and anything public is used. For LinkedIn job changes, you can also upload your LinkedIn export in the editor.</p>}
+      {limited && <p className="mt-4 rounded-lg bg-ink/[0.04] px-3 py-2 text-[0.88rem] text-ink-soft">LinkedIn and Facebook show very little to visitors who aren’t logged in, and we never log in as you. Those links still help the Investigator be sure it has found <i>you</i>, and anything public is used. For LinkedIn job changes, copy your profile page and paste it in the editor’s LinkedIn import.</p>}
       <label className="mt-5 flex items-start gap-2.5 text-[0.95rem] text-ink"><input type="checkbox" checked={own} onChange={(event) => setOwn(event.target.checked)} className="mt-1 size-4" /><span>These are my own profiles, and I’m happy for the Investigator to read their public pages and search for my professional news.</span></label>
     </section>
 

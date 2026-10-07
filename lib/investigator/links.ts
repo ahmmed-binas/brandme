@@ -6,12 +6,13 @@
  * - "feed": a public RSS/Atom feed (blogs, Medium, Substack, YouTube channels).
  * - "page": Claude reads the public page itself (web fetch) and searches around it.
  *
- * LinkedIn, Instagram, Facebook and X show little or nothing to visitors who
- * aren't logged in. We never log in as the customer; those links still help
- * the search find the right person, and the report says honestly what was readable.
+ * LinkedIn and Facebook show little to visitors who aren't logged in. We never
+ * log in as the customer; those links still help confirm it's the right person
+ * (name, photo, headline), and the report says honestly what was readable.
+ * Instagram, TikTok and X show nothing without a login, so they aren't offered.
  */
 
-export type LinkKind = "website" | "linkedin" | "instagram" | "x" | "facebook" | "tiktok" | "github" | "youtube" | "medium" | "substack" | "behance" | "dribbble" | "orcid" | "scholar" | "feed" | "other";
+export type LinkKind = "website" | "linkedin" | "facebook" | "github" | "stackoverflow" | "credly" | "sessionize" | "youtube" | "podcast" | "medium" | "substack" | "behance" | "dribbble" | "orcid" | "scholar" | "feed" | "other";
 
 export interface InvestigatorLink { kind: LinkKind; value: string }
 
@@ -20,12 +21,13 @@ export interface LinkKindInfo { id: LinkKind; label: string; placeholder: string
 export const LINK_KINDS: LinkKindInfo[] = [
   { id: "website", label: "Your website or company page", placeholder: "https://…", method: "page" },
   { id: "linkedin", label: "LinkedIn", placeholder: "linkedin.com/in/your-name", method: "page", limited: true },
-  { id: "instagram", label: "Instagram", placeholder: "@username", method: "page", limited: true },
-  { id: "x", label: "X (Twitter)", placeholder: "@username", method: "page", limited: true },
-  { id: "facebook", label: "Facebook page", placeholder: "facebook.com/your-page", method: "page", limited: true },
-  { id: "tiktok", label: "TikTok", placeholder: "@username", method: "page", limited: true },
+  { id: "facebook", label: "Facebook", placeholder: "facebook.com/your-name", method: "page", limited: true },
   { id: "github", label: "GitHub", placeholder: "username", method: "api" },
+  { id: "stackoverflow", label: "Stack Overflow", placeholder: "stackoverflow.com/users/123456/your-name", method: "page" },
+  { id: "credly", label: "Credly (certificates and badges)", placeholder: "credly.com/users/your-name", method: "page" },
+  { id: "sessionize", label: "Sessionize (speaker profile)", placeholder: "sessionize.com/your-name", method: "page" },
   { id: "youtube", label: "YouTube channel", placeholder: "youtube.com/channel/UC… or @handle", method: "feed" },
+  { id: "podcast", label: "Podcast (RSS feed)", placeholder: "https://feeds.example.com/your-show", method: "feed" },
   { id: "medium", label: "Medium", placeholder: "@username", method: "feed" },
   { id: "substack", label: "Substack", placeholder: "yourname.substack.com", method: "feed" },
   { id: "behance", label: "Behance", placeholder: "behance.net/username", method: "page" },
@@ -37,7 +39,8 @@ export const LINK_KINDS: LinkKindInfo[] = [
 ];
 
 export const MAX_LINKS = 12;
-export const kindInfo = (kind: LinkKind) => LINK_KINDS.find((item) => item.id === kind)!;
+/** Links saved before a kind was retired read as "Other public page" rather than failing. */
+export const kindInfo = (kind: LinkKind) => LINK_KINDS.find((item) => item.id === kind) ?? LINK_KINDS.find((item) => item.id === "other")!;
 
 const handle = (value: string) => value.trim().replace(/^@/, "").replace(/\/+$/, "");
 const withHttps = (value: string) => (/^https?:\/\//i.test(value) ? value : `https://${value}`);
@@ -50,9 +53,9 @@ export function linkUrl(link: InvestigatorLink): string | null {
   let url: string;
   switch (link.kind) {
     case "linkedin": url = looksLikeUrl ? withHttps(value) : `https://www.linkedin.com/in/${handle(value)}`; break;
-    case "instagram": url = looksLikeUrl ? withHttps(value) : `https://www.instagram.com/${handle(value)}/`; break;
-    case "x": url = looksLikeUrl ? withHttps(value) : `https://x.com/${handle(value)}`; break;
-    case "tiktok": url = looksLikeUrl ? withHttps(value) : `https://www.tiktok.com/@${handle(value)}`; break;
+    case "facebook": url = looksLikeUrl ? withHttps(value) : `https://www.facebook.com/${handle(value)}`; break;
+    case "credly": url = looksLikeUrl ? withHttps(value) : `https://www.credly.com/users/${handle(value)}`; break;
+    case "sessionize": url = looksLikeUrl ? withHttps(value) : `https://sessionize.com/${handle(value)}`; break;
     case "github": url = looksLikeUrl ? withHttps(value) : `https://github.com/${handle(value)}`; break;
     case "youtube": url = looksLikeUrl ? withHttps(value) : `https://www.youtube.com/@${handle(value)}`; break;
     case "medium": url = looksLikeUrl ? withHttps(value) : `https://medium.com/@${handle(value)}`; break;
@@ -76,7 +79,8 @@ export function feedUrl(link: InvestigatorLink): string | null {
   if (!url) return null;
   const parsed = new URL(url);
   switch (link.kind) {
-    case "feed": return url;
+    case "feed":
+    case "podcast": return url;
     case "medium": {
       const user = parsed.pathname.split("/").find((part) => part.startsWith("@"));
       return user ? `https://medium.com/feed/${user}` : parsed.hostname.endsWith(".medium.com") ? `https://${parsed.hostname}/feed` : null;

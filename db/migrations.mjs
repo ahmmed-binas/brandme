@@ -489,6 +489,15 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "014_investigator_sources",
+  statements: [
+    // Instagram, TikTok and X show nothing without a login, so the Investigator no longer offers them.
+    `UPDATE investigator_settings SET links = COALESCE((SELECT jsonb_agg(link) FROM jsonb_array_elements(links) link WHERE link->>'kind' NOT IN ('instagram', 'x', 'tiktok')), '[]'::jsonb)
+     WHERE links @> '[{"kind": "instagram"}]' OR links @> '[{"kind": "x"}]' OR links @> '[{"kind": "tiktok"}]'`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**
