@@ -1,6 +1,6 @@
-# The Investigator
+# The Investigator (“Inspector Iqbal”)
 
-The Investigator keeps a customer's website up to date with their career. They give it **their own** public profiles, choose how often it checks, and choose whether what it finds waits for them or goes straight onto the site. It emails them after every check that finds something.
+The Investigator, presented to customers as **Inspector Iqbal** (avatar in `components/agents/InspectorAvatar.tsx`, public page `/agents/investigator`), keeps a customer's website up to date with their career. They give it **their own** public profiles, choose how often it checks, and choose whether what it finds waits for them or goes straight onto the site. It emails them after every check that finds something.
 
 Settings: `/account/investigator`. Code: `lib/investigator/*`. Tests: `tests/e2e/investigator.mjs`.
 
@@ -12,7 +12,7 @@ Every plan, including free Basic, gets the Investigator on any schedule: every d
 
 1. **GitHub** (free, no AI): new public repositories, through the existing GitHub sync.
 2. **Feeds** (free, no AI): RSS/Atom from a blog, Medium, Substack or a YouTube channel. New posts since the last check (or the past 6 months the first time), at most three per feed. Feeds are fetched by our server with `safeFetchText` (`lib/investigator/feeds.ts`), which refuses private and internal addresses, re-checks every redirect, and limits size and time.
-3. **Their own pages, read by us first** (`lib/investigator/reader.ts`). With `OBSCURA_URL` set, pages open in **Obscura** (github.com/h4ckf0r0day/obscura), a small headless browser, so pages that build their content with JavaScript (most portfolio builders, link-in-bio pages, Behance) are read properly, including the schema.org “Person” data many sites publish (job title, employer). Without it, the HTML is fetched. Public addresses only, no logins or cookies, stealth mode off. Login-walled networks (LinkedIn, Instagram, Facebook, X, TikTok) aren't opened this way. The text is given to Claude as data.
+3. **Their own pages, read by us first** (`lib/investigator/reader.ts`). With `OBSCURA_URL` set, pages open in **Obscura** (github.com/h4ckf0r0day/obscura), a small headless browser, so pages that build their content with JavaScript (most portfolio builders, link-in-bio pages, Behance) are read properly, including the schema.org “Person” data many sites publish (job title, employer). Without it, the HTML is fetched. Public addresses only, no logins or cookies, stealth mode off. Login-walled networks (LinkedIn, Facebook) aren't opened this way. The text is given to Claude as data.
 4. **Everything else** (AI, paid with credits or the customer's own Claude key): Claude reads each profile with web fetch, searches the web around the person, compares with what's already on the portfolio and returns only cited professional changes from roughly the last 18 months, each with a confidence. Pages and search results are treated as data, never instructions. If this step fails or credits run out, the free sources still count and the history says which links were skipped.
 5. **Fact-check** (`lib/investigator/verify.ts`). We read the page each finding cites ourselves:
    - the page mentions the person and the claim → confirmed, kept as is;
@@ -28,7 +28,7 @@ Scheduled checks run from the hourly job (`POST /api/cron`, step `investigator`,
 
 ## What it can't do (say this honestly to customers)
 
-- **It never logs in anywhere, and never asks for passwords.** LinkedIn, Instagram, Facebook, X and TikTok show very little to logged-out visitors, so from those it usually gets a name and headline at most. The history marks them “Partly readable” or “Needs a login”. Those links still help it confirm it has found the right person. For LinkedIn job changes, the LinkedIn data export upload in the editor is the reliable route.
+- **It never logs in anywhere, and never asks for passwords.** LinkedIn and Facebook show very little to logged-out visitors, so from those it usually gets a name and headline at most; Instagram, TikTok and X aren't offered because they show nothing. The history marks them “Partly readable” or “Needs a login”. Those links still help it confirm it has found the right person. For LinkedIn job changes, copying the profile page into the editor's LinkedIn import (or uploading the data export) is the reliable route.
 - It only looks at the account owner, with their consent (the checkbox is required whenever profiles change). It must never be extended to other people.
 - It updates the website only. There is no PDF CV.
 

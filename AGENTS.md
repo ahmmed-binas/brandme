@@ -41,14 +41,14 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Owner approval of templates | `lib/templates/approval.ts`, shipped decisions in `lib/templates/decisions.ts`, desk at `/templates/review` |
 | Job titles and sample content | `lib/templates/roles/*`, personas `lib/templates/personas*.ts`, `lib/templates/samples.ts` |
 | Editor | `components/editor/studio/StudioEditor.tsx` (+ `fields.tsx`, `BlogPanel.tsx`, `SuggestionsPanel.tsx`), persistence `components/editor/usePortfolioPersistence.ts` |
-| Content model and validation | `lib/portfolio/schema.ts`; storage `lib/portfolio/repository.ts` |
+| Content model and validation | `lib/portfolio/schema.ts`; storage `lib/portfolio/repository.ts` (plan's portfolio limit `roomFor`, moving content to another design `switchTemplate`) |
 | Publishing and custom domains | `app/p/[slug]`, `app/sites/[host]` (via `proxy.ts`), `lib/domains/*`, `Caddyfile` |
-| Blogs | Journal: `lib/content/journal.ts`, `/admin/journal`, `/blog`. Customer blogs: `lib/portfolio/posts.ts`, `lib/portfolio/blog-pages.tsx` (Pro feature) |
+| Blogs | Journal: `lib/content/journal.ts`, `/admin/journal`, `/blog`. Customer blogs (every plan): `lib/portfolio/posts.ts`, `lib/portfolio/blog-pages.tsx`. Media block (image, YouTube/Vimeo, sandboxed HTML): `lib/content/media.ts`, `components/blog/MediaField.tsx`, `PostMediaView.tsx` |
 | Gallery, free downloads, submissions | `lib/gallery/*`, `lib/templates/export.ts`, `app/gallery/*`, `/admin/gallery`, clips in `public/gallery/` (`scripts/samples/template-clips.mjs`) |
 | Ratings | `lib/templates/ratings.ts`, `lib/templates/rating-route.ts` |
 | Plans, billing, credits, AI metering | `lib/plans.ts`, `lib/billing/*`, `lib/ai/*`, `app/api/webhooks/stripe` |
 | Auto-updates (GitHub, research agent) | `lib/autoupdate/*`, hourly jobs `lib/jobs/scheduled.ts` (`POST /api/cron`) |
-| The Investigator (checks the owner's own profiles on a schedule, updates the site) | `lib/investigator/*` (page reader `reader.ts` with optional Obscura headless browser, fact-check `verify.ts`), `/account/investigator`, `app/api/investigator/*`, `docs/INVESTIGATOR.md` |
+| The Investigator, “Inspector Iqbal” (checks the owner's own profiles on a schedule, updates the site; avatar `components/agents/InspectorAvatar.tsx`, page `/agents/investigator` with ratings and comments `lib/agents/comments.ts`) | `lib/investigator/*` (page reader `reader.ts` with optional Obscura headless browser, fact-check `verify.ts`), `/account/investigator`, `app/api/investigator/*`, `docs/INVESTIGATOR.md` |
 | Imports' accuracy | `lib/import/grounding.ts` (drops AI-imported facts not in the source text), `lib/import/linkedin-export.ts`, `tests/e2e/accuracy.mts` |
 | Community and support | `lib/community/*`, `lib/support/*`, `app/community/*` |
 | Superadmin console (dashboard, users, visitor counts) | `app/console/*` behind `SUPERADMIN_PATH`, `components/console/*`, `lib/console/metrics.ts`, `lib/analytics/track.ts` (+ `/api/t`, `components/common/VisitBeacon.tsx`), `docs/CONSOLE.md` |
@@ -80,13 +80,11 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 - Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) at `/templates/review`.
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
 - The owner's legal name and country for `/privacy` and `/terms` (`LEGAL_NAME`, `LEGAL_COUNTRY`), and a final read of both pages (drafted, not legal advice).
-- The Investigator's character name and avatar (plan step 4), and the sources clean-up (step 5).
-- Basic “one set of content” (switching template moves the content; plan step 1) is not built yet: Basic is limited to one *live* portfolio, drafts are not limited.
 - ChatGPT/OpenAI as a second AI provider: agreed for after launch.
 - The Journal's new-tab option for agents (asked for, parked for later).
 
 ## Next work, in order
 
-**Being built: `docs/plans/free-first-launch-plan.md`.** Done: plans (free Basic, Pro yearly/monthly, no trial/Premium), money (AI at cost + 5%, card fee lines, refund wording, domains at cost), any Investigator schedule on any plan incl. custom days and a free first check, navigation (Agents in, Pricing to the footer), the Investigator page, Book a free call (Cal.com), privacy and terms. Still to do from the plan: Basic one-set-of-content, the agent's character/avatar and comments, sources clean-up, blog media upgrade. Then launch on a VPS.
+**Built: `docs/plans/free-first-launch-plan.md` steps 1–7** (plans, money, navigation, Inspector Iqbal's page with ratings and comments, sources clean-up, blog media), plus Book a free call (Cal.com), privacy and terms. **Next: run every end-to-end suite on a fresh database, then launch on a VPS** (`docs/LAUNCH.md`). Later (plan step 8): email channel → ChatGPT/Claude connector → WhatsApp; ChatGPT/OpenAI as a second AI provider; uploaded video in posts (today: YouTube/Vimeo links).
 
 See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics (owner side done: the console; still to do: views per portfolio for customers), a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).

@@ -1,6 +1,11 @@
 # Free-first launch plan (agreed with the owner, not built yet)
 
-Status: **steps 1–3 built (October 2026), plus the Investigator page, Book a free call and the legal pages.** Still to build: Basic one-set-of-content (step 1), the agent's character, avatar and comments (step 4), sources clean-up (step 5), blog upgrade (step 6).
+Status: **steps 1–7 built (October 2026)**, plus Book a free call and the legal pages. Step 8 (keep-alive channels, new sources such as Property Finder/Bayut) is for later. Built details:
+
+- Step 1: Basic keeps **one portfolio**; opening another design shows “move your content here” (`switchTemplate` in `lib/portfolio/repository.ts`): same words, photos, posts, address, domain and Investigator settings, the old design's palette dropped, a published site switches design straight away. The original editorial template stores content differently and can't be moved automatically. Pro keeps up to three.
+- Step 4: the agent is **Inspector Iqbal** (owner's choice), an SVG detective avatar used on his page, the Agents index, the settings page and the editor card; emails are signed by him. His page has star ratings and comments (community spam rules).
+- Step 5: Instagram, TikTok and X removed (migration 014 cleans saved settings); Facebook kept; added Stack Overflow, Credly, Sessionize and podcast feeds. LinkedIn's main import is copying the profile page and pasting it; the data export stays for full history.
+- Step 6: a media block on every post (image, YouTube/Vimeo, custom HTML in a sandboxed iframe) for customers and the Journal; Journal covers. Uploaded video files aren't supported yet (links only).
 
 ## Owner's decisions (7 October 2026)
 
