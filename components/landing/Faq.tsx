@@ -1,4 +1,4 @@
-import { FAQ } from "./faq";
+import { FAQ } from "./faq-data";
 
 /** Native <details> keeps the answers in the HTML for search engines and works without JavaScript. */
 export default function Faq() {

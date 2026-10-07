@@ -6,7 +6,7 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import TemplateShowcase, { CollectionStrip } from "@/components/landing/TemplateShowcase";
 import Faq from "@/components/landing/Faq";
 import Reveal from "@/components/landing/Reveal";
-import { FAQ } from "@/components/landing/faq";
+import { FAQ } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
 import { siteDescription, siteUrl } from "@/lib/site";
 
