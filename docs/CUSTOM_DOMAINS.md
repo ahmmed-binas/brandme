@@ -20,14 +20,15 @@ Code: `lib/domains/` (names, DNS checks, registrar client, business rules), `app
 3. To **sell** domains:
    - **Vercel token:** Vercel → Account Settings → Tokens → `VERCEL_API_TOKEN` (plus `VERCEL_TEAM_ID` if the token belongs to a team). Add a card on Vercel; domain purchases are charged there, after your customer has already paid you.
    - **Stripe:** Dashboard → Developers → API keys → `STRIPE_SECRET_KEY`. Then Developers → Webhooks → endpoint `https://YOUR-DOMAIN/api/webhooks/stripe` with the events `checkout.session.completed` and `checkout.session.async_payment_succeeded` → signing secret into `STRIPE_WEBHOOK_SECRET`.
-   - Optional pricing: `DOMAIN_MARKUP_PERCENT` (default 20) and `DOMAIN_SERVICE_FEE_CENTS` (default 300). A $12 domain sells for $18.
+   - Pricing: the registrar's price plus Stripe's card fee (2.9% + 30¢), so domains are sold at cost: a $12 domain is $12.65. `DOMAIN_MARKUP_PERCENT` and `DOMAIN_SERVICE_FEE_CENTS` (both 0 by default) can add a margin later.
+   - Buying or connecting a domain needs **Pro**. Domains already set up keep working if Pro ends, and can always be renewed.
 
 ## Renewals
 
 Domains are bought for one year with auto-renew **off**, so Formora never pays for a renewal the customer hasn't paid for.
 
 - From **30 days before expiry** the hourly job emails the owner once a week ("Renew ada.dev by 12 October") until they renew.
-- **/account/domains** lists their bought domains with the expiry date and a **Renew for $X** button (open from 90 days before expiry). The price is the registrar's renewal price with the same markup as a purchase. On Premium, renewing the included domain is free.
+- **/account/domains** lists their bought domains with the expiry date and a **Renew for $X** button (open from 90 days before expiry). The price is the registrar's renewal price plus the card fee, like a purchase.
 - After Stripe confirms payment, the webhook calls the registrar's renew endpoint and moves the expiry date on a year. The owner gets a confirmation email.
 - If the registrar refuses the renewal, the payment is **kept** and the order is marked `renewal_manual`; an email to `SMTP_TO` says which domain to renew by hand in the Vercel dashboard, with the SQL to mark it done. Check the renew endpoint against Vercel's current API docs before the first renewals are due.
 

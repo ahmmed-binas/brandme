@@ -110,7 +110,7 @@ export function BlogPanel({ templateId, signedIn, liveUrl }: { templateId: strin
 
   if (posts !== null && !plan.allowed) return <div className="p-5 text-[13px] leading-relaxed text-ink-soft">
     <p className="font-display text-[1.4rem] leading-tight text-ink">A blog on your site</p>
-    <p className="mt-2">Share news, case studies and what you’ve learned, at <b>/blog</b> on your portfolio and your own domain. Blogs are included in <b>Pro</b> and <b>Premium</b>{plan.name ? `; you’re on ${plan.name}` : ""}.</p>
+    <p className="mt-2">Share news, case studies and what you’ve learned, at <b>/blog</b> on your portfolio and your own domain. Blogs are included in every plan.</p>
     {posts.length > 0 && <p className="mt-2">Your {posts.length} post{posts.length === 1 ? " is" : "s are"} kept and will be back on your site when you upgrade.</p>}
     <Link href="/pricing" className="mt-4 inline-block rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-paper hover:bg-signal">See Pro</Link>
   </div>;

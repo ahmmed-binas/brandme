@@ -36,7 +36,7 @@ export default async function DomainsPage({ searchParams }: { searchParams: Prom
             : item.manual ? <span className="text-[0.92rem] text-ink-soft">Renewal paid; we’re finishing it by hand.</span>
             : days > 90 ? <span className="text-[0.92rem] text-ink-soft">Renewal opens 90 days before expiry</span>
             : item.renewalCents === null ? <span className="text-[0.92rem] text-ink-soft">Renewal price unavailable right now</span>
-            : <RenewButton orderId={item.orderId} label={item.included ? "Renew (included in Premium)" : `Renew for $${(item.renewalCents / 100).toFixed(0)}`} />}
+            : <RenewButton orderId={item.orderId} label={`Renew for $${(item.renewalCents / 100).toFixed(2)}`} />}
         </li>;
       })}</ul>}
   </div></main>;

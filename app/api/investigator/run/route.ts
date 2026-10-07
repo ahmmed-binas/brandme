@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/utils/user-account";
 
 export const maxDuration = 300;
 
-/** “Check now”: runs a check straight away (Pro/Premium every 12 hours; the trial gets one). */
+/** “Check now”: runs a check straight away (the first one is free; after that, at most every 12 hours). */
 export const POST = route(async () => {
   if (!databaseConfigured()) return jsonError(503, "The Investigator needs the database.");
   const user = await getCurrentUser();

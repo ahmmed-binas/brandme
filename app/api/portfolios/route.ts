@@ -11,7 +11,7 @@ export const GET = route(async () => {
   const drafts = await listDrafts(user.id);
   return Response.json({
     plan: user.plan,
-    standing: { state: user.standing.standing, daysLeft: user.standing.daysLeft, endsAt: user.standing.endsAt.toISOString() },
+    standing: { state: user.standing.standing, daysLeft: user.standing.daysLeft, endsAt: user.standing.endsAt?.toISOString() ?? null },
     credits: user.credits,
     ownKey: user.hasOwnKey,
     portfolios: drafts.map(({ content, ...draft }) => ({ ...draft, name: (content.name ?? (content.personal as { name?: string } | undefined)?.name ?? "") as string })),

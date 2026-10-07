@@ -70,7 +70,12 @@ log("paste option without AI key shows sign-in/unavailable note:", await page.ge
 await page.keyboard.press("Escape");
 
 
-// --- Publish, then buy a domain
+// --- Own domains are a Pro feature: Basic sees the upgrade note.
+const basicCaps = await (await context.request.get(`${BASE}/api/domains/template-one`)).json();
+log("basic: domains offered:", basicCaps.capabilities?.planAllows, basicCaps.capabilities?.canBuy, basicCaps.capabilities?.canConnect);
+sql("UPDATE app_users SET plan='pro', plan_expires_at = NOW() + INTERVAL '1 year' WHERE provider_account_id = 'google-test-1'");
+
+// --- Publish, then buy a domain (price = registrar price + card fee: 1200 + 65)
 await page.getByRole("button", { name: /Publish/ }).click();
 await page.getByPlaceholder("your-name").fill("ada-lovelace");
 await page.getByRole("button", { name: "Publish portfolio" }).click();
@@ -132,7 +137,8 @@ const failPayload = JSON.stringify({ id: "evt_2", object: "event", type: "checko
 await fetch(`${BASE}/api/webhooks/stripe`, { method: "POST", headers: { "stripe-signature": Stripe.webhooks.generateTestHeaderString({ payload: failPayload, secret: "whsec_test" }) }, body: failPayload });
 log("failed purchase:", sql(`SELECT status FROM domain_orders WHERE id='${failOrder}'`), "| refund issued:", (await mockLog()).includes("REFUND pi_fail"), "| domain released:", sql("SELECT count(*) FROM custom_domains WHERE domain='fail-ada.com'") === "0");
 
-// --- Connecting an owned domain: free plan refused, Pro allowed with DNS instructions
+// --- Connecting an owned domain: Basic refused, Pro allowed with DNS instructions
+sql("UPDATE app_users SET plan='basic'");
 const api = context.request;
 const free = await api.post(`${BASE}/api/domains/kinetic-portfolio`, { data: { domain: "me.ada-needs-txt.org" } });
 log("free plan connect:", free.status(), (await free.json()).error);
@@ -143,7 +149,7 @@ log("pro connect:", pro.status(), proBody.domain?.domain, proBody.domain?.status
 log("same domain on another portfolio:", (await api.post(`${BASE}/api/domains/template-one`, { data: { domain: "me.ada-needs-txt.org" } })).status());
 log("invalid domain:", (await api.post(`${BASE}/api/domains/kinetic-portfolio`, { data: { domain: "not a domain" } })).status());
 log("disconnect:", (await api.delete(`${BASE}/api/domains/kinetic-portfolio`)).status(), sql("SELECT count(*) FROM custom_domains WHERE domain='me.ada-needs-txt.org'"));
-sql("UPDATE app_users SET plan='free'");
+sql("UPDATE app_users SET plan='basic'");
 
 console.log("page errors:", errors.length ? errors : "none");
 await browser.close();

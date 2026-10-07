@@ -452,6 +452,43 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "012_free_first",
+  statements: [
+    // Free-first launch: Basic is free, Pro is paid yearly or monthly, no trial and no Premium.
+    `UPDATE app_users SET plan = 'basic', plan_expires_at = NULL WHERE plan IN ('trial', 'free', 'basic')`,
+    `UPDATE app_users SET plan = 'pro' WHERE plan = 'premium'`,
+    `ALTER TABLE app_users ALTER COLUMN plan SET DEFAULT 'basic'`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS plan_interval TEXT NOT NULL DEFAULT 'year' CHECK (plan_interval IN ('year', 'month'))`,
+    `ALTER TABLE billing_orders ADD COLUMN IF NOT EXISTS term_months SMALLINT`,
+    // The Investigator runs on any schedule the customer picks, including every N days.
+    `ALTER TABLE investigator_settings DROP CONSTRAINT IF EXISTS investigator_settings_frequency_check`,
+    `ALTER TABLE investigator_settings ADD CONSTRAINT investigator_settings_frequency_check CHECK (frequency IN ('daily', 'weekly', 'monthly', 'six_months', 'yearly', 'custom'))`,
+    `ALTER TABLE investigator_settings ADD COLUMN IF NOT EXISTS custom_days SMALLINT CHECK (custom_days BETWEEN 1 AND 365)`,
+  ],
+});
+
+migrations.push({
+  id: "013_call_bookings",
+  statements: [
+    // Free calls booked with the owner through Cal.com, reported by its webhook.
+    `CREATE TABLE IF NOT EXISTS call_bookings (
+      uid TEXT PRIMARY KEY,
+      status TEXT NOT NULL CHECK (status IN ('booked', 'rescheduled', 'cancelled')),
+      title TEXT NOT NULL,
+      starts_at TIMESTAMPTZ NOT NULL,
+      ends_at TIMESTAMPTZ,
+      name TEXT,
+      email TEXT,
+      time_zone TEXT,
+      notes TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS call_bookings_starts ON call_bookings (starts_at)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

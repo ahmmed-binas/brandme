@@ -1,5 +1,8 @@
 # Formora business plan: building a portfolio business that AI makes stronger, not obsolete
 
+> **Superseded for pricing (October 2026):** the plans, prices and credit packs below were replaced by the free-first launch (`docs/plans/free-first-launch-plan.md`, `lib/plans.ts`): free Basic, Pro $24/yr or $2.50/mo, no trial or Premium, AI at cost + 5%, domains at cost. The positioning and growth sections still apply.
+
+
 _Last reviewed: October 2026._
 
 ## 1. The uncomfortable starting point

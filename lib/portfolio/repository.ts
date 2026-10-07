@@ -3,7 +3,7 @@ import { ensureSchema } from "@/utils/db-schema";
 import type { CurrentUser } from "@/utils/user-account";
 import type { TemplateId } from "@/lib/templates/types";
 import type { ColorTheme } from "./schema";
-import { isLive, standingOf } from "@/lib/plans";
+import { standingOf } from "@/lib/plans";
 
 /**
  * Server-only data access for portfolios.
@@ -12,7 +12,8 @@ import { isLive, standingOf } from "@/lib/plans";
  * - A user has at most one portfolio per template (the editor is per template).
  * - Editing changes the draft (`content`). Visitors only ever see the snapshot
  *   taken at publish time (`published_content`), so half-finished edits never go live.
- * - The number of simultaneously published portfolios is limited by plan.
+ * - The number of simultaneously published portfolios is limited by plan. If
+ *   Pro ends, the portfolios published first stay live and the rest rest.
  */
 
 export interface PortfolioDraft {
@@ -94,7 +95,6 @@ export type PublishResult =
 
 export async function publish(user: CurrentUser, templateId: TemplateId, slug: string): Promise<PublishResult> {
   await ensureSchema();
-  if (user.standing.standing === "paused") return { ok: false, status: 402, error: "Your free trial has ended. Choose a plan to put your portfolio back online; everything you made is still here." };
   const client = await db.connect();
   try {
     await client.query("BEGIN");
@@ -153,7 +153,7 @@ export interface PublishedPortfolio {
   showsBranding: boolean;
   /** The owner's plan includes a blog; posts are hidden (not deleted) when it doesn't. */
   hasBlog: boolean;
-  /** The owner's trial or plan has lapsed; visitors see a holding page, not the portfolio. */
+  /** More portfolios are published than the owner's plan allows (Pro ended); visitors see a holding page. */
   resting: boolean;
   ownerName: string | null;
   updatedAt: string;
@@ -170,8 +170,9 @@ export async function getPublishedFor(ownerId: string, templateId: TemplateId): 
 
 async function findPublished(where: string, params: unknown[]): Promise<PublishedPortfolio | null> {
   await ensureSchema();
-  const result = await db.query<{ owner_id: string; template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; name: string | null }>(
-    `SELECT p.owner_id, p.template_id, p.published_content, p.published_theme, p.published_at, u.plan, u.trial_ends_at, u.plan_expires_at, u.name
+  const result = await db.query<{ owner_id: string; template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string; plan_expires_at: Date | null; plan_interval: string; name: string | null; live_rank: string }>(
+    `SELECT p.owner_id, p.template_id, p.published_content, p.published_theme, p.published_at, u.plan, u.plan_expires_at, u.plan_interval, u.name,
+       (SELECT COUNT(*) FROM portfolios o WHERE o.owner_id = p.owner_id AND o.published_at IS NOT NULL AND (o.published_at, o.id) <= (p.published_at, p.id)) AS live_rank
      FROM portfolios p JOIN app_users u ON u.id = p.owner_id
      WHERE ${where} AND p.published_at IS NOT NULL`,
     params,
@@ -181,6 +182,6 @@ async function findPublished(where: string, params: unknown[]): Promise<Publishe
   const standing = standingOf(row);
   return {
     ownerId: row.owner_id, templateId: row.template_id, content: row.published_content, theme: row.published_theme, updatedAt: row.published_at.toISOString(),
-    showsBranding: standing.plan.showsBranding, hasBlog: standing.plan.blog, resting: !isLive(standing.standing), ownerName: (row.published_content.name as string | undefined) ?? row.name,
+    showsBranding: standing.plan.showsBranding, hasBlog: standing.plan.blog, resting: Number(row.live_rank) > standing.plan.publishedPortfolios, ownerName: (row.published_content.name as string | undefined) ?? row.name,
   };
 }

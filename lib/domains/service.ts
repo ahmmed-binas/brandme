@@ -1,4 +1,4 @@
-import { INCLUDED_DOMAIN_MAX_CENTS } from "@/lib/plans";
+import { cardFeeCents } from "@/lib/plans";
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import type { CurrentUser } from "@/utils/user-account";
@@ -19,7 +19,8 @@ import { getUserById } from "@/utils/user-account";
  * - Bought domains: the customer pays first (Stripe). Only then does Formora
  *   buy the domain, with the customer as the legal registrant. If registration
  *   fails, the payment is refunded automatically.
- * - Connected domains (already owned) require a plan that includes them.
+ * - Buying or connecting a domain needs Pro. Domains already set up keep
+ *   working if Pro ends, and can always be renewed: the customer owns them.
  * - A domain shows the portfolio only while the portfolio is published, and
  *   only after it is verified: it resolves to this server and, for connected
  *   domains, carries the owner's TXT token (so nobody can claim a domain they
@@ -27,11 +28,16 @@ import { getUserById } from "@/utils/user-account";
  *   domains (see tlsAllowed).
  */
 
-/** Customer price for one year: registrar price + margin + flat fee, rounded up to a whole dollar. */
+/**
+ * Customer price for one year: the registrar's price plus Stripe's card fee, so
+ * domains are sold at cost. DOMAIN_MARKUP_PERCENT and DOMAIN_SERVICE_FEE_CENTS
+ * (both 0 unless set) can add a margin later.
+ */
 export function customerPriceCents(registrarPrice: number): number {
-  const markup = Number(process.env.DOMAIN_MARKUP_PERCENT ?? 20) / 100;
-  const fee = Number(process.env.DOMAIN_SERVICE_FEE_CENTS ?? 300);
-  return Math.ceil((registrarPrice * 100 * (1 + markup) + fee) / 100) * 100;
+  const markup = Number(process.env.DOMAIN_MARKUP_PERCENT ?? 0) / 100;
+  const fee = Number(process.env.DOMAIN_SERVICE_FEE_CENTS ?? 0);
+  const before = Math.ceil(registrarPrice * 100 * (1 + markup) + fee);
+  return before + cardFeeCents(before);
 }
 
 export type DomainStatus = "active" | "pending_dns" | "registering" | "failed";
@@ -116,7 +122,7 @@ async function assertDomainFree(domain: string, ownerId: string, templateId: Tem
 
 /** Connects a domain the user already owns. */
 export async function connectDomain(user: CurrentUser, templateId: TemplateId, domain: string): Promise<DomainView> {
-  if (!user.plan.connectOwnDomain) throw new DomainError(`Connecting a domain you already own isn’t included in the ${user.plan.name} plan.`, 402);
+  if (!user.plan.ownDomain) throw new DomainError("Your own domain comes with Pro.", 402);
   if (!(await portfolioExists(user.id, templateId))) throw new DomainError("Save your portfolio before adding a domain.", 404);
   await assertDomainFree(domain, user.id, templateId);
   await db.query(
@@ -158,6 +164,7 @@ export async function priceDomains(domains: string[]): Promise<DomainOffer[]> {
  * Checkout URL.
  */
 export async function startPurchase(user: CurrentUser, templateId: TemplateId, domain: string, contact: vercel.RegistrantContact, origin: string): Promise<string> {
+  if (!user.plan.ownDomain) throw new DomainError("Your own domain comes with Pro.", 402);
   if (!(await portfolioExists(user.id, templateId))) throw new DomainError("Save your portfolio before buying a domain.", 404);
   await assertDomainFree(domain, user.id, templateId);
   const [offer] = await priceDomains([domain]);
@@ -168,32 +175,18 @@ export async function startPurchase(user: CurrentUser, templateId: TemplateId, d
     [user.id, templateId, domain, price.purchasePrice, offer.priceCents, JSON.stringify(contact)],
   );
   const orderId = order.rows[0].id;
-  // Premium includes one domain a year: no payment step, straight to registration.
-  if (await includedDomainAvailable(user, price.purchasePrice)) {
-    await db.query("UPDATE domain_orders SET charged_cents = 0, updated_at = NOW() WHERE id = $1", [orderId]);
-    await fulfilPaidOrder(orderId, null);
-    return `${origin}/editor/${templateId}?domainOrder=${orderId}`;
-  }
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
     customer_email: contact.email,
     client_reference_id: orderId,
     metadata: { orderId, domain },
-    line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: offer.priceCents, product_data: { name: `${domain} — 1 year`, description: "Domain registration, connected to your Formora portfolio with HTTPS." } } }],
+    line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: offer.priceCents, product_data: { name: `${domain} — 1 year`, description: "Domain registration at the registrar’s price plus the card fee, connected to your portfolio with HTTPS." } } }],
     success_url: `${origin}/editor/${templateId}?domainOrder=${orderId}`,
     cancel_url: `${origin}/editor/${templateId}?domainOrder=cancelled`,
   });
   await db.query("UPDATE domain_orders SET stripe_session_id = $2, updated_at = NOW() WHERE id = $1", [orderId, session.id]);
   if (!session.url) throw new DomainError("Payment could not be started.", 502);
   return session.url;
-}
-
-/** Premium, active, a domain within the included price, and none claimed in the last year. */
-async function includedDomainAvailable(user: CurrentUser, registrarPrice: number, renewing?: string): Promise<boolean> {
-  if (!user.plan.includedDomain || user.standing.standing !== "active" || registrarPrice * 100 > INCLUDED_DOMAIN_MAX_CENTS) return false;
-  // Renewing the included domain itself is covered; its own earlier registration doesn't count against it.
-  const used = await db.query("SELECT 1 FROM domain_orders WHERE owner_id = $1 AND charged_cents = 0 AND status NOT IN ('refunded', 'refund_failed') AND created_at > NOW() - INTERVAL '1 year' AND domain IS DISTINCT FROM $2", [user.id, renewing ?? null]);
-  return !used.rowCount;
 }
 
 async function refund(orderId: string, paymentIntent: string | null, reason: string) {
@@ -304,7 +297,7 @@ export async function tlsAllowed(host: string): Promise<boolean> {
 // domain over an API problem.
 // ---------------------------------------------------------------------------
 
-export interface OwnedDomain { orderId: string; domain: string; expiresAt: string; daysLeft: number; renewalCents: number | null; included: boolean; renewing: boolean; manual: boolean }
+export interface OwnedDomain { orderId: string; domain: string; expiresAt: string; daysLeft: number; renewalCents: number | null; renewing: boolean; manual: boolean }
 
 /** The latest completed registration per bought domain, with its expiry and renewal price. */
 async function latestRegistrations(where: string, params: unknown[]) {
@@ -333,13 +326,12 @@ export async function ownedDomains(user: CurrentUser): Promise<OwnedDomain[]> {
     return {
       orderId: row.id, domain: row.domain, expiresAt: row.expires_at.toISOString(), daysLeft: Math.ceil((row.expires_at.getTime() - Date.now()) / 86_400_000),
       renewalCents: registrar === null ? null : customerPriceCents(registrar),
-      included: registrar !== null && await includedDomainAvailable(user, registrar, row.domain),
       ...(await renewalInProgress(row.domain)),
     };
   }));
 }
 
-/** Starts a renewal for one of the owner's domains. Returns a Stripe Checkout URL, or the account page when it's included. */
+/** Starts a renewal for one of the owner's domains. Returns a Stripe Checkout URL. */
 export async function startRenewal(user: CurrentUser, orderId: string, origin: string): Promise<string> {
   await ensureSchema();
   const [current] = await latestRegistrations("owner_id = $1 AND id = $2", [user.id, orderId]);
@@ -355,11 +347,6 @@ export async function startRenewal(user: CurrentUser, orderId: string, origin: s
     [current.id, registrar, cents],
   );
   const renewalId = order.rows[0]!.id;
-  if (await includedDomainAvailable(user, registrar, current.domain)) {
-    await db.query("UPDATE domain_orders SET charged_cents = 0, updated_at = NOW() WHERE id = $1", [renewalId]);
-    await fulfilPaidOrder(renewalId, null);
-    return `${origin}/account/domains?renewed=${renewalId}`;
-  }
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
     customer_email: user.email ?? undefined,
@@ -405,9 +392,8 @@ export async function remindRenewals(): Promise<number> {
     if (!user?.email) continue;
     const registrar = await renewalPrice(row.domain);
     if (registrar === null) continue;
-    const included = await includedDomainAvailable(user, registrar, row.domain);
     const week = new Date().toISOString().slice(0, 10);
-    if (await sendOnce(`domain-renewal:${row.id}:${week}`, user.id, "domain-renewal", { to: user.email, ...emails.domainRenewalDue(user.name, row.domain, row.expires_at, `$${(customerPriceCents(registrar) / 100).toFixed(0)}`, included) })) sent += 1;
+    if (await sendOnce(`domain-renewal:${row.id}:${week}`, user.id, "domain-renewal", { to: user.email, ...emails.domainRenewalDue(user.name, row.domain, row.expires_at, `$${(customerPriceCents(registrar) / 100).toFixed(2)}`) })) sent += 1;
     await db.query("UPDATE domain_orders SET reminded_at = NOW() WHERE id = $1", [row.id]);
   }
   return sent;

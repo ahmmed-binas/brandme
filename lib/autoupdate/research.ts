@@ -5,8 +5,8 @@ import { safeLink, type StandardContent } from "@/lib/portfolio/schema";
 import { addSuggestions, fingerprint, knownTitles, type NewSuggestion } from "./suggestions";
 
 /**
- * The research agent. On the owner's request (or on a schedule for Pro and
- * Premium) Claude searches the public web for recent professional news about
+ * The research agent. On the owner's request (scheduled news checks are the
+ * Investigator's job now) Claude searches the public web for recent professional news about
  * them: a new role, talks, publications, awards, press, launches. Each finding
  * must cite a public source and be clearly about the same person; it becomes a
  * suggestion the owner can apply or dismiss. Nothing changes on its own.

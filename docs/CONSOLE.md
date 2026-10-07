@@ -29,7 +29,7 @@ Ranges: 7 days, 30 days, 90 days (per day) and 12 months (per week). All amounts
 | --- | --- |
 | Revenue | Paid `billing_orders` (plans, AI credits) + paid `domain_orders` (not refunded), with the change against the previous period |
 | Yearly run rate | Active paying accounts × their plan's yearly list price |
-| Paying subscribers, trials, lapsed | `app_users` plan and expiry dates (the superadmin is left out of every user count) |
+| Pro subscribers (yearly, monthly, ending), free Basic | `app_users` plan and expiry dates (the superadmin is left out of every user count) |
 | Sign-up to paid | Of the people who joined in the range, the share who have paid for a plan |
 | Domain margin | Charged for domains minus the registrar's price |
 | AI cost to you | `ai_spend`: what AI on your own key cost, next to the credits sold |
@@ -39,7 +39,7 @@ Ranges: 7 days, 30 days, 90 days (per day) and 12 months (per week). All amounts
 
 Charts are SVG with a hover tooltip and a "Show table" view. Colours come from a validated palette (blue, orange, aqua; checked for colour blindness and contrast on the dark background).
 
-**Users** lists every account (search by email, name or username; filter paying, trial or lapsed) with plan, portfolios, credits and what they have paid in total.
+**Users** lists every account (search by email, name or username; filter Pro, free Basic or Pro ended) with plan, portfolios, credits and what they have paid in total.
 
 ## Visitor counting (no cookies)
 

@@ -6,6 +6,8 @@ import { stripeConfigured } from "@/lib/payments/stripe";
 import { registrarConfigured } from "@/lib/domains/vercel";
 import { platformAiConfigured } from "@/lib/ai/metering";
 import { devLoginEnabled } from "@/lib/dev-login";
+import { bookingUrl, bookingWebhookConfigured } from "@/lib/booking";
+import { legal, legalConfigured } from "@/lib/legal";
 
 /**
  * The go-live checklist on /admin: each check reads the server's real
@@ -66,5 +68,9 @@ export async function runSetupChecks(): Promise<Check[]> {
   add({ id: "registrar", group: "Domains & AI", title: "Selling domains (VERCEL_API_TOKEN)", state: registrarConfigured() ? "ok" : "warn", detail: registrarConfigured() ? "Customers can search, buy and renew domains." : "Off: customers can still connect domains they own.", fix: registrarConfigured() ? undefined : "Create a Vercel account, add a payment method, and create an API token. Vercel is only the registrar." });
   add({ id: "ai", group: "Domains & AI", title: "AI assistant (ANTHROPIC_API_KEY)", state: platformAiConfigured() ? "ok" : "warn", detail: platformAiConfigured() ? `On, with a daily limit of $${process.env.AI_DAILY_BUDGET_USD ?? 25}.` : "Off: customers can still add their own key.", fix: platformAiConfigured() ? undefined : "Create a key at platform.claude.com." });
   add({ id: "approval", group: "Domains & AI", title: "Template approval", state: process.env.TEMPLATES_REQUIRE_APPROVAL === "false" ? "warn" : "ok", detail: process.env.TEMPLATES_REQUIRE_APPROVAL === "false" ? "Off: customers see every template, approved or not." : "On: customers see only templates you’ve approved." });
+
+  // Legal pages and calls
+  add({ id: "legal", group: "Legal & calls", title: "Privacy policy and terms (LEGAL_NAME, LEGAL_COUNTRY)", state: legalConfigured() ? "ok" : "todo", detail: legalConfigured() ? `Run by ${legal.name}, under the law of ${legal.country}.` : "The /privacy and /terms pages show a draft notice until these are set.", fix: legalConfigured() ? "Read both pages once more before launch; they’re a starting point, not legal advice." : "Set LEGAL_NAME (you, or your company) and LEGAL_COUNTRY, then read /privacy and /terms." });
+  add({ id: "booking", group: "Legal & calls", title: "Book a free call (BOOKING_URL)", state: bookingUrl() ? "ok" : "warn", detail: bookingUrl() ? `“Book a free call” opens ${bookingUrl()}.${bookingWebhookConfigured() ? " Bookings are listed in the console." : ""}` : "Not set: “Book a free call” opens the contact page.", fix: bookingUrl() ? (bookingWebhookConfigured() ? undefined : "Optional: add a Cal.com webhook to /api/webhooks/calcom with CALCOM_WEBHOOK_SECRET to list bookings in the console.") : "Create a free Cal.com account with a 20-minute event and set BOOKING_URL to its link (https://cal.com/you/free-call)." });
   return checks;
 }

@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, CircleAlert, CircleSlash, Loader2, Lock, Plus, Search, Trash2, Undo2 } from "lucide-react";
+import { CheckCircle2, CircleAlert, CircleSlash, Loader2, Plus, Search, Trash2, Undo2 } from "lucide-react";
 import type { InvestigatorLink, LinkKind, LinkKindInfo } from "@/lib/investigator/links";
-import type { Frequency, InvestigatorAccess, InvestigatorSettings, Mode } from "@/lib/investigator/settings";
+import { CHECK_CREDITS_ESTIMATE, CUSTOM_DAYS_MAX, CUSTOM_DAYS_MIN, type Frequency, type InvestigatorAccess, type InvestigatorSettings, type Mode } from "@/lib/investigator/schedule";
 import type { RunView, SourceResult } from "@/lib/investigator/run";
 
 interface State {
@@ -33,6 +33,7 @@ export default function InvestigatorPanel() {
   const [state, setState] = useState<State | null>(null);
   const [links, setLinks] = useState<InvestigatorLink[]>([]);
   const [frequency, setFrequency] = useState<Frequency>("monthly");
+  const [customDays, setCustomDays] = useState("14");
   const [mode, setMode] = useState<Mode>("ask");
   const [enabled, setEnabled] = useState(false);
   const [templateId, setTemplateId] = useState<string>("");
@@ -43,7 +44,8 @@ export default function InvestigatorPanel() {
   const apply = useCallback((body: State) => {
     setState(body);
     setLinks(body.settings.links.length ? body.settings.links : [{ kind: "linkedin", value: "" }]);
-    setFrequency(body.access.frequencies.includes(body.settings.frequency) ? body.settings.frequency : body.access.frequencies[0] ?? "monthly");
+    setFrequency(body.settings.frequency);
+    if (body.settings.customDays) setCustomDays(String(body.settings.customDays));
     setMode(body.settings.mode);
     setEnabled(body.settings.enabled);
     setTemplateId(body.settings.templateId ?? body.portfolios[0]?.templateId ?? "");
@@ -63,7 +65,7 @@ export default function InvestigatorPanel() {
 
   async function save(next?: { enabled?: boolean }) {
     setBusy("save"); setMessage(null);
-    const response = await fetch("/api/investigator", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ links: links.filter((link) => link.value.trim()), frequency, mode, enabled: next?.enabled ?? enabled, templateId: templateId || undefined, ownProfiles: own }) });
+    const response = await fetch("/api/investigator", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ links: links.filter((link) => link.value.trim()), frequency, customDays: frequency === "custom" ? Number(customDays) : undefined, mode, enabled: next?.enabled ?? enabled, templateId: templateId || undefined, ownProfiles: own }) });
     const body = await response.json().catch(() => ({}));
     setBusy(null);
     if (!response.ok) { setMessage({ tone: "error", text: body.error ?? "That didn’t save." }); return false; }
@@ -94,16 +96,18 @@ export default function InvestigatorPanel() {
 
   if (!state) return <p className="mt-10 flex items-center gap-2 text-ink-soft">{message ? message.text : <><Loader2 size={16} className="animate-spin" /> Loading…</>}</p>;
   const { access } = state;
-  const canUse = access.scheduled || access.trialRunAvailable;
+  const canUse = access.scheduled;
+  const cost = `about ${CHECK_CREDITS_ESTIMATE.low}–${CHECK_CREDITS_ESTIMATE.high} credits ($${(CHECK_CREDITS_ESTIMATE.low / 100).toFixed(2)}–$${(CHECK_CREDITS_ESTIMATE.high / 100).toFixed(2)})`;
   const kind = (id: LinkKind) => state.kinds.find((item) => item.id === id)!;
   const limited = links.some((link) => kind(link.kind)?.limited && link.value.trim());
 
   return <div className="mt-10 space-y-6">
-    {!access.scheduled && <div className={`${card} ${access.trialRunAvailable ? "border-signal/40" : "border-amber-300 bg-amber-50"}`}>
-      {access.trialRunAvailable
-        ? <p className="text-[0.98rem] text-ink"><b className="font-medium">Your free trial includes one check.</b> Add your profiles below and press <b className="font-medium">Check now</b> to see what the Investigator finds. Regular checks come with Pro and Premium.</p>
-        : <p className="text-[0.98rem] text-amber-950">{access.reason} <Link href="/pricing" className="font-medium underline">See plans</Link></p>}
-    </div>}
+    <div className={`${card} ${access.paysWith === "none" ? "border-amber-300 bg-amber-50" : "border-signal/40"}`}>
+      {access.paysWith === "free" ? <p className="text-[0.98rem] text-ink"><b className="font-medium">Your first check is on us.</b> Add your profiles below and press <b className="font-medium">Check now</b> to see what the Investigator finds. After that, each check’s AI step costs {cost}, paid from your credits or your own Claude key.</p>
+        : access.paysWith === "own-key" ? <p className="text-[0.98rem] text-ink">Checks run on your own Claude key, so no credits are used. GitHub and blog feeds are always read for free.</p>
+        : access.paysWith === "credits" ? <p className="text-[0.98rem] text-ink">Each check’s AI step costs {cost} from your {access.credits.toLocaleString("en")} credits. GitHub and blog feeds are read for free.</p>
+        : <p className="text-[0.98rem] text-amber-950">Checks will read GitHub and blog feeds only, which is free. To read your other profiles and search the web, <Link href="/account#ai" className="font-medium underline">add credits or your own Claude key</Link>.</p>}
+    </div>
 
     {message && <p role={message.tone === "error" ? "alert" : "status"} className={`rounded-xl px-4 py-3 text-[0.95rem] ${message.tone === "error" ? "bg-red-50 text-red-900" : "bg-emerald-50 text-emerald-950"}`}>{message.text}</p>}
 
@@ -124,12 +128,11 @@ export default function InvestigatorPanel() {
 
     <section className={card} aria-labelledby="often">
       <h2 id="often" className="font-display text-[1.6rem] text-ink">How often</h2>
-      <div className="mt-4 flex flex-wrap gap-2" role="radiogroup" aria-label="How often to check">{state.frequencies.map((option) => {
-        const allowed = access.frequencies.includes(option.id);
-        return <button key={option.id} type="button" role="radio" aria-checked={frequency === option.id} disabled={!allowed} onClick={() => setFrequency(option.id)} title={allowed ? undefined : "Included in Premium"} className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[0.92rem] transition ${frequency === option.id && allowed ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink"} disabled:cursor-not-allowed disabled:opacity-50`}>{!allowed && <Lock size={12} />}{option.label}</button>;
-      })}</div>
-      {access.scheduled && !access.frequencies.includes("daily") && <p className="mt-3 text-[0.88rem] text-ink-soft">Weekly and daily checks come with <Link href="/pricing" className="underline">Premium</Link>.</p>}
-      <p className="mt-3 text-[0.88rem] text-ink-faint">Each check uses a few AI credits from your plan’s monthly allowance (or your own Claude key).</p>
+      <div className="mt-4 flex flex-wrap items-center gap-2" role="radiogroup" aria-label="How often to check">{state.frequencies.map((option) => <button key={option.id} type="button" role="radio" aria-checked={frequency === option.id} onClick={() => setFrequency(option.id)} className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[0.92rem] transition ${frequency === option.id ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink"}`}>{option.id === "custom" ? "Custom" : option.label}</button>)}</div>
+      {frequency === "custom" && <label className="mt-4 flex flex-wrap items-center gap-2 text-[0.95rem] text-ink">Every
+        <input type="number" inputMode="numeric" min={CUSTOM_DAYS_MIN} max={CUSTOM_DAYS_MAX} value={customDays} onChange={(event) => setCustomDays(event.target.value)} aria-label="Number of days between checks" className="w-24 rounded-lg border border-rule bg-paper px-3 py-2 outline-none focus:border-ink" />
+        days <span className="text-[0.85rem] text-ink-faint">({CUSTOM_DAYS_MIN}–{CUSTOM_DAYS_MAX})</span></label>}
+      <p className="mt-3 text-[0.88rem] text-ink-faint">Choose any schedule on any plan. Each check that uses AI costs {cost} from your credits, or nothing extra with your own Claude key; more often means more credits.</p>
     </section>
 
     <section className={card} aria-labelledby="changes">

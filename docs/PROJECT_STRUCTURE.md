@@ -38,7 +38,7 @@ lib/brand.ts         Product name, contact email, and primary navigation.
 lib/templates/       Template catalog, IDs, and template metadata types.
 lib/portfolio/       Content validation (schema.ts), database access (repository.ts), browser drafts.
 lib/ai/              Server-side AI copy editing (Claude). Never imported by client code.
-lib/plans.ts         Plans, prices, terms, trial and grace rules. The only place pricing lives.
+lib/plans.ts         Plans, prices, card fee and the Pro grace rule. The only place pricing lives.
 lib/billing/         Stripe checkout for plans and credits, renewals, the credit ledger.
 lib/ai/metering.ts   The gate every AI request goes through: own key or credits, caps, daily budget.
 lib/autoupdate/      GitHub sync, the research agent, and suggestions the owner approves.
@@ -90,7 +90,7 @@ To add a new portfolio design, follow `docs/AI_PORTFOLIO_TEMPLATE_WORKFLOW.md`.
 
 Browser-local editing works without an account; signing in adds account saving and publishing. The schema is created and upgraded automatically by the versioned migrations in `db/migrations.mjs`. Owners are identified by their Google account id, carried in the session by `auth.ts`.
 
-Plans, the 14-day trial and grace period live in `lib/plans.ts`. Payments go through Stripe Checkout (`lib/billing/service.ts`); the webhook at `app/api/webhooks/stripe/route.ts` fulfils plan, credit and domain orders, and the hourly job in `lib/jobs/scheduled.ts` handles renewals and reminder emails. See `docs/BUSINESS_PLAN.md` for pricing and unit economics.
+Plans (free Basic, Pro yearly or monthly) and the 14-day grace period after Pro ends live in `lib/plans.ts`. Payments go through Stripe Checkout (`lib/billing/service.ts`); the webhook at `app/api/webhooks/stripe/route.ts` fulfils plan, credit and domain orders, and the hourly job in `lib/jobs/scheduled.ts` handles renewals and reminder emails. See `docs/BUSINESS_PLAN.md` for pricing and unit economics.
 
 ## Community moderation
 

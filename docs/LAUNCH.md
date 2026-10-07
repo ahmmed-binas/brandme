@@ -74,10 +74,9 @@ cd formora && git pull && docker compose up -d --build
 There are two paths, both in the editor's **Publish** dialog:
 
 1. **Buy one through Formora** (the easy path most people take).
-   - We suggest names from their portfolio name (`janeokafor.com`, `janeokafor.dev`, `jane-okafor.com`, `okafor.dev`…), or they type their own idea and show which are free, with your price (registrar price + `DOMAIN_MARKUP_PERCENT` + `DOMAIN_SERVICE_FEE_CENTS`).
+   - We suggest names from their portfolio name (`janeokafor.com`, `janeokafor.dev`, `jane-okafor.com`, `okafor.dev`…), or they type their own idea and show which are free, at the registrar's price plus the card fee. Own domains come with Pro.
    - They enter the owner details the domain registry requires (they legally own the domain) and pay with Stripe.
    - We buy it from the registrar (Vercel, used only as a registrar), point it at your server, and Caddy issues HTTPS on the first visit. No DNS work for the customer; it's live in minutes.
-   - Premium includes one domain a year at no charge.
    - Each year: reminder emails from 30 days before expiry, and a **Renew** button at `/account/domains`. Nothing renews without them paying, and nothing is charged to you before they've paid.
 2. **Connect one they already own.** The editor shows the exact DNS records to add at their registrar (an `A` record to your server and a `TXT` record proving ownership), checks them automatically, and turns the domain on with HTTPS as soon as they're right.
 

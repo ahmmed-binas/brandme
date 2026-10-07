@@ -6,14 +6,7 @@ Settings: `/account/investigator`. Code: `lib/investigator/*`. Tests: `tests/e2e
 
 ## Who gets what
 
-| Plan | Checks |
-| --- | --- |
-| Free trial | One check, started by hand |
-| Basic | None (upgrade message) |
-| Pro | Every month, every 6 months or once a year |
-| Premium | Also every week or every day |
-
-Pro and Premium can also press **Check now**, at most once every 12 hours. Rules live in `accessFor()` in `lib/investigator/settings.ts` and are enforced on the server.
+Every plan, including free Basic, gets the Investigator on any schedule: every day, week, month, 6 months, year, or **custom** (every 1–365 days). The customer pays for the AI step of each check (credits at cost + 5%, or their own Claude key), so the schedule is their choice. **Each account's first check is free**: its AI step runs on the platform key without charging credits (`openFreeAi` in `lib/ai/metering.ts`), still within `AI_DAILY_BUDGET_USD`. After that, **Check now** works at most once every 12 hours. Rules live in `accessFor()` in `lib/investigator/settings.ts`; schedules and labels are in `lib/investigator/schedule.ts` (safe to import in the browser).
 
 ## What happens in a check (`runInvestigator` in `lib/investigator/run.ts`)
 
@@ -41,9 +34,7 @@ Scheduled checks run from the hourly job (`POST /api/cron`, step `investigator`,
 
 ## Costs
 
-The GitHub and feed steps cost nothing. The AI step is charged from real token usage like every other AI feature (`lib/ai/metering.ts`, 1 credit ≈ $0.01 retail). In the tests' mock a check costs 19 credits; a real one, reading several pages and running a few searches, is **estimated** at roughly 30–90 credits (not yet measured against the real API: check `credit_ledger` rows with reason “Investigator check” after the first real runs).
-
-**Open decision for the owner:** Pro includes 100 credits a month and Premium 300, which covers monthly or weekly checks, but **daily checks would use far more than Premium's allowance**. When credits run out, checks carry on with GitHub and feeds only and say so. Options: keep it as is, run the AI step at most weekly even on a daily schedule (feeds and GitHub daily), or raise Premium's allowance.
+The GitHub and feed steps cost nothing. The AI step is charged from real token usage like every other AI feature (`lib/ai/metering.ts`, 1 credit = $0.01, cost + 5%). A real check, reading several pages and running a few searches, is **estimated** at roughly 20–60 credits (`CHECK_CREDITS_ESTIMATE`, shown to customers; not yet measured against the real API: check `credit_ledger` rows with reason “Investigator check” after the first real runs and adjust the estimate). When credits run out, checks carry on with GitHub and feeds only and say so. Daily schedules simply use more credits; there are no monthly allowances any more.
 
 ## Data
 

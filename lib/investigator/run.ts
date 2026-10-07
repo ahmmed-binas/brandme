@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import { getUserById, type CurrentUser } from "@/utils/user-account";
-import { openAi, settleAi, sumUsage } from "@/lib/ai/metering";
+import { openAi, openFreeAi, settleAi, sumUsage } from "@/lib/ai/metering";
 import { applySuggestion, type SuggestionPayload } from "@/lib/autoupdate/apply";
 import { findingToSuggestion } from "@/lib/autoupdate/research";
 import { githubSuggestions } from "@/lib/autoupdate/github-sync";
@@ -123,10 +123,9 @@ export async function runInvestigator(userId: string, trigger: "schedule" | "man
   if (!user) throw new InvestigatorError("Account not found.", 404);
   const settings = await getSettings(userId);
   const access = await accessFor(user);
-  if (!access.scheduled && !(trigger === "manual" && access.trialRunAvailable)) throw new InvestigatorError(access.reason ?? "The Investigator isn’t included in your plan.", 402);
   if (trigger === "schedule" && !settings.enabled) throw new InvestigatorError("The Investigator is switched off.");
   if (!settings.links.length) throw new InvestigatorError("Add at least one of your profiles first.");
-  if (trigger === "manual" && access.scheduled) {
+  if (trigger === "manual" && !access.freeCheckAvailable) {
     const recent = await db.query("SELECT 1 FROM investigator_runs WHERE owner_id = $1 AND trigger = 'manual' AND started_at > NOW() - make_interval(hours => $2)", [userId, MANUAL_GAP_HOURS]);
     if (recent.rowCount) throw new InvestigatorError(`You can run a check by hand every ${MANUAL_GAP_HOURS} hours. Your scheduled checks carry on as usual.`, 429);
   }
@@ -168,12 +167,13 @@ export async function runInvestigator(userId: string, trigger: "schedule" | "man
       pageCache.set(url.replace(/#.*$/, "").replace(/\/+$/, ""), read);
       return read;
     }));
-    const gate = await openAi(user);
+    // The account's first check is on us; after that credits or the owner's own key pay.
+    const gate = access.paysWith === "free" ? await openFreeAi(user) : await openAi(user);
     if (!gate.ok) {
       for (const link of pageLinks) sources.push({ label: kindInfo(link.kind).label, url: linkUrl(link)!, status: "skipped", note: gate.error });
     } else {
       const outcome = await investigate(gate.access.client, content, pageLinks, ownPages);
-      await settleAi(gate.access, outcome.usage.length ? sumUsage(outcome.usage) : null, "Investigator check");
+      await settleAi(gate.access, outcome.usage.length ? sumUsage(outcome.usage) : null, gate.access.billing === "free" ? "Investigator check (free first check)" : "Investigator check");
       // If the AI step fails, keep what the free sources found and say so per source.
       if (!outcome.ok) for (const link of pageLinks) sources.push({ label: kindInfo(link.kind).label, url: linkUrl(link)!, status: "error", note: outcome.error });
       const reported = new Map((outcome.ok ? outcome.sources : []).map((source) => [source.url.replace(/\/+$/, ""), source]));
@@ -219,7 +219,7 @@ export async function runInvestigator(userId: string, trigger: "schedule" | "man
     if (toApply.length) {
       let next = content;
       for (const candidate of toApply) next = applySuggestion(next, candidate.item.payload as SuggestionPayload);
-      const live = Boolean(portfolio.published_at) && user.standing.standing !== "paused";
+      const live = Boolean(portfolio.published_at);
       await db.query("UPDATE investigator_runs SET content_before = $2, published_before = $3 WHERE id = $1", [run.id, JSON.stringify(portfolio.content), live ? JSON.stringify(portfolio.published_content) : null]);
       await db.query(
         `UPDATE portfolios SET content = $3, version = version + 1, updated_at = NOW()${live ? ", published_content = $3, published_at = NOW()" : ""} WHERE owner_id = $1 AND template_id = $2`,
@@ -234,7 +234,7 @@ export async function runInvestigator(userId: string, trigger: "schedule" | "man
     await db.query(
       `INSERT INTO investigator_settings (owner_id, last_run_at, next_run_at) VALUES ($1, NOW(), NULL)
        ON CONFLICT (owner_id) DO UPDATE SET last_run_at = NOW(), failures = 0, next_run_at = CASE WHEN investigator_settings.enabled THEN $2::timestamptz ELSE investigator_settings.next_run_at END`,
-      [userId, nextRun(settings.frequency)],
+      [userId, nextRun(settings.frequency, settings.customDays)],
     );
 
     // 4. Tell them, when there's something to tell.

@@ -9,7 +9,7 @@ import type { CurrentUser } from "@/utils/user-account";
  * The single gate every AI request goes through.
  *
  * - People who saved their own Anthropic key use it: no credits, a generous rate limit.
- * - Everyone else spends prepaid credits, priced from the real token usage with a margin.
+ * - Everyone else spends prepaid credits, priced from the real token usage plus 5%.
  * - A per-plan daily request cap stops anyone hammering the service.
  * - A global daily budget for the platform key (AI_DAILY_BUDGET_USD) is a hard
  *   stop: past it, only own-key requests run until midnight UTC.
@@ -17,8 +17,8 @@ import type { CurrentUser } from "@/utils/user-account";
 
 /** USD per million tokens, and per web search. Keep in step with Anthropic's price list. */
 const PRICES = { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5, webSearch: 0.01 };
-/** Retail price of AI = cost × this. Covers payment fees, failed requests and the occasional long answer. */
-const MARKUP = 1.6;
+/** Price of AI = cost × this: a 5% service fee. Card fees are shown separately when credits are bought. */
+const MARKUP = 1.05;
 /** Minimum balance to start a request, so a long answer can't run far below zero. */
 export const MIN_CREDITS_TO_START = 5;
 const OWN_KEY_DAILY_CAP = 400;
@@ -26,7 +26,7 @@ const OWN_KEY_DAILY_CAP = 400;
 export const platformAiConfigured = () => Boolean(process.env.ANTHROPIC_API_KEY);
 const dailyBudgetMicros = () => Math.round(Number(process.env.AI_DAILY_BUDGET_USD ?? 25) * 1_000_000);
 
-export interface AiAccess { client: Anthropic; ownerId: string; billing: "own-key" | "credits" }
+export interface AiAccess { client: Anthropic; ownerId: string; billing: "own-key" | "credits" | "free" }
 export type AiGate = { ok: true; access: AiAccess } | { ok: false; status: 402 | 429 | 503; error: string };
 
 async function countRequest(ownerId: string, cap: number): Promise<boolean> {
@@ -57,6 +57,16 @@ export async function openAi(user: CurrentUser): Promise<AiGate> {
   return { ok: true, access: { client: new Anthropic(), ownerId: user.id, billing: "credits" } };
 }
 
+/** A request we pay for (each account's first Investigator check). Still counted against the daily caps. */
+export async function openFreeAi(user: CurrentUser): Promise<AiGate> {
+  await ensureSchema();
+  if (!platformAiConfigured()) return { ok: false, status: 503, error: "AI isn’t switched on for this site yet. You can add your own Claude API key in Account → AI." };
+  const spent = await db.query<{ micro_usd: string }>("SELECT micro_usd FROM ai_spend WHERE day = CURRENT_DATE");
+  if (Number(spent.rows[0]?.micro_usd ?? 0) >= dailyBudgetMicros()) return { ok: false, status: 503, error: "The AI assistant is resting until tomorrow. Your free check is still waiting for you." };
+  if (!(await countRequest(user.id, user.plan.aiEditsPerDay))) return { ok: false, status: 429, error: `You’ve reached today’s ${user.plan.aiEditsPerDay} AI requests. They reset at midnight UTC.` };
+  return { ok: true, access: { client: new Anthropic(), ownerId: user.id, billing: "free" } };
+}
+
 type Usage = Partial<Pick<Anthropic.Beta.BetaUsage, "input_tokens" | "output_tokens" | "cache_read_input_tokens" | "cache_creation_input_tokens">> & { server_tool_use?: { web_search_requests?: number } | null };
 
 /** Adds up usage from several responses (e.g. a research turn that was continued). */
@@ -80,12 +90,12 @@ export function costMicros(usage: Usage | null | undefined): number {
 
 export const creditsFor = (micros: number) => Math.max(1, Math.ceil((micros * MARKUP) / 10_000));
 
-/** Records what a request cost and charges credits when it ran on the platform key. */
+/** Records what a request cost and charges credits when it ran on the platform key (not for a free check). */
 export async function settleAi(access: AiAccess, usage: Usage | null | undefined, reason: string): Promise<{ charged: number; balance: number | null }> {
   if (access.billing === "own-key") return { charged: 0, balance: null };
   const micros = costMicros(usage);
   await db.query(`INSERT INTO ai_spend (day, micro_usd, requests) VALUES (CURRENT_DATE, $1, 1) ON CONFLICT (day) DO UPDATE SET micro_usd = ai_spend.micro_usd + $1, requests = ai_spend.requests + 1`, [micros]);
-  if (!usage) return { charged: 0, balance: null };
+  if (!usage || access.billing === "free") return { charged: 0, balance: null };
   return chargeCredits(access.ownerId, creditsFor(micros), reason);
 }
 

@@ -8,6 +8,7 @@ import Faq from "@/components/landing/Faq";
 import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
+import { PLANS, formatUsd } from "@/lib/plans";
 import { siteDescription, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -83,20 +84,20 @@ export default function Home() {
 
     <section aria-labelledby="pricing-title" className="py-24 lg:py-32">
       <div className="mx-auto grid max-w-[1320px] grid-cols-1 gap-14 px-5 sm:px-8 lg:grid-cols-12">
-        <Reveal className="lg:col-span-5"><SectionHeading kicker="Pricing" id="pricing-title">Free for 14 days. <em className="font-[300]">Then about a coffee a year.</em></SectionHeading>
-          <p className="mt-6 max-w-[26rem] text-[1.02rem] leading-[1.7] text-ink-soft">Pay once for a year, two or five, and stop thinking about it. AI help is pay-as-you-go, or bring your own Claude key.</p></Reveal>
+        <Reveal className="lg:col-span-5"><SectionHeading kicker="Pricing" id="pricing-title">Free to start. <em className="font-[300]">Fair after that.</em></SectionHeading>
+          <p className="mt-6 max-w-[26rem] text-[1.02rem] leading-[1.7] text-ink-soft">One portfolio with a blog is free for as long as you like. Pro adds more sites and your own domain. AI is sold at cost, or bring your own Claude key.</p></Reveal>
         <div className="grid gap-px overflow-hidden rounded-xl border border-rule bg-rule sm:grid-cols-2 lg:col-span-7">
           <Reveal className="flex flex-col bg-card p-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Free trial</p>
-            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">14 days</p>
-            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Every template and design option", "Import from CV, GitHub, LinkedIn", "Publish at a free address", "60 AI credits to try the assistant", "No card needed"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Basic</p>
+            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">Free</p>
+            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Every template and design option", "Import from CV, GitHub, LinkedIn", "Publish at a free address, with a blog", "The Investigator: your first check free", "No card needed"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
             <Link href="/templatechooser" className="mt-9 inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Start building</Link>
           </Reveal>
           <Reveal delay={0.08} className="flex flex-col bg-card p-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Then</p>
-            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">$10<span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ year</span></p>
-            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Your own domain, set up and secured for you", "Pay for up to five years at once", "Pro keeps your portfolio up to date for you", "Premium includes your domain name"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
-            <Link href="/pricing" className="mt-auto pt-9 text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Compare Basic, Pro and Premium →</Link>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Pro</p>
+            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">{formatUsd(PLANS.pro.prices.year!)}<span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ year</span></p>
+            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Your own domain, set up and secured for you", "Up to three live portfolios", "No Formora link on your site", `Or ${formatUsd(PLANS.pro.prices.month!)} a month`].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
+            <Link href="/pricing" className="mt-auto pt-9 text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Compare Basic and Pro →</Link>
           </Reveal>
         </div>
       </div>

@@ -40,9 +40,9 @@ export interface CurrentUser {
   isAdmin: boolean;
 }
 
-interface UserRow { id: string; email: string | null; name: string | null; plan: string; trial_ends_at: Date; plan_expires_at: Date | null; credits: number; has_key: boolean; username: string | null; verified: boolean; is_superadmin: boolean }
+interface UserRow { id: string; email: string | null; name: string | null; plan: string; plan_interval: string; plan_expires_at: Date | null; credits: number; has_key: boolean; username: string | null; verified: boolean; is_superadmin: boolean }
 
-export const USER_COLUMNS = "id, email, name, plan, trial_ends_at, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified, is_superadmin";
+export const USER_COLUMNS = "id, email, name, plan, plan_interval, plan_expires_at, credits, anthropic_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified, is_superadmin";
 
 export function toCurrentUser(row: UserRow, consoleSession = false): CurrentUser {
   const standing = standingOf(row);

@@ -25,7 +25,7 @@ export interface PortfolioPost {
 }
 
 export const MAX_POSTS = 300;
-export const BLOG_UPGRADE = "A blog is included in Pro and Premium. Upgrade to write and publish posts; anything you’ve written is kept.";
+export const BLOG_UPGRADE = "Blogs aren’t switched on for this account. Anything you’ve written is kept.";
 const MAX_BODY = 60_000;
 
 interface Row { id: string; slug: string; title: string; excerpt: string; body: string; cover: string | null; published_at: Date | null; updated_at: Date }

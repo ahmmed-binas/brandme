@@ -12,7 +12,7 @@ Read this first, then `docs/plans/project-handoff.pdf` (history, progress, to-do
 
 **Formora** (working name; the owner is considering a rename, see "Open decisions") is a portfolio and personal-website builder for every kind of professional, not just designers and developers. People pick a template drawn for their job (156 job titles, 46 studio designs), fill it by clicking text in a live preview (or import a CV, LinkedIn export or GitHub, or ask the AI assistant), and publish at `/p/<address>` or on their own domain. Templates are also given away free in a **gallery** (content marketing); the paid product is customising, hosting, domains, blogs and keeping the site up to date.
 
-Business model: free trial (14 days, everything in Pro) → Basic $10/yr, Pro $24/yr, Premium $49/yr (`lib/plans.ts`). AI is paid separately with credits or the customer's own Anthropic key. Domains are sold at registrar price + markup.
+Business model (free-first launch, `docs/plans/free-first-launch-plan.md`): **Basic is free** (one live portfolio, blog, the Investigator); **Pro is $24/yr or $2.50/mo** (up to three live portfolios, own domain, no branding); no trial, no Premium (`lib/plans.ts`). AI is paid separately at cost + 5% with credits or the customer's own Anthropic key, the same on every plan; each account's first Investigator check is free. Domains are sold at the registrar's price + Stripe's card fee, which is shown as its own line (also for credits). “Need more?” and the done-for-you service go through **Book a free call** (Cal.com, `lib/booking.ts`). Legal pages: `/privacy`, `/terms` (`lib/legal.ts`).
 
 ## Stack and commands
 
@@ -77,15 +77,16 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 ## Open decisions (waiting on the owner)
 
 - Brand name (currently Formora; “BrandMe” was considered but is taken by a London agency).
-- Auto-update: answered by the Investigator (Pro: monthly / 6 months / yearly; Premium: also weekly and daily; trial: one check; the customer chooses “ask me first” or “update automatically”; website only, no PDF CV). Still open: daily Investigator checks cost more AI credits than Premium's monthly allowance covers (see `docs/INVESTIGATOR.md`, “Costs”).
 - Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) at `/templates/review`.
-- Pricing (the owner was advised $10/yr is too low to pay for ads; a “done for you” offer was suggested).
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
-- A privacy notice page (none yet). It should cover accounts, payments, the Investigator and the cookie-less visitor counts (`docs/CONSOLE.md`).
+- The owner's legal name and country for `/privacy` and `/terms` (`LEGAL_NAME`, `LEGAL_COUNTRY`), and a final read of both pages (drafted, not legal advice).
+- The Investigator's character name and avatar (plan step 4), and the sources clean-up (step 5).
+- Basic “one set of content” (switching template moves the content; plan step 1) is not built yet: Basic is limited to one *live* portfolio, drafts are not limited.
+- ChatGPT/OpenAI as a second AI provider: agreed for after launch.
 - The Journal's new-tab option for agents (asked for, parked for later).
 
 ## Next work, in order
 
-**Agreed next: `docs/plans/free-first-launch-plan.md`** (free Basic, Pro with the Investigator and up to 3 sites, no Premium, AI at cost + 5%, Agents menu with the Investigator page, blog media upgrade). Planned only; build it when the owner says "implement". It overrides the pricing notes below.
+**Being built: `docs/plans/free-first-launch-plan.md`.** Done: plans (free Basic, Pro yearly/monthly, no trial/Premium), money (AI at cost + 5%, card fee lines, refund wording, domains at cost), any Investigator schedule on any plan incl. custom days and a free first check, navigation (Agents in, Pricing to the footer), the Investigator page, Book a free call (Cal.com), privacy and terms. Still to do from the plan: Basic one-set-of-content, the agent's character/avatar and comments, sources clean-up, blog media upgrade. Then launch on a VPS.
 
 See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics (owner side done: the console; still to do: views per portfolio for customers), a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).

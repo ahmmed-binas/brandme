@@ -31,27 +31,15 @@ const date = (value: Date) => value.toLocaleDateString("en-GB", { day: "numeric"
 export const emails = {
   welcome: (name: string | null) => layout(`Welcome to ${brand.name}`, [
     `Hi ${first(name)},`,
-    `Your 14-day trial is on: every template, a free address for your site, and AI help to write it. Most people publish in under an hour.`,
+    `Your account is ready, and Basic is free for as long as you like: every template, a free address for your site and a blog. Most people publish in under an hour.`,
     `A good first step is importing what you already have: a CV, your LinkedIn export or your GitHub. We’ll lay it out for you.`,
   ], { label: "Open the editor", url: `${siteUrl}/templatechooser` }),
 
-  trialEndingSoon: (name: string | null, days: number) => layout(`Your trial ends in ${days} day${days === 1 ? "" : "s"}`, [
+  proEnding: (name: string | null, days: number) => layout(`Your Pro plan ends in ${days} day${days === 1 ? "" : "s"}`, [
     `Hi ${first(name)},`,
-    `Your free trial ends in ${days} day${days === 1 ? "" : "s"}. Nothing changes straight away: your site stays online for another 14 days after that, so there’s no rush.`,
-    `When you’re ready, plans start at $10 a year, about the price of one coffee, and you can pay for two years at once and forget about it.`,
-  ], { label: "See plans", url: `${siteUrl}/pricing` }),
-
-  trialEnded: (name: string | null, graceEnds: Date) => layout("Your trial has ended (your site is still online)", [
-    `Hi ${first(name)},`,
-    `Your free trial has ended, but we’ve kept your site online until ${date(graceEnds)} so nobody visiting it notices.`,
-    `Choose a plan before then and nothing changes at all. If you decide not to, your site will rest quietly; everything you made stays saved and comes back the moment you pick a plan.`,
-  ], { label: "Keep my site online", url: `${siteUrl}/pricing` }),
-
-  graceEnding: (name: string | null, days: number) => layout(`Your site goes offline in ${days} day${days === 1 ? "" : "s"}`, [
-    `Hi ${first(name)},`,
-    `Just a friendly reminder: your portfolio will rest in ${days} day${days === 1 ? "" : "s"} unless you choose a plan. Visitors would see a short “taking a break” page instead of your work.`,
-    `It takes a minute, and Basic is $10 a year.`,
-  ], { label: "Choose a plan", url: `${siteUrl}/pricing` }),
+    `Your Pro plan has ended, and we’ve kept everything working for another ${days} day${days === 1 ? "" : "s"} while you decide.`,
+    `After that your account moves to Basic, which is free. Your first published site stays online; any others rest (visitors see a short holding page) and nothing is deleted. Renew whenever you like and they come straight back.`,
+  ], { label: "Renew Pro", url: `${siteUrl}/pricing` }),
 
   investigatorReport: (name: string | null, changes: { title: string; applied: boolean }[], unreadable: string[], liveUrl: string | null) => {
     const applied = changes.filter((change) => change.applied);
@@ -66,10 +54,10 @@ export const emails = {
     ], applied.length && liveUrl ? { label: "See your website", url: liveUrl } : { label: "Review the updates", url: `${siteUrl}/account/investigator` });
   },
 
-  domainRenewalDue: (name: string | null, domain: string, expires: Date, price: string, included: boolean) => layout(`${domain} needs renewing by ${date(expires)}`, [
+  domainRenewalDue: (name: string | null, domain: string, expires: Date, price: string) => layout(`${domain} needs renewing by ${date(expires)}`, [
     `Hi ${first(name)},`,
     `Your domain ${domain} is registered until ${date(expires)}. Renew it before then to keep your portfolio at that address.`,
-    included ? `Your Premium plan includes the renewal, so there’s nothing to pay; just confirm it.` : `Renewing costs ${price} for another year. Domains don’t renew on their own, so you’re never charged without saying yes.`,
+    `Renewing costs ${price} for another year (the registrar’s price plus the card fee). Domains don’t renew on their own, so you’re never charged without saying yes.`,
     `If it expires, the address stops working and someone else could register it.`,
   ], { label: `Renew ${domain}`, url: `${siteUrl}/account/domains` }),
 
@@ -78,28 +66,23 @@ export const emails = {
     `${domain} is renewed and now registered until ${date(expires)}. Nothing else changes; your portfolio stays at the same address.`,
   ], { label: "Your domains", url: `${siteUrl}/account/domains` }),
 
-  paused: (name: string | null) => layout("Your portfolio is resting", [
-    `Hi ${first(name)},`,
-    `Your portfolio is now resting. Nothing has been deleted: your content, images and address are all kept.`,
-    `Whenever you’d like it back, choose a plan and it goes live again immediately.`,
-  ], { label: "Bring it back", url: `${siteUrl}/pricing` }),
-
   receipt: (name: string | null, item: string, amount: string, until?: Date) => layout(`Receipt: ${item}`, [
     `Hi ${first(name)},`,
     `Thanks, your payment of ${amount} for ${item} went through.`,
-    ...(until ? [`Your plan now runs until ${date(until)}. We’ll remind you two weeks before it renews.`] : []),
+    ...(until ? [`Your plan now runs until ${date(until)}.`] : []),
+    `Changed your mind? Unused credits, and Pro within 14 days of paying, can be refunded: reply to this email. Stripe keeps its card fee on a refund, so you get back the payment minus that fee.`,
     `Your card statement will show the payment from ${brand.name}. Reply to this email if anything looks wrong.`,
   ], { label: "Your account", url: `${siteUrl}/account` }),
 
-  renewalSoon: (name: string | null, plan: string, amount: string, on: Date, autoRenew: boolean) => layout(autoRenew ? `Your ${plan} plan renews on ${date(on)}` : `Your ${plan} plan ends on ${date(on)}`, [
+  renewalSoon: (name: string | null, plan: string, amount: string, on: Date, autoRenew: boolean, interval = "year") => layout(autoRenew ? `Your ${plan} plan renews on ${date(on)}` : `Your ${plan} plan ends on ${date(on)}`, [
     `Hi ${first(name)},`,
-    autoRenew ? `Your ${plan} plan renews on ${date(on)} for ${amount} for another year, using the card you paid with last time. You don’t need to do anything.` : `Your ${plan} plan ends on ${date(on)}. Renew for ${amount} a year to keep your site online without a break.`,
-    autoRenew ? `If you’d rather not renew, you can switch it off in your account at any time before then.` : `Your site stays up for 14 days after the end date either way.`,
+    autoRenew ? `Your ${plan} plan renews on ${date(on)} for ${amount} for another ${interval}, using the card you paid with last time. You don’t need to do anything.` : `Your ${plan} plan ends on ${date(on)}. Renew for ${amount} a ${interval} to keep Pro without a break.`,
+    autoRenew ? `If you’d rather not renew, you can switch it off in your account at any time before then.` : `If it ends, your account moves to free Basic after 14 days and nothing is deleted.`,
   ], { label: autoRenew ? "Manage renewal" : "Renew now", url: autoRenew ? `${siteUrl}/account` : `${siteUrl}/pricing` }),
 
   renewalFailed: (name: string | null, plan: string) => layout("We couldn’t renew your plan", [
     `Hi ${first(name)},`,
-    `We tried to renew your ${plan} plan, but the card was declined. Your site is still online for the next 14 days.`,
+    `We tried to renew your ${plan} plan, but the card was declined. Pro keeps working for the next 14 days; after that your account moves to free Basic and nothing is deleted.`,
     `You can renew with another card in a minute.`,
   ], { label: "Renew now", url: `${siteUrl}/pricing` }),
 

@@ -12,7 +12,8 @@ type Context = { params: Promise<{ templateId: string }> };
 export const GET = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  const capabilities = { canBuy: serverDomainsConfigured() && registrarConfigured() && stripeConfigured(), canConnect: serverDomainsConfigured() && owner.user.plan.connectOwnDomain, planName: owner.user.plan.name };
+  const planAllows = owner.user.plan.ownDomain;
+  const capabilities = { canBuy: planAllows && serverDomainsConfigured() && registrarConfigured() && stripeConfigured(), canConnect: planAllows && serverDomainsConfigured(), planAllows, planName: owner.user.plan.name };
   if (!serverDomainsConfigured()) return Response.json({ domain: null, orders: [], capabilities });
   try {
     return Response.json({ ...(await domainOverview(owner.user, owner.templateId)), capabilities });

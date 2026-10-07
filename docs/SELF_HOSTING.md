@@ -30,7 +30,7 @@ Then:
 1. **Google sign-in:** add `https://formora.app/api/auth/callback/google` as a redirect URI in Google Cloud Console (see `GOOGLE_AUTH_SETUP.md`).
 2. **Stripe** (plans, AI credits and domains): add the webhook `https://formora.app/api/webhooks/stripe` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`, and put its signing secret in `STRIPE_WEBHOOK_SECRET`. Prices are set in code (`lib/plans.ts`), so there are no Stripe products to create.
 3. **Email from your company address:** once your domain and mailbox exist, fill in `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` and `SMTP_TO` (see below). Until then emails are only written to the app log.
-4. **Scheduled jobs:** set a long random `CRON_SECRET`. The `cron` service calls `/api/cron` every hour (renewals, trial and renewal emails, monthly credits, automatic portfolio updates, clean-up). Check it with `docker compose logs cron`.
+4. **Scheduled jobs:** set a long random `CRON_SECRET`. The `cron` service calls `/api/cron` every hour (renewals, renewal and Pro-ending emails, the Investigator, automatic portfolio updates, clean-up). Check it with `docker compose logs cron`.
 5. **Admins:** put your Google email in `ADMIN_EMAILS`, sign in, and approve templates at `/templates/review`. Customers only see approved templates.
 6. **AI:** set `ANTHROPIC_API_KEY` and `AI_DAILY_BUDGET_USD`. Customers can also use their own key from their account page.
 

@@ -1,4 +1,4 @@
-// The Investigator: plan rules, settings UI, a check in "ask me first" and "automatic" modes,
+// The Investigator: every plan, any schedule (custom days), the free first check, then paid checks, settings UI, a check in "ask me first" and "automatic" modes,
 // what goes live, the email, undo, the hourly schedule, and the safety rules for feeds.
 import { chromium } from "playwright";
 import { execSync } from "node:child_process";
@@ -23,30 +23,31 @@ const api = (path, method = "GET", data) => page.request.fetch(`${BASE}${path}`,
 
 // A published portfolio to keep up to date.
 await page.goto(`${BASE}/account`);
-await page.getByText("Free trial").first().waitFor();
+await page.getByText("Basic, free").first().waitFor();
 const userId = sql(`SELECT id FROM app_users WHERE provider_account_id = '${account}'`);
 const content = { name: "Ada Okafor", professional_title: "Staff Engineer", tagline: "Calm infrastructure.", summary: ["I make payment systems boring."], experience: [{ job_title: "Staff Engineer", company: "Northwind Pay", start_date: "2021", end_date: "Present" }], highlights: [], projects: [] };
 log("portfolio saved:", (await api("/api/portfolios/brief", "PUT", { content, theme: null, baseVersion: null })).status, "| published:", (await api("/api/portfolios/brief/publish", "POST", { slug: "ada-investigator" })).status);
 const links = [{ kind: "linkedin", value: "ada-okafor-test" }, { kind: "website", value: "http://localhost:4010/spa/ada" }, { kind: "feed", value: "http://localhost:4010/feeds/demo.xml" }, { kind: "github", value: "ada" }];
 
-// 1) Plans: Basic has no Investigator; the trial gets one free check.
-sql(`UPDATE app_users SET plan = 'basic', plan_expires_at = NOW() + INTERVAL '1 year' WHERE id = '${userId}'`);
-log("basic: switching on refused:", (await api("/api/investigator", "PUT", { links, ownProfiles: true, enabled: true, frequency: "monthly" })).body.error);
-log("basic: check refused:", (await api("/api/investigator/run", "POST")).status);
-sql(`UPDATE app_users SET plan = 'trial', trial_ends_at = NOW() + INTERVAL '10 days', plan_expires_at = NULL WHERE id = '${userId}'`);
+// 1) Free Basic: any schedule, and the first check is on us.
 log("links without confirming they're yours refused:", (await api("/api/investigator", "PUT", { links, ownProfiles: false })).body.error);
-log("trial: save links:", (await api("/api/investigator", "PUT", { links, ownProfiles: true })).status);
-const trialRun = await api("/api/investigator/run", "POST");
-log("trial: free check:", trialRun.status, `found ${trialRun.body.found}`, "| second check:", (await api("/api/investigator/run", "POST")).status);
+log("basic: custom 0 days refused:", (await api("/api/investigator", "PUT", { links, ownProfiles: true, frequency: "custom", customDays: 0 })).body.error);
+log("basic: daily allowed:", (await api("/api/investigator", "PUT", { links, ownProfiles: true, enabled: true, frequency: "daily" })).body.settings?.frequency);
+await api("/api/investigator", "PUT", { enabled: false, frequency: "monthly" });
+const access = (await api("/api/investigator")).body.access;
+log("first check is free:", access.freeCheckAvailable, access.paysWith);
+const creditsBefore = sql(`SELECT credits FROM app_users WHERE id = '${userId}'`);
+const freeRun = await api("/api/investigator/run", "POST");
+log("free check:", freeRun.status, `found ${freeRun.body.found}`, "| credits unchanged:", sql(`SELECT credits FROM app_users WHERE id = '${userId}'`) === creditsBefore, "| AI spend recorded:", Number(sql("SELECT COALESCE(SUM(micro_usd), 0) FROM ai_spend")) > 0);
+log("after it, checks are paid:", (await api("/api/investigator")).body.access.paysWith, "| second check within 12h refused:", (await api("/api/investigator/run", "POST")).status);
 sql(`DELETE FROM profile_suggestions WHERE owner_id = '${userId}'`);
-sql(`DELETE FROM investigator_runs WHERE owner_id = '${userId}'`);
+sql(`UPDATE investigator_runs SET started_at = started_at - INTERVAL '13 hours' WHERE owner_id = '${userId}'`);
 
-// 2) Pro: set it up in the page, "ask me first", check now.
-sql(`UPDATE app_users SET plan = 'pro', plan_expires_at = NOW() + INTERVAL '1 year' WHERE id = '${userId}'`);
+// 2) Still on Basic: set it up in the page, "ask me first", check now (paid from credits).
 sql(`UPDATE investigator_settings SET links = '[]', last_run_at = NULL WHERE owner_id = '${userId}'`);
 await page.goto(`${BASE}/account/investigator`);
 await page.getByRole("heading", { name: "Your profiles" }).waitFor();
-log("pro: daily locked:", await page.getByRole("radio", { name: /Every day/ }).isDisabled(), "| monthly allowed:", !(await page.getByRole("radio", { name: /Every month/ }).isDisabled()));
+log("every schedule offered:", await page.getByRole("radio", { name: /Every day/ }).isEnabled(), await page.getByRole("radio", { name: "Custom" }).isVisible(), "| cost shown:", await page.getByText(/costs about 20–60 credits/).first().isVisible());
 for (const [index, link] of links.entries()) {
   if (index > 0) await page.getByRole("button", { name: "Add a profile" }).click();
   await page.getByLabel("Profile type").nth(index).selectOption(link.kind);
@@ -61,7 +62,7 @@ await page.getByText(/Saved\. Next check/).waitFor();
 log("switched on:", sql(`SELECT enabled || ' ' || frequency || ' ' || mode || ' next≈now:' || (next_run_at < NOW() + INTERVAL '5 minutes') FROM investigator_settings WHERE owner_id = '${userId}'`));
 await page.getByRole("button", { name: "Check now" }).click();
 await page.getByText(/^Done:/).waitFor({ timeout: 120000 });
-log("check result:", await page.getByText(/^Done:/).textContent());
+log("check result:", await page.getByText(/^Done:/).textContent(), "| paid from credits:", sql(`SELECT count(*) FROM credit_ledger WHERE owner_id = '${userId}' AND reason = 'Investigator check'`) !== "0");
 log("suggestions waiting:", sql(`SELECT string_agg(title, ' | ' ORDER BY title) FROM profile_suggestions WHERE owner_id = '${userId}' AND source = 'investigator' AND status = 'pending'`));
 log("left out: low confidence, old post, other Ada, 2019 award:", sql(`SELECT count(*) FROM profile_suggestions WHERE owner_id = '${userId}' AND (title LIKE '%different person%' OR title LIKE '%years ago%' OR title LIKE '%RustConf%' OR title LIKE '%Excellence Award%')`) === "0");
 log("unconfirmable source kept but not confident:", sql(`SELECT count(*) FROM profile_suggestions WHERE owner_id = '${userId}' AND title LIKE '%Platform Weekly%' AND status = 'pending'`) === "1");
@@ -107,10 +108,12 @@ sql(`UPDATE investigator_settings SET next_run_at = NOW() - INTERVAL '1 minute',
 const cron = await fetch(`${BASE}/api/cron`, { method: "POST", headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` } }).then((response) => response.json());
 log("cron:", JSON.stringify(cron.investigator), "| next check in ~30 days:", sql(`SELECT (next_run_at > NOW() + INTERVAL '29 days')::text FROM investigator_settings WHERE owner_id = '${userId}'`));
 
-// 6) Premium can check daily; plan rules are enforced on the server too.
-log("pro: daily via API refused:", (await api("/api/investigator", "PUT", { frequency: "daily", enabled: true })).status);
-sql(`UPDATE app_users SET plan = 'premium' WHERE id = '${userId}'`);
-log("premium: daily allowed:", (await api("/api/investigator", "PUT", { frequency: "daily", enabled: true })).body.settings?.frequency);
+// 6) A custom schedule: every 10 days.
+log("custom 10 days:", (await api("/api/investigator", "PUT", { frequency: "custom", customDays: 10, enabled: true })).body.settings?.customDays);
+sql(`UPDATE investigator_settings SET next_run_at = NOW() - INTERVAL '1 minute' WHERE owner_id = '${userId}'`);
+sql(`UPDATE investigator_runs SET started_at = started_at - INTERVAL '13 hours' WHERE owner_id = '${userId}'`);
+await fetch(`${BASE}/api/cron`, { method: "POST", headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` } });
+log("next check in ~10 days:", sql(`SELECT (next_run_at BETWEEN NOW() + INTERVAL '9 days' AND NOW() + INTERVAL '11 days')::text FROM investigator_settings WHERE owner_id = '${userId}'`));
 
 // 7) Feeds can't be pointed at our own network (checked without the test override).
 const ssrf = execSync(`cd ${new URL("../..", import.meta.url).pathname} && INVESTIGATOR_ALLOW_PRIVATE_FETCH= npx tsx -e 'import { safeFetchText } from "./lib/investigator/feeds"; Promise.all(["http://127.0.0.1:4010/feeds/demo.xml", "http://localhost:5432", "http://169.254.169.254/latest/meta-data", "http://10.0.0.5/"].map((url) => safeFetchText(url).then(() => "FETCHED " + url, (error) => "refused"))).then((r) => console.log(r.join(",")))'`).toString().trim();

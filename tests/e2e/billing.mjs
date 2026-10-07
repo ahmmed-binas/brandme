@@ -1,4 +1,4 @@
-// Plans, trial/grace/pause, credits, own API key, research agent, renewals and emails.
+// Plans (free Basic, Pro yearly/monthly, grace, back to Basic), credits at cost with card fee, own API key, research agent, renewals and emails.
 import { chromium } from "playwright";
 import { execSync } from "node:child_process";
 import { createRequire } from "node:module";
@@ -24,11 +24,11 @@ const webhook = async (orderId, intent = "pi_test_1") => {
 };
 const cron = () => fetch(`${BASE}/api/cron`, { method: "POST", headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` } }).then((response) => response.json());
 
-// New account: trial + welcome credits.
+// New account: free Basic + welcome credits.
 await page.goto(`${BASE}/account`);
-await page.getByText("Free trial").first().waitFor();
+await page.getByText("Basic, free").first().waitFor();
 const userId = sql(`SELECT id FROM app_users WHERE provider_account_id = '${account}'`);
-log("trial standing:", sql(`SELECT plan || ' / ' || (trial_ends_at > NOW() + INTERVAL '13 days')::text || ' / credits ' || credits FROM app_users WHERE id = '${userId}'`));
+log("new account:", sql(`SELECT plan || ' / expires ' || COALESCE(plan_expires_at::text, 'never') || ' / credits ' || credits FROM app_users WHERE id = '${userId}'`));
 log("welcome ledger:", sql(`SELECT reason || ' ' || delta FROM credit_ledger WHERE owner_id = '${userId}'`));
 
 // AI assistant spends credits (platform key, mock Claude).
@@ -70,62 +70,77 @@ log("github sync added:", gh.body.added);
 const first = (await api("/api/suggestions")).body.suggestions[0];
 log("dismiss:", (await api(`/api/suggestions/${first.id}`, "POST", { action: "dismissed" })).status, "| twice:", (await api(`/api/suggestions/${first.id}`, "POST", { action: "dismissed" })).status);
 
-// Buying a plan: checkout → webhook (twice) → active plan, receipt email, card saved.
-const basic5 = await api("/api/billing/checkout", "POST", { plan: "basic", years: 5 });
-log("basic for 5 years refused:", basic5.body.error);
-const checkout = await api("/api/billing/checkout", "POST", { plan: "pro", years: 2 });
+// Buying Pro: checkout → webhook (twice) → active plan, receipt email, card saved.
+log("Basic can't be bought:", (await api("/api/billing/checkout", "POST", { plan: "basic", interval: "year" })).body.error);
+log("bad interval refused:", (await api("/api/billing/checkout", "POST", { plan: "pro", interval: "week" })).body.error);
+const checkout = await api("/api/billing/checkout", "POST", { plan: "pro", interval: "year" });
 log("checkout url:", checkout.status, checkout.body.url?.slice(0, 40));
 const mockLog = (await (await fetch("http://localhost:4010/__log")).json()).filter((line) => line.startsWith("CHECKOUT")).at(-1);
 log("stripe got:", mockLog);
 const orderId = sql(`SELECT id FROM billing_orders WHERE owner_id='${userId}' AND kind='plan'`);
+log("order:", sql(`SELECT amount_cents || 'c / ' || term_months || ' months' FROM billing_orders WHERE id='${orderId}'`));
 log("webhook:", await webhook(orderId), "| again:", await webhook(orderId));
-log("plan after payment:", sql(`SELECT plan || ' until ' || to_char(plan_expires_at, 'YYYY') || ' card=' || COALESCE(stripe_payment_method,'none') FROM app_users WHERE id='${userId}'`));
+log("plan after payment:", sql(`SELECT plan || ' ' || plan_interval || ' until ' || to_char(plan_expires_at, 'YYYY-MM') || ' (expected ' || to_char(NOW() + INTERVAL '1 year', 'YYYY-MM') || ') card=' || COALESCE(stripe_payment_method,'none') FROM app_users WHERE id='${userId}'`));
 log("receipt emails:", sql(`SELECT count(*) FROM email_log WHERE owner_id='${userId}' AND kind='receipt'`));
 
-// Credits pack.
+// Credits pack: sold at cost, card fee as its own line.
 await api("/api/billing/checkout", "POST", { credits: "plus" });
 const creditOrder = sql(`SELECT id FROM billing_orders WHERE owner_id='${userId}' AND kind='credits'`);
+log("credits order total (1000 + 59 fee):", sql(`SELECT amount_cents FROM billing_orders WHERE id='${creditOrder}'`), "| stripe lines:", (await (await fetch("http://localhost:4010/__log")).json()).filter((line) => line.startsWith("CHECKOUT")).at(-1));
 const credBefore = Number(sql(`SELECT credits FROM app_users WHERE id='${userId}'`));
 await webhook(creditOrder, "pi_credits"); await webhook(creditOrder, "pi_credits");
 log("credits added once:", Number(sql(`SELECT credits FROM app_users WHERE id='${userId}'`)) - credBefore);
 
-// Switching plan mid-term converts remaining time.
-const proUntil = sql(`SELECT plan_expires_at FROM app_users WHERE id='${userId}'`);
-await api("/api/billing/checkout", "POST", { plan: "premium", years: 1 });
-const premiumOrder = sql(`SELECT id FROM billing_orders WHERE owner_id='${userId}' AND plan='premium'`);
-await webhook(premiumOrder, "pi_premium");
-log("pro until", proUntil.slice(0, 10), "→ premium until", sql(`SELECT to_char(plan_expires_at, 'YYYY-MM-DD') FROM app_users WHERE id='${userId}'`));
+// Paying monthly while yearly Pro runs adds a month on top and switches to monthly renewal.
+const yearUntil = sql(`SELECT to_char(plan_expires_at, 'YYYY-MM-DD') FROM app_users WHERE id='${userId}'`);
+await api("/api/billing/checkout", "POST", { plan: "pro", interval: "month" });
+const monthOrder = sql(`SELECT id FROM billing_orders WHERE owner_id='${userId}' AND kind='plan' AND term_months = 1`);
+log("monthly order:", sql(`SELECT amount_cents FROM billing_orders WHERE id='${monthOrder}'`));
+await webhook(monthOrder, "pi_month");
+log("pro until", yearUntil, "→", sql(`SELECT to_char(plan_expires_at, 'YYYY-MM-DD') || ' ' || plan_interval FROM app_users WHERE id='${userId}'`));
 
-// Publishing works while active; a paused account's site rests; grace keeps it live.
-const published = await api("/api/portfolios/terminal/publish", "POST", { slug: "ines-billing" });
-log("publish:", published.status);
-sql(`UPDATE app_users SET plan='trial', plan_expires_at=NULL, trial_ends_at = NOW() - INTERVAL '3 days' WHERE id='${userId}'`);
-log("grace: site", (await page.request.get(`${BASE}/p/ines-billing`)).status(), "| banner:", (await api("/api/account/status")).body.account.standing);
-sql(`UPDATE app_users SET trial_ends_at = NOW() - INTERVAL '20 days' WHERE id='${userId}'`);
-const resting = await page.goto(`${BASE}/p/ines-billing`);
-log("paused: status", resting.status(), "| resting page:", await page.getByText("portfolio is resting").isVisible(), "| publish:", (await api("/api/portfolios/terminal/publish", "POST", { slug: "ines-billing" })).status);
+// Pro publishes three; when Pro ends: grace keeps all live, then Basic keeps the first.
+const extra = { ...content, name: "Ines Okafor" };
+await api("/api/portfolios/swiss", "PUT", { content: extra, theme: null, baseVersion: null });
+await api("/api/portfolios/broadsheet", "PUT", { content: extra, theme: null, baseVersion: null });
+await api("/api/portfolios/blueprint", "PUT", { content: extra, theme: null, baseVersion: null });
+const publishes = [];
+for (const [id, slug] of [["terminal", "ines-billing"], ["swiss", "ines-two"], ["broadsheet", "ines-three"], ["blueprint", "ines-four"]]) publishes.push((await api(`/api/portfolios/${id}/publish`, "POST", { slug })).status);
+log("Pro publishes 3 then refuses the 4th:", publishes.join(","));
+sql(`UPDATE app_users SET plan_expires_at = NOW() - INTERVAL '3 days' WHERE id='${userId}'`);
+const graceStatus = await Promise.all(["ines-billing", "ines-two", "ines-three"].map(async (slug) => { await page.goto(`${BASE}/p/${slug}`); return await page.getByText("portfolio is resting").isVisible() ? "resting" : "live"; }));
+log("grace:", graceStatus.join(","), "| standing:", (await api("/api/account/status")).body.account.standing);
 await page.goto(`${BASE}/editor/terminal`);
-await page.getByText("Your site is resting").waitFor({ timeout: 10000 }).catch(() => undefined);
-log("editor banner (paused):", await page.getByText("Your site is resting").isVisible());
-await page.screenshot({ path: `${S}/shots/editor-paused-banner.png` });
+await page.getByText("plan has ended").waitFor({ timeout: 10000 }).catch(() => undefined);
+log("editor banner (grace):", await page.getByText("plan has ended").isVisible());
+await page.screenshot({ path: `${S}/shots/editor-grace-banner.png` });
+sql(`UPDATE app_users SET plan_expires_at = NOW() - INTERVAL '20 days' WHERE id='${userId}'`);
+const after = await Promise.all(["ines-billing", "ines-two", "ines-three"].map(async (slug) => { await page.goto(`${BASE}/p/${slug}`); return await page.getByText("portfolio is resting").isVisible() ? "resting" : "live"; }));
+log("after grace (Basic): first live, rest resting:", after.join(","), "| plan shown:", (await api("/api/account/status")).body.account.planName);
+log("Basic can't publish a second:", (await api("/api/portfolios/blueprint/publish", "POST", { slug: "ines-four" })).status);
 
-// Scheduled jobs: lifecycle emails (once), renewal with a saved card, failed renewal.
-sql(`UPDATE app_users SET trial_ends_at = NOW() - INTERVAL '2 days' WHERE id='${userId}'`);
+// Scheduled jobs: emails (once), renewal with a saved card (yearly and monthly), failed renewal.
+sql(`UPDATE app_users SET plan_expires_at = NOW() - INTERVAL '12 days' WHERE id='${userId}'`);
 const firstRun = await cron();
 const secondRun = await cron();
 log("cron emails first/second run:", firstRun.emails, secondRun.emails);
 log("emails logged:", sql(`SELECT string_agg(kind, ',' ORDER BY kind) FROM email_log WHERE owner_id='${userId}'`));
-sql(`UPDATE app_users SET plan='pro', plan_expires_at = NOW() + INTERVAL '2 days', auto_renew = TRUE, stripe_customer_id='cus_1', stripe_payment_method='pm_card_visa' WHERE id='${userId}'`);
+sql(`UPDATE app_users SET plan='pro', plan_interval='year', plan_expires_at = NOW() + INTERVAL '2 days', auto_renew = TRUE, stripe_customer_id='cus_1', stripe_payment_method='pm_card_visa' WHERE id='${userId}'`);
 const renewal = await cron();
-log("renewal:", JSON.stringify(renewal.renewals), "| now until:", sql(`SELECT to_char(plan_expires_at, 'YYYY-MM-DD') FROM app_users WHERE id='${userId}'`), "| monthly credits:", renewal.monthlyCredits);
+log("yearly renewal:", JSON.stringify(renewal.renewals), "| now until:", sql(`SELECT to_char(plan_expires_at, 'YYYY-MM-DD') FROM app_users WHERE id='${userId}'`), "| charged:", sql(`SELECT amount_cents FROM billing_orders WHERE owner_id='${userId}' AND kind='renewal' ORDER BY created_at DESC LIMIT 1`));
 log("renew again same period:", JSON.stringify((await cron()).renewals));
+sql(`UPDATE app_users SET plan_interval='month', plan_expires_at = NOW() + INTERVAL '1 day' WHERE id='${userId}'`);
+const monthly = await cron();
+log("monthly renewal:", JSON.stringify(monthly.renewals), "| charged:", sql(`SELECT amount_cents || 'c, ' || term_months || ' month' FROM billing_orders WHERE owner_id='${userId}' AND kind='renewal' ORDER BY created_at DESC LIMIT 1`), "| until in ~1 month:", sql(`SELECT (plan_expires_at BETWEEN NOW() + INTERVAL '28 days' AND NOW() + INTERVAL '33 days')::text FROM app_users WHERE id='${userId}'`));
 sql(`UPDATE app_users SET plan_expires_at = NOW() + INTERVAL '1 day', stripe_payment_method='pm_decline' WHERE id='${userId}'`);
 log("declined renewal:", JSON.stringify((await cron()).renewals), "| email:", sql(`SELECT count(*) FROM email_log WHERE owner_id='${userId}' AND kind='renewal-failed'`));
 log("cron without secret:", (await fetch(`${BASE}/api/cron`, { method: "POST" })).status);
 
 // Pricing page and checkout entry.
 await page.goto(`${BASE}/pricing`);
-log("pricing cards:", await page.locator("li h2").allTextContents(), "| 5-year Basic note:", await page.getByRole("radio", { name: /5 years/ }).click().then(() => page.getByText("Basic goes up to 2 years").isVisible()));
+log("pricing cards:", await page.locator("li h2").allTextContents());
+await page.getByRole("radio", { name: "Monthly" }).click();
+log("monthly price shown:", await page.getByText("$2.50").first().isVisible(), "| card fee shown:", await page.getByText("+ $0.59 card fee").isVisible());
 await page.screenshot({ path: `${S}/shots/pricing.png`, fullPage: true });
 await page.goto(`${BASE}/account`);
 await page.getByText("AI help").waitFor();

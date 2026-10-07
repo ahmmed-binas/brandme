@@ -59,7 +59,7 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
         <Delta now={d.revenue.total} before={d.revenue.previous} label={vs} />
         <p className="mt-3 text-[12px] text-[var(--c-muted)]">Yearly run rate from active plans: <span className="text-[var(--c-text2)]">{usd(d.revenue.runRate)}</span></p>
       </div>
-      <Tile label="Paying subscribers" value={count(d.subscribers.paying)}><p className="mt-1 text-[12px] text-[var(--c-text2)]">{count(d.subscribers.trials)} on a free trial</p></Tile>
+      <Tile label="Paying subscribers" value={count(d.subscribers.paying)}><p className="mt-1 text-[12px] text-[var(--c-text2)]">{count(d.subscribers.free)} on free Basic</p></Tile>
       <Tile label="Users" value={count(d.users.total)}><Delta now={d.users.added} before={d.users.previousAdded} label={`new users ${vs}`} /></Tile>
       <Tile label="Visitors" value={count(d.visitors.total)}><Delta now={d.visitors.total} before={d.visitors.previous} label={vs} /></Tile>
     </section>

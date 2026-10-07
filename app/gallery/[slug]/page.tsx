@@ -9,7 +9,6 @@ import { RateTemplate } from "@/components/templates/Rating";
 import { galleryArticle, galleryItems, noticeFor } from "@/lib/gallery/items";
 import { LICENSES } from "@/lib/gallery/submissions";
 import { brand } from "@/lib/brand";
-import { PLANS, formatUsd } from "@/lib/plans";
 import { siteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +45,6 @@ export default async function GalleryArticlePage({ params }: Props) {
     ...(item.rating.count && item.rating.average !== null ? { aggregateRating: { "@type": "AggregateRating", ratingValue: item.rating.average, ratingCount: item.rating.count, bestRating: 5 } } : {}),
   };
   const ratingEndpoint = item.kind === "original" ? `/api/templates/${item.slug}/rating` : `/api/gallery/${item.slug}/rating`;
-  const basic = PLANS.basic;
 
   return <article className="pb-28">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
@@ -123,9 +121,9 @@ export default async function GalleryArticlePage({ params }: Props) {
           <div className="mt-6"><DownloadButton href={item.download} label="Download the ZIP" /></div>
         </div>
         <div className="rounded-2xl bg-ink p-7 text-paper">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-paper/60">No code · from {formatUsd(basic.yearlyCents)} a year</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-paper/60">No code · free to start</p>
           <h3 className="mt-2 font-display text-[1.8rem] leading-tight">Let {brand.name} handle it</h3>
-          <ul className="mt-5 space-y-2.5 text-[0.98rem] text-paper/85">{["Click any text or photo to change it, no code at all", "Your own domain with HTTPS, set up for you", "Hosting, speed and security looked after", "A blog, and updates suggested as your career moves (Pro)", "Switch to another design any time, keeping your words"].map((line) => <li key={line} className="flex gap-2.5"><Check size={17} className="mt-0.5 shrink-0 text-signal" />{line}</li>)}</ul>
+          <ul className="mt-5 space-y-2.5 text-[0.98rem] text-paper/85">{["Click any text or photo to change it, no code at all", "A free address, or your own domain with Pro", "Hosting, speed and security looked after", "A blog, and the Investigator to keep it up to date", "Switch to another design any time, keeping your words"].map((line) => <li key={line} className="flex gap-2.5"><Check size={17} className="mt-0.5 shrink-0 text-signal" />{line}</li>)}</ul>
           <div className="mt-7 flex flex-wrap gap-3">
             {item.editable ? <Link href={`/editor/${item.slug}`} className="inline-flex items-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.98rem] font-medium text-ink hover:bg-signal hover:text-signal-ink">Customise {item.title} <ArrowRight size={16} /></Link>
               : <Link href="/templatechooser" className="inline-flex items-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.98rem] font-medium text-ink hover:bg-signal hover:text-signal-ink">See designs you can customise <ArrowRight size={16} /></Link>}

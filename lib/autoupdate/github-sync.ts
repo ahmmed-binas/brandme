@@ -19,7 +19,7 @@ export async function githubSuggestions(ownerId: string, username: string, sourc
 }
 
 /**
- * Weekly GitHub check for Pro and Premium (and on demand): new public
+ * Weekly GitHub check on every plan (and on demand): new public
  * repositories that aren't on the portfolio yet become suggestions. Uses only
  * public data and no AI, so it costs nothing to run.
  */

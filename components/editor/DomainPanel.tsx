@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Check, CheckCircle2, Clock, Copy, Globe2, Loader2, RefreshCw, Search, ShoppingCart, Trash2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { PLANS, formatUsd } from "@/lib/plans";
 
 interface DomainView { domain: string; source: "connected" | "purchased"; status: "active" | "pending_dns" | "registering" | "failed"; records: Array<{ type: string; name: string; value: string; purpose: string }>; message?: string }
 interface OrderView { id: string; domain: string; status: string; chargedCents: number; error: string | null }
-interface Overview { domain: DomainView | null; orders: OrderView[]; capabilities: { canBuy: boolean; canConnect: boolean; planName: string } }
+interface Overview { domain: DomainView | null; orders: OrderView[]; capabilities: { canBuy: boolean; canConnect: boolean; planAllows: boolean; planName: string } }
 interface Offer { domain: string; available: boolean; priceCents: number | null; renewalCents: number | null }
 type View = "home" | "buy" | "contact" | "connect";
 
@@ -125,6 +126,8 @@ export function DomainPanel({ templateId, personName, published }: { templateId:
     </div>;
   }
 
+  if (!capabilities.planAllows) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-600">Your own domain, like <b>{(personName || "yourname").toLowerCase().replace(/[^a-z0-9]+/g, "") || "yourname"}.com</b>, comes with <b>Pro</b> ({formatUsd(PLANS.pro.prices.year!)} a year or {formatUsd(PLANS.pro.prices.month!)} a month). On {capabilities.planName} your site lives at your free Formora address.</p><a href="/pricing" className="inline-block rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">See Pro</a></div>;
+
   if (!capabilities.canBuy && !capabilities.canConnect) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-500">Custom domains aren’t available on this server yet.</p></div>;
 
   if (view === "buy") return <div className="space-y-3">
@@ -138,7 +141,7 @@ export function DomainPanel({ templateId, personName, published }: { templateId:
       {offer.available && offer.priceCents !== null ? <button type="button" onClick={() => { setChosen(offer); setView("contact"); }} className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-blue-700">{money(offer.priceCents)}/yr</button> : <span className="shrink-0 text-xs text-slate-400">Taken</span>}
     </li>)}</ul>}
     {errorBox}
-    <p className="text-[11px] leading-4 text-slate-500">Price includes registration for one year, setup, and HTTPS. The domain is registered in your name.</p>
+    <p className="text-[11px] leading-4 text-slate-500">The registrar’s price for one year plus the card fee, nothing more. Setup and HTTPS are included. The domain is registered in your name.</p>
   </div>;
 
   if (view === "contact" && chosen) return <form onSubmit={(event) => { event.preventDefault(); void checkout(); }} className="space-y-2.5">

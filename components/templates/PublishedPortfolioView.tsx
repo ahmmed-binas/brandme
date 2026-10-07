@@ -9,7 +9,7 @@ import type { ColorTheme, StandardContent } from "@/lib/portfolio/schema";
 import { PortfolioWriting, type PublicPost } from "./PortfolioBlog";
 
 /** Renders a published snapshot. Content comes from the server; nothing is read from the visitor's browser. */
-/** Shown instead of the portfolio while the owner's trial or plan has lapsed. Nothing is deleted. */
+/** Shown instead of a portfolio beyond what the owner's plan allows (after Pro ends). Nothing is deleted. */
 function Resting({ name }: { name: string | null }) {
   return <main className="grid min-h-dvh place-items-center bg-[#f4f0e8] px-6 text-center text-[#15140f]">
     <div className="max-w-md">

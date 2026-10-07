@@ -1,6 +1,6 @@
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
-import { PAID_PLANS, PLANS } from "@/lib/plans";
+import { PLANS } from "@/lib/plans";
 
 /**
  * Figures for the superadmin console. Everything is in US dollars (all prices
@@ -29,7 +29,7 @@ export interface Dashboard {
   revenue: { total: number; previous: number; plans: number; credits: number; domains: number; domainCost: number; runRate: number };
   users: { total: number; added: number; previousAdded: number; verified: number; google: number; password: number };
   plans: { id: string; name: string; count: number }[];
-  subscribers: { paying: number; trials: number; lapsed: number; conversion: number | null };
+  subscribers: { paying: number; free: number; lapsed: number; conversion: number | null };
   visitors: { total: number; previous: number; views: number; portfolioViews: number; devices: Ranked[]; pages: Ranked[]; referrers: Ranked[]; portfolios: Ranked[] };
   product: { portfolios: number; published: number; domains: number; investigatorOn: number; aiCost: number; aiRequests: number };
   inbox: { support: number; submissions: number; moderation: number };
@@ -94,9 +94,10 @@ export async function loadDashboard(range: RangeId): Promise<Dashboard> {
       COUNT(*) FILTER (WHERE provider = 'password') AS password
       FROM app_users WHERE ${CUSTOMER}`),
     db.query<{ plan: string; count: unknown }>(`SELECT CASE
-        WHEN plan IN ('basic', 'pro', 'premium') AND plan_expires_at > NOW() THEN plan
-        WHEN plan = 'trial' AND trial_ends_at > NOW() THEN 'trial'
-        ELSE 'lapsed' END AS plan, COUNT(*) AS count
+        WHEN plan = 'pro' AND plan_expires_at > NOW() THEN CASE WHEN plan_interval = 'month' THEN 'pro-month' ELSE 'pro-year' END
+        WHEN plan = 'pro' AND plan_expires_at > NOW() - INTERVAL '14 days' THEN 'grace'
+        WHEN plan = 'pro' THEN 'lapsed'
+        ELSE 'basic' END AS plan, COUNT(*) AS count
       FROM app_users WHERE ${CUSTOMER} GROUP BY 1`).then((result) => result.rows),
     // Of the people who signed up in the range, how many have paid for a plan since.
     one<{ cohort: unknown; paid: unknown }>(`SELECT COUNT(DISTINCT u.id) AS cohort, COUNT(DISTINCT o.owner_id) AS paid
@@ -123,7 +124,7 @@ export async function loadDashboard(range: RangeId): Promise<Dashboard> {
       (SELECT COUNT(*) FROM gallery_submissions WHERE status = 'pending') AS submissions,
       (SELECT COUNT(*) FROM community_posts WHERE status = 'pending') AS moderation`),
     db.query<{ at: Date; email: string | null; what: string; cents: number }>(`SELECT * FROM (
-        SELECT o.paid_at AS at, u.email, CASE WHEN o.kind = 'plan' THEN initcap(o.plan) || ' plan, ' || o.term_years || ' yr' ELSE o.credits || ' AI credits' END AS what, o.amount_cents AS cents
+        SELECT o.paid_at AS at, u.email, CASE WHEN o.kind IN ('plan', 'renewal') THEN initcap(o.plan) || CASE WHEN o.term_months = 1 THEN ' plan, monthly' ELSE ' plan, yearly' END ELSE o.credits || ' AI credits' END AS what, o.amount_cents AS cents
           FROM billing_orders o JOIN app_users u ON u.id = o.owner_id WHERE o.status = 'paid'
         UNION ALL
         SELECT d.created_at, u.email, 'Domain ' || d.domain, d.charged_cents FROM domain_orders d JOIN app_users u ON u.id = d.owner_id WHERE d.${PAID_DOMAIN} AND d.charged_cents > 0
@@ -132,7 +133,7 @@ export async function loadDashboard(range: RangeId): Promise<Dashboard> {
   ]);
 
   const count = (id: string) => n(planRows.find((row) => row.plan === id)?.count);
-  const paying = PAID_PLANS.reduce((sum, id) => sum + count(id), 0);
+  const paying = count("pro-year") + count("pro-month") + count("grace");
   const cohort = n(subs.cohort);
   const label = (date: Date) => date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 
@@ -143,11 +144,11 @@ export async function loadDashboard(range: RangeId): Promise<Dashboard> {
     revenue: {
       plans: dollars(money.plans), credits: dollars(money.credits), domains: dollars(money.domains), domainCost: dollars(money.domain_cost),
       total: dollars(n(money.plans) + n(money.credits) + n(money.domains)), previous: dollars(moneyBefore.total),
-      runRate: PAID_PLANS.reduce((sum, id) => sum + count(id) * PLANS[id].yearlyCents, 0) / 100,
+      runRate: (count("pro-year") * PLANS.pro.prices.year! + count("pro-month") * PLANS.pro.prices.month! * 12) / 100,
     },
     users: { total: n(users.total), added: n(users.added), previousAdded: n(users.previous), verified: n(users.verified), google: n(users.google), password: n(users.password) },
-    plans: [...PAID_PLANS.map((id) => ({ id, name: PLANS[id].name, count: count(id) })), { id: "trial", name: "Free trial", count: count("trial") }, { id: "lapsed", name: "Lapsed", count: count("lapsed") }],
-    subscribers: { paying, trials: count("trial"), lapsed: count("lapsed"), conversion: cohort ? n(subs.paid) / cohort : null },
+    plans: [{ id: "pro-year", name: "Pro, yearly", count: count("pro-year") }, { id: "pro-month", name: "Pro, monthly", count: count("pro-month") }, { id: "grace", name: "Pro ending", count: count("grace") }, { id: "basic", name: "Basic (free)", count: count("basic") + count("lapsed") }],
+    subscribers: { paying, free: count("basic") + count("lapsed"), lapsed: count("lapsed"), conversion: cohort ? n(subs.paid) / cohort : null },
     visitors: {
       total: n(visits.visitors), previous: n(visitsBefore.visitors), views: n(visits.views), portfolioViews: n(visits.portfolio_views),
       devices, pages, referrers, portfolios: portfolioRanks,

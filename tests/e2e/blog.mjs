@@ -124,15 +124,10 @@ await fetch(`${BASE}/api/webhooks/stripe`, { method: "POST", body: payload, head
 log("after payment:", sql(`SELECT status || ' until ' || to_char(expires_at, 'YYYY-MM-DD') FROM domain_orders WHERE id = '${renewalId}'`), "| registrar called:", (await (await fetch("http://localhost:4010/__log")).json()).some((line) => line.startsWith("RENEW moadmin.example")));
 log("second renew refused (too early):", (await api("/api/domains/renew", "POST", { orderId: renewalId })).status);
 
-// 7) Blogs are a Pro feature: on Basic the blog disappears (posts are kept) and writing is refused.
-sql(`UPDATE app_users SET plan = 'basic', plan_expires_at = NOW() + INTERVAL '1 year' WHERE id = '${owner}'`);
-log("basic: new post refused:", (await api("/api/portfolios/brief/posts", "POST", { title: "x" })).status, "| list still works:", (await api("/api/portfolios/brief/posts")).body.allowed === false);
-log("basic: blog hidden:", (await fetch(`${BASE}/p/${slug}/blog`)).status, (await fetch(`${BASE}/p/${slug}/blog/three-questions-to-ask-before-signing-a-settlement`)).status, "| writing strip gone:", !(await (await fetch(`${BASE}/p/${slug}`)).text()).includes("Three questions to ask"), "| custom domain:", viaHost("/blog"));
-log("basic: posts kept in db:", sql(`SELECT count(*) FROM portfolio_posts WHERE owner_id = '${owner}'`));
-await page.goto(`${BASE}/editor/brief`);
-await page.getByRole("tab", { name: "Blog" }).click();
-log("basic: editor shows upgrade:", await page.getByRole("link", { name: "See Pro" }).waitFor({ timeout: 10000 }).then(() => true, () => false), "|", (await page.locator("aside").first().innerText()).match(/Blogs are included[^.]*\./)?.[0]);
-sql(`UPDATE app_users SET plan = 'pro' WHERE id = '${owner}'`);
-log("pro: blog back:", (await fetch(`${BASE}/p/${slug}/blog`)).status);
+// 7) Blogs are on every plan: on free Basic the blog stays, on the free address and the custom domain it already has.
+sql(`UPDATE app_users SET plan = 'basic', plan_expires_at = NULL WHERE id = '${owner}'`);
+log("basic: new post allowed:", (await api("/api/portfolios/brief/posts", "POST", { title: "Basic plan post" })).status, "| list allowed:", (await api("/api/portfolios/brief/posts")).body.allowed);
+log("basic: blog live:", (await fetch(`${BASE}/p/${slug}/blog`)).status, "| custom domain still serves it:", viaHost("/blog"));
+sql(`UPDATE app_users SET plan = 'pro', plan_expires_at = NOW() + INTERVAL '1 year' WHERE id = '${owner}'`);
 console.log("page errors:", errors.length ? errors : "none");
 await browser.close();

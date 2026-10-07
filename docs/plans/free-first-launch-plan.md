@@ -1,6 +1,16 @@
 # Free-first launch plan (agreed with the owner, not built yet)
 
-Status: **planned only.** Start when the owner says "implement". Work in the order at the bottom, test end to end, then update the docs.
+Status: **steps 1–3 built (October 2026), plus the Investigator page, Book a free call and the legal pages.** Still to build: Basic one-set-of-content (step 1), the agent's character, avatar and comments (step 4), sources clean-up (step 5), blog upgrade (step 6).
+
+## Owner's decisions (7 October 2026)
+
+- **Pro: $24/yr or $2.50/mo.** Self-serve: up to 3 live portfolios, own domain, no branding, 1 GB. Having the owner personally look after a customer's site is a **separate done-for-you service**, sold through "Book a free call" with a price agreed on the call.
+- **No trial.** New accounts start on free Basic. Every account's **first Investigator check is free**.
+- **The Investigator on every plan, any schedule** (daily, weekly, monthly, 6-monthly, yearly or every N days), because each check's AI step is paid by the customer (credits at cost or their own key). No monthly credit allowances.
+- **Book a free call: Cal.com** (free). `BOOKING_URL` = the owner's event link; optional webhook (`CALCOM_WEBHOOK_SECRET`) lists bookings in the console. Cal.com sends the confirmation emails and calendar invites.
+- **AI providers: Claude now, ChatGPT/OpenAI later** (after launch; every AI feature would need a second implementation).
+- **Legal pages name the owner personally** for now (`LEGAL_NAME`, `LEGAL_COUNTRY`). Domain not bought yet.
+- Built details: when Pro ends there are 14 days of grace, then the account is Basic: the first-published portfolio stays live, others rest. Own domains already set up keep working and can be renewed. Old trial accounts became Basic; Premium became Pro (migration `012_free_first`).
 
 Goal for the first ~6 months: **users and engagement first, money later.** Charge only what keeps hosting and the domain running. No profit on AI, domains or card fees beyond a few cents.
 

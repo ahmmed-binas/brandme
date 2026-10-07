@@ -3,124 +3,108 @@
  * only explains them. Change prices here: checkout, the pricing page and the
  * account page all read from this file.
  *
- * The model (see docs/BUSINESS_PLAN.md):
- * - Everyone starts with a 14-day trial with Pro features.
- * - After it ends there are 14 days of grace: the site stays up, the owner sees
- *   a friendly banner and gets a few emails. After that the site rests (it is
- *   never deleted) until they choose a plan.
- * - Plans are paid yearly and upfront, optionally for several years at a
- *   discount. Hosting is what's sold; AI is paid separately (credits or the
- *   owner's own API key), so no plan can run at a loss because of AI.
+ * The model (free-first launch, see docs/plans/free-first-launch-plan.md):
+ * - Basic is free for ever: every template, one live portfolio, a blog and the
+ *   Investigator. Nothing is ever paused.
+ * - Pro is paid yearly or monthly: up to three live portfolios, the owner's own
+ *   domain and no branding. When Pro ends there are 14 days of grace, then the
+ *   account is back on Basic (extra portfolios rest; nothing is deleted).
+ * - AI is paid separately at cost (credits or the owner's own API key) and
+ *   costs the same on every plan, so no plan can run at a loss because of AI.
  */
-export type PlanId = "trial" | "basic" | "pro" | "premium";
-export type PaidPlanId = Exclude<PlanId, "trial">;
+export type PlanId = "basic" | "pro";
+export type PaidPlanId = "pro";
+export type BillingInterval = "year" | "month";
 
 export interface PlanLimits {
   id: PlanId;
   name: string;
   summary: string;
-  /** Price per year in US cents. */
-  yearlyCents: number;
-  /** Prepaid terms on offer, in years. */
-  terms: number[];
+  /** Price in US cents per billing interval on offer; empty for a free plan. */
+  prices: Partial<Record<BillingInterval, number>>;
   /** Portfolios that can be live at the same time. */
   publishedPortfolios: number;
   /** Cap on AI requests per day, whatever pays for them, so nobody can hammer the service. */
   aiEditsPerDay: number;
   /** Whether a small "Made with Formora" link shows on published pages. */
   showsBranding: boolean;
-  /** Whether a domain the owner already has can be connected. */
-  connectOwnDomain: boolean;
-  /** Premium: one domain registration (up to INCLUDED_DOMAIN_MAX_CENTS a year) is on us. */
-  includedDomain: boolean;
+  /** Whether the owner can buy or connect a domain of their own. */
+  ownDomain: boolean;
   /** Total image storage. */
   storageMb: number;
   /** A blog on the portfolio (/blog, and on the owner's own domain). */
   blog: boolean;
   /** Weekly GitHub sync into the portfolio. */
   autoSync: boolean;
-  /** How often the research agent looks for news about the owner; null when not included. */
-  researchEveryDays: number | null;
-  /** AI credits added every month at no charge. */
-  monthlyCredits: number;
-  prioritySupport: boolean;
 }
 
-export const TRIAL_DAYS = 14;
 export const GRACE_DAYS = 14;
 /** Credits every new account starts with, enough to try the AI assistant and an import or two. */
 export const WELCOME_CREDITS = 60;
-export const INCLUDED_DOMAIN_MAX_CENTS = 2000;
-/** Discount for paying several years upfront. */
-export const TERM_DISCOUNT: Record<number, number> = { 1: 0, 2: 0.1, 5: 0.25 };
 
 export const PLANS: Record<PlanId, PlanLimits> = {
-  trial: {
-    id: "trial", name: "Free trial", summary: "Everything in Pro for 14 days.", yearlyCents: 0, terms: [],
-    publishedPortfolios: 1, aiEditsPerDay: 25, showsBranding: true, connectOwnDomain: true, includedDomain: false,
-    storageMb: 100, blog: true, autoSync: true, researchEveryDays: null, monthlyCredits: 0, prioritySupport: false,
-  },
   basic: {
-    id: "basic", name: "Basic", summary: "Your portfolio online, on your own domain, kept fast and safe.", yearlyCents: 1000, terms: [1, 2],
-    publishedPortfolios: 1, aiEditsPerDay: 30, showsBranding: true, connectOwnDomain: true, includedDomain: false,
-    storageMb: 200, blog: false, autoSync: false, researchEveryDays: null, monthlyCredits: 0, prioritySupport: false,
+    id: "basic", name: "Basic", summary: "Your portfolio online with a blog, free for as long as you like.", prices: {},
+    publishedPortfolios: 1, aiEditsPerDay: 30, showsBranding: true, ownDomain: false,
+    storageMb: 100, blog: true, autoSync: true,
   },
   pro: {
-    id: "pro", name: "Pro", summary: "A portfolio that keeps itself up to date.", yearlyCents: 2400, terms: [1, 2, 5],
-    publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, connectOwnDomain: true, includedDomain: false,
-    storageMb: 1000, blog: true, autoSync: true, researchEveryDays: 90, monthlyCredits: 100, prioritySupport: false,
-  },
-  premium: {
-    id: "premium", name: "Premium", summary: "A domain included, monthly check-ins on your career, and priority help.", yearlyCents: 4900, terms: [1, 2, 5],
-    publishedPortfolios: 10, aiEditsPerDay: 200, showsBranding: false, connectOwnDomain: true, includedDomain: true,
-    storageMb: 5000, blog: true, autoSync: true, researchEveryDays: 30, monthlyCredits: 300, prioritySupport: true,
+    id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 2400, month: 250 },
+    publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
+    storageMb: 1000, blog: true, autoSync: true,
   },
 };
 
-export const PAID_PLANS: PaidPlanId[] = ["basic", "pro", "premium"];
-export const isPaidPlan = (value: unknown): value is PaidPlanId => PAID_PLANS.includes(value as PaidPlanId);
+export const isPaidPlan = (value: unknown): value is PaidPlanId => value === "pro";
+export const isInterval = (value: unknown): value is BillingInterval => value === "year" || value === "month";
 
+/** Old plan names (trial, premium) map onto today's plans. */
 export function planFor(value: string | null | undefined): PlanLimits {
-  if (value === "basic" || value === "pro" || value === "premium") return PLANS[value];
-  return PLANS.trial;
+  return value === "pro" || value === "premium" ? PLANS.pro : PLANS.basic;
 }
 
-/** Total price in cents for a plan paid upfront for `years`. The yearly rate is rounded to whole dollars so prices read cleanly. */
-export function priceFor(plan: PaidPlanId, years: number): number {
-  const discount = TERM_DISCOUNT[years] ?? 0;
-  return Math.round((PLANS[plan].yearlyCents * (1 - discount)) / 100) * 100 * years;
+export function priceFor(plan: PaidPlanId, interval: BillingInterval): number {
+  return PLANS[plan].prices[interval]!;
 }
+
+export const INTERVAL_LABEL: Record<BillingInterval, string> = { year: "year", month: "month" };
 
 export const formatUsd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
 /**
- * Where an account stands today:
- * - trial / active: everything in the plan works.
- * - grace: the trial or plan ended in the last 14 days; the site stays live and we remind them.
- * - paused: the site rests (visitors see a holding page); editing still works and nothing is deleted.
+ * Stripe's standard card fee (2.9% + 30¢), shown to the customer as its own line
+ * when they buy credits or a domain, so the item itself is sold at cost.
+ * Stripe keeps this fee when a payment is refunded.
  */
-export type Standing = "trial" | "active" | "grace" | "paused";
+export const cardFeeCents = (amountCents: number) => Math.ceil(amountCents * 0.029 + 30);
+
+/**
+ * Where an account stands today:
+ * - active: everything in the plan works (Basic is always active).
+ * - grace: Pro ended in the last 14 days; it keeps working while we remind them.
+ */
+export type Standing = "active" | "grace";
 
 export interface AccountStanding {
   standing: Standing;
   plan: PlanLimits;
-  /** When the current period (trial or paid term) ends. */
-  endsAt: Date;
-  /** Days left in the current period, or in the grace period when in grace. */
+  interval: BillingInterval;
+  /** When the paid period ends; null on Basic. */
+  endsAt: Date | null;
+  /** Days left in the paid period, or in the grace period when in grace. */
   daysLeft: number;
 }
 
 const DAY = 86_400_000;
 
-export function standingOf(row: { plan: string; trial_ends_at: Date | string; plan_expires_at: Date | string | null }, now = new Date()): AccountStanding {
+export function standingOf(row: { plan: string; plan_expires_at: Date | string | null; plan_interval?: string | null }, now = new Date()): AccountStanding {
+  const interval: BillingInterval = row.plan_interval === "month" ? "month" : "year";
   const plan = planFor(row.plan);
-  const endsAt = new Date(plan.id === "trial" ? row.trial_ends_at : row.plan_expires_at ?? row.trial_ends_at);
+  if (plan.id === "basic" || !row.plan_expires_at) return { standing: "active", plan: PLANS.basic, interval, endsAt: null, daysLeft: 0 };
+  const endsAt = new Date(row.plan_expires_at);
   const remaining = endsAt.getTime() - now.getTime();
-  if (remaining > 0) return { standing: plan.id === "trial" ? "trial" : "active", plan, endsAt, daysLeft: Math.ceil(remaining / DAY) };
+  if (remaining > 0) return { standing: "active", plan, interval, endsAt, daysLeft: Math.ceil(remaining / DAY) };
   const graceLeft = remaining + GRACE_DAYS * DAY;
-  if (graceLeft > 0) return { standing: "grace", plan, endsAt, daysLeft: Math.ceil(graceLeft / DAY) };
-  return { standing: "paused", plan, endsAt, daysLeft: 0 };
+  if (graceLeft > 0) return { standing: "grace", plan, interval, endsAt, daysLeft: Math.ceil(graceLeft / DAY) };
+  return { standing: "active", plan: PLANS.basic, interval, endsAt: null, daysLeft: 0 };
 }
-
-/** Whether visitors should see the portfolio. Paused accounts show a holding page instead. */
-export const isLive = (standing: Standing) => standing !== "paused";

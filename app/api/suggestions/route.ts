@@ -15,7 +15,7 @@ export const GET = route(async () => {
   return Response.json({
     suggestions: await pendingSuggestions(user.id),
     settings: { githubUsername: row.github_username, autoUpdate: row.auto_update, lastSyncedAt: row.last_synced_at?.toISOString() ?? null, lastResearchAt: row.last_research_at?.toISOString() ?? null },
-    features: { autoSync: user.plan.autoSync, researchEveryDays: user.plan.researchEveryDays, planName: user.plan.name },
+    features: { autoSync: user.plan.autoSync, researchEveryDays: null, planName: user.plan.name },
   });
 });
 

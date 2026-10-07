@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { BarChart3, ExternalLink, FileText, Images, Inbox, LayoutTemplate, Mail, MessagesSquare, Settings2, Users } from "lucide-react";
+import { BarChart3, CalendarDays, ExternalLink, FileText, Images, Inbox, LayoutTemplate, Mail, MessagesSquare, Settings2, Users } from "lucide-react";
 import { consoleHref } from "@/lib/console/path";
 import SignOut from "./SignOut";
 
 const NAV = [
   { href: "", label: "Dashboard", icon: BarChart3 },
   { href: "/users", label: "Users", icon: Users },
+  { href: "/calls", label: "Calls", icon: CalendarDays },
 ] as const;
 
 const TOOLS = [

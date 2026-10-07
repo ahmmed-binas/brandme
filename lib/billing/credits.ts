@@ -2,16 +2,16 @@ import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 
 /**
- * AI credits. One credit is worth one US cent of retail value. Credits are
- * charged from the real token usage of each request with a margin, so AI can
- * never cost more than it brings in. Every change is written to a ledger;
+ * AI credits. One credit is worth one US cent. Credits are charged from the
+ * real token usage of each request plus a 5% service fee, so AI is sold at
+ * cost and never costs more than it brings in. Every change is written to a ledger;
  * a `reference` makes grants idempotent (a webhook delivered twice adds once).
  */
 
 export const CREDIT_PACKS = [
   { id: "starter", credits: 500, cents: 500, label: "500 credits" },
-  { id: "plus", credits: 1200, cents: 1000, label: "1,200 credits" },
-  { id: "studio", credits: 3000, cents: 2000, label: "3,000 credits" },
+  { id: "plus", credits: 1000, cents: 1000, label: "1,000 credits" },
+  { id: "studio", credits: 2000, cents: 2000, label: "2,000 credits" },
 ] as const;
 export type CreditPackId = (typeof CREDIT_PACKS)[number]["id"];
 export const creditPack = (id: unknown) => CREDIT_PACKS.find((pack) => pack.id === id);

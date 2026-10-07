@@ -166,7 +166,7 @@ http.createServer(async (req, res) => {
   // Stripe
   if (path === "/v1/checkout/sessions" && req.method === "POST") {
     const params = new URLSearchParams(raw);
-    log.push(`CHECKOUT amount=${params.get("line_items[0][price_data][unit_amount]")} order=${params.get("metadata[orderId]") ?? params.get("metadata[billingOrderId]")} kind=${params.get("metadata[kind]")} save=${params.get("payment_intent_data[setup_future_usage]")} name=${params.get("line_items[0][price_data][product_data][name]")}`);
+    log.push(`CHECKOUT amount=${params.get("line_items[0][price_data][unit_amount]")} order=${params.get("metadata[orderId]") ?? params.get("metadata[billingOrderId]")} kind=${params.get("metadata[kind]")} save=${params.get("payment_intent_data[setup_future_usage]")} name=${params.get("line_items[0][price_data][product_data][name]")} fee=${params.get("line_items[1][price_data][unit_amount]")}`);
     return send(res, 200, { id: `cs_test_${Date.now()}`, object: "checkout.session", url: "http://localhost:3100/fake-stripe-checkout" });
   }
   if (path === "/v1/customers" && req.method === "POST") { log.push("CUSTOMER"); return send(res, 200, { id: `cus_${Date.now()}`, object: "customer" }); }

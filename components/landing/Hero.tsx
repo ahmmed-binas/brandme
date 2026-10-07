@@ -138,7 +138,7 @@ export default function Hero() {
     <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[38rem] bg-[radial-gradient(60%_60%_at_78%_20%,var(--signal-soft),transparent_70%)]" />
     <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-14 px-5 pb-20 pt-10 sm:px-8 lg:grid-cols-12 lg:gap-10 lg:pb-28 lg:pt-20">
       <div className="min-w-0 lg:col-span-6">
-        <p className="rise font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft" style={{ "--i": 0 } as React.CSSProperties}>Portfolio builder · 14 days free</p>
+        <p className="rise font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft" style={{ "--i": 0 } as React.CSSProperties}>Portfolio builder · free to start</p>
         <h1 id="hero-title" className="mt-6 font-display text-[clamp(3rem,8.4vw,6.6rem)] font-[360] leading-[0.92] tracking-[-0.035em] text-ink [font-variation-settings:'opsz'_144]">
           <span className="line"><span className="rise" style={{ "--i": 1 } as React.CSSProperties}>Your work,</span></span>
           <span className="line"><span className="rise" style={{ "--i": 2 } as React.CSSProperties}>at <em className="font-[300] text-signal">your own</em></span></span>

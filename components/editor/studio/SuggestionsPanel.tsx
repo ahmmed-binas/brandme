@@ -90,7 +90,7 @@ export function SuggestionsPanel({ signedIn, templateId, content, onApply }: { s
     {scheduled ? <label className="mt-4 flex items-start gap-2 text-[12px] leading-relaxed text-ink-soft">
       <input type="checkbox" checked={state.settings.autoUpdate} onChange={() => void toggleAuto()} className="mt-0.5 accent-[color:var(--ink,#15140f)]" />
       <span>Check for me automatically{state.features.autoSync ? " (GitHub weekly" : " ("}{state.features.researchEveryDays ? `${state.features.autoSync ? ", " : ""}news every ${state.features.researchEveryDays} days` : ""}) and email me when there’s something new. Last checked {ago(state.settings.lastSyncedAt ?? state.settings.lastResearchAt)}.</span>
-    </label> : <p className="mt-4 text-[12px] text-ink-faint">Automatic checks come with Pro and Premium.</p>}
+    </label> : <p className="mt-4 text-[12px] text-ink-faint">For regular checks of all your profiles, switch on <a href="/account/investigator" className="underline">the Investigator</a>.</p>}
 
     {state.suggestions.length > 0 && <ul className="mt-4 space-y-2">{state.suggestions.map((suggestion) => <li key={suggestion.id} className="rounded-xl border border-rule bg-white/70 p-3">
       <p className="text-[11px] uppercase tracking-[0.12em] text-ink-faint">{suggestion.source === "github" ? "From GitHub" : suggestion.source === "investigator" ? "Found by the Investigator" : "Found on the web"}</p>

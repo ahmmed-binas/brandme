@@ -8,14 +8,15 @@ import GoogleSignInButton from "@/components/common/GoogleSignInButton";
 import { ProfileSection } from "@/components/auth/ProfileSection";
 import { getTemplate } from "@/lib/templates/catalog";
 import type { TemplateId } from "@/lib/templates/types";
+import { cardFeeCents } from "@/lib/plans";
 
 interface AccountPortfolio { templateId: TemplateId; name: string; slug: string | null; publishedAt: string | null; updatedAt: string; hasUnpublishedChanges: boolean }
 interface Billing {
-  plan: { id: string; name: string; standing: "trial" | "active" | "grace" | "paused"; daysLeft: number; endsAt: string; autoRenew: boolean; hasCard: boolean };
+  plan: { id: string; name: string; standing: "active" | "grace"; daysLeft: number; endsAt: string | null; interval: "year" | "month"; autoRenew: boolean; hasCard: boolean };
   ai: { credits: number; keyHint: string | null; platformAi: boolean; packs: Array<{ id: string; credits: number; cents: number; label: string }>; history: Array<{ delta: number; balance: number; reason: string; at: string }> };
   emailsOptOut: boolean;
   payments: boolean;
-  orders: Array<{ id: string; kind: string; plan: string | null; term_years: number | null; credits: number | null; amount_cents: number; status: string; created_at: string }>;
+  orders: Array<{ id: string; kind: string; plan: string | null; term_years: number | null; term_months: number | null; credits: number | null; amount_cents: number; status: string; created_at: string }>;
 }
 
 const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
@@ -29,21 +30,19 @@ function Heading({ id, title, children }: { id: string; title: string; children?
 function Plan({ billing, reload }: { billing: Billing; reload: () => void }) {
   const { plan } = billing;
   const [busy, setBusy] = useState(false);
-  const line = {
-    trial: `Free trial, ${plan.daysLeft} day${plan.daysLeft === 1 ? "" : "s"} left. Everything in Pro is switched on.`,
-    active: `${plan.name} plan until ${date(plan.endsAt)}.`,
-    grace: `Your ${plan.id === "trial" ? "trial" : `${plan.name} plan`} has ended. Your site stays online for ${plan.daysLeft} more day${plan.daysLeft === 1 ? "" : "s"}.`,
-    paused: "Your site is resting. Choose a plan to bring it back; everything is saved.",
-  }[plan.standing];
+  const pro = plan.id === "pro";
+  const line = !pro ? "Basic, free. One live portfolio with a blog and the Investigator; upgrade to Pro for up to three sites and your own domain."
+    : plan.standing === "grace" ? `Your Pro plan has ended. It keeps working for ${plan.daysLeft} more day${plan.daysLeft === 1 ? "" : "s"}, then your account moves to free Basic. Nothing is deleted.`
+    : `Pro, paid ${plan.interval === "month" ? "monthly" : "yearly"}, until ${date(plan.endsAt!)}.`;
   return <section className="mt-10">
-    <Heading id="plan" title="Plan"><Link href="/pricing" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">{plan.id === "trial" || plan.standing !== "active" ? "Choose a plan" : "Change plan"}</Link></Heading>
+    <Heading id="plan" title="Plan"><Link href="/pricing" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">{!pro ? "See Pro" : plan.standing !== "active" ? "Renew Pro" : "Plans"}</Link></Heading>
     <p className="mt-4 text-[1.05rem]">{line}</p>
-    {plan.id !== "trial" && plan.hasCard && <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft">
+    {pro && plan.hasCard && <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft">
       <input type="checkbox" checked={plan.autoRenew} disabled={busy} onChange={async (event) => { setBusy(true); await json("/api/account/settings", { method: "PUT", body: JSON.stringify({ autoRenew: event.target.checked }) }).catch(() => undefined); setBusy(false); reload(); }} className="mt-1" />
-      <span>Renew automatically for one year at a time with the card you used. We email you two weeks before.</span>
+      <span>{plan.interval === "month" ? "Renew automatically each month with the card you used." : "Renew automatically each year with the card you used. We email you two weeks before."}</span>
     </label>}
     {billing.orders.length > 0 && <details className="mt-5 text-[0.92rem]"><summary className="cursor-pointer text-ink-soft">Payment history</summary>
-      <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule">{billing.orders.map((order) => <li key={order.id} className="flex justify-between gap-4 px-4 py-2.5"><span>{order.kind === "credits" ? `${order.credits?.toLocaleString("en")} credits` : `${order.plan?.[0]?.toUpperCase()}${order.plan?.slice(1)} ${order.kind === "renewal" ? "renewal" : `· ${order.term_years} yr`}`}<span className="ml-2 text-ink-faint">{date(order.created_at)}</span></span><span className={order.status === "paid" ? "" : "text-[color:var(--destructive)]"}>{usd(order.amount_cents)}{order.status !== "paid" && ` · ${order.status}`}</span></li>)}</ul></details>}
+      <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule">{billing.orders.map((order) => <li key={order.id} className="flex justify-between gap-4 px-4 py-2.5"><span>{order.kind === "credits" ? `${order.credits?.toLocaleString("en")} credits` : `${order.plan?.[0]?.toUpperCase()}${order.plan?.slice(1)} ${order.kind === "renewal" ? "renewal" : `· ${order.term_months === 1 ? "1 month" : order.term_months ? `${order.term_months / 12} yr` : `${order.term_years} yr`}`}`}<span className="ml-2 text-ink-faint">{date(order.created_at)}</span></span><span className={order.status === "paid" ? "" : "text-[color:var(--destructive)]"}>{usd(order.amount_cents)}{order.status !== "paid" && ` · ${order.status}`}</span></li>)}</ul></details>}
   </section>;
 }
 
@@ -77,13 +76,14 @@ function Ai({ billing, reload }: { billing: Billing; reload: () => void }) {
   const buy = (pack: string) => run(pack, async () => { const body = await json("/api/billing/checkout", { method: "POST", body: JSON.stringify({ credits: pack }) }); window.location.assign(body.url); });
   return <section className="mt-12">
     <Heading id="ai" title="AI help" />
-    <p className="mt-4 max-w-[40rem] text-[0.98rem] leading-relaxed text-ink-soft">The AI assistant, imports and career research are paid separately from your plan, so you only pay for what you use. Buy credits, or connect your own Claude API key and pay Anthropic directly.</p>
+    <p className="mt-4 max-w-[40rem] text-[0.98rem] leading-relaxed text-ink-soft">The AI assistant, imports and the Investigator are paid separately from your plan and cost the same on every plan. Buy credits (sold at what the AI costs us plus 5%), or connect your own Claude API key and pay Anthropic directly.</p>
     <div className="mt-6 grid gap-5 md:grid-cols-2">
       <div className="rounded-2xl border border-rule bg-white/50 p-5">
         <p className="text-[0.85rem] text-ink-soft">Credits</p>
         <p className="font-display text-[3rem] leading-none">{ai.credits.toLocaleString("en")}</p>
-        <p className="mt-2 text-[0.85rem] text-ink-faint">A rewrite costs about 5–10 credits; a full career search about 30–60.{!ai.platformAi && " (Credits aren’t switched on for this site yet.)"}</p>
-        {billing.payments && ai.platformAi && <div className="mt-4 flex flex-wrap gap-2">{ai.packs.map((pack) => <button key={pack.id} type="button" disabled={busy !== null} onClick={() => void buy(pack.id)} className="inline-flex items-center gap-1.5 rounded-full border border-ink/30 px-3 py-1.5 text-[0.88rem] hover:border-ink disabled:opacity-50">{busy === pack.id && <Loader2 size={13} className="animate-spin" />}{pack.label} · {usd(pack.cents)}</button>)}</div>}
+        <p className="mt-2 text-[0.85rem] text-ink-faint">A rewrite costs about 3–7 credits; an Investigator check about 20–60.{!ai.platformAi && " (Credits aren’t switched on for this site yet.)"}</p>
+        {billing.payments && ai.platformAi && <div className="mt-4 flex flex-wrap gap-2">{ai.packs.map((pack) => <button key={pack.id} type="button" disabled={busy !== null} onClick={() => void buy(pack.id)} className="inline-flex items-center gap-1.5 rounded-full border border-ink/30 px-3 py-1.5 text-[0.88rem] hover:border-ink disabled:opacity-50">{busy === pack.id && <Loader2 size={13} className="animate-spin" />}{pack.label} · {usd(pack.cents)} + {usd(cardFeeCents(pack.cents))} card fee</button>)}</div>}
+        {billing.payments && ai.platformAi && <p className="mt-2 text-[0.8rem] text-ink-faint">Credits never expire. Unused credits can be refunded, minus the card fee, which Stripe keeps.</p>}
         {ai.history.length > 0 && <details className="mt-4 text-[0.85rem]"><summary className="cursor-pointer text-ink-soft">Recent use</summary><ul className="mt-2 space-y-1">{ai.history.map((entry, index) => <li key={index} className="flex justify-between gap-3"><span>{entry.reason}<span className="ml-2 text-ink-faint">{date(entry.at)}</span></span><span className={entry.delta > 0 ? "text-emerald-800" : ""}>{entry.delta > 0 ? "+" : ""}{entry.delta}</span></li>)}</ul></details>}
       </div>
       <div className="rounded-2xl border border-rule bg-white/50 p-5">
@@ -108,7 +108,7 @@ function Emails({ billing, reload }: { billing: Billing; reload: () => void }) {
   return <section className="mt-12">
     <Heading id="emails" title="Emails" />
     <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft"><input type="checkbox" checked={!billing.emailsOptOut} onChange={async (event) => { await json("/api/account/settings", { method: "PUT", body: JSON.stringify({ emailsOptOut: !event.target.checked }) }).catch(() => undefined); reload(); }} className="mt-1" />
-      <span>Send me reminders about my trial and plan, and a weekly note when there are updates for my portfolio. Receipts are always sent.</span></label>
+      <span>Send me reminders about my plan, and a weekly note when there are updates for my portfolio. Receipts are always sent.</span></label>
   </section>;
 }
 
@@ -164,7 +164,7 @@ export default function AccountPage() {
       {billing ? <Plan billing={billing} reload={load} /> : <p className="mt-10 text-sm text-ink-soft">Loading your plan…</p>}
       <Portfolios />
       {billing && <Ai billing={billing} reload={load} />}
-      <section className="mt-12"><Heading id="updates" title="The Investigator"><Link href="/account/investigator" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">Set it up</Link></Heading><p className="mt-4 text-[0.95rem] text-ink-soft">Keeps your website up to date with your career. It checks your own profiles on the schedule you choose (monthly on Pro, as often as daily on Premium), finds new jobs, talks, awards and articles, and either asks you first or updates your site for you.</p></section>
+      <section className="mt-12"><Heading id="updates" title="The Investigator"><Link href="/account/investigator" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">Set it up</Link></Heading><p className="mt-4 text-[0.95rem] text-ink-soft">Keeps your website up to date with your career. It checks your own profiles on the schedule you choose (any schedule, on every plan; your first check is free), finds new jobs, talks, awards and articles, and either asks you first or updates your site for you.</p></section>
       {billing && <Emails billing={billing} reload={load} />}
       <section className="mt-12"><Heading id="domains" title="Domains" /><p className="mt-4 text-[0.95rem] text-ink-soft">See when the domains you bought here expire, and renew them. <Link href="/account/domains" className="text-ink underline underline-offset-4">Your domains</Link></p></section>
       <section className="mt-12"><Heading id="help" title="Help" /><p className="mt-4 text-[0.95rem] text-ink-soft">Questions about billing, domains or anything else? <Link href="/community/support" className="text-ink underline underline-offset-4">Open a support request</Link>; a person replies, usually within a working day.</p></section>
