@@ -12,7 +12,11 @@ export type SaveState =
   | { kind: "cloud"; at: number }
   | { kind: "error"; message: string }
   /** Another tab or device saved a newer version; the user chooses which to keep. */
-  | { kind: "conflict" };
+  | { kind: "conflict" }
+  /** The plan has no room for another portfolio; the user can move their content to this design. */
+  | { kind: "full" };
+
+export interface Room { canStart: boolean; max: number; planName: string; others: { templateId: string; name: string; switchable: boolean }[] }
 
 export interface PublishInfo { slug: string | null; publishedAt: string | null; hasUnpublishedChanges: boolean }
 
@@ -56,6 +60,9 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
   const [loaded, setLoaded] = useState(false);
   const [save, setSave] = useState<SaveState>({ kind: "loading" });
   const [publishInfo, setPublishInfo] = useState<PublishInfo>({ slug: null, publishedAt: null, hasUnpublishedChanges: false });
+  const [room, setRoom] = useState<Room | null>(null);
+  /** True while the plan has no room for this portfolio: edits stay on this device only. */
+  const full = useRef(false);
   const skipNextSave = useRef(true);
   /** The account version this editor last loaded or saved; sent with every save. */
   const serverVersion = useRef<number | null>(null);
@@ -82,7 +89,9 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
       let localIsNewer = Boolean(chosen);
       if (signedIn) {
         try {
-          const { draft } = await request<{ draft: RemoteDraft | null }>(`/api/portfolios/${templateId}`);
+          const { draft, room: plan } = await request<{ draft: RemoteDraft | null; room?: Room }>(`/api/portfolios/${templateId}`);
+          if (plan) setRoom(plan);
+          if (!draft && plan && !plan.canStart) full.current = true;
           if (draft) {
             serverVersion.current = draft.version;
             setPublishInfo(publishInfoOf(draft));
@@ -100,7 +109,7 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
       if (chosen) applyRef.current(chosen.content, chosen.theme);
       // Upload a newer browser copy straight away; otherwise wait for the first edit.
       skipNextSave.current = !(signedIn && localIsNewer);
-      setSave(signedIn ? { kind: "cloud", at: Date.now() } : { kind: "local" });
+      setSave(full.current ? { kind: "full" } : signedIn ? { kind: "cloud", at: Date.now() } : { kind: "local" });
       setLoaded(true);
     })();
     return () => { cancelled = true; };
@@ -109,7 +118,7 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
   const saveToCloud = useCallback(async (force = false) => {
     window.clearTimeout(cloudTimer.current);
     cloudTimer.current = undefined;
-    if (conflict.current && !force) return false;
+    if ((conflict.current && !force) || full.current) return false;
     setSave({ kind: "saving" });
     try {
       const { draft } = await request<{ draft: RemoteDraft }>(`/api/portfolios/${templateId}`, {
@@ -126,6 +135,10 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
       if (status === 409 && body?.draft) {
         conflict.current = body.draft;
         setSave({ kind: "conflict" });
+      } else if (status === 402 && (body as { room?: Room } | undefined)?.room) {
+        full.current = true;
+        setRoom((body as { room: Room }).room);
+        setSave({ kind: "full" });
       } else {
         const message = (error as Error).message;
         setSave({ kind: "error", message: /this device/i.test(message) ? message : `${message} Your changes are still saved on this device.` });
@@ -155,6 +168,7 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
     const ok = writeDraft(keys, latest.current.content, latest.current.theme);
     if (!ok) setSave({ kind: "error", message: "This browser is out of storage space. Remove or replace large images." });
     else if (!signedIn) setSave({ kind: "local" });
+    else if (full.current) setSave({ kind: "full" });
     return ok;
   }, [keys, signedIn]);
 
@@ -164,7 +178,7 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
     window.clearTimeout(localTimer.current);
     localTimer.current = window.setTimeout(() => {
       writeLocal();
-      if (!signedIn || conflict.current) return;
+      if (!signedIn || conflict.current || full.current) return;
       setSave({ kind: "saving" });
       window.clearTimeout(cloudTimer.current);
       cloudTimer.current = window.setTimeout(() => void saveToCloud(), CLOUD_DELAY_MS);
@@ -179,7 +193,7 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
       if (document.visibilityState !== "hidden") return;
       const pending = Boolean(localTimer.current || cloudTimer.current);
       if (localTimer.current) writeLocal();
-      if (!pending || !signedIn || conflict.current) return;
+      if (!pending || !signedIn || conflict.current || full.current) return;
       window.clearTimeout(cloudTimer.current);
       cloudTimer.current = undefined;
       void fetch(`/api/portfolios/${templateId}`, { method: "PUT", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: latest.current.content, theme: latest.current.theme ?? null, baseVersion: serverVersion.current }) });
@@ -188,7 +202,14 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
     return () => document.removeEventListener("visibilitychange", flush);
   }, [signedIn, templateId, writeLocal]);
 
+  /** Moves the owner's portfolio from another design to this one, then reloads with it. */
+  const moveHere = useCallback(async (from: string) => {
+    await request(`/api/portfolios/${templateId}/switch`, { method: "POST", body: JSON.stringify({ from }) });
+    window.location.reload();
+  }, [templateId]);
+
   const publish = useCallback(async (slug: string) => {
+    if (full.current) throw new Error("Move your content to this design first.");
     if (conflict.current) throw new Error("Choose which version to keep before publishing.");
     if (!(await saveToCloud())) throw new Error("Save your portfolio before publishing.");
     const result = await request<{ draft: RemoteDraft; url: string }>(`/api/portfolios/${templateId}/publish`, { method: "POST", body: JSON.stringify({ slug }) });
@@ -204,5 +225,5 @@ export function usePortfolioPersistence<T>({ templateId, content, theme, apply, 
   /** Write now without waiting for the debounce (used before opening the full preview). */
   const flushLocal = writeLocal;
 
-  return { loaded, save, signedIn, sessionLoading: status === "loading", publishInfo, publish, unpublish, saveToCloud, flushLocal, loadOtherVersion, keepThisVersion };
+  return { loaded, save, signedIn, sessionLoading: status === "loading", publishInfo, publish, unpublish, saveToCloud, flushLocal, loadOtherVersion, keepThisVersion, room, moveHere };
 }

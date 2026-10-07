@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 };
 
 const FEATURES: Record<PlanCard["id"], string[]> = {
-  basic: ["Every template, every colour and type option", "One live portfolio at your free address", "A blog on your portfolio", "The Investigator, on any schedule you choose", "Unlimited edits, saved as you type", `${PLANS.basic.storageMb} MB of images`, "A small “Made with Formora” link"],
-  pro: ["Everything in Basic", "Up to three live portfolios", "Your own domain, connected for you, with HTTPS", "No Formora link on your site", `${PLANS.pro.storageMb / 1000} GB of images`],
+  basic: ["Every template, every colour and type option", "One portfolio at your free address; switch design any time and keep your content", "A blog on your portfolio", "The Investigator, on any schedule you choose", "Unlimited edits, saved as you type", `${PLANS.basic.storageMb} MB of images`, "A small “Made with Formora” link"],
+  pro: ["Everything in Basic", "Up to three portfolios side by side, all live", "Your own domain, connected for you, with HTTPS", "No Formora link on your site", `${PLANS.pro.storageMb / 1000} GB of images`],
 };
 
 const FAQ: Array<[string, string]> = [

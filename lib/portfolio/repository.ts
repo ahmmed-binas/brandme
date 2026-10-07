@@ -2,14 +2,16 @@ import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import type { CurrentUser } from "@/utils/user-account";
 import type { TemplateId } from "@/lib/templates/types";
-import type { ColorTheme } from "./schema";
+import { validateContent, type ColorTheme } from "./schema";
 import { standingOf } from "@/lib/plans";
 
 /**
  * Server-only data access for portfolios.
  *
  * Business rules:
- * - A user has at most one portfolio per template (the editor is per template).
+ * - A user has at most one portfolio per template (the editor is per template),
+ *   and at most as many portfolios as their plan allows (Basic: one). To use
+ *   another design they move their content to it (switchTemplate).
  * - Editing changes the draft (`content`). Visitors only ever see the snapshot
  *   taken at publish time (`published_content`), so half-finished edits never go live.
  * - The number of simultaneously published portfolios is limited by plan. If
@@ -67,7 +69,30 @@ export async function listDrafts(ownerId: string): Promise<PortfolioDraft[]> {
   return result.rows.map(toDraft);
 }
 
-export type SaveResult = { ok: true; draft: PortfolioDraft } | { ok: false; conflict: PortfolioDraft };
+export type SaveResult = { ok: true; draft: PortfolioDraft } | { ok: false; conflict: PortfolioDraft } | { ok: false; full: true };
+
+export interface Room {
+  /** Whether a new portfolio can be started with this template. */
+  canStart: boolean;
+  max: number;
+  planName: string;
+  /** The owner's other portfolios, and whether their content fits this template. */
+  others: { templateId: TemplateId; name: string; switchable: boolean }[];
+}
+
+/** What the owner's plan leaves room for, seen from one template's editor. */
+export async function roomFor(user: CurrentUser, templateId: TemplateId): Promise<Room> {
+  await ensureSchema();
+  const rows = await db.query<{ template_id: TemplateId; content: Record<string, unknown> }>("SELECT template_id, content FROM portfolios WHERE owner_id = $1 ORDER BY updated_at DESC", [user.id]);
+  const others = rows.rows.filter((row) => row.template_id !== templateId);
+  const has = rows.rows.length > others.length;
+  return {
+    canStart: has || rows.rows.length < user.plan.portfolios,
+    max: user.plan.portfolios,
+    planName: user.plan.name,
+    others: others.map((row) => ({ templateId: row.template_id, name: String(row.content.name ?? (row.content.personal as { name?: string } | undefined)?.name ?? ""), switchable: validateContent(templateId, row.content).ok })),
+  };
+}
 
 /**
  * Saves a draft with optimistic locking. `baseVersion` is the version the
@@ -75,8 +100,12 @@ export type SaveResult = { ok: true; draft: PortfolioDraft } | { ok: false; conf
  * or device saved since), nothing is written and the newer draft is returned
  * so the user can choose. `force` overwrites after the user chose to.
  */
-export async function saveDraft(ownerId: string, templateId: TemplateId, content: Record<string, unknown>, theme: ColorTheme | null, baseVersion: number | null, force = false): Promise<SaveResult> {
+export async function saveDraft(ownerId: string, templateId: TemplateId, content: Record<string, unknown>, theme: ColorTheme | null, baseVersion: number | null, force = false, maxPortfolios = Infinity): Promise<SaveResult> {
   await ensureSchema();
+  if (Number.isFinite(maxPortfolios)) {
+    const owned = await db.query<{ template_id: string }>("SELECT template_id FROM portfolios WHERE owner_id = $1", [ownerId]);
+    if (!owned.rows.some((row) => row.template_id === templateId) && owned.rows.length >= maxPortfolios) return { ok: false, full: true };
+  }
   const result = await db.query(
     `INSERT INTO portfolios (owner_id, template_id, content, theme) VALUES ($1, $2, $3, $4)
      ON CONFLICT (owner_id, template_id) DO UPDATE
@@ -87,6 +116,43 @@ export async function saveDraft(ownerId: string, templateId: TemplateId, content
   );
   const draft = (await getDraft(ownerId, templateId))!;
   return result.rowCount ? { ok: true, draft } : { ok: false, conflict: draft };
+}
+
+export type SwitchResult = { ok: true; draft: PortfolioDraft } | { ok: false; status: 404 | 409 | 422; error: string };
+
+/**
+ * Moves a portfolio to another design: the same content, address, blog posts,
+ * domain and Investigator settings, now shown with the new template. The old
+ * design's own settings (its colour palette) are dropped. If the portfolio is
+ * published, the live site shows the new design straight away.
+ */
+export async function switchTemplate(ownerId: string, from: TemplateId, to: TemplateId): Promise<SwitchResult> {
+  await ensureSchema();
+  if (from === to) return { ok: false, status: 409, error: "That’s already this design." };
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const source = (await client.query<{ id: string; content: Record<string, unknown>; published_content: Record<string, unknown> | null }>(
+      "SELECT id, content, published_content FROM portfolios WHERE owner_id = $1 AND template_id = $2 FOR UPDATE", [ownerId, from])).rows[0];
+    if (!source) { await client.query("ROLLBACK"); return { ok: false, status: 404, error: "We couldn’t find that portfolio." }; }
+    if ((await client.query("SELECT 1 FROM portfolios WHERE owner_id = $1 AND template_id = $2", [ownerId, to])).rowCount) { await client.query("ROLLBACK"); return { ok: false, status: 409, error: "You already have a portfolio with this design." }; }
+    const content = validateContent(to, source.content);
+    const published = source.published_content ? validateContent(to, source.published_content) : null;
+    if (!content.ok || (published && !published.ok)) { await client.query("ROLLBACK"); return { ok: false, status: 422, error: "This design stores content differently, so it can’t be moved automatically. Copy your words across by hand, or choose another design." }; }
+    await client.query(
+      `UPDATE portfolios SET template_id = $2, content = $3, theme = NULL, published_content = $4, published_theme = NULL, version = version + 1, updated_at = NOW() WHERE id = $1`,
+      [source.id, to, JSON.stringify(content.content), published?.ok ? JSON.stringify(published.content) : null],
+    );
+    for (const table of ["portfolio_posts", "custom_domains", "domain_orders", "investigator_runs"]) await client.query(`UPDATE ${table} SET template_id = $3 WHERE owner_id = $1 AND template_id = $2`, [ownerId, from, to]);
+    await client.query("UPDATE investigator_settings SET template_id = $3 WHERE owner_id = $1 AND template_id = $2", [ownerId, from, to]);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+  return { ok: true, draft: (await getDraft(ownerId, to))! };
 }
 
 export type PublishResult =

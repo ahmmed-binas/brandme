@@ -11,7 +11,7 @@ import { mergeIntoStandard } from "@/lib/import/profile";
 import { usePortfolioPersistence } from "../usePortfolioPersistence";
 import { useUndoableState } from "../useUndoableState";
 import { AssistantPanel } from "../AssistantPanel";
-import { ConflictBanner, PublishDialog, SaveStatus } from "../EditorControls";
+import { ConflictBanner, SwitchDesignBanner, PublishDialog, SaveStatus } from "../EditorControls";
 import { Field, ImageField, ListEditor, Section, TagsField, TextArea, type ListSpec } from "./fields";
 import { TrialBanner } from "./TrialBanner";
 import { SuggestionsPanel } from "./SuggestionsPanel";
@@ -192,6 +192,7 @@ export default function StudioEditor({ template, sample: initialSample, role: in
     <TrialBanner signedIn={persistence.signedIn} />
     {persistence.save.kind === "error" && <p className="shrink-0 bg-amber-50 px-4 py-2 text-[12px] text-amber-900" role="alert">{persistence.save.message}</p>}
     {persistence.save.kind === "conflict" && <ConflictBanner onLoadOther={persistence.loadOtherVersion} onKeepMine={() => void persistence.keepThisVersion()} />}
+    {persistence.save.kind === "full" && persistence.room && <SwitchDesignBanner room={persistence.room} moveHere={persistence.moveHere} templateName={template.name} />}
 
     <nav className="grid shrink-0 grid-cols-2 border-b border-rule bg-paper text-[13px] lg:hidden" aria-label="Editor view">{(["edit", "preview"] as const).map((view) => <button key={view} type="button" onClick={() => setMobileView(view)} aria-pressed={mobileView === view} className={`py-2.5 ${mobileView === view ? "border-b-2 border-ink font-semibold" : "text-ink-soft"}`}>{view === "edit" ? "Edit" : "Preview"}</button>)}</nav>
 

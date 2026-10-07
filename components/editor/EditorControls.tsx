@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, Check, Cloud, CloudOff, Copy, ExternalLink, Globe, HardDrive, Loader2, X } from "lucide-react";
-import type { PublishInfo, SaveState } from "./usePortfolioPersistence";
+import type { PublishInfo, Room, SaveState } from "./usePortfolioPersistence";
+import { getTemplate } from "@/lib/templates/catalog";
 import { normaliseSlug, slugError } from "@/lib/portfolio/schema";
 import { DomainPanel } from "./DomainPanel";
 
@@ -16,8 +17,34 @@ export function SaveStatus({ save, signedIn }: { save: SaveState; signedIn: bool
     cloud: { icon: <Cloud size={14} />, text: "Saved to your account", tone: "text-emerald-700" },
     error: { icon: <CloudOff size={14} />, text: "Not saved to your account", tone: "text-amber-700" },
     conflict: { icon: <AlertCircle size={14} />, text: "Edited elsewhere", tone: "text-amber-700" },
+    full: { icon: <HardDrive size={14} />, text: "Trying this design (saved on this device)", tone: "text-amber-700" },
   }[save.kind];
   return <span role="status" title={save.kind === "error" ? save.message : undefined} className={`inline-flex items-center gap-1.5 text-xs font-semibold ${view.tone}`}>{view.icon}<span className="hidden md:inline">{view.text}</span></span>;
+}
+
+/**
+ * Shown when the plan already holds as many portfolios as it allows (Basic: one).
+ * The owner can move one of them to this design: same words, photos, posts and
+ * address, with this design's look. Until then, edits here stay on this device.
+ */
+export function SwitchDesignBanner({ room, moveHere, templateName }: { room: Room; moveHere: (from: string) => Promise<void>; templateName: string }) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const label = (id: string) => getTemplate(id)?.name ?? id;
+  const move = async (from: string) => {
+    if (!window.confirm(`Move your portfolio from ${label(from)} to ${templateName}? Your words, photos, blog posts, address and domain come with you. ${label(from)}’s colour choices are replaced by ${templateName}’s, and if your site is published it shows the new design straight away.`)) return;
+    setBusy(from); setError(null);
+    try { await moveHere(from); } catch (caught) { setError((caught as Error).message); setBusy(null); }
+  };
+  return <div role="status" className="shrink-0 bg-violet-50 px-4 py-2.5 text-xs text-violet-950">
+    <p><b>The {room.planName} plan keeps {room.max === 1 ? "one portfolio" : `${room.max} portfolios`}.</b> You’re trying {templateName}; changes here are saved on this device only. To use this design, move your content here.{room.max === 1 && <> Or <Link href="/pricing" className="font-bold underline">upgrade to Pro</Link> for up to three.</>}</p>
+    <div className="mt-2 flex flex-wrap gap-2">{room.others.map((other) => other.switchable
+      ? <button key={other.templateId} type="button" disabled={busy !== null} onClick={() => void move(other.templateId)} className="inline-flex items-center gap-1.5 rounded-lg bg-violet-700 px-2.5 py-1 font-bold text-white disabled:opacity-60">{busy === other.templateId && <Loader2 size={12} className="animate-spin" />}Move {other.name ? `${other.name}’s portfolio` : "my portfolio"} from {label(other.templateId)}</button>
+      : <span key={other.templateId} className="rounded-lg border border-violet-200 bg-white px-2.5 py-1">{label(other.templateId)} stores content differently, so it can’t be moved here. <Link href={`/editor/${other.templateId}`} className="font-bold underline">Open it</Link></span>)}
+      {room.others.filter((other) => other.switchable).map((other) => <Link key={`open-${other.templateId}`} href={`/editor/${other.templateId}`} className="rounded-lg border border-violet-300 bg-white px-2.5 py-1 font-bold">Back to {label(other.templateId)}</Link>)}
+    </div>
+    {error && <p role="alert" className="mt-1.5 text-red-700">{error}</p>}
+  </div>;
 }
 
 /** Shown when another tab or device saved this portfolio more recently. */

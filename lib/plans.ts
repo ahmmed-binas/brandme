@@ -22,6 +22,8 @@ export interface PlanLimits {
   summary: string;
   /** Price in US cents per billing interval on offer; empty for a free plan. */
   prices: Partial<Record<BillingInterval, number>>;
+  /** Portfolios (sets of content) an owner can keep. Basic keeps one: switching design moves it. */
+  portfolios: number;
   /** Portfolios that can be live at the same time. */
   publishedPortfolios: number;
   /** Cap on AI requests per day, whatever pays for them, so nobody can hammer the service. */
@@ -45,12 +47,12 @@ export const WELCOME_CREDITS = 60;
 export const PLANS: Record<PlanId, PlanLimits> = {
   basic: {
     id: "basic", name: "Basic", summary: "Your portfolio online with a blog, free for as long as you like.", prices: {},
-    publishedPortfolios: 1, aiEditsPerDay: 30, showsBranding: true, ownDomain: false,
+    portfolios: 1, publishedPortfolios: 1, aiEditsPerDay: 30, showsBranding: true, ownDomain: false,
     storageMb: 100, blog: true, autoSync: true,
   },
   pro: {
     id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 2400, month: 250 },
-    publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
+    portfolios: 3, publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
     storageMb: 1000, blog: true, autoSync: true,
   },
 };
