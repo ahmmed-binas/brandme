@@ -70,7 +70,7 @@ export function SuggestionsPanel({ signedIn, templateId, content, onApply }: { s
 
   const scheduled = state.features.autoSync || state.features.researchEveryDays;
   return <section className="border-b border-rule p-4">
-    <Link href="/account/investigator" className="mb-4 block rounded-xl bg-ink p-4 text-paper hover:bg-ink/90"><span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-paper/60">New</span><span className="mt-1 block font-display text-[1.15rem] leading-tight">The Investigator</span><span className="mt-1 block text-[12.5px] leading-relaxed text-paper/75">Give it your profiles and it keeps this site up to date with your career, on the schedule you choose. Set it up →</span></Link>
+    <Link href="/account/investigator" className="mb-4 block rounded-xl bg-ink p-4 text-paper hover:bg-ink/90"><span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-paper/60">New</span><span className="mt-1 block font-display text-[1.15rem] leading-tight">Inspector Iqbal, the Investigator</span><span className="mt-1 block text-[12.5px] leading-relaxed text-paper/75">Give him your profiles and he keeps this site up to date with your career, on the schedule you choose. Your first check is free. Set it up →</span></Link>
     <h3 className="font-display text-[1.25rem] leading-tight">Keep it up to date</h3>
     <p className="mt-1 text-[12.5px] leading-relaxed text-ink-soft">We look for new work and news about you. You decide what goes on your site.</p>
 

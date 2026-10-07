@@ -498,6 +498,21 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "015_agent_comments",
+  statements: [
+    // Comments on an agent's page, such as Inspector Iqbal's.
+    `CREATE TABLE IF NOT EXISTS agent_comments (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      agent TEXT NOT NULL,
+      author_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      body TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS agent_comments_agent ON agent_comments (agent, created_at DESC)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

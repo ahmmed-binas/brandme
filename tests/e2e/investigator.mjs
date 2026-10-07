@@ -72,7 +72,7 @@ log("AI used web_fetch + web_search:", (await (await fetch("http://localhost:401
 await page.getByText("Sources checked").first().click();
 log("sources reported:", (await page.locator("details li").allTextContents()).map((text) => text.replace(/\s+/g, " ").trim()).join(" / "));
 log("site unchanged in ask mode:", !(await (await fetch(`${BASE}/p/ada-investigator`)).text()).includes("Head of Platform"));
-log("email sent:", serverLog().includes("The Investigator found"));
+log("email sent:", serverLog().includes("Inspector Iqbal found"));
 log("second check within 12h refused:", (await api("/api/investigator/run", "POST")).status);
 
 // 3) Automatic mode: confident updates go live, less certain ones wait; undo puts it back.
@@ -100,7 +100,7 @@ log("undo twice refused:", (await api(`/api/investigator/runs/${sql(`SELECT id F
 await page.goto(`${BASE}/editor/brief`);
 await page.getByRole("tab", { name: "AI" }).click();
 await page.getByText("Found by the Investigator").first().waitFor({ timeout: 15000 }).catch(() => undefined);
-log("editor AI tab: Investigator card:", await page.getByRole("link", { name: /The Investigator/ }).isVisible(), "| labelled updates:", await page.getByText("Found by the Investigator").count());
+log("editor AI tab: Investigator card:", await page.getByRole("link", { name: /Inspector Iqbal/ }).isVisible(), "| labelled updates:", await page.getByText("Found by the Investigator").count());
 
 // 5) The hourly schedule runs due checks.
 sql(`DELETE FROM profile_suggestions WHERE owner_id = '${userId}'`);

@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
 import { CHECK_CREDITS_ESTIMATE } from "@/lib/investigator/schedule";
+import { InspectorAvatar } from "@/components/agents/InspectorAvatar";
+import { AgentComments } from "@/components/agents/AgentComments";
+import { RateTemplate } from "@/components/templates/Rating";
+import { ratingSummary } from "@/lib/templates/ratings";
 import { brand } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "The Investigator: your website, kept up to date",
-  description: `The ${brand.name} Investigator checks your own public profiles on the schedule you choose, double-checks what it finds, and keeps your website up to date. Your first check is free.`,
+  title: "Inspector Iqbal, the Investigator: your website, kept up to date",
+  description: `Inspector Iqbal, the ${brand.name} Investigator, checks your own public profiles on the schedule you choose, double-checks what it finds, and keeps your website up to date. Your first check is free.`,
   alternates: { canonical: "/agents/investigator" },
 };
 
@@ -34,12 +38,23 @@ const FAQ: Array<[string, string]> = [
   ["Does it update my PDF CV?", "No, only your website."],
 ];
 
-export default function InvestigatorPage() {
+// Shows the live star rating.
+export const dynamic = "force-dynamic";
+
+export default async function InvestigatorPage() {
+  const rating = await ratingSummary("agent:investigator").catch(() => ({ average: null, count: 0 }));
   return <div className="mx-auto max-w-[1100px] px-5 pb-24 pt-14 sm:px-8 lg:pt-20">
     <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft"><Link href="/agents" className="hover:text-ink">Agents</Link> / The Investigator</p>
-    <h1 className="mt-4 max-w-[18ch] font-display text-[clamp(2.4rem,5.4vw,4.4rem)] leading-[1] tracking-[-0.02em]">It notices your news, <em className="font-[300] text-signal">so your site does too.</em></h1>
-    <p className="mt-6 max-w-[40rem] text-[1.08rem] leading-[1.7] text-ink-soft">People rarely update their portfolio by hand. The Investigator watches your own public profiles, finds what’s new in your working life, checks it, and brings it to your website. Your first check is free, on every plan.</p>
-    <div className="mt-8 flex flex-wrap gap-3"><Link href="/account/investigator" className="rounded-full bg-ink px-6 py-3 text-paper hover:bg-signal hover:text-signal-ink">Try your free check</Link><Link href="/pricing" className="rounded-full border border-rule px-6 py-3 hover:border-ink">See pricing</Link></div>
+    <div className="mt-6 grid items-center gap-10 lg:grid-cols-[1fr_auto]">
+      <div>
+        <p className="font-display text-[1.4rem] italic text-ink-soft">Meet Inspector Iqbal.</p>
+        <h1 className="mt-2 max-w-[18ch] font-display text-[clamp(2.4rem,5.4vw,4.4rem)] leading-[1] tracking-[-0.02em]">He notices your news, <em className="font-[300] text-signal">so your site does too.</em></h1>
+        <p className="mt-6 max-w-[40rem] text-[1.08rem] leading-[1.7] text-ink-soft">People rarely update their portfolio by hand. Inspector Iqbal, our Investigator, watches your own public profiles, finds what’s new in your working life, checks it twice, and brings it to your website. Your first check is free, on every plan.</p>
+        <div className="mt-8 flex flex-wrap gap-3"><Link href="/account/investigator" className="rounded-full bg-ink px-6 py-3 text-paper hover:bg-signal hover:text-signal-ink">Let him keep your site up to date</Link><Link href="/pricing" className="rounded-full border border-rule px-6 py-3 hover:border-ink">See pricing</Link></div>
+        <div className="mt-6"><RateTemplate templateId="agent-investigator" initial={rating} endpoint="/api/agents/investigator/rating" returnTo="/agents/investigator" /></div>
+      </div>
+      <InspectorAvatar size={260} className="mx-auto drop-shadow-sm" />
+    </div>
 
     <section className="mt-20 border-t border-rule pt-12">
       <h2 className="font-display text-[2.2rem]">How it works</h2>
@@ -47,14 +62,20 @@ export default function InvestigatorPage() {
     </section>
 
     <section className="mt-20 grid gap-10 rounded-2xl border border-rule p-8 lg:grid-cols-2 lg:p-12">
-      <div><h2 className="font-display text-[2rem] leading-tight">What it never does</h2><p className="mt-3 text-ink-soft">Your data is yours. The Investigator only looks at you, only at what anyone can see without logging in, and only with your say-so.</p></div>
+      <div><h2 className="font-display text-[2rem] leading-tight">What he never does</h2><p className="mt-3 text-ink-soft">Your data is yours. Inspector Iqbal only looks at you, only at what anyone can see without logging in, and only with your say-so.</p></div>
       <ul className="space-y-3">{NEVER.map((line) => <li key={line} className="flex gap-3"><X size={18} className="mt-0.5 shrink-0 text-[color:var(--destructive)]" />{line}</li>)}
-        <li className="flex gap-3"><Check size={18} className="mt-0.5 shrink-0 text-emerald-700" />Tell you which profiles it couldn’t read, and why</li></ul>
+        <li className="flex gap-3"><Check size={18} className="mt-0.5 shrink-0 text-emerald-700" />Tell you which profiles he couldn’t read, and why</li></ul>
     </section>
 
     <section className="mx-auto mt-20 max-w-[48rem]">
       <h2 className="font-display text-[2.2rem] leading-tight">Questions</h2>
       <dl className="mt-8 divide-y divide-rule border-y border-rule">{FAQ.map(([question, answer]) => <div key={question} className="py-6"><dt className="font-medium">{question}</dt><dd className="mt-2 leading-relaxed text-ink-soft">{answer}</dd></div>)}</dl>
+    </section>
+
+    <section className="mx-auto mt-20 max-w-[48rem]" aria-labelledby="comments">
+      <h2 id="comments" className="font-display text-[2.2rem] leading-tight">What people say</h2>
+      <p className="mt-2 text-ink-soft">Rate Inspector Iqbal above, and tell others what he found for you.</p>
+      <div className="mt-6"><AgentComments endpoint="/api/agents/investigator/comments" returnTo="/agents/investigator" /></div>
     </section>
   </div>;
 }

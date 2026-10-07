@@ -44,9 +44,9 @@ export const emails = {
   investigatorReport: (name: string | null, changes: { title: string; applied: boolean }[], unreadable: string[], liveUrl: string | null) => {
     const applied = changes.filter((change) => change.applied);
     const waiting = changes.filter((change) => !change.applied);
-    return layout(applied.length ? `Your website is up to date: ${applied.length} change${applied.length === 1 ? "" : "s"}` : `The Investigator found ${waiting.length} update${waiting.length === 1 ? "" : "s"} for you`, [
+    return layout(applied.length ? `Your website is up to date: ${applied.length} change${applied.length === 1 ? "" : "s"}` : `Inspector Iqbal found ${waiting.length} update${waiting.length === 1 ? "" : "s"} for you`, [
       `Hi ${first(name)},`,
-      applied.length ? `The Investigator checked your profiles and updated your website:` : `The Investigator checked your profiles and found something new. Nothing changes on your site until you add it:`,
+      applied.length ? `Inspector Iqbal, your Investigator, checked your profiles and updated your website:` : `Inspector Iqbal, your Investigator, checked your profiles and found something new. Nothing changes on your site until you add it:`,
       ...[...applied, ...waiting].slice(0, 8).map((change) => `• ${change.title}${change.applied ? "" : " (waiting for you)"}`),
       ...(applied.length && waiting.length ? [`${waiting.length} more ${waiting.length === 1 ? "is" : "are"} waiting for you to check, because we weren’t completely sure.`] : []),
       ...(applied.length ? ["Not right? You can undo any automatic change for 30 days from the Investigator page."] : []),
