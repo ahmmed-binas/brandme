@@ -4,12 +4,14 @@ import type { CSSProperties, ReactNode } from "react";
 import { getTemplate } from "@/lib/templates/catalog";
 import type { StandardContent } from "@/lib/portfolio/schema";
 import { Markdown } from "@/lib/content/markdown";
+import type { PostMedia } from "@/lib/content/media";
+import { PostMediaView } from "@/components/blog/PostMediaView";
 
 /**
  * A portfolio's blog, dressed in the colours and type the owner chose for
  * their portfolio, so /blog feels like part of the same site.
  */
-export interface PublicPost { slug: string; title: string; summary: string; body?: string; cover: string | null; publishedAt: string | null; readMinutes: number }
+export interface PublicPost { slug: string; title: string; summary: string; body?: string; cover: string | null; media?: PostMedia | null; publishedAt: string | null; readMinutes: number }
 
 const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : "");
 
@@ -69,7 +71,7 @@ export function PortfolioBlogPost({ templateId, content, home, post, more }: { t
       <p className="mt-10 text-[0.8rem] uppercase tracking-[0.14em] text-[var(--b-muted)]">{date(post.publishedAt)} · {post.readMinutes} min read</p>
       <h1 className="mt-3 text-[clamp(2.2rem,6vw,3.6rem)] leading-[1.02] tracking-[-0.02em]" style={{ fontFamily: "var(--post-display)" }}>{post.title}</h1>
       {/* eslint-disable-next-line @next/next/no-img-element -- owners' images */}
-      {post.cover && <img src={post.cover} alt="" className="mt-10 w-full rounded-lg object-cover" />}
+      {post.media ? <PostMediaView media={post.media} className="mt-10" /> : post.cover && <img src={post.cover} alt="" className="mt-10 w-full rounded-lg object-cover" />}
       <Markdown source={post.body ?? ""} className="post-body mt-10 [&_a]:text-[var(--b-accent)]" />
       <p className="mt-14 border-t border-[color-mix(in_oklab,var(--b-fg)_15%,transparent)] pt-6 text-[0.95rem] text-[var(--b-muted)]">Written by <a href={home || "/"} className="text-[var(--b-fg)] underline underline-offset-4">{content.name}</a>{content.professional_title ? `, ${content.professional_title.charAt(0).toLowerCase() + content.professional_title.slice(1)}` : ""}.</p>
     </article>

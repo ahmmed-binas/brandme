@@ -15,7 +15,7 @@ export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   if (!owner.user.plan.blog) return jsonError(402, BLOG_UPGRADE);
-  const body = await readJson(request, 80_000);
+  const body = await readJson(request, 110_000);
   if (body instanceof Response) return body;
   try {
     return Response.json({ post: await createPost(owner.user.id, owner.templateId, (body ?? {}) as PostInput) }, { status: 201 });

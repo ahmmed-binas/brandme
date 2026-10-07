@@ -5,10 +5,13 @@ import { ExternalLink, Plus } from "lucide-react";
 import type { JournalPost } from "@/lib/content/journal";
 import { slugify } from "@/lib/content/markdown";
 import { PostBodyEditor } from "./PostBodyEditor";
+import { MediaField } from "./MediaField";
+import { prepareImage } from "@/lib/images";
+import type { PostMedia } from "@/lib/content/media";
 
-interface Draft { originalSlug?: string; slug: string; title: string; description: string; category: string; body: string; published: boolean; origin: JournalPost["origin"] | "new" }
+interface Draft { originalSlug?: string; slug: string; title: string; description: string; category: string; body: string; cover: string | null; media: PostMedia | null; published: boolean; origin: JournalPost["origin"] | "new" }
 
-const toDraft = (post: JournalPost): Draft => ({ originalSlug: post.slug, slug: post.slug, title: post.title, description: post.description, category: post.category, body: post.body, published: post.publishedAt !== null, origin: post.origin });
+const toDraft = (post: JournalPost): Draft => ({ originalSlug: post.slug, slug: post.slug, title: post.title, description: post.description, category: post.category, body: post.body, cover: post.cover, media: post.media, published: post.publishedAt !== null, origin: post.origin });
 const ORIGIN = { "built-in": "Shipped with the site", edited: "Edited", written: "Written here", new: "New" } as const;
 const input = "w-full rounded-lg border border-rule bg-white px-3 py-2 text-[14px] outline-none focus:border-ink";
 
@@ -53,7 +56,7 @@ export default function JournalEditor({ initial, categories }: { initial: Journa
 
   return <div className="mt-10 grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)]">
     <aside>
-      <button type="button" onClick={() => open({ slug: "", title: "", description: "", category: categories[0] ?? "News", body: "", published: false, origin: "new" })} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[0.92rem] font-medium text-paper hover:bg-signal hover:text-signal-ink"><Plus size={16} /> New post</button>
+      <button type="button" onClick={() => open({ slug: "", title: "", description: "", category: categories[0] ?? "News", body: "", cover: null, media: null, published: false, origin: "new" })} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[0.92rem] font-medium text-paper hover:bg-signal hover:text-signal-ink"><Plus size={16} /> New post</button>
       <ul className="mt-5 divide-y divide-rule rounded-xl border border-rule bg-card">{posts.map((post) => <li key={post.slug}>
         <button type="button" onClick={() => open(toDraft(post))} aria-current={draft?.originalSlug === post.slug ? "true" : undefined} className={`block w-full px-4 py-3 text-left hover:bg-ink/[0.03] ${draft?.originalSlug === post.slug ? "bg-ink/[0.05]" : ""}`}>
           <span className="block text-[0.95rem] leading-snug text-ink">{post.title}</span>
@@ -84,6 +87,17 @@ export default function JournalEditor({ initial, categories }: { initial: Journa
       </div>
       <label className="block"><span className="mb-1 flex justify-between text-[12px] font-medium text-ink-soft"><span>Summary <span className="font-normal">(shown in lists and search results)</span></span><span className={draft.description.length > 160 ? "text-amber-700" : "font-normal text-ink-faint"}>{draft.description.length}/160</span></span>
         <textarea value={draft.description} rows={2} maxLength={300} onChange={(event) => change({ description: event.target.value })} className={`${input} resize-y`} /></label>
+      <div className="rounded-xl border border-rule bg-white/60 p-4">
+        <MediaField value={draft.media} onChange={(media) => change({ media })} upload={(file) => prepareImage(file, true)} />
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-rule pt-4 text-[13px]">
+          <span className="font-medium text-ink">Cover picture for lists and sharing</span>
+          {draft.cover && <>
+        {/* eslint-disable-next-line @next/next/no-img-element -- an uploaded cover */}
+        <img src={draft.cover} alt="" className="h-12 w-20 rounded object-cover" /></>}
+          <label className="cursor-pointer rounded-lg border border-dashed border-ink/30 px-3 py-1.5 hover:border-ink">{draft.cover ? "Replace" : "Upload"}<input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={async (event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) { try { change({ cover: await prepareImage(file, true) }); } catch (problem) { setMessage({ kind: "error", text: (problem as Error).message }); } } }} /></label>
+          {draft.cover && <button type="button" onClick={() => change({ cover: null })} className="text-ink-faint hover:text-ink">Remove</button>}
+        </div>
+      </div>
       <PostBodyEditor value={draft.body} onChange={(body) => change({ body })} rows={22} />
     </section> : <div className="grid min-h-[20rem] place-items-center rounded-xl border border-dashed border-rule text-center text-ink-soft"><p>Choose a post to edit, or write a new one.{message && <span className="mt-2 block text-[13px] text-emerald-700">{message.text}</span>}</p></div>}
   </div>;

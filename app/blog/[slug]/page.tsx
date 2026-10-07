@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { formatDate } from "@/components/blog/BlogListing";
 import { getJournalPost, listJournal } from "@/lib/content/journal";
 import { Markdown } from "@/lib/content/markdown";
+import { PostMediaView } from "@/components/blog/PostMediaView";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return { title: "Article not found", robots: { index: false } };
   return {
     title: post.title, description: post.description, alternates: { canonical: `/blog/${post.slug}` },
-    openGraph: { title: post.title, description: post.description, type: "article", publishedTime: post.publishedAt ?? undefined, modifiedTime: post.updatedAt ?? undefined, url: `/blog/${post.slug}` },
+    openGraph: { ...(post.cover ? { images: [post.cover] } : {}), title: post.title, description: post.description, type: "article", publishedTime: post.publishedAt ?? undefined, modifiedTime: post.updatedAt ?? undefined, url: `/blog/${post.slug}` },
   };
 }
 
@@ -42,6 +43,9 @@ export default async function ArticlePage({ params }: Props) {
       <h1 className="mt-5 font-display text-[clamp(2.4rem,5.4vw,4rem)] font-[400] leading-[1.0] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">{post.title}</h1>
       <p className="mt-6 text-[1.2rem] leading-[1.6] text-ink-soft">{post.description}</p>
     </header>
+    {post.media ? <PostMediaView media={post.media} className="mx-auto mt-12 max-w-[56rem]" /> : post.cover && <>
+        {/* eslint-disable-next-line @next/next/no-img-element -- an uploaded cover */}
+        <img src={post.cover} alt="" className="mx-auto mt-12 w-full max-w-[56rem] rounded-lg object-cover" /></>}
     <Markdown source={post.body} className="post-body mx-auto mt-12 max-w-[44rem] border-t border-rule pt-10 text-ink [--post-display:var(--font-display)] [&_a]:text-signal [&_h2]:font-display [&_h3]:font-display" />
 
     <aside className="mx-auto mt-16 max-w-[44rem] rounded-xl border border-rule bg-card p-7">

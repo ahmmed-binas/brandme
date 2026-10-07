@@ -36,12 +36,18 @@ export default async function BlogListing({ page }: { page: number }) {
         <h2 className="mt-4 font-display text-[clamp(2rem,4vw,3.2rem)] leading-[1.02] tracking-[-0.02em] text-ink"><Link href={`/blog/${lead.slug}`} className="hover:text-signal">{lead.title}</Link></h2>
       </div>
       <div className="lg:pt-8">
+        {lead.cover && <Link href={`/blog/${lead.slug}`} className="mb-5 block overflow-hidden rounded-lg">
+        {/* eslint-disable-next-line @next/next/no-img-element -- an uploaded cover */}
+        <img src={lead.cover} alt="" className="aspect-[16/10] w-full object-cover" /></Link>}
         <p className="text-[1.08rem] leading-[1.7] text-ink-soft">{lead.description}</p>
         <Link href={`/blog/${lead.slug}`} className="mt-5 inline-flex items-center gap-2 text-[0.95rem] font-medium text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Read the article <ArrowRight size={15} /></Link>
       </div>
     </article>}
 
     {rest.length > 0 && <ul className="mt-12 grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">{rest.map((post) => post && <li key={post.slug} className="flex flex-col border-t border-ink pt-5">
+      {post.cover && <Link href={`/blog/${post.slug}`} className="mb-4 block overflow-hidden rounded-lg">
+        {/* eslint-disable-next-line @next/next/no-img-element -- an uploaded cover */}
+        <img src={post.cover} alt="" loading="lazy" className="aspect-[16/10] w-full object-cover transition-transform duration-500 hover:scale-[1.02]" /></Link>}
       <Meta post={post} />
       <h2 className="mt-3 font-display text-[1.6rem] leading-[1.1] tracking-[-0.015em] text-ink"><Link href={`/blog/${post.slug}`} className="hover:text-signal">{post.title}</Link></h2>
       <p className="mt-3 text-[0.98rem] leading-relaxed text-ink-soft">{post.description}</p>

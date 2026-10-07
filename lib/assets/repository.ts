@@ -45,13 +45,16 @@ export async function getAsset(id: string): Promise<{ mime: string; data: Buffer
   return result.rows[0] ?? null;
 }
 
-/** Deletes uploads older than a week that no draft or published portfolio refers to. */
+/** Deletes uploads older than a week that no portfolio, blog post or Journal post refers to. */
 export async function deleteOrphanedAssets(): Promise<number> {
   await ensureSchema();
   const result = await db.query(
     `DELETE FROM portfolio_assets a WHERE a.created_at < NOW() - INTERVAL '7 days'
      AND NOT EXISTS (SELECT 1 FROM portfolios p WHERE p.owner_id = a.owner_id
-       AND (p.content::text LIKE '%' || a.id::text || '%' OR COALESCE(p.published_content::text, '') LIKE '%' || a.id::text || '%'))`,
+       AND (p.content::text LIKE '%' || a.id::text || '%' OR COALESCE(p.published_content::text, '') LIKE '%' || a.id::text || '%'))
+     AND NOT EXISTS (SELECT 1 FROM portfolio_posts b WHERE b.owner_id = a.owner_id
+       AND (b.body LIKE '%' || a.id::text || '%' OR COALESCE(b.cover, '') LIKE '%' || a.id::text || '%' OR COALESCE(b.media::text, '') LIKE '%' || a.id::text || '%'))
+     AND NOT EXISTS (SELECT 1 FROM journal_posts j WHERE j.body LIKE '%' || a.id::text || '%' OR COALESCE(j.cover, '') LIKE '%' || a.id::text || '%' OR COALESCE(j.media::text, '') LIKE '%' || a.id::text || '%')`,
   );
   return result.rowCount ?? 0;
 }

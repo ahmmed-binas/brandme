@@ -513,6 +513,16 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "016_blog_media",
+  statements: [
+    // A media block at the top of a post (image, YouTube/Vimeo video or sandboxed custom HTML), and Journal covers.
+    `ALTER TABLE portfolio_posts ADD COLUMN IF NOT EXISTS media JSONB`,
+    `ALTER TABLE journal_posts ADD COLUMN IF NOT EXISTS media JSONB`,
+    `ALTER TABLE journal_posts ADD COLUMN IF NOT EXISTS cover TEXT`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

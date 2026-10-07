@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, Loader2, Plus } from "lucide-react";
 import type { PortfolioPost } from "@/lib/portfolio/posts";
 import { prepareImage } from "@/lib/images";
 import { PostBodyEditor } from "@/components/blog/PostBodyEditor";
+import { MediaField } from "@/components/blog/MediaField";
 import { Field, ImageField, TextArea } from "./fields";
 
 type Status = { kind: "idle" | "saving" | "saved" } | { kind: "error"; message: string };
@@ -124,6 +125,7 @@ export function BlogPanel({ templateId, signedIn, liveUrl }: { templateId: strin
       </div>
       {status.kind === "error" && <p role="alert" className="rounded-lg bg-amber-50 px-3 py-2 text-[12px] text-amber-900">{status.message}</p>}
       <Field label="Title" value={open.title === "Untitled post" && !open.publishedAt ? "" : open.title} onChange={(title) => edit({ title })} path="post.title" placeholder="What’s this post about?" />
+      <MediaField value={open.media} onChange={(media) => edit({ media })} upload={(file) => prepareImage(file, true)} />
       <PostBodyEditor value={open.body} onChange={(body) => edit({ body })} rows={14} />
       <details className="rounded-xl border border-rule bg-white/60 p-3 text-[13px]">
         <summary className="cursor-pointer font-medium">Cover image, summary and address</summary>

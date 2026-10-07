@@ -1,7 +1,8 @@
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 import { BUILT_IN_ARTICLES } from "./articles";
-import { plainText, readingMinutes, slugify } from "./markdown";
+import { plainText, readingMinutes, safeUrl, slugify } from "./markdown";
+import { cleanMedia, MediaError, readMedia, type PostMedia } from "./media";
 
 /**
  * The site's Journal at /blog. Posts come from two places: articles that ship
@@ -15,6 +16,10 @@ export interface JournalPost {
   description: string;
   category: string;
   body: string;
+  /** A picture for lists and sharing. */
+  cover: string | null;
+  /** The media block at the top of the article. */
+  media: PostMedia | null;
   /** ISO date; null for a draft or a hidden article. */
   publishedAt: string | null;
   updatedAt: string | null;
@@ -26,13 +31,13 @@ export interface JournalPost {
 export const POSTS_PER_PAGE = 9;
 export const JOURNAL_CATEGORIES = ["Portfolio strategy", "Writing", "Case studies", "Design", "Career", "Getting online", "Workflow", "News"] as const;
 
-interface Row { slug: string; title: string; description: string; category: string; body: string; published_at: Date | null; updated_at: Date }
+interface Row { slug: string; title: string; description: string; category: string; body: string; cover: string | null; media: unknown; published_at: Date | null; updated_at: Date }
 
 const builtInSlugs = new Set(BUILT_IN_ARTICLES.map((article) => article.slug));
 
 function fromRow(row: Row): JournalPost {
   return {
-    slug: row.slug, title: row.title, description: row.description || plainText(row.body).slice(0, 160), category: row.category, body: row.body,
+    slug: row.slug, title: row.title, description: row.description || plainText(row.body).slice(0, 160), category: row.category, body: row.body, cover: row.cover, media: readMedia(row.media),
     publishedAt: row.published_at?.toISOString() ?? null, updatedAt: row.updated_at.toISOString(), readMinutes: readingMinutes(row.body),
     origin: builtInSlugs.has(row.slug) ? "edited" : "written",
   };
@@ -42,7 +47,7 @@ async function storedPosts(): Promise<Row[]> {
   if (!databaseConfigured()) return [];
   try {
     await ensureSchema();
-    return (await db.query<Row>("SELECT slug, title, description, category, body, published_at, updated_at FROM journal_posts")).rows;
+    return (await db.query<Row>("SELECT slug, title, description, category, body, cover, media, published_at, updated_at FROM journal_posts")).rows;
   } catch (error) {
     console.error("Journal posts unavailable; showing built-in articles only", error);
     return [];
@@ -53,7 +58,7 @@ async function storedPosts(): Promise<Row[]> {
 export async function listJournal({ drafts = false } = {}): Promise<JournalPost[]> {
   const stored = await storedPosts();
   const bySlug = new Map<string, JournalPost>(BUILT_IN_ARTICLES.map((article) => [article.slug, {
-    ...article, publishedAt: new Date(`${article.publishedAt}T09:00:00Z`).toISOString(), updatedAt: null, readMinutes: readingMinutes(article.body), origin: "built-in" as const,
+    ...article, cover: null, media: null, publishedAt: new Date(`${article.publishedAt}T09:00:00Z`).toISOString(), updatedAt: null, readMinutes: readingMinutes(article.body), origin: "built-in" as const,
   }]));
   for (const row of stored) bySlug.set(row.slug, fromRow(row));
   const now = Date.now();
@@ -66,7 +71,7 @@ export async function getJournalPost(slug: string, { drafts = false } = {}): Pro
   return (await listJournal({ drafts })).find((post) => post.slug === slug) ?? null;
 }
 
-export interface JournalInput { title: string; description: string; category: string; body: string; slug?: string; publish: boolean }
+export interface JournalInput { title: string; description: string; category: string; body: string; slug?: string; cover?: string | null; media?: unknown; publish: boolean }
 
 export class JournalError extends Error {}
 
@@ -78,6 +83,9 @@ export async function saveJournalPost(input: JournalInput, authorId: string, ori
   if (!slug) throw new JournalError("The address needs at least one letter or number.");
   const body = input.body.slice(0, 100_000);
   if (input.publish && plainText(body).length < 40) throw new JournalError("Write a little more before publishing.");
+  const cover = input.cover ? safeUrl(input.cover) : null;
+  let media: PostMedia | null;
+  try { media = cleanMedia(input.media); } catch (error) { if (error instanceof MediaError) throw new JournalError(error.message); throw error; }
   await ensureSchema();
   const client = await db.connect();
   try {
@@ -92,10 +100,10 @@ export async function saveJournalPost(input: JournalInput, authorId: string, ori
     const firstPublished = existing?.published_at ?? (builtIn ? new Date(`${builtIn.publishedAt}T09:00:00Z`) : null);
     const publishedAt = input.publish ? firstPublished ?? new Date() : null;
     const result = await client.query<Row>(
-      `INSERT INTO journal_posts (slug, title, description, category, body, author_id, published_at) VALUES ($1, $2, $3, $4, $5, $6, $7)
-       ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, category = EXCLUDED.category, body = EXCLUDED.body, published_at = EXCLUDED.published_at, updated_at = NOW()
-       RETURNING slug, title, description, category, body, published_at, updated_at`,
-      [slug, title, input.description.trim().slice(0, 300), input.category.trim().slice(0, 40) || "News", body, authorId, publishedAt],
+      `INSERT INTO journal_posts (slug, title, description, category, body, author_id, published_at, cover, media) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, category = EXCLUDED.category, body = EXCLUDED.body, published_at = EXCLUDED.published_at, cover = EXCLUDED.cover, media = EXCLUDED.media, updated_at = NOW()
+       RETURNING slug, title, description, category, body, cover, media, published_at, updated_at`,
+      [slug, title, input.description.trim().slice(0, 300), input.category.trim().slice(0, 40) || "News", body, authorId, publishedAt, cover, media ? JSON.stringify(media) : null],
     );
     await client.query("COMMIT");
     return fromRow(result.rows[0]!);

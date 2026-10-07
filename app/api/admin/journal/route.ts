@@ -23,12 +23,12 @@ export const GET = route(async () => {
 export const POST = route(async (request: Request) => {
   const user = await admin();
   if (user instanceof Response) return user;
-  const body = await readJson(request, 220_000);
+  const body = await readJson(request, 250_000);
   if (body instanceof Response) return body;
   const input = (body ?? {}) as Record<string, unknown>;
   const text = (key: string) => (typeof input[key] === "string" ? (input[key] as string) : "");
   try {
-    const post = await saveJournalPost({ title: text("title"), description: text("description"), category: text("category"), body: text("body"), slug: text("slug"), publish: input.publish === true }, user.id, text("originalSlug") || undefined);
+    const post = await saveJournalPost({ title: text("title"), description: text("description"), category: text("category"), body: text("body"), slug: text("slug"), cover: text("cover") || null, media: input.media ?? null, publish: input.publish === true }, user.id, text("originalSlug") || undefined);
     refresh(post.slug);
     if (text("originalSlug") && text("originalSlug") !== post.slug) refresh(text("originalSlug"));
     return Response.json({ post });

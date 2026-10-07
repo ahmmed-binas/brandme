@@ -8,7 +8,7 @@ export const PATCH = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   if (!owner.user.plan.blog) return jsonError(402, BLOG_UPGRADE);
-  const body = await readJson(request, 80_000);
+  const body = await readJson(request, 110_000);
   if (body instanceof Response) return body;
   try {
     const post = await updatePost(owner.user.id, owner.templateId, (await params).postId, (body ?? {}) as PostInput);

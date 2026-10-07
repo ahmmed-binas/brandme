@@ -29,7 +29,7 @@ export const siteForHost = cache(async (rawHost: string): Promise<Site | null> =
 });
 
 export const toPublic = (post: PortfolioPost, withBody = false): PublicPost => ({
-  slug: post.slug, title: post.title, summary: post.summary, cover: post.cover, publishedAt: post.publishedAt, readMinutes: post.readMinutes, ...(withBody ? { body: post.body } : {}),
+  slug: post.slug, title: post.title, summary: post.summary, cover: post.cover, publishedAt: post.publishedAt, readMinutes: post.readMinutes, ...(withBody ? { body: post.body, media: post.media } : {}),
 });
 
 /** Published posts for a live (not resting) site, newest first. */
