@@ -10,7 +10,7 @@ Read this first, then `docs/plans/project-handoff.pdf` (history, progress, to-do
 
 ## What this is
 
-**Formora** (working name; the owner is considering a rename, see "Open decisions") is a portfolio and personal-website builder for every kind of professional, not just designers and developers. People pick a template drawn for their job (156 job titles, 46 studio designs), fill it by clicking text in a live preview (or import a CV, LinkedIn export or GitHub, or ask the AI assistant), and publish at `/p/<address>` or on their own domain. Templates are also given away free in a **gallery** (content marketing); the paid product is customising, hosting, domains, blogs and keeping the site up to date.
+**Formora** (working name; the owner is considering a rename, see "Open decisions") is a portfolio and personal-website builder for every kind of professional, not just designers and developers. People pick a template drawn for their job (156 job titles, 51 studio designs, including a real estate collection built to sell from), fill it by clicking text in a live preview (or import a CV, LinkedIn export or GitHub, or ask the AI assistant), and publish at `/p/<address>` or on their own domain. Templates are also given away free in a **gallery** (content marketing); the paid product is customising, hosting, domains, blogs and keeping the site up to date.
 
 Business model (free-first launch, `docs/plans/free-first-launch-plan.md`): **Basic is free** (one live portfolio, blog, the Investigator); **Pro is $24/yr or $2.50/mo** (up to three live portfolios, own domain, no branding); no trial, no Premium (`lib/plans.ts`). AI is paid separately at cost + 5% with credits or the customer's own Anthropic key, the same on every plan; each account's first Investigator check is free. Domains are sold at the registrar's price + Stripe's card fee, which is shown as its own line (also for credits). “Need more?” and the done-for-you service go through **Book a free call** (Cal.com, `lib/booking.ts`). Legal pages: `/privacy`, `/terms` (`lib/legal.ts`).
 
@@ -40,6 +40,7 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Template components | `components/templates/studio/<field>/<Name>.tsx`, shared `kit.tsx` (`useStudio`, `ed()`, `Picture`, `StudioRoot`), `motion.tsx`, `studio.css`, `registry.tsx` |
 | Owner approval of templates | `lib/templates/approval.ts`, shipped decisions in `lib/templates/decisions.ts`, desk at `/templates/review` |
 | Job titles and sample content | `lib/templates/roles/*`, personas `lib/templates/personas*.ts`, `lib/templates/samples.ts` |
+| Real estate collection (Skyline, Manor, Front Door, Shoreline, Off Plan) and TikTok clips | `components/templates/studio/realestate/*` (`re-kit.tsx`), `scripts/samples/tiktok-clips.mjs`, photos `public/samples/re/` (Unsplash, not in downloads); see `docs/TEMPLATES.md` |
 | Editor | `components/editor/studio/StudioEditor.tsx` (+ `fields.tsx`, `BlogPanel.tsx`, `SuggestionsPanel.tsx`), persistence `components/editor/usePortfolioPersistence.ts` |
 | Content model and validation | `lib/portfolio/schema.ts`; storage `lib/portfolio/repository.ts` (plan's portfolio limit `roomFor`, moving content to another design `switchTemplate`) |
 | Publishing and custom domains | `app/p/[slug]`, `app/sites/[host]` (via `proxy.ts`), `lib/domains/*`, `Caddyfile` |
@@ -77,7 +78,7 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 ## Open decisions (waiting on the owner)
 
 - Brand name (currently Formora; “BrandMe” was considered but is taken by a London agency).
-- Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) at `/templates/review`.
+- Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) and the five real estate templates (Skyline, Manor, Front Door, Shoreline, Off Plan) at `/templates/review`.
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
 - The owner's legal name and country for `/privacy` and `/terms` (`LEGAL_NAME`, `LEGAL_COUNTRY`), and a final read of both pages (drafted, not legal advice).
 - ChatGPT/OpenAI as a second AI provider: agreed for after launch.

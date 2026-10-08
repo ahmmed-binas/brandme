@@ -320,6 +320,33 @@ const SPECS: StudioSpec[] = [
     idealFor: ["Chefs & private chefs", "Restaurants & supper clubs", "Bakers & caterers"], sections: ["skills", "projects", "about", "services", "gallery", "testimonials", "experience", "highlights", "contact"],
     palettes: [p("market", "Market", "#f4ede1", "#231a12", "#b5482a", "#7d6e60", "#ebe1d0"), p("charred", "Charred", "#141110", "#f3e9dc", "#e0632b", "#968b80", "#1e1a18"), p("herb", "Herb", "#eef0e6", "#1b2116", "#557a3a", "#6c7365", "#e2e6d6")],
     fonts: [f("dmserif", "DM Serif + DM Sans", F.dmSerif, F.dmSans), f("playfair", "Playfair + DM Sans", F.playfair, F.dmSans)] },
+
+  // ——— Real estate collection: sites agents can sell from ———
+  { id: "skyline", name: "Skyline", persona: "re-skyline", professions: ["realestate"], styles: ["Motion", "Editorial"], mood: "dark",
+    description: "Luxury property in motion: a cross-fading hero, prices that switch currency live, residences that stack as you scroll and a rental-yield calculator.",
+    idealFor: ["Luxury & prime agents", "Dubai, Miami & Monaco brokers", "Investment advisers"], sections: ["stats", "projects", "skills", "about", "highlights", "services", "gallery", "testimonials", "education", "contact"],
+    palettes: [p("onyx", "Onyx & gold", "#0b0d12", "#f1ece2", "#c9a55c", "#8b8a86", "#14171e"), p("desert", "Desert", "#f4efe6", "#1a1712", "#a87b3d", "#7a7266", "#ebe3d5"), p("marina", "Marina", "#08141f", "#e8eef3", "#7fc4d8", "#7e909d", "#0f1f2d")],
+    fonts: [f("bodoni", "Bodoni + Manrope", F.bodoni, F.manrope), f("playfair", "Playfair + Manrope", F.playfair, F.manrope)] },
+  { id: "manor", name: "Manor", persona: "re-manor", professions: ["realestate"], styles: ["Editorial", "Classic"], mood: "light",
+    description: "A country-house magazine: a masthead, particulars as spreads with sold stamps, a village picker that finds the homes in each place, and a free valuation request.",
+    idealFor: ["Country & village agents", "Independent estate agents", "Heritage & period homes"], sections: ["stats", "projects", "skills", "about", "highlights", "gallery", "testimonials", "services", "education", "contact"],
+    palettes: [p("green", "Racing green", "#f4efe3", "#1c1f1a", "#2c4a35", "#6e6b60", "#eae3d2"), p("claret", "Claret", "#f6f1e8", "#221a17", "#7d2333", "#75695f", "#ece3d6"), p("slate", "Slate", "#1b1d1c", "#ece6d8", "#b89a5b", "#8f8a7f", "#242725")],
+    fonts: [f("cormorant", "Cormorant + Franklin", F.cormorant, F.franklin), f("garamond", "Garamond + Franklin", F.garamond, F.franklin)] },
+  { id: "front-door", name: "Front Door", persona: "re-frontdoor", professions: ["realestate"], styles: ["Playful", "Bold"], mood: "light",
+    description: "For buyer’s agents: the front door swings open as you scroll, a mortgage calculator prices every home per month, and visitors heart homes and send the list in one tap.",
+    idealFor: ["Buyer’s agents", "Realtors for first-time buyers", "Mortgage-led agents"], sections: ["stats", "projects", "skills", "about", "highlights", "services", "testimonials", "gallery", "education", "contact"],
+    palettes: [p("coral", "Coral", "#fff8ef", "#1b1a1f", "#ff5a36", "#6d6a73", "#f8eadb"), p("mint", "Mint", "#f4fbf6", "#13201a", "#19a96b", "#5f7067", "#e3f3e9"), p("midnight", "Midnight", "#15131c", "#f6f1ea", "#ffb547", "#a39fae", "#221f2b")],
+    fonts: [f("bricolage", "Bricolage + Figtree", F.bricolage, F.figtree), f("familjen", "Familjen + Figtree", F.familjen, F.figtree)] },
+  { id: "shoreline", name: "Shoreline", persona: "re-shoreline", professions: ["realestate"], styles: ["Motion", "Minimal"], mood: "light",
+    description: "Coastal and holiday homes: waves along the hero, a photograph that changes as you read down the homes, a holiday-let income estimate and postcards of the places you cover.",
+    idealFor: ["Coastal & resort agents", "Holiday-home specialists", "Agents selling to buyers abroad"], sections: ["stats", "projects", "skills", "about", "highlights", "services", "gallery", "testimonials", "contact"],
+    palettes: [p("sand", "Sand & sea", "#f7f2e8", "#10283a", "#1f7a8c", "#66707a", "#ede4d3"), p("terracotta", "Terracotta", "#f8f1ea", "#2a1d17", "#c1603a", "#7a6a60", "#efe2d6"), p("night", "Night swim", "#0c1b26", "#e9f0f3", "#6cc6d9", "#8399a6", "#13283a")],
+    fonts: [f("fraunces", "Fraunces + DM Sans", F.fraunces, F.dmSans), f("young", "Young Serif + DM Sans", F.youngSerif, F.dmSans)] },
+  { id: "off-plan", name: "Off Plan", persona: "re-offplan", professions: ["realestate"], styles: ["Technical", "Bold"], mood: "dark",
+    description: "New developments: a countdown to launch, the building rising floor by floor, a tower to pick a home from with live availability, and a construction diary.",
+    idealFor: ["New-homes sales teams", "Developers & launches", "Off-plan specialists"], sections: ["stats", "projects", "skills", "services", "gallery", "about", "highlights", "testimonials", "contact"],
+    palettes: [p("lime", "Concrete & lime", "#0d0e0e", "#f0f0ea", "#d4ff3a", "#8b8d88", "#171918"), p("blueprint", "Blueprint", "#0a1530", "#e8eefc", "#5ea0ff", "#8592b0", "#111f42"), p("daylight", "Daylight", "#f2f1ec", "#111111", "#ff4f1f", "#6d6c66", "#e6e4dc")],
+    fonts: [f("unbounded", "Unbounded + Space Grotesk", F.unbounded, F.grotesk, F.jetbrains), f("syne", "Syne + Space Grotesk", F.syne, F.grotesk, F.jetbrains)] },
 ];
 
 const CATEGORY: Partial<Record<ProfessionId, TemplateDefinition["category"]>> = { developer: "Developer", data: "Developer", student: "Developer", design: "Creative", art: "Creative", photo: "Creative", music: "Creative", film: "Creative", architecture: "Creative" };

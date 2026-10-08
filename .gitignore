@@ -44,3 +44,6 @@ next-env.d.ts
 # End-to-end test output
 tests/e2e/.out/
 tests/e2e/node_modules/
+
+# Marketing videos recorded by scripts/samples/tiktok-clips.mjs
+/marketing/clips/

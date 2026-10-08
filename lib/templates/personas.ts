@@ -1,5 +1,6 @@
 import type { StandardContent } from "@/lib/portfolio/schema";
 import { MORE_PERSONAS } from "./personas-more";
+import { REALESTATE_PERSONAS } from "./personas-realestate";
 
 /**
  * Sample people used to fill template previews and as a new portfolio's
@@ -416,7 +417,7 @@ PERSONAS.trainer = {
   experience: [{ job_title: "Head Coach", company: "Costa Strength", start_date: "2018", end_date: "Present" }, { job_title: "S&C Coach", company: "Confederação Brasileira de Remo", start_date: "2019", end_date: "2021" }],
 };
 
-Object.assign(PERSONAS, MORE_PERSONAS);
+Object.assign(PERSONAS, MORE_PERSONAS, REALESTATE_PERSONAS);
 
 export function personaFor(id: string | undefined): StandardContent {
   return structuredClone(PERSONAS[id ?? "developer"] ?? PERSONAS.developer);

@@ -67,6 +67,11 @@ export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   pulse: load(() => import("./healthcare/Pulse")),
   counsel: load(() => import("./legal/Counsel")),
   mise: load(() => import("./food/Mise")),
+  skyline: load(() => import("./realestate/Skyline")),
+  manor: load(() => import("./realestate/Manor")),
+  "front-door": load(() => import("./realestate/FrontDoor")),
+  shoreline: load(() => import("./realestate/Shoreline")),
+  "off-plan": load(() => import("./realestate/OffPlan")),
 };
 
 export default function StudioTemplate(props: StudioProps) {

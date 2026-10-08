@@ -120,6 +120,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 `;
 
+/**
+ * Sample photos licensed from Unsplash (public/samples/re) may be shown on our
+ * site but not handed out as a collection, so downloads get empty image slots
+ * (the template shows a tonal placeholder) and the README says where to add photos.
+ */
+const LICENSED = /^\/samples\/re\//;
+function withoutLicensedPhotos<T>(value: T): T {
+  if (typeof value === "string") return (LICENSED.test(value) ? "" : value) as T;
+  if (Array.isArray(value)) return value.map(withoutLicensedPhotos) as T;
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, withoutLicensedPhotos(child)])) as T;
+  return value;
+}
+
 /** Every local image the sample content points at ("/samples/x.webp"). */
 function localImages(content: StandardContent): string[] {
   const found = new Set<string>();
@@ -143,7 +156,8 @@ export async function templateZip(template: TemplateDefinition): Promise<Uint8Ar
   const source = await readFile(path.join(STUDIO, `${relative}.tsx`), "utf8");
   const fonts = [...new Set([...source.matchAll(/import "(@fontsource(?:-variable)?\/[^/"]+)[^"]*";/g)].map((match) => match[1]!))];
   const usesMotion = source.includes('from "../motion"');
-  const content = sampleFor(template);
+  const usesRealEstateKit = source.includes('from "./re-kit"');
+  const content = withoutLicensedPhotos(sampleFor(template));
   const folder = `${template.id}-portfolio-template`;
   const files: Zippable = {};
   const add = (name: string, data: string | Uint8Array) => { files[`${folder}/${name}`] = typeof data === "string" ? strToU8(data) : data; };
@@ -164,7 +178,8 @@ export async function templateZip(template: TemplateDefinition): Promise<Uint8Ar
   add("src/template/types.ts", TYPES);
   add(`src/template/${componentName}.tsx`, stripClient(source).replace(/from "\.\.\/(kit|motion)"/g, 'from "./$1"'));
   add("src/template/kit.tsx", stripClient(await readFile(path.join(STUDIO, "kit.tsx"), "utf8")).replace(/from "@\/lib\/portfolio\/schema"|from "@\/lib\/templates\/types"/g, 'from "./types"'));
-  if (usesMotion) add("src/template/motion.tsx", stripClient(await readFile(path.join(STUDIO, "motion.tsx"), "utf8")));
+  if (usesMotion || usesRealEstateKit) add("src/template/motion.tsx", stripClient(await readFile(path.join(STUDIO, "motion.tsx"), "utf8")));
+  if (usesRealEstateKit) add("src/template/re-kit.tsx", stripClient(await readFile(path.join(STUDIO, "realestate/re-kit.tsx"), "utf8")).replace(/from "\.\.\/(kit|motion)"/g, 'from "./$1"').replace(/from "@\/lib\/portfolio\/schema"/g, 'from "./types"'));
   add("src/template/studio.css", await readFile(path.join(STUDIO, "studio.css"), "utf8"));
   for (const image of localImages(content)) {
     try { add(`public${image}`, new Uint8Array(await readFile(path.join(ROOT, "public", image)))); } catch { /* a missing sample image just shows the placeholder */ }
