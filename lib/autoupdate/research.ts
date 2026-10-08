@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { AiProviderError, type AiClient, type AiUsage } from "@/lib/ai/provider";
 import { z } from "zod";
 import { db } from "@/utils/db";
 import { safeLink, type StandardContent } from "@/lib/portfolio/schema";
@@ -12,7 +12,7 @@ import { addSuggestions, fingerprint, knownTitles, type NewSuggestion } from "./
  * suggestion the owner can apply or dismiss. Nothing changes on its own.
  */
 
-const MODEL = "claude-opus-5-5";
+
 
 const findingSchema = z.object({
   kind: z.enum(["role", "highlight", "project", "title"]),
@@ -69,32 +69,19 @@ function parseFindings(text: string) {
   try { return resultSchema.parse(JSON.parse(text.slice(start, end + 1))).findings; } catch { return []; }
 }
 
-export type ResearchResult = { ok: true; added: number; usage: Anthropic.Beta.BetaUsage[] } | { ok: false; error: string; usage: Anthropic.Beta.BetaUsage[] };
+export type ResearchResult = { ok: true; added: number; usage: AiUsage[] } | { ok: false; error: string; usage: AiUsage[] };
 
-export async function runResearch(client: Anthropic, ownerId: string, content: StandardContent): Promise<ResearchResult> {
+export async function runResearch(client: AiClient, ownerId: string, content: StandardContent): Promise<ResearchResult> {
   if (!content.name?.trim()) return { ok: false, error: "Add your name to your portfolio first.", usage: [] };
-  const usage: Anthropic.Beta.BetaUsage[] = [];
-  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: `Find recent professional news about this person.\n\n${describePerson(content)}` }];
-  let text = "";
+  let answer;
   try {
-    // Server-side web search can pause a long turn; continue it a few times at most.
-    for (let turn = 0; turn < 3; turn++) {
-      const response = await client.beta.messages.create({
-        model: MODEL, max_tokens: 16000, system: SYSTEM, messages,
-        betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
-        output_config: { effort: "medium" },
-        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 6 }],
-      });
-      usage.push(response.usage);
-      if (response.stop_reason === "refusal") return { ok: false, error: "The research assistant couldn’t help with that.", usage };
-      text = response.content.flatMap((block) => (block.type === "text" ? [block.text] : [])).join("");
-      if (response.stop_reason !== "pause_turn") break;
-      messages.push({ role: "assistant", content: response.content });
-    }
+    answer = await client.ask({ system: SYSTEM, user: `Find recent professional news about this person.\n\n${describePerson(content)}`, webSearch: 6 });
   } catch (error) {
-    if (error instanceof Anthropic.APIError) return { ok: false, error: "The research assistant couldn’t finish. Please try again later.", usage };
-    throw error;
+    if (!(error instanceof AiProviderError)) throw error;
+    return { ok: false, error: error.kind === "auth" ? "Your AI provider didn’t accept the saved API key. Check it in Account → AI." : "The research assistant couldn’t finish. Please try again later.", usage: [] };
   }
+  const { usage, text } = answer;
+  if (answer.stop === "refusal") return { ok: false, error: "The research assistant couldn’t help with that.", usage };
 
   const known = await knownTitles(ownerId);
   const findings = parseFindings(text).filter((finding) => finding.confidence !== "low" && safeLink(finding.source_url) && !known.has(finding.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()));

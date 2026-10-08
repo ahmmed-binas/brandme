@@ -91,7 +91,7 @@ export function AssistantPanel<T>({ templateId, content, onContent, quickAction,
         <input value={prompt} onChange={(event) => setPrompt(event.target.value)} maxLength={1000} placeholder={available && signedIn ? "e.g. Make my bio warmer and shorter" : "Ask for a content change…"} className="min-w-0 flex-1 px-2 py-2 text-sm outline-none" />
         <button disabled={busy} className="rounded-lg bg-violet-600 p-2 text-white hover:bg-violet-700 disabled:opacity-50" aria-label="Send"><Send size={16} /></button>
       </div>
-      <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400"><Sparkles size={11} /> {available && signedIn ? (ownKey ? "Using your own Claude API key" : credits === null ? "AI is paid with credits" : <>{credits} credits left · <Link href="/account#ai" className="underline">add more</Link></>) : "Local quick actions are enabled"}</p>
+      <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400"><Sparkles size={11} /> {available && signedIn ? (ownKey ? "Using your own API key" : credits === null ? "AI is paid with credits" : <>{credits} credits left · <Link href="/account#ai" className="underline">add more</Link></>) : "Local quick actions are enabled"}</p>
     </form>
   </>;
 }

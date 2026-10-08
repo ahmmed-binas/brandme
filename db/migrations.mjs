@@ -523,6 +523,31 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "017_own_ai_key_provider",
+  statements: [
+    // A customer's own AI key can now be Claude (Anthropic) or OpenAI. Existing keys are Claude keys.
+    `ALTER TABLE app_users RENAME COLUMN anthropic_key_enc TO ai_key_enc`,
+    `ALTER TABLE app_users RENAME COLUMN anthropic_key_hint TO ai_key_hint`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS ai_key_provider TEXT NOT NULL DEFAULT 'anthropic' CHECK (ai_key_provider IN ('anthropic', 'openai'))`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS ai_key_model TEXT`,
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS ai_key_saved_at TIMESTAMPTZ`,
+  ],
+});
+
+migrations.push({
+  id: "018_rate_limits",
+  statements: [
+    // Rate limits that survive restarts (lib/security/rate-limit.ts).
+    `CREATE TABLE IF NOT EXISTS rate_limits (
+      key TEXT NOT NULL,
+      window_start TIMESTAMPTZ NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (key, window_start)
+    )`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

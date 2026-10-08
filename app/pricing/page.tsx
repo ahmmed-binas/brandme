@@ -20,7 +20,7 @@ const FEATURES: Record<PlanCard["id"], string[]> = {
 
 const FAQ: Array<[string, string]> = [
   ["Is Basic really free?", "Yes. One portfolio with a blog stays online for free for as long as you like, with a small “Made with Formora” link. We’d rather you use it and tell a friend than pay for something you’re unsure about."],
-  ["How does AI work if it isn’t in the price?", "AI costs real money every time it runs, so it’s paid separately and costs the same on every plan. Buy credits at what the AI costs us plus 5% (they never expire), or connect your own Claude API key and pay Anthropic directly."],
+  ["How does AI work if it isn’t in the price?", "AI costs real money every time it runs, so it’s paid separately and costs the same on every plan. Buy credits at what the AI costs us plus 5% (they never expire), or connect your own Claude or OpenAI API key and pay Anthropic or OpenAI directly. ChatGPT and Codex users can use an OpenAI key."],
   ["What’s the card fee?", `Stripe charges about 2.9% + 30¢ for each card payment. When you buy credits or a domain we show it as its own line, so the thing you’re buying is at cost. For example, $10 of credits is $10 + ${formatUsd(cardFeeCents(1000))}.`],
   ["How does the Investigator get paid for?", "Every account gets its first check free. After that, reading GitHub and blog feeds is free, and the AI step (reading your other profiles and searching the web) costs a few credits per check, or nothing extra with your own Claude key. You choose how often it runs."],
   ["Will I be charged automatically?", "Only for Pro, and only if you choose it. We save your card for renewal, email yearly payers two weeks before, and you can switch renewal off any time in your account."],
@@ -52,7 +52,7 @@ export default function PricingPage() {
 
     <section className="mt-24 grid gap-10 rounded-2xl border border-rule p-8 lg:grid-cols-[1fr_1.2fr] lg:p-12">
       <div><h2 className="font-display text-[2.2rem] leading-tight">AI, at cost</h2><p className="mt-4 text-ink-soft">Writing help, imports from your CV or LinkedIn, and the Investigator use AI. Credits are priced from what each request really costs plus 5%, so a quick rewrite is a few cents. The card fee is shown separately.</p>
-        <p className="mt-4 text-ink-soft">Prefer your own account? <b className="font-medium text-ink">Connect your Claude API key</b> and use AI without credits at all.</p></div>
+        <p className="mt-4 text-ink-soft">Prefer your own account? <b className="font-medium text-ink">Connect your Claude or OpenAI API key</b> and use AI without credits at all.</p></div>
       <ul className="grid gap-3 sm:grid-cols-3">{CREDIT_PACKS.map((pack) => <li key={pack.id} className="rounded-xl bg-white/60 p-5 text-center"><p className="font-display text-[2.2rem] leading-none">{formatUsd(pack.cents)}</p><p className="mt-2 text-[0.92rem]">{pack.label}</p><p className="mt-1 text-[0.82rem] text-ink-faint">+ {formatUsd(cardFeeCents(pack.cents))} card fee</p></li>)}</ul>
     </section>
 

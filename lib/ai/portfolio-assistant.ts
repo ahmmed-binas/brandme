@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { AiProviderError, type AiClient, type AiUsage } from "./provider";
 import { z } from "zod";
 
 /**
@@ -10,7 +10,7 @@ import { z } from "zod";
  * or break a template's data shape.
  */
 
-const MODEL = "claude-opus-5-5";
+
 const MAX_FIELDS = 250;
 const MAX_FIELD_LENGTH = 4000;
 
@@ -70,7 +70,7 @@ Rules:
 - If the request is not about the portfolio's written content (for example layout, colours, or adding a new section), change nothing and explain that the template controls design and that sections are added from the Content panel.`;
 
 /** Token usage of the model call, when one was made, so the caller can meter it. */
-type Metered = { usage?: Anthropic.Beta.BetaUsage };
+type Metered = { usage?: AiUsage[] };
 
 export type AssistResult =
   | ({ ok: true; content: Record<string, unknown>; reply: string; changed: number } & Metered)
@@ -91,42 +91,36 @@ function applyChanges(content: Record<string, unknown>, allowed: Map<string, str
   return { next, changed };
 }
 
-export async function assistWithContent(client: Anthropic, content: Record<string, unknown>, instruction: string): Promise<AssistResult> {
+/** What to tell the owner when the AI provider itself fails. */
+function providerFailure(error: unknown, failed: string): { ok: false; status: 502 | 503; error: string } {
+  if (!(error instanceof AiProviderError)) throw error;
+  if (error.kind === "busy") return { ok: false, status: 503, error: "The assistant is busy right now. Try again in a minute." };
+  if (error.kind === "auth") return { ok: false, status: 502, error: "Your AI provider didn’t accept the saved API key. Check it in Account → AI." };
+  return { ok: false, status: 502, error: failed };
+}
+
+export async function assistWithContent(client: AiClient, content: Record<string, unknown>, instruction: string): Promise<AssistResult> {
   const fields = collectEditableFields(content);
   if (!fields.length) return { ok: false, status: 422, error: "Add some content first, then ask me to improve it." };
 
-  let response: Anthropic.Beta.BetaMessage;
+  let answer;
   try {
-    response = await client.beta.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "medium", format: { type: "json_schema", schema: RESULT_JSON_SCHEMA } },
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: `Editable fields:\n${JSON.stringify(fields)}\n\nRequest from the portfolio owner:\n${instruction}` }],
-    });
+    answer = await client.ask({ system: SYSTEM_PROMPT, schema: RESULT_JSON_SCHEMA, user: `Editable fields:\n${JSON.stringify(fields)}\n\nRequest from the portfolio owner:\n${instruction}` });
   } catch (error) {
-    if (error instanceof Anthropic.RateLimitError) return { ok: false, status: 503, error: "The assistant is busy right now. Try again in a minute." };
-    if (error instanceof Anthropic.APIError) {
-      console.error("AI assist request failed", error.status, error.message);
-      return { ok: false, status: 502, error: "The assistant could not complete that request." };
-    }
-    throw error;
+    return providerFailure(error, "The assistant could not complete that request.");
   }
 
-  if (response.stop_reason === "refusal") return { ok: false, status: 422, error: "The assistant can't help with that request.", usage: response.usage };
-  if (response.stop_reason === "max_tokens") return { ok: false, status: 502, error: "That change was too large. Try asking for one section at a time.", usage: response.usage };
-  const text = response.content.flatMap((block) => (block.type === "text" ? [block.text] : [])).join("");
+  if (answer.stop === "refusal") return { ok: false, status: 422, error: "The assistant can't help with that request.", usage: answer.usage };
+  if (answer.stop === "max_tokens") return { ok: false, status: 502, error: "That change was too large. Try asking for one section at a time.", usage: answer.usage };
   let parsed: z.infer<typeof resultSchema>;
   try {
-    parsed = resultSchema.parse(JSON.parse(text));
+    parsed = resultSchema.parse(JSON.parse(answer.text));
   } catch {
-    return { ok: false, status: 502, error: "The assistant returned an unreadable answer. Please try again.", usage: response.usage };
+    return { ok: false, status: 502, error: "The assistant returned an unreadable answer. Please try again.", usage: answer.usage };
   }
 
   const { next, changed } = applyChanges(content, new Map(fields.map((field) => [field.path, field.value])), parsed.changes);
-  return { ok: true, content: next, reply: parsed.reply, changed, usage: response.usage };
+  return { ok: true, content: next, reply: parsed.reply, changed, usage: answer.usage };
 }
 
 const str = { type: "string" } as const;
@@ -163,32 +157,18 @@ Rules:
 export type ExtractResult = ({ ok: true; profile: Record<string, unknown> } & Metered) | ({ ok: false; status: 422 | 502 | 503; error: string } & Metered);
 
 /** Structures free text about a person into portfolio content. */
-export async function extractProfile(client: Anthropic, text: string): Promise<ExtractResult> {
-  let response: Anthropic.Beta.BetaMessage;
+export async function extractProfile(client: AiClient, text: string): Promise<ExtractResult> {
+  let answer;
   try {
-    response = await client.beta.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "medium", format: { type: "json_schema", schema: PROFILE_JSON_SCHEMA } },
-      system: IMPORT_PROMPT,
-      messages: [{ role: "user", content: `<source>\n${text}\n</source>` }],
-    });
+    answer = await client.ask({ system: IMPORT_PROMPT, schema: PROFILE_JSON_SCHEMA, user: `<source>\n${text}\n</source>` });
   } catch (error) {
-    if (error instanceof Anthropic.RateLimitError) return { ok: false, status: 503, error: "The assistant is busy right now. Try again in a minute." };
-    if (error instanceof Anthropic.APIError) {
-      console.error("AI import request failed", error.status, error.message);
-      return { ok: false, status: 502, error: "The assistant could not read that text." };
-    }
-    throw error;
+    return providerFailure(error, "The assistant could not read that text.");
   }
-  if (response.stop_reason === "refusal") return { ok: false, status: 422, error: "The assistant can't process that text.", usage: response.usage };
-  if (response.stop_reason === "max_tokens") return { ok: false, status: 502, error: "That text was too long to process at once. Try a shorter section.", usage: response.usage };
+  if (answer.stop === "refusal") return { ok: false, status: 422, error: "The assistant can't process that text.", usage: answer.usage };
+  if (answer.stop === "max_tokens") return { ok: false, status: 502, error: "That text was too long to process at once. Try a shorter section.", usage: answer.usage };
   try {
-    const raw = response.content.flatMap((block) => (block.type === "text" ? [block.text] : [])).join("");
-    return { ok: true, profile: JSON.parse(raw) as Record<string, unknown>, usage: response.usage };
+    return { ok: true, profile: JSON.parse(answer.text) as Record<string, unknown>, usage: answer.usage };
   } catch {
-    return { ok: false, status: 502, error: "The assistant returned an unreadable answer. Please try again.", usage: response.usage };
+    return { ok: false, status: 502, error: "The assistant returned an unreadable answer. Please try again.", usage: answer.usage };
   }
 }

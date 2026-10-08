@@ -39,7 +39,7 @@ log("AI edit:", edit.status, "| charged:", edit.body.charged, "| credits now:", 
 // Own key: bad key refused, good key saved and used (no credits spent).
 log("bad key:", (await api("/api/account/ai-key", "PUT", { key: "sk-ant-api03-wrongwrongwrongwrongwrong" })).body.error);
 log("good key:", (await api("/api/account/ai-key", "PUT", { key: "sk-ant-api03-validkeyvalidkeyvalidkey" })).body);
-log("stored encrypted:", !sql(`SELECT anthropic_key_enc FROM app_users WHERE id='${userId}'`).includes("validkey"));
+log("stored encrypted:", !sql(`SELECT ai_key_enc FROM app_users WHERE id='${userId}'`).includes("validkey"));
 const before = Number(sql(`SELECT credits FROM app_users WHERE id='${userId}'`));
 const ownEdit = await api("/api/ai/assist", "POST", { templateId: "terminal", content, instruction: "Tighten my title" });
 const usedKey = (await (await fetch("http://localhost:4010/__log")).json()).filter((line) => line.startsWith("CLAUDE-KEY")).at(-1);

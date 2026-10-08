@@ -1,6 +1,6 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { assistWithContent } from "@/lib/ai/portfolio-assistant";
-import { openAi, platformAiConfigured, releaseRequest, settleAi } from "@/lib/ai/metering";
+import { openAi, platformAiConfigured, releaseRequest, settleAi, sumUsage } from "@/lib/ai/metering";
 import { MAX_CONTENT_BYTES, validateContent } from "@/lib/portfolio/schema";
 import { isTemplateId } from "@/lib/templates/catalog";
 import { databaseConfigured } from "@/utils/db-schema";
@@ -36,7 +36,7 @@ export const POST = route(async (request: Request) => {
   if (!gate.ok) return jsonError(gate.status, gate.error);
   try {
     const result = await assistWithContent(gate.access.client, validation.content, instruction.trim());
-    const bill = await settleAi(gate.access, result.usage, "AI edit");
+    const bill = await settleAi(gate.access, result.usage ? sumUsage(result.usage) : null, "AI edit");
     if (!result.ok) {
       if (!result.usage) await releaseRequest(user.id);
       return jsonError(result.status, result.error);

@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Globe, KeyRound, Loader2, LogOut, PencilLine } from "lucide-react";
+import { ExternalLink, Globe, LogOut, PencilLine } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import GoogleSignInButton from "@/components/common/GoogleSignInButton";
 import { ProfileSection } from "@/components/auth/ProfileSection";
 import { getTemplate } from "@/lib/templates/catalog";
 import type { TemplateId } from "@/lib/templates/types";
-import { cardFeeCents } from "@/lib/plans";
+import { AiSettings, type AiBilling } from "@/components/account/AiSettings";
 
 interface AccountPortfolio { templateId: TemplateId; name: string; slug: string | null; publishedAt: string | null; updatedAt: string; hasUnpublishedChanges: boolean }
 interface Billing {
   plan: { id: string; name: string; standing: "active" | "grace"; daysLeft: number; endsAt: string | null; interval: "year" | "month"; autoRenew: boolean; hasCard: boolean };
-  ai: { credits: number; keyHint: string | null; platformAi: boolean; packs: Array<{ id: string; credits: number; cents: number; label: string }>; history: Array<{ delta: number; balance: number; reason: string; at: string }> };
+  ai: AiBilling;
   emailsOptOut: boolean;
   payments: boolean;
   orders: Array<{ id: string; kind: string; plan: string | null; term_years: number | null; term_months: number | null; credits: number | null; amount_cents: number; status: string; created_at: string }>;
@@ -64,43 +64,6 @@ function Portfolios() {
         <div className="flex gap-2">{item.publishedAt && item.slug && <a href={`/p/${item.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-rule px-3 py-1.5 text-[0.88rem] hover:border-ink"><ExternalLink size={13} /> View</a>}
           <Link href={`/editor/${item.templateId}`} className="inline-flex items-center gap-1 rounded-full bg-ink px-4 py-1.5 text-[0.88rem] text-paper"><PencilLine size={13} /> Edit</Link></div>
       </li>)}</ul>}
-  </section>;
-}
-
-function Ai({ billing, reload }: { billing: Billing; reload: () => void }) {
-  const { ai } = billing;
-  const [key, setKey] = useState("");
-  const [busy, setBusy] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const run = async (name: string, action: () => Promise<void>) => { setBusy(name); setMessage(null); try { await action(); } catch (error) { setMessage({ tone: "error", text: (error as Error).message }); } finally { setBusy(null); } };
-  const buy = (pack: string) => run(pack, async () => { const body = await json("/api/billing/checkout", { method: "POST", body: JSON.stringify({ credits: pack }) }); window.location.assign(body.url); });
-  return <section className="mt-12">
-    <Heading id="ai" title="AI help" />
-    <p className="mt-4 max-w-[40rem] text-[0.98rem] leading-relaxed text-ink-soft">The AI assistant, imports and the Investigator are paid separately from your plan and cost the same on every plan. Buy credits (sold at what the AI costs us plus 5%), or connect your own Claude API key and pay Anthropic directly.</p>
-    <div className="mt-6 grid gap-5 md:grid-cols-2">
-      <div className="rounded-2xl border border-rule bg-white/50 p-5">
-        <p className="text-[0.85rem] text-ink-soft">Credits</p>
-        <p className="font-display text-[3rem] leading-none">{ai.credits.toLocaleString("en")}</p>
-        <p className="mt-2 text-[0.85rem] text-ink-faint">A rewrite costs about 3–7 credits; an Investigator check about 20–60.{!ai.platformAi && " (Credits aren’t switched on for this site yet.)"}</p>
-        {billing.payments && ai.platformAi && <div className="mt-4 flex flex-wrap gap-2">{ai.packs.map((pack) => <button key={pack.id} type="button" disabled={busy !== null} onClick={() => void buy(pack.id)} className="inline-flex items-center gap-1.5 rounded-full border border-ink/30 px-3 py-1.5 text-[0.88rem] hover:border-ink disabled:opacity-50">{busy === pack.id && <Loader2 size={13} className="animate-spin" />}{pack.label} · {usd(pack.cents)} + {usd(cardFeeCents(pack.cents))} card fee</button>)}</div>}
-        {billing.payments && ai.platformAi && <p className="mt-2 text-[0.8rem] text-ink-faint">Credits never expire. Unused credits can be refunded, minus the card fee, which Stripe keeps.</p>}
-        {ai.history.length > 0 && <details className="mt-4 text-[0.85rem]"><summary className="cursor-pointer text-ink-soft">Recent use</summary><ul className="mt-2 space-y-1">{ai.history.map((entry, index) => <li key={index} className="flex justify-between gap-3"><span>{entry.reason}<span className="ml-2 text-ink-faint">{date(entry.at)}</span></span><span className={entry.delta > 0 ? "text-emerald-800" : ""}>{entry.delta > 0 ? "+" : ""}{entry.delta}</span></li>)}</ul></details>}
-      </div>
-      <div className="rounded-2xl border border-rule bg-white/50 p-5">
-        <p className="flex items-center gap-2 text-[0.85rem] text-ink-soft"><KeyRound size={14} /> Your own Claude API key</p>
-        {ai.keyHint ? <>
-          <p className="mt-2 font-mono text-[0.95rem]">{ai.keyHint}</p><p className="mt-1 text-[0.85rem] text-ink-faint">AI runs on your Anthropic account. No credits are used.</p>
-          <button type="button" disabled={busy !== null} onClick={() => void run("remove", async () => { await json("/api/account/ai-key", { method: "DELETE" }); reload(); })} className="mt-4 text-[0.88rem] underline">Remove key</button>
-        </> : <>
-          <p className="mt-2 text-[0.85rem] leading-relaxed text-ink-faint">Create one at console.anthropic.com → API keys. It’s checked, encrypted, and never shown again.</p>
-          <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void run("key", async () => { await json("/api/account/ai-key", { method: "PUT", body: JSON.stringify({ key }) }); setKey(""); setMessage({ tone: "ok", text: "Key saved. AI now runs on your account." }); reload(); }); }}>
-            <input value={key} onChange={(event) => setKey(event.target.value)} type="password" autoComplete="off" placeholder="sk-ant-…" aria-label="Claude API key" className="min-w-0 flex-1 rounded-lg border border-rule bg-white px-3 py-2 font-mono text-[0.88rem] outline-none focus:border-ink" />
-            <button disabled={!key.trim() || busy !== null} className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 text-[0.88rem] text-paper disabled:opacity-40">{busy === "key" && <Loader2 size={13} className="animate-spin" />}Save</button>
-          </form>
-        </>}
-      </div>
-    </div>
-    {message && <p role={message.tone === "error" ? "alert" : "status"} className={`mt-3 text-[0.92rem] ${message.tone === "error" ? "text-[color:var(--destructive)]" : "text-emerald-800"}`}>{message.text}</p>}
   </section>;
 }
 
@@ -163,7 +126,7 @@ export default function AccountPage() {
       {paid && <p role="status" className="mt-8 rounded-xl bg-emerald-50 px-4 py-3 text-[0.95rem] text-emerald-950">Thank you, your payment went through. {paid === "credits" ? "Your credits are on their way." : "Your plan is active."} A receipt is in your inbox.</p>}
       {billing ? <Plan billing={billing} reload={load} /> : <p className="mt-10 text-sm text-ink-soft">Loading your plan…</p>}
       <Portfolios />
-      {billing && <Ai billing={billing} reload={load} />}
+      {billing && <AiSettings ai={billing.ai} payments={billing.payments} reload={load} />}
       <section className="mt-12"><Heading id="updates" title="The Investigator"><Link href="/account/investigator" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">Set it up</Link></Heading><p className="mt-4 text-[0.95rem] text-ink-soft">Keeps your website up to date with your career. It checks your own profiles on the schedule you choose (any schedule, on every plan; your first check is free), finds new jobs, talks, awards and articles, and either asks you first or updates your site for you.</p></section>
       {billing && <Emails billing={billing} reload={load} />}
       <section className="mt-12"><Heading id="domains" title="Domains" /><p className="mt-4 text-[0.95rem] text-ink-soft">See when the domains you bought here expire, and renew them. <Link href="/account/domains" className="text-ink underline underline-offset-4">Your domains</Link></p></section>

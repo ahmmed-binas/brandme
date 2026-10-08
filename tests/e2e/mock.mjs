@@ -91,6 +91,28 @@ http.createServer(async (req, res) => {
     return send(res, 200, { data: [{ id: "claude-opus-5-5", type: "model" }], has_more: false });
   }
 
+  // OpenAI (customers' own keys): model list and the Responses API.
+  if (path === "/openai/v1/models" && req.method === "GET") {
+    const key = String(req.headers.authorization ?? "").replace(/^Bearer /, "");
+    log.push(`OPENAI-MODELS key=${key}`);
+    if (key !== "sk-proj-validopenaikeyvalidopenaikey") return send(res, 401, { error: { message: "Incorrect API key provided", type: "invalid_request_error" } });
+    return send(res, 200, { object: "list", data: ["gpt-4o", "gpt-5", "gpt-5.2", "gpt-5.2-mini", "o3", "text-embedding-3-large"].map((id) => ({ id, object: "model" })) });
+  }
+  if (path === "/openai/v1/responses" && req.method === "POST") {
+    const body = JSON.parse(raw);
+    const key = String(req.headers.authorization ?? "").replace(/^Bearer /, "");
+    log.push(`OPENAI model=${body.model} key=${key} store=${body.store} format=${body.text?.format?.type ?? "none"} tools=${(body.tools ?? []).map((tool) => tool.type).join(",")}`);
+    if (key !== "sk-proj-validopenaikeyvalidopenaikey") return send(res, 401, { error: { message: "Incorrect API key provided" } });
+    const reply = (text) => send(res, 200, { id: "resp_1", object: "response", status: "completed", model: body.model, output: [{ type: "message", role: "assistant", content: [{ type: "output_text", text }] }], usage: { input_tokens: 900, output_tokens: 120, input_tokens_details: { cached_tokens: 0 } } });
+    if (String(body.instructions).includes("edit the written content")) {
+      const fields = JSON.parse(String(body.input).split("Editable fields:\n")[1].split("\n\nRequest from the portfolio owner:")[0]);
+      const field = fields.find((item) => item.path === "tagline") ?? fields[0];
+      return reply(JSON.stringify({ reply: "Sharpened your tagline.", changes: [{ path: field.path, value: `${field.value} (sharpened by GPT)` }] }));
+    }
+    if (String(body.instructions).includes("You are the Investigator")) return reply(JSON.stringify({ findings: [{ kind: "highlight", title: "Talk at GPT Summit 2026", detail: "On calm on-call", year: "2026", organisation: "GPT Summit", source_url: "http://localhost:4010/news/devconf", confidence: "high" }], sources: [] }));
+    return reply("{}");
+  }
+
   // Anthropic Messages API
   if (path === "/v1/messages" && req.method === "POST") {
     const body = JSON.parse(raw);

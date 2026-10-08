@@ -1,6 +1,6 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { extractProfile } from "@/lib/ai/portfolio-assistant";
-import { openAi, releaseRequest, settleAi } from "@/lib/ai/metering";
+import { openAi, releaseRequest, settleAi, sumUsage } from "@/lib/ai/metering";
 import { compactProfile } from "@/lib/import/profile";
 import { groundProfile } from "@/lib/import/grounding";
 import { standardContentSchema } from "@/lib/portfolio/schema";
@@ -24,7 +24,7 @@ export const POST = route(async (request: Request) => {
   if (!gate.ok) return jsonError(gate.status, gate.error);
   try {
     const result = await extractProfile(gate.access.client, text);
-    const bill = await settleAi(gate.access, result.usage, "AI import");
+    const bill = await settleAi(gate.access, result.usage ? sumUsage(result.usage) : null, "AI import");
     if (!result.ok) {
       if (!result.usage) await releaseRequest(user.id);
       return jsonError(result.status, result.error);

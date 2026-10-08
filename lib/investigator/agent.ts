@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { AiProviderError, type AiClient, type AiUsage } from "@/lib/ai/provider";
 import { z } from "zod";
 import type { StandardContent } from "@/lib/portfolio/schema";
 import { describePerson, findingSchema, type Finding } from "@/lib/autoupdate/research";
@@ -13,7 +13,7 @@ import type { PageRead } from "./reader";
  * login are reported as unreadable rather than guessed at.
  */
 
-const MODEL = "claude-opus-5-5";
+
 
 const sourceSchema = z.object({
   url: z.string(),
@@ -47,7 +47,7 @@ function parse(text: string) {
   try { return resultSchema.parse(JSON.parse(text.slice(start, end + 1))); } catch { return null; }
 }
 
-export type AgentResult = { ok: true; findings: Finding[]; sources: SourceReport[]; usage: Anthropic.Beta.BetaUsage[] } | { ok: false; error: string; usage: Anthropic.Beta.BetaUsage[] };
+export type AgentResult = { ok: true; findings: Finding[]; sources: SourceReport[]; usage: AiUsage[] } | { ok: false; error: string; usage: AiUsage[] };
 
 /** Pages we read ourselves (with the headless browser when available), given to Claude as text. */
 function alreadyRead(pages: PageRead[]): string {
@@ -63,35 +63,20 @@ function alreadyRead(pages: PageRead[]): string {
   ].filter(Boolean).join("\n")).join("\n")}`;
 }
 
-export async function investigate(client: Anthropic, content: StandardContent, links: InvestigatorLink[], ownPages: PageRead[] = []): Promise<AgentResult> {
+export async function investigate(client: AiClient, content: StandardContent, links: InvestigatorLink[], ownPages: PageRead[] = []): Promise<AgentResult> {
   const pages = links.map((link) => ({ link, url: linkUrl(link) })).filter((entry): entry is { link: InvestigatorLink; url: string } => Boolean(entry.url));
   const list = pages.map(({ link, url }) => `- ${kindInfo(link.kind).label}: ${url}${kindInfo(link.kind).limited ? " (often shows little without logging in)" : ""}`).join("\n");
-  const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: `Check this person's profiles and find professional changes.\n\n${describePerson(content)}\n\nTheir own profiles (fetch these first):\n${list || "- none given; search only"}${alreadyRead(ownPages)}` }];
-  const usage: Anthropic.Beta.BetaUsage[] = [];
-  let text = "";
+  const user = `Check this person's profiles and find professional changes.\n\n${describePerson(content)}\n\nTheir own profiles (fetch these first):\n${list || "- none given; search only"}${alreadyRead(ownPages)}`;
+  let answer;
   try {
-    // Server-side tools can pause a long turn; continue it a few times at most.
-    for (let turn = 0; turn < 4; turn++) {
-      const response = await client.beta.messages.create({
-        model: MODEL, max_tokens: 16000, system: SYSTEM, messages,
-        betas: ["server-side-fallback-2026-07-01"], fallbacks: "default",
-        output_config: { effort: "medium" },
-        tools: [
-          { type: "web_fetch_20260209", name: "web_fetch", max_uses: Math.min(12, pages.length + 4), max_content_tokens: 8000 },
-          { type: "web_search_20260209", name: "web_search", max_uses: 6 },
-        ],
-      });
-      usage.push(response.usage);
-      if (response.stop_reason === "refusal") return { ok: false, error: "The Investigator couldn’t help with that.", usage };
-      text = response.content.flatMap((block) => (block.type === "text" ? [block.text] : [])).join("");
-      if (response.stop_reason !== "pause_turn") break;
-      messages.push({ role: "assistant", content: response.content });
-    }
+    answer = await client.ask({ system: SYSTEM, user, webFetch: Math.min(12, pages.length + 4), webSearch: 6 });
   } catch (error) {
-    if (error instanceof Anthropic.APIError) return { ok: false, error: "The Investigator couldn’t finish this time. It will try again at the next check.", usage };
-    throw error;
+    if (!(error instanceof AiProviderError)) throw error;
+    return { ok: false, error: error.kind === "auth" ? "Your AI provider didn’t accept the saved API key. Check it in Account → AI." : "The Investigator couldn’t finish this time. It will try again at the next check.", usage: [] };
   }
-  const result = parse(text);
+  const { usage } = answer;
+  if (answer.stop === "refusal") return { ok: false, error: "The Investigator couldn’t help with that.", usage };
+  const result = parse(answer.text);
   if (!result) return { ok: false, error: "The Investigator’s answer couldn’t be read. It will try again at the next check.", usage };
   return { ok: true, findings: result.findings, sources: result.sources, usage };
 }

@@ -5,6 +5,7 @@ import { emails } from "@/lib/email/templates";
 import { sendOnce } from "@/lib/email/mailer";
 import { renewPlan } from "@/lib/billing/service";
 import { deleteOrphanedAssets } from "@/lib/assets/repository";
+import { pruneRateLimits } from "@/lib/security/rate-limit";
 import { syncGitHub } from "@/lib/autoupdate/github-sync";
 import { advanceOrders, remindRenewals } from "@/lib/domains/service";
 import { runDueInvestigations } from "@/lib/investigator/run";
@@ -95,6 +96,7 @@ export async function runScheduledJobs(): Promise<Record<string, unknown>> {
     await step("domainRenewals", remindRenewals);
     await step("investigator", () => runDueInvestigations());
     await step("orphanedImages", deleteOrphanedAssets);
+    await step("rateLimits", pruneRateLimits);
     await step("oldVisits", pruneViews);
     return summary;
   } finally {
