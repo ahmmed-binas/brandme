@@ -39,7 +39,9 @@ services:
   # Only the app can reach it (no ports published). It refuses private/internal
   # addresses by default; stealth mode stays off on purpose.
   obscura:
-    image: h4ckf0r0day/obscura:latest
+    # Pinned to one release by its digest, so a changed or hijacked image can't reach the
+    # server unnoticed. To update: check the release notes, then replace tag and digest.
+    image: h4ckf0r0day/obscura:0.2.4@sha256:772cf3bada266e81bc0fae0304074f4971a551e3766f412417f006273e202f0e
     restart: unless-stopped
     command: ["serve", "--port", "9222", "--workers", "2"]
     mem_limit: 512m

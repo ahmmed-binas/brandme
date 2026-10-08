@@ -42,7 +42,7 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
     : null;
 
   return <article className="mx-auto max-w-[860px] px-5 pb-24 pt-12 sm:px-8 lg:pt-16">
-    {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
+    {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />}
     <Link href="/community" className="inline-flex items-center gap-2 text-[0.92rem] text-ink-soft hover:text-ink"><ArrowLeft size={15} /> Community</Link>
 
     <header className="mt-10">

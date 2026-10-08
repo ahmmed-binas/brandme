@@ -31,6 +31,27 @@ export async function requireOwner(params: Promise<{ templateId: string }>): Pro
 
 type Handler<C> = (request: Request, context: C) => Promise<Response>;
 
+const UNSAFE = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/**
+ * Refuses changes sent by another website's page (cross-site request forgery).
+ * Sign-in cookies are already SameSite=Lax; this is the second lock. Browsers
+ * mark every request with Sec-Fetch-Site and Origin; server-to-server callers
+ * (Stripe, Cal.com, the cron job) send neither and are let through to their own
+ * signature or secret checks.
+ */
+function crossSite(request: Request): Response | null {
+  if (!UNSAFE.has(request.method)) return null;
+  const site = request.headers.get("sec-fetch-site");
+  if (site === "cross-site") return jsonError(403, "This request came from another website, so it was refused.");
+  const origin = request.headers.get("origin");
+  if (!origin || origin === "null") return null;
+  let originHost: string;
+  try { originHost = new URL(origin).host.toLowerCase(); } catch { return jsonError(403, "This request came from another website, so it was refused."); }
+  const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "").split(",")[0]!.trim().toLowerCase();
+  return host && originHost !== host ? jsonError(403, "This request came from another website, so it was refused.") : null;
+}
+
 /**
  * Wraps a route handler so failures become clear JSON errors: a database
  * outage is a 503 the editor can explain, and anything unexpected is logged
@@ -38,6 +59,8 @@ type Handler<C> = (request: Request, context: C) => Promise<Response>;
  */
 export function route<C = unknown>(handler: Handler<C>): Handler<C> {
   return async (request, context) => {
+    const refused = crossSite(request);
+    if (refused) return refused;
     try {
       return await handler(request, context);
     } catch (error) {

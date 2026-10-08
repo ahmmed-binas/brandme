@@ -1,12 +1,12 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
-import { AccountError, signUp, tooManyAttempts } from "@/lib/accounts/passwords";
+import { AccountError, signUp } from "@/lib/accounts/passwords";
+import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 import { databaseConfigured } from "@/utils/db-schema";
 
 /** Creates an email + password account. The browser then signs in with the "password" provider. */
 export const POST = route(async (request: Request) => {
   if (!databaseConfigured()) return jsonError(503, "Accounts need the database.");
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (tooManyAttempts(`signup:${ip}`, 8, 60 * 60_000)) return jsonError(429, "Too many sign-ups from here. Try again in an hour.");
+  if (!(await rateLimit(`signup:${clientIp(request)}`, 8, 3600))) return jsonError(429, "Too many sign-ups from here. Try again in an hour.");
   const body = await readJson(request, 4_000);
   if (body instanceof Response) return body;
   const input = (body ?? {}) as Record<string, unknown>;

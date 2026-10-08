@@ -23,3 +23,27 @@ export async function pruneRateLimits(): Promise<number> {
   await ensureSchema();
   return (await db.query("DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL '1 day'")).rowCount ?? 0;
 }
+
+/** True when `key` has failed `limit` times in the current window (failures recorded with `recordFailure`). */
+export async function failuresBlocked(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+  await ensureSchema();
+  const result = await db.query<{ count: number }>(
+    "SELECT count FROM rate_limits WHERE key = $1 AND window_start = to_timestamp(floor(extract(epoch FROM NOW()) / $2) * $2)",
+    [`fail:${key}`.slice(0, 200), windowSeconds],
+  );
+  return (result.rows[0]?.count ?? 0) >= limit;
+}
+
+export async function recordFailure(key: string, windowSeconds: number): Promise<void> {
+  await rateLimit(`fail:${key}`, Number.MAX_SAFE_INTEGER, windowSeconds);
+}
+
+/**
+ * The visitor's IP address. Behind Caddy (the only way in, in production) the
+ * first X-Forwarded-For entry is set by Caddy itself, so it can't be forged.
+ */
+export function clientIp(request: Request | { headers?: { get?: (name: string) => string | null } } | undefined): string {
+  const headers = request?.headers;
+  const forwarded = headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwarded || headers?.get?.("x-real-ip")?.trim() || "local";
+}

@@ -1,7 +1,11 @@
 <!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
 <!-- END:nextjs-agent-rules -->
 
 # Handoff for coding agents (Codex, Claude Code, …)
@@ -55,7 +59,7 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Superadmin console (dashboard, users, visitor counts) | `app/console/*` behind `SUPERADMIN_PATH`, `components/console/*`, `lib/console/metrics.ts`, `lib/analytics/track.ts` (+ `/api/t`, `components/common/VisitBeacon.tsx`), `docs/CONSOLE.md` |
 | Admin | `/admin` (go-live checklist `lib/setup-checks.ts`), moderators = `ADMIN_EMAILS` |
 
-More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CONSOLE.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
+More: `docs/SECURITY.md` (security model, pre-launch review, launch checklist), `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CONSOLE.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
 
 ## Rules the owner has set
 
@@ -72,7 +76,7 @@ More: `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs
 - **Templates:** size with container queries (`@3xl:`, `cqw`), never viewport breakpoints or `position: fixed` (they render inside the editor and phone preview). Every visible piece of content gets `{...ed("path")}` so clicking it opens its field. Empty sections hide via `has()`. Respect `motionOff()` (static captures, reduced motion). Each template must show the name in an `<h1>` even with almost no content (`tests/e2e/blank.mjs`).
 - **APIs:** wrap handlers in `route()` from `lib/api/http.ts`; validate everything on the server; owner-only routes use `requireOwner`; admin routes check `user.isAdmin` (or `isSuperadmin`) and return 404 otherwise.
 - **Pages that depend on who is signed in** export `dynamic = "force-dynamic"`. Without it, a build without `DATABASE_URL` (as in Docker) pre-renders them once, baking in a sign-in redirect or a 404.
-- **Security:** no secrets in the repo; uploads are checked by content (magic bytes), size and, for ZIPs, paths and file types; one-time tokens are stored hashed; rate limits on sign-in, sign-up and uploads.
+- **Security:** see `docs/SECURITY.md`. No secrets in the repo; wrap every API handler in `route()` (it also refuses cross-site writes); escape `<` in any JSON-LD; fetch customer-given addresses only through `lib/investigator/feeds.ts` (public addresses only); use `rateLimit()` from `lib/security/rate-limit.ts` on anything public that costs money or sends email; one-time tokens are stored hashed.
 - **Money:** prices are calculated on the server; a domain is never bought before the customer has paid; renewals never happen without the customer paying.
 
 ## Open decisions (waiting on the owner)

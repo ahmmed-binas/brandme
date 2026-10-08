@@ -6,7 +6,9 @@
  */
 export function devLoginEnabled(): boolean {
   if (process.env.DEV_LOGIN !== "true") return false;
-  const url = process.env.APP_URL ?? process.env.AUTH_URL ?? "http://localhost:3000";
+  // No default: a server with no APP_URL set must not fall back to “localhost” and allow it.
+  const url = process.env.APP_URL ?? process.env.AUTH_URL;
+  if (!url) return false;
   try {
     return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname);
   } catch {

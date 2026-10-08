@@ -41,7 +41,7 @@ export default function PricingPage() {
   };
 
   return <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-14 sm:px-8 lg:pt-20">
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
     <header className="mx-auto max-w-[46rem] text-center">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Pricing</p>
       <h1 className="mt-4 font-display text-[clamp(2.8rem,6.6vw,5.4rem)] leading-[0.95] tracking-[-0.03em]">Free to start. <em className="font-[300] text-signal">Fair after that.</em></h1>

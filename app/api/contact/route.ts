@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { sendContactEmail } from "@/lib/contact/smtp";
+import { clientIp, rateLimit } from "@/lib/security/rate-limit";
+import { databaseConfigured } from "@/utils/db-schema";
 
 export async function POST(request: Request) {
+  // A public form that sends email: limit it so it can't be used to flood the inbox.
+  if (databaseConfigured() && (!(await rateLimit(`contact:${clientIp(request)}`, 5, 3600).catch(() => true)) || !(await rateLimit("contact:all", 200, 86400).catch(() => true)))) {
+    return NextResponse.json({ error: "Too many messages from here. Please try again later, or email us directly." }, { status: 429 });
+  }
   try {
     const body = await request.json() as Record<string, unknown>;
     const name = typeof body.name === "string" ? body.name.trim().slice(0, 120) : "";

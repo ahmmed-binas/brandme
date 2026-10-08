@@ -9,6 +9,9 @@ import {
 import LoadingBars from "@/utils/LoadingUI";
 import InfoCloud from "@/utils/cloudInfo";
 
+/** Text read from an uploaded CV, shown as HTML: escaped first, so markup inside a file can't run. */
+const textToHtml = (text: string) => (text ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!).replace(/\n/g, "<br>");
+
 const UPLOAD_GIF_SRC = "/uploadcv.gif";
 
 // ---------------------------------------------------------------------------
@@ -1148,7 +1151,7 @@ const handleAIProcess = async () => {
                       contentEditable
                       suppressContentEditableWarning
                        dangerouslySetInnerHTML={{
-    __html: project.project_summary,
+    __html: textToHtml(project.project_summary),
   }}
                       dir="ltr"
                       onFocus={() => handleFocus("about_ProjectInput")}
@@ -1291,7 +1294,7 @@ const handleAIProcess = async () => {
                         suppressContentEditableWarning
                         dir="ltr"
                          dangerouslySetInnerHTML={{
-                          __html: exp.work_summary,
+                          __html: textToHtml(exp.work_summary),
                         }}
                             onFocus={() => handleFocus("about_WorkInput")}
                         style={{

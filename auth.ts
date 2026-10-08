@@ -3,13 +3,17 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { devLoginEnabled } from "@/lib/dev-login";
 import { saveGoogleUser } from "@/utils/user-account";
-import { blockedAfterFailures, checkCredentials, noteFailure, tooManyAttempts } from "@/lib/accounts/passwords";
+import { checkCredentials } from "@/lib/accounts/passwords";
+import { clientIp, failuresBlocked, rateLimit, recordFailure } from "@/lib/security/rate-limit";
 
 declare module "next-auth" {
   interface Session {
     user: { providerAccountId?: string; provider?: string; console?: boolean } & DefaultSession["user"];
   }
 }
+
+/** How long a superadmin console sign-in keeps its powers. */
+const CONSOLE_SESSION_MS = 12 * 60 * 60 * 1000;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -23,8 +27,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const login = String(input?.login ?? "").trim().toLowerCase();
         const password = String(input?.password ?? "");
         if (!login || !password) return null;
-        const ip = request?.headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-        if (tooManyAttempts(`login:${login}`) || tooManyAttempts(`login-ip:${ip}`, 30)) return null;
+        const ip = clientIp(request);
+        // Stored in the database, so the limits hold across restarts: 10 tries per account and 30 per address every 15 minutes.
+        if (!(await rateLimit(`login:${login}`, 10, 900)) || !(await rateLimit(`login-ip:${ip}`, 30, 900))) return null;
         const account = await checkCredentials(login, password);
         return account ? { id: account.providerAccountId, email: account.email, name: account.name } : null;
       },
@@ -38,11 +43,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const login = String(input?.login ?? "").trim().toLowerCase();
         const password = String(input?.password ?? "");
         if (!login || !password) return null;
-        const ip = request?.headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+        const ip = clientIp(request);
         // Five wrong passwords (per email) or ten (per address) pause console sign-in for 15 minutes.
-        if (blockedAfterFailures(`console:${login}`, 5) || blockedAfterFailures(`console-ip:${ip}`, 10)) return null;
+        if (await failuresBlocked(`console:${login}`, 5, 900) || await failuresBlocked(`console-ip:${ip}`, 10, 900)) return null;
         const account = await checkCredentials(login, password, "console");
-        if (!account) { noteFailure(`console:${login}`); noteFailure(`console-ip:${ip}`); return null; }
+        if (!account) { await recordFailure(`console:${login}`, 900); await recordFailure(`console-ip:${ip}`, 900); return null; }
         return { id: account.providerAccountId, email: account.email, name: account.name };
       },
     }),
@@ -72,12 +77,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account) token.provider = account.provider === "password" || account.provider === "console" ? "password" : "google";
       // Superadmin powers come only with a console sign-in.
       if (account) token.console = account.provider === "console";
+      if (account?.provider === "console") token.consoleAt = Date.now();
       return token;
     },
     session({ session, token }) {
       if (typeof token.providerAccountId === "string") session.user.providerAccountId = token.providerAccountId;
       session.user.provider = token.provider === "password" ? "password" : "google";
-      session.user.console = token.console === true;
+      // Superadmin powers lapse 12 hours after the console sign-in, however long the session lasts.
+      session.user.console = token.console === true && typeof token.consoleAt === "number" && Date.now() - token.consoleAt < CONSOLE_SESSION_MS;
       return session;
     },
   },
