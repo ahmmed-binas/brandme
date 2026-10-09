@@ -16,7 +16,7 @@ Read this first, then `docs/plans/project-handoff.pdf` (history, progress, to-do
 
 **Formora** (working name; the owner is considering a rename, see "Open decisions") is a portfolio and personal-website builder for every kind of professional, not just designers and developers. People pick a template drawn for their job (156 job titles, 51 studio designs, including a real estate collection built to sell from), fill it by clicking text in a live preview (or import a CV, LinkedIn export or GitHub, or ask the AI assistant), and publish at `/p/<address>` or on their own domain. Templates are also given away free in a **gallery** (content marketing); the paid product is customising, hosting, domains, blogs and keeping the site up to date.
 
-Business model (free-first launch, `docs/plans/free-first-launch-plan.md`): **Basic is free** (one live portfolio, blog, the Investigator); **Pro is $6/month or $60/year** (up to three live portfolios, own domain, no branding; changed from $2.50/$24 on 9 October 2026); **Custom** is a personal designer, started from a free call; free demo calls through Book a free call; no trial, no Premium (`lib/plans.ts`, `app/pricing`). AI is paid separately at cost + 5% with credits or the customer's own Anthropic key, the same on every plan; each account's first Investigator check is free. Domains are sold at the registrar's price + Stripe's card fee, which is shown as its own line (also for credits). “Need more?” and the done-for-you service go through **Book a free call** (Cal.com, `lib/booking.ts`). Legal pages: `/privacy`, `/terms` (`lib/legal.ts`).
+Business model (free-first launch, `docs/plans/free-first-launch-plan.md`): **Basic is free** (one live portfolio, blog, the Investigator); **Pro is $6/month or $60/year** (up to three live portfolios, own domain, no branding; changed from $2.50/$24 on 9 October 2026); **Custom** is a personal designer, started from a free call; free demo calls through Book a free call; no trial, no Premium (`lib/plans.ts`, `app/pricing`). AI is never free for customers: they sign in and either connect their own Claude or OpenAI key (free on our side; their provider bills them) or buy credits at cost + 5%, the same on every plan. The only exceptions are small, capped trials: 60 welcome credits and each account's first Investigator check (owner's decision, October 2026). Domains are sold at the registrar's price + Stripe's card fee, which is shown as its own line (also for credits). “Need more?” and the done-for-you service go through **Book a free call** (Cal.com, `lib/booking.ts`). Legal pages: `/privacy`, `/terms` (`lib/legal.ts`).
 
 ## Stack and commands
 
@@ -59,7 +59,7 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Superadmin console (dashboard, users, visitor counts) | `app/console/*` behind `SUPERADMIN_PATH`, `components/console/*`, `lib/console/metrics.ts`, `lib/analytics/track.ts` (+ `/api/t`, `components/common/VisitBeacon.tsx`), `docs/CONSOLE.md` |
 | Admin | `/admin` (go-live checklist `lib/setup-checks.ts`), moderators = `ADMIN_EMAILS` |
 
-More: `docs/SECURITY.md` (security model, pre-launch review, launch checklist), `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CONSOLE.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
+Owner's manuals: `docs/plans/running-formora-with-an-ai-agent.pdf` (how the site works, who pays for AI, running it with an agent) and `docs/plans/why-formora-makes-money-ai-age.pdf`. More: `docs/SECURITY.md` (security model, pre-launch review, launch checklist), `docs/PROJECT_STRUCTURE.md`, `docs/TEMPLATES.md`, `docs/GALLERY.md`, `docs/INVESTIGATOR.md`, `docs/CONSOLE.md`, `docs/CUSTOM_DOMAINS.md`, `docs/BUSINESS_PLAN.md`.
 
 ## Rules the owner has set
 
@@ -84,11 +84,10 @@ More: `docs/SECURITY.md` (security model, pre-launch review, launch checklist), 
 - Brand name (currently Formora; “BrandMe” was considered but is taken by a London agency).
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
 - The owner's legal name and country for `/privacy` and `/terms` (`LEGAL_NAME`, `LEGAL_COUNTRY`), and a final read of both pages (drafted, not legal advice).
-- ChatGPT/OpenAI as a second AI provider: agreed for after launch.
 - The Journal's new-tab option for agents (asked for, parked for later).
 
 ## Next work, in order
 
-**Built: `docs/plans/free-first-launch-plan.md` steps 1–7** (plans, money, navigation, Inspector Iqbal's page with ratings and comments, sources clean-up, blog media), plus Book a free call (Cal.com), privacy and terms. **Next: run every end-to-end suite on a fresh database, then launch on a VPS** (`docs/LAUNCH.md`). Later (plan step 8): email channel → ChatGPT/Claude connector → WhatsApp; ChatGPT/OpenAI as a second AI provider; uploaded video in posts (today: YouTube/Vimeo links).
+**Built: `docs/plans/free-first-launch-plan.md` steps 1–7** (plans, money, navigation, Inspector Iqbal's page with ratings and comments, sources clean-up, blog media), plus Book a free call (Cal.com), privacy and terms. **Next: run every end-to-end suite on a fresh database, then launch on a VPS** (`docs/LAUNCH.md`). Later (plan step 8): email channel → ChatGPT/Claude connector → WhatsApp; uploaded video in posts (today: YouTube/Vimeo links).
 
 See the PDF for detail. In short: configurable auto-update (done: the Investigator), analytics (owner side done: the console; still to do: views per portfolio for customers), a done-for-you order flow, blog link in template menus and blogs for the three original templates, production launch on a VPS, then growth work (SEO pages, the MCP/“update my site from Claude or ChatGPT” connector, more sources).

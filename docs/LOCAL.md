@@ -13,6 +13,8 @@ This gets the whole site running at http://localhost:3000 with a database and a 
 ```bash
 git clone https://github.com/ahmmed-binas/brandme.git formora
 cd formora
+# The current work lives on this branch (not merged into main yet):
+git checkout improve-editor-and-business
 npm install
 
 # A PostgreSQL database in Docker, kept between restarts:
@@ -45,6 +47,8 @@ TEMPLATES_REQUIRE_APPROVAL=true
 - Put the email you'll sign in with into `ADMIN_EMAILS` to get the admin pages. Or create the owner's account the way the live site does it: `npm run admin:create`, then sign in at http://localhost:3000/console (or your `SUPERADMIN_PATH`), not at `/login`. That opens the superadmin console: the business dashboard, users, and every admin tool, including **Email settings** with a test email once `SMTP_…` is filled in.
 - *(Optional)* **Obscura**, the headless browser the Investigator uses to read pages built with JavaScript: download it from https://github.com/h4ckf0r0day/obscura/releases (Windows: the `.zip`), run `obscura serve --port 9222`, and add `OBSCURA_URL=ws://127.0.0.1:9222/devtools/browser` to `.env.local`. Without it, pages are read with a plain fetch.
 - **A page shows an error?** Usually the database isn't running: start Docker Desktop, then `docker start formora-db`, and reload. The Community page now says "can't be reached right now" instead of failing.
+
+- Other optional lines: `ENCRYPTION_KEY` (a long random value; encrypts customers' saved AI keys), `ANTHROPIC_API_KEY` (turns on AI credits), `NEXT_PUBLIC_WHATSAPP_NUMBER` (the WhatsApp button; defaults to the owner's number), `SUPERADMIN_PATH` (the console's secret address).
 
 ## 4. Start it
 
@@ -87,3 +91,19 @@ docker stop formora-db        # stop the database (data is kept)
 docker start formora-db       # start it again
 docker rm -f formora-db && docker volume rm formora-db   # wipe everything
 ```
+
+
+## Moving to another computer
+
+The code is on GitHub; your settings and your local database are not (on purpose: `.env.local` holds secrets and is never committed).
+
+1. On the new computer, follow steps 1–4 above (clone, `git checkout improve-editor-and-business`, `npm install`, start the database).
+2. **Settings:** copy `.env.local` from the old computer by USB stick or a password manager, never by email, chat or GitHub. Or make a fresh one from `.env.example` as in step 3.
+3. **Database:** a new database starts empty. Templates you approved come along anyway (they're recorded in `lib/templates/decisions.ts`). To bring your test accounts and portfolios too, on the old computer run
+   `docker exec formora-db pg_dump -U postgres -Fc formora > formora.dump`
+   copy `formora.dump` across, and on the new one run
+   `docker exec -i formora-db pg_restore -U postgres -d formora --clean < formora.dump`
+   On Windows, run these two in **Git Bash** or **Command Prompt**, not PowerShell: PowerShell's `>` and `<` damage binary files like this dump.
+4. **Superadmin:** with a fresh database, create the owner account again with `npm run admin:create`, then sign in at your `SUPERADMIN_PATH`.
+5. `npm run db:migrate`, then `npm run dev`, and open http://localhost:3000.
+6. Before working: `git pull` to get the latest changes. After working: commit and `git push`, so the other computer can `git pull` them.
