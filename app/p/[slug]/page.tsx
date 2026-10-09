@@ -26,11 +26,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (portfolio.resting) return { title: portfolio.ownerName ?? "Portfolio", robots: { index: false } };
   const { name, title, summary } = describe(portfolio.content);
   const heading = [name, title].filter(Boolean).join(" — ") || "Portfolio";
+  const canonical = (await sitePathFor(slug))?.canonical ?? `/p/${slug}`;
   return {
     title: { absolute: heading },
     description: summary?.slice(0, 160),
-    alternates: { canonical: `/p/${slug}` },
-    openGraph: { type: "profile", title: heading, description: summary?.slice(0, 160), url: `/p/${slug}` },
+    // The owner's own domain, when they have one, is the address to index.
+    alternates: { canonical: canonical },
+    openGraph: { type: "profile", title: heading, description: summary?.slice(0, 160), url: canonical },
   };
 }
 

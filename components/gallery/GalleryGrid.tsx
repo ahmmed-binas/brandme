@@ -102,7 +102,7 @@ function Tile({ item, index }: { item: GalleryItem; index: number }) {
   </li>;
 }
 
-export default function GalleryGrid({ items, initialQuery = "" }: { items: GalleryItem[]; initialQuery?: string }) {
+export default function GalleryGrid({ items, initialQuery = "", initialPage = 1 }: { items: GalleryItem[]; initialQuery?: string; initialPage?: number }) {
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<Filter>("all");
   const matches = useMemo(() => {
@@ -116,7 +116,7 @@ export default function GalleryGrid({ items, initialQuery = "" }: { items: Galle
     });
   }, [items, query, filter]);
 
-  const { items: pageItems, page, pages, go, top } = usePaged(matches, 12, `${query}|${filter}`);
+  const { items: pageItems, page, pages, go, top } = usePaged(matches, 12, `${query}|${filter}`, initialPage);
 
   // Keep the search in the address bar so a search can be shared.
   useEffect(() => {
@@ -141,7 +141,7 @@ export default function GalleryGrid({ items, initialQuery = "" }: { items: Galle
     <p className="mt-6 text-[0.9rem] text-ink-soft" aria-live="polite">{matches.length} {matches.length === 1 ? "template" : "templates"}{query ? ` for “${query}”` : ""}{pages > 1 && ` · page ${page} of ${pages}`}</p>
     {matches.length
       ? <><ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">{pageItems.map((item, index) => <Tile key={item.key} item={item} index={index} />)}</ul>
-        <Pagination page={page} pages={pages} go={go} label="Gallery pages" /></>
+        <Pagination page={page} pages={pages} go={go} basePath="/gallery" label="Gallery pages" /></>
       : <div className="mt-16 text-center"><p className="font-display text-[2rem] text-ink">Nothing matches yet.</p><p className="mt-2 text-ink-soft">Try a profession or a style, or <button type="button" onClick={() => { setQuery(""); setFilter("all"); }} className="underline">see everything</button>.</p></div>}
   </>;
 }

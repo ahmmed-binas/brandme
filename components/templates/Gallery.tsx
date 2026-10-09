@@ -22,7 +22,7 @@ const STATUS_LABEL = { approved: "Approved", changes: "Changes requested", rejec
 const fieldOf = (id: string) => PROFESSIONS.find((item) => item.id === id)?.field ?? "";
 const professionLabel = (id: string) => PROFESSIONS.find((item) => item.id === id)?.label ?? "";
 
-export default function Gallery({ templates, roles, initial, moderator }: { templates: GalleryTemplate[]; roles: RoleSummary[]; initial: { profession?: string; field?: string; style?: string; mood?: string; q?: string; role?: string }; moderator: boolean }) {
+export default function Gallery({ templates, roles, initial, moderator }: { templates: GalleryTemplate[]; roles: RoleSummary[]; initial: { profession?: string; field?: string; style?: string; mood?: string; q?: string; role?: string; page?: number }; moderator: boolean }) {
   const [role, setRole] = useState<string>(roles.some((item) => item.id === initial.role) ? initial.role! : "");
   const [finding, setFinding] = useState(false);
   const selectedRole = roles.find((item) => item.id === role);
@@ -66,7 +66,7 @@ export default function Gallery({ templates, roles, initial, moderator }: { temp
   const chooseField = (id: string) => { setField(id); setProfession(""); sync({ field: id, for: "" }); };
   const clear = () => { setRole(""); setField(""); setProfession(""); setStyle(""); setMood(""); setQuery(""); window.history.replaceState(null, "", window.location.pathname); };
   const filtered = Boolean(role || field || profession || style || mood || query);
-  const { items: pageItems, page, pages, go, top } = usePaged(matches, 18, [role, field, profession, style, mood, query].join("|"));
+  const { items: pageItems, page, pages, go, top } = usePaged(matches, 18, [role, field, profession, style, mood, query].join("|"), initial.page);
 
   const chip = (active: boolean) => `shrink-0 rounded-full border px-3.5 py-1.5 text-[0.88rem] transition-colors ${active ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink hover:text-ink"}`;
 
@@ -125,7 +125,7 @@ export default function Gallery({ templates, roles, initial, moderator }: { temp
         </div>
       </li>)}
     </ul>
-    <Pagination page={page} pages={pages} go={go} label="Template pages" />
+    <Pagination page={page} pages={pages} go={go} basePath="/templatechooser" label="Template pages" />
     </> : <div className="mt-20 text-center"><p className="font-display text-[2rem]">Nothing matches yet.</p><p className="mt-2 text-ink-soft">Try another style, or <button type="button" onClick={clear} className="underline">see every template</button>.</p></div>}
   </>;
 }

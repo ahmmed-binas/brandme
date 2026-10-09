@@ -8,6 +8,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ hos
   const urls = [
     { loc: `${site.canonical}/`, lastmod: site.portfolio.updatedAt },
     ...(posts.length ? [{ loc: `${site.canonical}/blog`, lastmod: posts[0]!.publishedAt! }] : []),
+    // Later pages of the blog (10 posts each), each its own canonical address.
+    ...Array.from({ length: Math.max(0, Math.ceil(posts.length / 10) - 1) }, (_, index) => ({ loc: `${site.canonical}/blog?page=${index + 2}`, lastmod: posts[(index + 1) * 10]!.publishedAt! })),
     ...posts.map((post) => ({ loc: `${site.canonical}/blog/${post.slug}`, lastmod: post.publishedAt! })),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((url) => `<url><loc>${url.loc}</loc><lastmod>${url.lastmod}</lastmod></url>`).join("")}</urlset>`;

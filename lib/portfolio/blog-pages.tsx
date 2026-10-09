@@ -8,11 +8,13 @@ import { sitePost, sitePosts, type Site } from "./site";
 const ownerName = (site: Site) => (site.portfolio.content as StandardContent).name || site.portfolio.ownerName || "Blog";
 const base = (site: Site) => (site.canonical.startsWith("https://") ? { metadataBase: new URL(site.canonical) } : {});
 
-export async function blogIndexMetadata(site: Site | null): Promise<Metadata> {
+export async function blogIndexMetadata(site: Site | null, page = 1): Promise<Metadata> {
   if (!site || site.portfolio.resting || !site.portfolio.hasBlog) return { title: "Blog not found", robots: { index: false } };
   const name = ownerName(site);
-  const url = `${site.canonical.replace(/\/$/, "")}/blog`;
-  return { ...base(site), title: { absolute: `Blog — ${name}` }, description: `Writing by ${name}.`, alternates: { canonical: url }, openGraph: { type: "website", title: `Blog — ${name}`, url } };
+  // Each page of the blog is its own canonical address, so older posts are found too.
+  const url = `${site.canonical.replace(/\/$/, "")}/blog${page > 1 ? `?page=${page}` : ""}`;
+  const title = `Blog — ${name}${page > 1 ? ` (page ${page})` : ""}`;
+  return { ...base(site), title: { absolute: title }, description: page > 1 ? `Page ${page} of writing by ${name}.` : `Writing by ${name}.`, alternates: { canonical: url }, openGraph: { type: "website", title, url } };
 }
 
 /** Posts per page on a customer's blog index. */

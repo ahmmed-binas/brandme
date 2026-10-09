@@ -262,6 +262,13 @@ export async function advanceOrders(ownerId: string): Promise<void> {
   }
 }
 
+/** The verified custom domain a portfolio is served on, if any (its canonical address). */
+export async function domainFor(ownerId: string, templateId: string): Promise<string | null> {
+  await ensureSchema();
+  const result = await db.query<{ domain: string }>("SELECT domain FROM custom_domains WHERE owner_id = $1 AND template_id = $2 AND verified_at IS NOT NULL LIMIT 1", [ownerId, templateId]);
+  return result.rows[0]?.domain ?? null;
+}
+
 /** Finds the portfolio behind a verified custom domain ("www." is accepted). */
 export async function portfolioForHost(host: string): Promise<{ ownerId: string; templateId: TemplateId } | null> {
   await ensureSchema();

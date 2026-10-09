@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { isValidDomain } from "@/lib/domains/names";
-import { portfolioForHost } from "@/lib/domains/service";
+import { domainFor, portfolioForHost } from "@/lib/domains/service";
 import { databaseConfigured } from "@/utils/db-schema";
 import { getPost, listPosts, type PortfolioPost } from "./posts";
 import { getPublished, getPublishedFor, type PublishedPortfolio } from "./repository";
@@ -10,14 +10,18 @@ import type { PublicPost } from "@/components/templates/PortfolioBlog";
 /**
  * A published portfolio as a small website: its home page and its blog,
  * reached either at /p/<slug> on our domain or at the owner's own domain.
- * `home` is the path prefix links use; `origin` is the canonical address.
+ * `home` is the path prefix links use; `canonical` is the address search
+ * engines should index: the owner's own domain when they have one (so the copy
+ * at /p/<slug> doesn't compete with it), otherwise /p/<slug>.
  */
 export interface Site { portfolio: PublishedPortfolio; home: string; canonical: string }
 
 export const sitePathFor = cache(async (slug: string): Promise<Site | null> => {
   if (!databaseConfigured() || !SLUG_PATTERN.test(slug)) return null;
   const portfolio = await getPublished(slug);
-  return portfolio ? { portfolio, home: `/p/${slug}`, canonical: `/p/${slug}` } : null;
+  if (!portfolio) return null;
+  const domain = await domainFor(portfolio.ownerId, portfolio.templateId).catch(() => null);
+  return { portfolio, home: `/p/${slug}`, canonical: domain ? `https://${domain}` : `/p/${slug}` };
 });
 
 export const siteForHost = cache(async (rawHost: string): Promise<Site | null> => {

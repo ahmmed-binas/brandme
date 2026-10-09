@@ -4,18 +4,28 @@ import { ArrowRight } from "lucide-react";
 import GalleryGrid from "@/components/gallery/GalleryGrid";
 import { galleryItems } from "@/lib/gallery/items";
 import { brand } from "@/lib/brand";
+import { notFound } from "next/navigation";
+import { pagedMetadata, pageNumber } from "@/lib/seo/paging";
+
+/** Tiles per page; keep in step with GalleryGrid. */
+const GALLERY_PAGE_SIZE = 12;
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Free portfolio website templates",
-  description: `Beautiful portfolio and personal website templates, free to download and use. Made by the ${brand.name} studio and the community, for lawyers, doctors, designers, developers, chefs, teachers and more.`,
-  alternates: { canonical: "/gallery" },
-};
+type Props = { searchParams: Promise<{ q?: string; page?: string | string[] }> };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  return pagedMetadata({ base: "/gallery", title: "Free portfolio website templates", description: `Beautiful portfolio and personal website templates, free to download and use. Made by the ${brand.name} studio and the community, for lawyers, doctors, designers, developers, chefs, teachers and more.`, page: pageNumber(params.page), filtered: Boolean(params.q) });
+}
 
 /** The gallery: every free template, studio originals and community designs, as moving tiles. */
-export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function GalleryPage({ searchParams }: Props) {
+  const params = await searchParams;
   const items = await galleryItems();
+  const page = pageNumber(params.page);
+  // A page past the end is a real “not found”, not an empty page.
+  if (!params.q && page > Math.max(1, Math.ceil(items.length / GALLERY_PAGE_SIZE))) notFound();
   const community = items.filter((item) => item.kind === "community").length;
   return <div className="mx-auto max-w-[1320px] px-5 pb-28 pt-14 sm:px-8 lg:pt-20">
     <header className="grid gap-10 lg:grid-cols-[1.25fr_1fr] lg:items-end">
@@ -36,6 +46,6 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
       <li className="bg-card p-5"><b className="block font-display text-[1.25rem] font-normal text-ink">No code? No problem</b><span className="text-ink-soft">Customise studio designs in the editor and we host them for you.</span></li>
       <li className="bg-card p-5"><b className="block font-display text-[1.25rem] font-normal text-ink">Made by people</b><span className="text-ink-soft">{community ? `${community} community ${community === 1 ? "design" : "designs"} and counting.` : "Designers can submit their own; each one is reviewed by hand."}</span></li>
     </ul>
-    <GalleryGrid items={items} initialQuery={(await searchParams).q ?? ""} />
+    <GalleryGrid items={items} initialQuery={params.q ?? ""} initialPage={page} />
   </div>;
 }
