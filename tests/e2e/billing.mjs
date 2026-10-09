@@ -140,7 +140,7 @@ log("cron without secret:", (await fetch(`${BASE}/api/cron`, { method: "POST" })
 await page.goto(`${BASE}/pricing`);
 log("pricing cards:", await page.locator("li h2").allTextContents());
 await page.getByRole("radio", { name: "Monthly" }).click();
-log("monthly price shown:", await page.getByText("$2.50").first().isVisible(), "| card fee shown:", await page.getByText("+ $0.59 card fee").isVisible());
+log("monthly price shown:", await page.getByText("$6").first().isVisible(), "| card fee shown:", await page.getByText("+ $0.59 card fee").isVisible());
 await page.screenshot({ path: `${S}/shots/pricing.png`, fullPage: true });
 await page.goto(`${BASE}/account`);
 await page.getByText("AI help").waitFor();

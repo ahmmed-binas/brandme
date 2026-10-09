@@ -52,14 +52,18 @@ export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plan
         </li>;
       })}
       <li className="flex flex-col rounded-2xl border border-dashed border-rule p-7">
-        <h2 className="font-display text-[2rem] leading-none">Need more?</h2>
-        <p className="mt-2 min-h-[3rem] text-[0.95rem] text-ink-soft">More than three sites, a team, a custom website, or someone to look after your site for you.</p>
-        <p className="mt-6 font-display text-[2.2rem] leading-none tracking-[-0.02em]">Let’s talk</p>
-        <p className="mt-1 text-[0.88rem] text-ink-faint">A free 20-minute call. We agree a price before any work starts.</p>
+        <h2 className="font-display text-[2rem] leading-none">Custom</h2>
+        <p className="mt-2 min-h-[3rem] text-[0.95rem] text-ink-soft">A website designed around you, with your own designer, built and looked after for you.</p>
+        <p className="mt-6 font-display text-[2.2rem] leading-none tracking-[-0.02em]">Free call first</p>
+        <p className="mt-1 text-[0.88rem] text-ink-faint">Tell us your custom design requirements on a free 20-minute call. We agree a price before any work starts.</p>
         <Link href={bookingHref} className="mt-6 inline-flex items-center justify-center rounded-full border border-ink px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-ink hover:text-paper">Book a free call</Link>
-        <ul className="mt-7 space-y-2.5 text-[0.93rem]">{["Done for you: we build and keep your site up to date", "More than three portfolios", "Teams and agencies", "Help moving an existing site"].map((feature) => <li key={feature} className="flex gap-2.5"><Check size={16} className="mt-0.5 shrink-0 text-ink" />{feature}</li>)}</ul>
+        <ul className="mt-7 space-y-2.5 text-[0.93rem]">{["A personal designer who works with you", "Start from 50+ designs, or something new", "Free stock photos to choose from", "Add, remove or change any section or element", "Done for you: we build it and keep it up to date", "More than three sites, teams and agencies"].map((feature) => <li key={feature} className="flex gap-2.5"><Check size={16} className="mt-0.5 shrink-0 text-ink" />{feature}</li>)}</ul>
       </li>
     </ul>
     {error && <p role="alert" className="mt-4 text-center text-[0.95rem] text-[color:var(--destructive)]">{error}</p>}
+    <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-[color-mix(in_oklab,var(--ink)_5%,transparent)] px-6 py-5 text-center sm:flex-row sm:text-left">
+      <p className="text-[0.98rem]"><b className="font-medium">Want to see it first?</b> <span className="text-ink-soft">Book a free demo call: we’ll show you the editor, the designs made for your job and the Investigator, and answer your questions. No card, no obligation.</span></p>
+      <Link href={bookingHref} className="shrink-0 rounded-full bg-ink px-5 py-2.5 text-[0.92rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Book a free demo</Link>
+    </div>
   </>;
 }

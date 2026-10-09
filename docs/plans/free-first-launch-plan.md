@@ -9,7 +9,8 @@ Status: **steps 1–7 built (October 2026)**, plus Book a free call and the lega
 
 ## Owner's decisions (7 October 2026)
 
-- **Pro: $24/yr or $2.50/mo.** Self-serve: up to 3 live portfolios, own domain, no branding, 1 GB. Having the owner personally look after a customer's site is a **separate done-for-you service**, sold through "Book a free call" with a price agreed on the call.
+- **Pro: $6/month or $60/year** (raised on 9 October 2026 from $2.50/$24 so card fees stay small and the price reads as a real product). Custom (a personal designer, from a free call) and free demo calls are offered on /pricing and /book.
+- *Original:* **Pro: $24/yr or $2.50/mo.** Self-serve: up to 3 live portfolios, own domain, no branding, 1 GB. Having the owner personally look after a customer's site is a **separate done-for-you service**, sold through "Book a free call" with a price agreed on the call.
 - **No trial.** New accounts start on free Basic. Every account's **first Investigator check is free**.
 - **The Investigator on every plan, any schedule** (daily, weekly, monthly, 6-monthly, yearly or every N days), because each check's AI step is paid by the customer (credits at cost or their own key). No monthly credit allowances.
 - **Book a free call: Cal.com** (free). `BOOKING_URL` = the owner's event link; optional webhook (`CALCOM_WEBHOOK_SECRET`) lists bookings in the console. Cal.com sends the confirmation emails and calendar invites.

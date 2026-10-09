@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Book a free call",
-  description: `A free 20-minute call with the ${brand.name} team about a custom website, more than three sites, or having your site looked after for you.`,
+  description: `A free 20-minute demo or design call with the ${brand.name} team: see the product, or talk through a custom website with your own designer, more than three sites, or having your site looked after for you.`,
   alternates: { canonical: "/book" },
 };
 
@@ -24,7 +24,7 @@ export default function BookPage() {
     <header className="max-w-[44rem]">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Book a free call</p>
       <h1 className="mt-4 font-display text-[clamp(2.4rem,5.5vw,4.2rem)] leading-[0.98] tracking-[-0.03em]">Twenty minutes, <em className="font-[300] text-signal">no obligation.</em></h1>
-      <p className="mt-5 text-[1.05rem] leading-[1.7] text-ink-soft">Tell us what you need: a custom website, more than three sites, a team, or someone to build and look after your site for you. We’ll agree a price on the call before any work starts. Pick a time below; you’ll get a confirmation email with a calendar invite.</p>
+      <p className="mt-5 text-[1.05rem] leading-[1.7] text-ink-soft">Use it as a free demo (we’ll show you the editor, the designs for your job and the Investigator) or to talk through what you need: a custom design with your own designer, more than three sites, a team, or someone to build and look after your site for you. We’ll agree a price on the call before any work starts. Pick a time below; you’ll get a confirmation email with a calendar invite.</p>
       <p className="mt-4"><a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[0.95rem] text-ink underline underline-offset-4"><CalendarDays size={16} /> Open the calendar in a new tab <ArrowUpRight size={14} /></a></p>
     </header>
     <div className="mt-10 overflow-hidden rounded-2xl border border-rule bg-white">

@@ -51,7 +51,7 @@ export const PLANS: Record<PlanId, PlanLimits> = {
     storageMb: 100, blog: true, autoSync: true,
   },
   pro: {
-    id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 2400, month: 250 },
+    id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 6000, month: 600 },
     portfolios: 3, publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
     storageMb: 1000, blog: true, autoSync: true,
   },

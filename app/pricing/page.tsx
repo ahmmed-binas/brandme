@@ -19,6 +19,8 @@ const FEATURES: Record<PlanCard["id"], string[]> = {
 };
 
 const FAQ: Array<[string, string]> = [
+  ["Can I see a demo first?", "Yes. Book a free 20-minute demo call and we’ll walk you through the editor, the designs made for your kind of work and the Investigator, using your own details if you like. You can also try any template in the editor without an account."],
+  ["What does Custom include?", "A personal designer who works with you on your requirements: start from any of our 50+ designs or from something new, choose free stock photos together, and add, remove or change any section or element. We build it, publish it and can keep it up to date for you. Book a free call to talk it through; we agree a price before any work starts."],
   ["Is Basic really free?", "Yes. One portfolio with a blog stays online for free for as long as you like, with a small “Made with Formora” link. We’d rather you use it and tell a friend than pay for something you’re unsure about."],
   ["How does AI work if it isn’t in the price?", "AI costs real money every time it runs, so it’s paid separately and costs the same on every plan. Buy credits at what the AI costs us plus 5% (they never expire), or connect your own Claude or OpenAI API key and pay Anthropic or OpenAI directly. ChatGPT and Codex users can use an OpenAI key."],
   ["What’s the card fee?", `Stripe charges about 2.9% + 30¢ for each card payment. When you buy credits or a domain we show it as its own line, so the thing you’re buying is at cost. For example, $10 of credits is $10 + ${formatUsd(cardFeeCents(1000))}.`],
@@ -45,7 +47,8 @@ export default function PricingPage() {
     <header className="mx-auto max-w-[46rem] text-center">
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Pricing</p>
       <h1 className="mt-4 font-display text-[clamp(2.8rem,6.6vw,5.4rem)] leading-[0.95] tracking-[-0.03em]">Free to start. <em className="font-[300] text-signal">Fair after that.</em></h1>
-      <p className="mx-auto mt-6 max-w-[34rem] text-[1.08rem] leading-[1.7] text-ink-soft">Your portfolio and blog are free for as long as you like. Pro adds more sites and your own domain. AI is sold at cost, so you only pay for what you use.</p>
+      <p className="mx-auto mt-6 max-w-[34rem] text-[1.08rem] leading-[1.7] text-ink-soft">Your portfolio and blog are free for as long as you like. Pro adds more sites and your own domain. Custom gives you your own designer. AI is sold at cost, so you only pay for what you use.</p>
+      <p className="mt-4 text-[0.95rem]"><Link href="/book" className="text-ink underline underline-offset-4">Book a free demo call</Link> <span className="text-ink-soft">if you’d like to see it first.</span></p>
     </header>
 
     <PlanPicker plans={plans} paymentsReady={stripeConfigured()} bookingHref="/book" />
