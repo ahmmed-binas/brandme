@@ -82,7 +82,6 @@ More: `docs/SECURITY.md` (security model, pre-launch review, launch checklist), 
 ## Open decisions (waiting on the owner)
 
 - Brand name (currently Formora; “BrandMe” was considered but is taken by a London agency).
-- Approve or reject the five moving templates (Residence, Margin Notes, Pulse, Counsel, Mise) and the five real estate templates (Skyline, Manor, Front Door, Shoreline, Off Plan) at `/templates/review`.
 - Licence for the free templates (MIT chosen; owner may prefer credit-required).
 - The owner's legal name and country for `/privacy` and `/terms` (`LEGAL_NAME`, `LEGAL_COUNTRY`), and a final read of both pages (drafted, not legal advice).
 - ChatGPT/OpenAI as a second AI provider: agreed for after launch.

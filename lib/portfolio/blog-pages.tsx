@@ -15,9 +15,16 @@ export async function blogIndexMetadata(site: Site | null): Promise<Metadata> {
   return { ...base(site), title: { absolute: `Blog — ${name}` }, description: `Writing by ${name}.`, alternates: { canonical: url }, openGraph: { type: "website", title: `Blog — ${name}`, url } };
 }
 
-export async function BlogIndex({ site }: { site: Site | null }) {
+/** Posts per page on a customer's blog index. */
+const POSTS_PER_PAGE = 10;
+export const pageParam = (value: string | string[] | undefined) => Math.max(1, Math.min(100, Number(Array.isArray(value) ? value[0] : value) || 1));
+
+export async function BlogIndex({ site, page = 1 }: { site: Site | null; page?: number }) {
   if (!site || site.portfolio.resting || !site.portfolio.hasBlog) notFound();
-  return <PortfolioBlogIndex templateId={site.portfolio.templateId} content={site.portfolio.content as StandardContent} home={site.home} posts={await sitePosts(site)} />;
+  const posts = await sitePosts(site);
+  const pages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+  if (page > pages) notFound();
+  return <PortfolioBlogIndex templateId={site.portfolio.templateId} content={site.portfolio.content as StandardContent} home={site.home} posts={posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE)} page={page} pages={pages} />;
 }
 
 export async function blogPostMetadata(site: Site | null, slug: string): Promise<Metadata> {

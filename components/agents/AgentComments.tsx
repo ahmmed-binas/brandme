@@ -14,6 +14,7 @@ export function AgentComments({ endpoint, returnTo }: { endpoint: string; return
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [visible, setVisible] = useState(10);
 
   useEffect(() => {
     let live = true;
@@ -48,7 +49,7 @@ export function AgentComments({ endpoint, returnTo }: { endpoint: string; return
     </form> : <p className="text-ink-soft"><Link href={`/login?callbackUrl=${encodeURIComponent(returnTo)}`} className="text-ink underline underline-offset-4">Sign in</Link> to leave a comment.</p>}
     {comments === null ? <p className="mt-6 flex items-center gap-2 text-ink-soft"><Loader2 size={15} className="animate-spin" /> Loading comments…</p>
       : comments.length === 0 ? <p className="mt-6 text-ink-soft">No comments yet. Be the first.</p>
-      : <ul className="mt-6 divide-y divide-rule border-y border-rule">{comments.map((comment) => <li key={comment.id} className="flex gap-3 py-4">
+      : <ul className="mt-6 divide-y divide-rule border-y border-rule">{comments.slice(0, visible).map((comment) => <li key={comment.id} className="flex gap-3 py-4">
         {/* eslint-disable-next-line @next/next/no-img-element -- small profile pictures from sign-in providers */}
         {comment.author.image ? <img src={comment.author.image} alt="" className="size-9 shrink-0 rounded-full object-cover" /> : <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-ink/10 text-[0.85rem]">{comment.author.name[0]?.toUpperCase()}</span>}
         <div className="min-w-0 flex-1">
@@ -57,5 +58,6 @@ export function AgentComments({ endpoint, returnTo }: { endpoint: string; return
         </div>
         {viewer && (viewer.id === comment.author.id || viewer.isModerator) && <button type="button" onClick={() => void remove(comment.id)} aria-label="Delete comment" className="self-start rounded p-1.5 text-ink-faint hover:bg-red-50 hover:text-red-700"><Trash2 size={15} /></button>}
       </li>)}</ul>}
+    {comments && comments.length > visible && <button type="button" onClick={() => setVisible((count) => count + 10)} className="mt-5 rounded-full border border-rule px-5 py-2 text-[0.92rem] hover:border-ink">Show more comments ({comments.length - visible})</button>}
   </div>;
 }

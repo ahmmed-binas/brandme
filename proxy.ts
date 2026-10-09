@@ -57,7 +57,9 @@ export function proxy(request: NextRequest) {
   // "/" is the portfolio, "/blog/…" its blog, plus its own sitemap and robots.txt. Anything else 404s.
   const path = request.nextUrl.pathname.replace(/\/+$/, "");
   url.pathname = `/sites/${encodeURIComponent(host)}${path}`;
-  url.search = "";
+  // Only the blog's page number passes through; nothing else from the query reaches the site.
+  const page = request.nextUrl.searchParams.get("page");
+  url.search = page && /^\d{1,3}$/.test(page) ? `?page=${page}` : "";
   return NextResponse.rewrite(url);
 }
 

@@ -4,6 +4,7 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 import VisitBeacon from "./VisitBeacon";
+import WhatsAppButton from "./WhatsAppButton";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   // The route segment (not the browser path) is used because custom domains are served via a rewrite:
@@ -24,6 +25,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Header />
       <main id="main" className="pt-16">{children}</main>
       <Footer />
+      <WhatsAppButton />
     </>
   );
 }

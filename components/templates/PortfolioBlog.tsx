@@ -45,7 +45,8 @@ function Shell({ templateId, content, home, children }: { templateId: string; co
   </div>;
 }
 
-export function PortfolioBlogIndex({ templateId, content, home, posts }: { templateId: string; content: StandardContent; home: string; posts: PublicPost[] }) {
+export function PortfolioBlogIndex({ templateId, content, home, posts, page = 1, pages = 1 }: { templateId: string; content: StandardContent; home: string; posts: PublicPost[]; page?: number; pages?: number }) {
+  const pageHref = (n: number) => `${home}/blog${n > 1 ? `?page=${n}` : ""}`;
   return <Shell templateId={templateId} content={content} home={home}>
     <h1 className="pt-10 text-[clamp(2.6rem,7vw,4.6rem)] leading-[0.98] tracking-[-0.02em]" style={{ fontFamily: "var(--post-display)" }}>Blog</h1>
     {content.professional_title && <p className="mt-3 text-[1.05rem] text-[var(--b-muted)]">Writing by {content.name}, {content.professional_title.charAt(0).toLowerCase() + content.professional_title.slice(1)}.</p>}
@@ -61,6 +62,11 @@ export function PortfolioBlogIndex({ templateId, content, home, posts }: { templ
           {post.cover && <img src={post.cover} alt="" loading="lazy" className="aspect-[4/3] w-full rounded-md object-cover" />}
         </a>
       </li>)}</ul>}
+    {pages > 1 && <nav aria-label="Blog pages" className="mt-6 flex items-center justify-between border-t border-[color-mix(in_oklab,var(--b-fg)_15%,transparent)] pt-6 text-[0.95rem]">
+      <span>{page > 1 && <a href={pageHref(page - 1)} className="hover:text-[var(--b-accent)]">← Newer posts</a>}</span>
+      <span className="text-[var(--b-muted)]">Page {page} of {pages}</span>
+      <span>{page < pages && <a href={pageHref(page + 1)} className="hover:text-[var(--b-accent)]">Older posts →</a>}</span>
+    </nav>}
   </Shell>;
 }
 

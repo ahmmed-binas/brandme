@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Pagination, usePaged } from "@/components/common/Pagination";
 import Link from "next/link";
 import { Download, Search, Star, X } from "lucide-react";
 import type { GalleryItem } from "@/lib/gallery/items";
@@ -115,6 +116,8 @@ export default function GalleryGrid({ items, initialQuery = "" }: { items: Galle
     });
   }, [items, query, filter]);
 
+  const { items: pageItems, page, pages, go, top } = usePaged(matches, 12, `${query}|${filter}`);
+
   // Keep the search in the address bar so a search can be shared.
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -134,9 +137,11 @@ export default function GalleryGrid({ items, initialQuery = "" }: { items: Galle
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter">{FILTERS.map((option) => <button key={option.id} type="button" onClick={() => setFilter(option.id)} aria-pressed={filter === option.id} className={`rounded-full border px-4 py-2 text-[0.9rem] transition ${filter === option.id ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink hover:text-ink"}`}>{option.label}</button>)}</div>
       </div>
     </div>
-    <p className="mt-6 text-[0.9rem] text-ink-soft" aria-live="polite">{matches.length} {matches.length === 1 ? "template" : "templates"}{query ? ` for “${query}”` : ""}</p>
+    <div ref={top} className="scroll-mt-40" />
+    <p className="mt-6 text-[0.9rem] text-ink-soft" aria-live="polite">{matches.length} {matches.length === 1 ? "template" : "templates"}{query ? ` for “${query}”` : ""}{pages > 1 && ` · page ${page} of ${pages}`}</p>
     {matches.length
-      ? <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">{matches.map((item, index) => <Tile key={item.key} item={item} index={index} />)}</ul>
+      ? <><ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">{pageItems.map((item, index) => <Tile key={item.key} item={item} index={index} />)}</ul>
+        <Pagination page={page} pages={pages} go={go} label="Gallery pages" /></>
       : <div className="mt-16 text-center"><p className="font-display text-[2rem] text-ink">Nothing matches yet.</p><p className="mt-2 text-ink-soft">Try a profession or a style, or <button type="button" onClick={() => { setQuery(""); setFilter("all"); }} className="underline">see everything</button>.</p></div>}
   </>;
 }

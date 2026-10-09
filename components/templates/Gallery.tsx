@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Pagination, usePaged } from "@/components/common/Pagination";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Search, X } from "lucide-react";
 import { FIELDS, PROFESSIONS, STYLES, type ProfessionId, type StyleTag } from "@/lib/templates/types";
@@ -65,6 +66,7 @@ export default function Gallery({ templates, roles, initial, moderator }: { temp
   const chooseField = (id: string) => { setField(id); setProfession(""); sync({ field: id, for: "" }); };
   const clear = () => { setRole(""); setField(""); setProfession(""); setStyle(""); setMood(""); setQuery(""); window.history.replaceState(null, "", window.location.pathname); };
   const filtered = Boolean(role || field || profession || style || mood || query);
+  const { items: pageItems, page, pages, go, top } = usePaged(matches, 18, [role, field, profession, style, mood, query].join("|"));
 
   const chip = (active: boolean) => `shrink-0 rounded-full border px-3.5 py-1.5 text-[0.88rem] transition-colors ${active ? "border-ink bg-ink text-paper" : "border-rule text-ink-soft hover:border-ink hover:text-ink"}`;
 
@@ -99,8 +101,9 @@ export default function Gallery({ templates, roles, initial, moderator }: { temp
       {selectedRole && <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.9rem] text-ink-soft"><span className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-paper">{selectedRole.label}<button type="button" onClick={clearRole} aria-label={`Stop showing templates for ${selectedRole.plural}`} className="opacity-70 hover:opacity-100"><X size={13} /></button></span>Best designs for {selectedRole.plural} first. Previews and the editor start with a {selectedRole.label.toLowerCase()}’s sample portfolio.</p>}
     </div>
 
-    {matches.length ? <ul className="mt-12 grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
-      {matches.map((template) => <li key={template.id} className="flex flex-col">
+    <div ref={top} className="scroll-mt-28" />
+    {matches.length ? <><ul className="mt-12 grid grid-cols-1 gap-x-6 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
+      {pageItems.map((template) => <li key={template.id} className="flex flex-col">
         <Link href={withRole(`/templatepreview?template=${template.id}`)} className="group relative block aspect-[3/2] overflow-hidden rounded-xl border border-rule bg-ink/5" aria-label={`Preview ${template.name}`}>
           {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnails, already sized */}
           <img src={`/templates/${template.id}.webp`} alt="" loading="lazy" decoding="async" className="size-full object-cover object-top transition-transform duration-[900ms] ease-[cubic-bezier(.2,.7,.1,1)] group-hover:scale-[1.03]" />
@@ -121,6 +124,8 @@ export default function Gallery({ templates, roles, initial, moderator }: { temp
           <Link href={withRole(`/templatepreview?template=${template.id}`)} className="text-[0.92rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Preview</Link>
         </div>
       </li>)}
-    </ul> : <div className="mt-20 text-center"><p className="font-display text-[2rem]">Nothing matches yet.</p><p className="mt-2 text-ink-soft">Try another style, or <button type="button" onClick={clear} className="underline">see every template</button>.</p></div>}
+    </ul>
+    <Pagination page={page} pages={pages} go={go} label="Template pages" />
+    </> : <div className="mt-20 text-center"><p className="font-display text-[2rem]">Nothing matches yet.</p><p className="mt-2 text-ink-soft">Try another style, or <button type="button" onClick={clear} className="underline">see every template</button>.</p></div>}
   </>;
 }

@@ -24,4 +24,7 @@ export const OWNER_DECISIONS: Record<string, { status: Exclude<ReviewStatus, "pe
   brief: { status: "approved" }, "open-house": { status: "approved" }, clinic: { status: "approved" },
   "exercise-book": { status: "approved" }, prospectus: { status: "approved" }, "site-board": { status: "approved" },
   carte: { status: "approved" }, datasheet: { status: "approved" }, lookbook: { status: "approved" }, quota: { status: "approved" }, "field-report": { status: "approved" },
+  // Approved by the owner on 8 October 2026: the Motion collection and the real estate collection.
+  residence: { status: "approved" }, "margin-notes": { status: "approved" }, pulse: { status: "approved" }, counsel: { status: "approved" }, mise: { status: "approved" },
+  skyline: { status: "approved" }, manor: { status: "approved" }, "front-door": { status: "approved" }, shoreline: { status: "approved" }, "off-plan": { status: "approved" },
 };
