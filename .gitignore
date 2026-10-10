@@ -51,3 +51,8 @@ tests/e2e/node_modules/
 /marketing/kestrel-demo/out/
 /marketing/kestrel-demo/*.mp4
 /marketing/kestrel-demo/voice.*
+/marketing/.tts/
+/marketing/kestrel-demo/clone/
+/marketing/kestrel-demo/samples*/
+/marketing/kestrel-demo/*.wav
+/marketing/kestrel-demo/*.m4a
