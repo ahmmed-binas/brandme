@@ -7,6 +7,7 @@ import type { PortfolioPost } from "@/lib/portfolio/posts";
 import { prepareImage } from "@/lib/images";
 import { PostBodyEditor } from "@/components/blog/PostBodyEditor";
 import { MediaField } from "@/components/blog/MediaField";
+import { RowanReview } from "@/components/blog/RowanReview";
 import { Field, ImageField, TextArea } from "./fields";
 
 type Status = { kind: "idle" | "saving" | "saved" } | { kind: "error"; message: string };
@@ -135,6 +136,7 @@ export function BlogPanel({ templateId, signedIn, liveUrl }: { templateId: strin
           <Field label="Address" value={open.slug} onChange={(slug) => edit({ slug })} hint={`Your post’s link ends in /blog/${open.slug || "…"}`} />
         </div>
       </details>
+      <RowanReview post={{ title: open.title === "Untitled post" ? "" : open.title, body: open.body, excerpt: open.excerpt }} onApply={edit} />
       <div className="flex flex-wrap items-center gap-2 border-t border-rule pt-4">
         {open.publishedAt
           ? <button type="button" onClick={() => void setPublished(false)} className="rounded-full border border-ink px-4 py-1.5 text-[13px] font-medium">Unpublish</button>

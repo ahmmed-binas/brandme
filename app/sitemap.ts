@@ -14,7 +14,7 @@ type Entry = MetadataRoute.Sitemap[number];
 /** Pages that change rarely. No lastModified: a made-up “now” teaches search engines to ignore our dates. */
 const STATIC: Array<[path: string, priority: number]> = [
   ["/", 1], ["/templatechooser", 0.9], ["/gallery", 0.9], ["/pricing", 0.8], ["/for", 0.8],
-  ["/agents", 0.6], ["/agents/investigator", 0.7], ["/community", 0.6], ["/blog", 0.6], ["/book", 0.5],
+  ["/agents", 0.6], ["/agents/investigator", 0.7], ["/agents/editor", 0.6], ["/agents/reviewer", 0.6], ["/agents/custom", 0.8], ["/community", 0.6], ["/blog", 0.6], ["/book", 0.5],
   ["/about", 0.4], ["/contact", 0.4], ["/domains", 0.4],
   ["/tools", 0.5], ["/tools/developer-tools", 0.4], ["/tools/everyday-toolbox", 0.4], ["/tools/extract-pdf-pages", 0.4],
   ["/tools/image-tools", 0.4], ["/tools/merge-pdf", 0.4], ["/tools/pdf-editor", 0.4], ["/DetailExtractorPage", 0.4],
