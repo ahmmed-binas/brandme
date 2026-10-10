@@ -18,10 +18,10 @@ export default function WhatsAppButton() {
   const text = `Hi! I have a question about ${brand.name}${path && path !== "/" ? ` (I was on ${path})` : ""}.`;
   const href = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(text)}`;
   return <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"
-    className="group fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-[70] flex h-14 items-center overflow-hidden rounded-full bg-[#25d366] text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,.7),0_4px_12px_-4px_rgba(0,0,0,.25)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-10px_rgba(37,211,102,.8),0_6px_16px_-6px_rgba(0,0,0,.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#128c7e] sm:right-6">
-    <span aria-hidden className="absolute inset-0 rounded-full bg-[#25d366] opacity-60 motion-safe:animate-[whatsapp-ping_2.6s_cubic-bezier(0,0,.2,1)_infinite] group-hover:hidden" />
-    <span className="relative grid size-14 shrink-0 place-items-center"><Logo /></span>
-    <span className="relative max-w-0 whitespace-nowrap pr-0 text-[0.95rem] font-semibold opacity-0 transition-[max-width,opacity,padding] duration-500 ease-[cubic-bezier(.2,.7,.1,1)] group-hover:max-w-[16rem] group-hover:pr-5 group-hover:opacity-100 group-focus-visible:max-w-[16rem] group-focus-visible:pr-5 group-focus-visible:opacity-100">Chat with us on WhatsApp</span>
-    <style>{"@keyframes whatsapp-ping{0%{transform:scale(1);opacity:.5}80%,100%{transform:scale(1.55);opacity:0}}"}</style>
+    className="group fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-[70] flex h-12 items-center gap-0 rounded-full border border-rule bg-ink p-1.5 text-paper shadow-[0_12px_32px_-12px_rgb(21_20_15/0.55)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal sm:right-6">
+    <span aria-hidden className="absolute -inset-1 rounded-full border border-[#c4851c]/60 opacity-0 motion-safe:animate-[whatsapp-ping_3.2s_cubic-bezier(0,0,.2,1)_infinite] group-hover:hidden" />
+    <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-[#25d366] text-white"><Logo size={19} /></span>
+    <span className="relative max-w-0 overflow-hidden whitespace-nowrap text-[0.92rem] font-medium opacity-0 transition-[max-width,opacity,padding] duration-500 ease-[cubic-bezier(.2,.7,.1,1)] group-hover:max-w-[14rem] group-hover:px-3 group-hover:opacity-100 group-focus-visible:max-w-[14rem] group-focus-visible:px-3 group-focus-visible:opacity-100">Chat on WhatsApp</span>
+    <style>{"@keyframes whatsapp-ping{0%{transform:scale(.96);opacity:.7}70%,100%{transform:scale(1.25);opacity:0}}"}</style>
   </a>;
 }

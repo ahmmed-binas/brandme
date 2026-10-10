@@ -40,7 +40,10 @@ export default async function TemplateChooser({ searchParams }: { searchParams: 
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">{templates.length} templates</p>
         <h1 className="mt-4 font-display text-[clamp(2.8rem,6.4vw,5.2rem)] font-[400] leading-[0.95] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">Made for your kind of work. <em className="font-[300] text-signal">Not everyone’s.</em></h1>
       </div>
-      <p className="max-w-[34rem] text-[1.08rem] leading-[1.7] text-ink-soft">A photographer needs a contact sheet, not a skills bar. A researcher needs a references list. Each design here was drawn for a profession, then made yours with colours, type and the sections you choose.</p>
+      <div>
+        <p className="max-w-[34rem] text-[1.08rem] leading-[1.7] text-ink-soft">A photographer needs a contact sheet, not a skills bar. A researcher needs a references list. Each design here was drawn for a profession, then made yours with colours, type and the sections you choose.</p>
+        <p className="mt-4 text-[0.95rem] text-ink-soft">Would rather have the code? <Link href="/gallery" className="text-ink underline underline-offset-4">Download templates free</Link>, including ones made by the community.</p>
+      </div>
     </header>
     {moderator && <p className="mt-8 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-[0.92rem] text-amber-950">You’re seeing every template because you’re an admin. Customers only see the ones you’ve approved. <Link href="/templates/review" className="font-medium underline">Review templates →</Link></p>}
     <Gallery templates={templates} roles={ROLE_SUMMARIES} moderator={moderator} initial={{ profession: params.for, field: params.field, style: params.style, mood: params.mood, q: params.q, role: params.role, page }} />
