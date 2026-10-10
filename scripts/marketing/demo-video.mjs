@@ -18,15 +18,19 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-/** [start, end, speed] in seconds of the source recording, in the order they play. */
+/**
+ * [start, end, speed, blur] in seconds of the source recording, in the order they play.
+ * blur: boxes [x, y, width, height] in source pixels (1884×918) to blur, so the
+ * website's page addresses can't be read.
+ */
 const SEGMENTS = [
   [8.0, 10.5, 1],    // “OPS secure console” boot screen
   [10.5, 16.0, 1],   // Mission control: the agent network and token burn
   [27.0, 34.5, 1.25], // Indexing team: the agent cards
   [21.0, 26.5, 1.2], // Settings: daily token budgets
-  [35.0, 42.0, 1.15], // Indexing progress: 34 confirmed, 40 pending
+  [35.0, 42.0, 1.15, [[40, 780, 900, 138]]], // Indexing progress: 34 confirmed, 40 pending (page list at the bottom blurred)
   [42.5, 47.0, 0.75], // Impressions: held a little longer to read the numbers
-  [47.5, 53.0, 1.1], // Pages changed: the table
+  [47.5, 53.0, 1.1, [[40, 100, 940, 818]]], // Pages changed: the address column blurred
 ];
 const END_CARD = { title: "Kestrel", subtitle: "Your own SEO & AEO agent · by fuccura", cta: "Link in bio", seconds: 4 };
 const BG = "0x100f0d";
@@ -80,8 +84,16 @@ if (options.voice) {
 const cutLength = SEGMENTS.reduce((sum, [start, end, speed]) => sum + (end - start) / speed, 0);
 const voiceLength = voice ? duration(voice) : 0;
 const endSeconds = Math.max(END_CARD.seconds, voiceLength - cutLength + 1);
-const parts = SEGMENTS.map(([start, end, speed], index) =>
-  `[0:v]trim=${start}:${end},setpts=(PTS-STARTPTS)/${speed},scale=1920:-2:flags=lanczos,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=${BG},fps=30,format=yuv420p,fade=t=in:st=0:d=0.25[s${index}]`);
+/** Blurs each box on the stream named `input`, returning the filters and the final stream's name. */
+const blurred = (input, boxes, index) => boxes.reduce(({ chain, name }, [x, y, w, h], box) => {
+  const id = `${index}_${box}`;
+  return { chain: `${chain};[${name}]split[k${id}][c${id}];[c${id}]crop=${w}:${h}:${x}:${y},boxblur=24:4[b${id}];[k${id}][b${id}]overlay=${x}:${y}[o${id}]`, name: `o${id}` };
+}, { chain: "", name: input });
+const parts = SEGMENTS.map(([start, end, speed, boxes = []], index) => {
+  const cut = `[0:v]trim=${start}:${end},setpts=(PTS-STARTPTS)/${speed}[r${index}]`;
+  const { chain, name } = blurred(`r${index}`, boxes, index);
+  return `${cut}${chain};[${name}]scale=1920:-2:flags=lanczos,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=${BG},fps=30,format=yuv420p,fade=t=in:st=0:d=0.25[s${index}]`;
+});
 const card = `color=c=${BG}:s=1920x1080:d=${endSeconds.toFixed(2)}:r=30,format=yuv420p,${text(END_CARD.title, 150, "(h/2)-170", GOLD)},${text(END_CARD.subtitle, 48, "(h/2)+20")},${text(END_CARD.cta, 40, "(h/2)+110", "0xbbbbbb")},fade=t=in:st=0:d=0.4[card]`;
 const join16 = `${parts.join(";")};${card};${SEGMENTS.map((_, index) => `[s${index}]`).join("")}[card]concat=n=${SEGMENTS.length + 1}:v=1:a=0[wide]`;
 const wide = join(out, "kestrel-16x9.mp4");
