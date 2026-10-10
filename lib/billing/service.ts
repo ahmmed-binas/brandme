@@ -36,7 +36,7 @@ async function customerFor(user: CurrentUser): Promise<string> {
 export async function startPlanCheckout(user: CurrentUser, plan: unknown, interval: unknown, origin: string): Promise<string> {
   await ensureSchema();
   if (!isPaidPlan(plan)) throw new BillingError("Choose Pro.", 422);
-  if (!isInterval(interval) || !OFFERED_INTERVALS.includes(interval)) throw new BillingError("Pro is paid monthly.", 422);
+  if (!isInterval(interval) || !OFFERED_INTERVALS.includes(interval)) throw new BillingError("Pro is one payment for a year.", 422);
   const amount = priceFor(plan, interval);
   const months = interval === "year" ? 12 : 1;
   const order = await db.query<{ id: string }>("INSERT INTO billing_orders (owner_id, kind, plan, term_months, amount_cents) VALUES ($1, 'plan', $2, $3, $4) RETURNING id", [user.id, plan, months, amount]);
@@ -48,7 +48,7 @@ export async function startPlanCheckout(user: CurrentUser, plan: unknown, interv
     metadata: { billingOrderId: orderId, kind: "plan" },
     // Keeps the card on file so the plan can renew without the owner coming back.
     payment_intent_data: { setup_future_usage: "off_session", metadata: { billingOrderId: orderId } },
-    line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: amount, product_data: { name: `${PLANS[plan].name} plan, 1 ${INTERVAL_LABEL[interval]}`, description: `${PLANS[plan].summary} Renews each ${INTERVAL_LABEL[interval]} until you switch it off. Refundable within 14 days, minus Stripe’s card fee.` } } }],
+    line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: amount, product_data: { name: `${PLANS[plan].name} plan, 1 ${INTERVAL_LABEL[interval]}`, description: `${PLANS[plan].summary} ${interval === "year" ? "One payment: it doesn’t renew unless you turn renewal on." : `Renews each ${INTERVAL_LABEL[interval]} until you switch it off.`} Refundable within 14 days, minus Stripe’s card fee.` } } }],
     success_url: `${origin}/account?paid=plan`,
     cancel_url: `${origin}/pricing?checkout=cancelled`,
   });
@@ -111,7 +111,7 @@ export async function fulfilBillingOrder(orderId: string, paymentIntent: string 
       try { const intent = await stripe().paymentIntents.retrieve(paymentIntent); paymentMethod = typeof intent.payment_method === "string" ? intent.payment_method : intent.payment_method?.id ?? null; }
       catch (error) { console.error("Could not read payment method for renewal", error); }
     }
-    await db.query("UPDATE app_users SET plan = $2, plan_expires_at = $3, plan_interval = $5, auto_renew = TRUE, stripe_payment_method = COALESCE($4, stripe_payment_method) WHERE id = $1", [order.owner_id, order.plan, until, paymentMethod, interval]);
+    await db.query("UPDATE app_users SET plan = $2, plan_expires_at = $3, plan_interval = $5, auto_renew = ($5 = 'month'), stripe_payment_method = COALESCE($4, stripe_payment_method) WHERE id = $1", [order.owner_id, order.plan, until, paymentMethod, interval]);
     if (user.email) await sendOnce(`receipt:${orderId}`, order.owner_id, "receipt", { to: user.email, ...emails.receipt(user.name, `${PLANS[order.plan].name} plan, ${termLabel(order.term_months)}`, formatUsd(order.amount_cents), until) });
   }
   if (order.kind === "credits" && order.credits) {

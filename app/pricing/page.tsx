@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PlanPicker, { type PlanCard } from "./PlanPicker";
 import { CREDIT_PACKS } from "@/lib/billing/credits";
-import { GRACE_DAYS, PLANS, cardFeeCents, formatUsd } from "@/lib/plans";
+import { GRACE_DAYS, PLANS, PRO_CUSTOM_EDITS, cardFeeCents, formatUsd } from "@/lib/plans";
 import { stripeConfigured } from "@/lib/payments/stripe";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing: free to start",
-  description: `${brand.name} is free for one portfolio with a blog. Pro is ${formatUsd(PLANS.pro.prices.month!)} a month for up to three sites on your own domain. AI at cost.`,
+  description: `${brand.name} is free for one portfolio with a blog. Pro is ${formatUsd(PLANS.pro.prices.year!)} for a whole year: your own domain, up to three sites and up to ${PRO_CUSTOM_EDITS} changes done for you. AI at cost.`,
   alternates: { canonical: "/pricing" },
 };
 
 const FEATURES: Record<PlanCard["id"], string[]> = {
   basic: ["Every template, every colour and type option", "One portfolio at your free address; switch design any time and keep your content", "A blog on your portfolio", "The Investigator, on any schedule you choose", "Unlimited edits, saved as you type", `${PLANS.basic.storageMb} MB of images`, "A small “Made with Fuccura” link"],
-  pro: ["Everything in Basic", "Up to three portfolios side by side, all live", "Your own domain, connected for you, with HTTPS", "No Fuccura link on your site", `${PLANS.pro.storageMb / 1000} GB of images`],
+  pro: ["Everything in Basic", `Up to ${PRO_CUSTOM_EDITS} changes done for you during the year`, "A free call with a developer to plan your site", "Your own domain, connected for you, with HTTPS", "Up to three portfolios side by side, all live", "No Fuccura link on your site", `${PLANS.pro.storageMb / 1000} GB of images`],
 };
 
 const FAQ: Array<[string, string]> = [
@@ -25,7 +25,8 @@ const FAQ: Array<[string, string]> = [
   ["How does AI work if it isn’t in the price?", "AI costs real money every time it runs, so it’s paid separately and costs the same on every plan. Buy credits at what the AI costs us plus 5% (they never expire), or connect your own Claude or OpenAI API key and pay Anthropic or OpenAI directly. ChatGPT and Codex users can use an OpenAI key."],
   ["What’s the card fee?", `Stripe charges about 2.9% + 30¢ for each card payment. When you buy credits or a domain we show it as its own line, so the thing you’re buying is at cost. For example, $10 of credits is $10 + ${formatUsd(cardFeeCents(1000))}.`],
   ["How does the Investigator get paid for?", "Every account gets its first check free. After that, reading GitHub and blog feeds is free, and the AI step (reading your other profiles and searching the web) costs a few credits per check, or nothing extra with your own Claude key. You choose how often it runs."],
-  ["Will I be charged automatically?", "Only for Pro, and only if you choose it. Pro renews each month on the card you paid with, and you can switch renewal off any time in your account."],
+  ["What counts as a change done for me?", `Anything you’d ask a web designer for: a new section, a different layout for your listings, your brand colours, a new page. Send it on WhatsApp or by email and we’ll do it, up to ${PRO_CUSTOM_EDITS} times in your year. Editing your own text and photos is unlimited and always free.`],
+  ["Will I be charged automatically?", "Only for Pro, and only if you choose it. Pro is one payment for a year and doesn’t renew on its own. We email you before it ends, and you can turn on renewal in your account if you’d like it to."],
   ["What happens if Pro ends?", `Pro keeps working for another ${GRACE_DAYS} days while you decide. After that your account moves to free Basic: your first published site stays online, any others rest (visitors see a short holding page), and nothing is deleted.`],
   ["Can I get a refund?", "Yes, for Pro within 14 days of paying, and for credits you haven’t used. Stripe keeps its card fee when a payment is refunded, so you get back the payment minus that fee. Just reply to your receipt."],
   ["Do I need a domain?", "No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee."],
@@ -37,7 +38,7 @@ export default function PricingPage() {
     "@context": "https://schema.org", "@type": "Product", name: `${brand.name} portfolio hosting`, description: brand.description, brand: { "@type": "Brand", name: brand.name },
     offers: [
       { "@type": "Offer", name: "Basic plan", price: "0.00", priceCurrency: "USD", url: `${siteUrl}/pricing`, availability: "https://schema.org/InStock" },
-      { "@type": "Offer", name: "Pro plan, monthly", price: (PLANS.pro.prices.month! / 100).toFixed(2), priceCurrency: "USD", url: `${siteUrl}/pricing`, availability: "https://schema.org/InStock" },
+      { "@type": "Offer", name: "Pro plan, one year", price: (PLANS.pro.prices.year! / 100).toFixed(2), priceCurrency: "USD", url: `${siteUrl}/pricing`, availability: "https://schema.org/InStock" },
     ],
   };
 

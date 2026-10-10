@@ -6,7 +6,7 @@
  * The model (free-first launch, see docs/plans/free-first-launch-plan.md):
  * - Basic is free for ever: every template, one live portfolio, a blog and the
  *   Investigator. Nothing is ever paused.
- * - Pro is paid monthly: up to three live portfolios, the owner's own
+ * - Pro is one payment for a year (it renews only if the owner turns renewal on): up to three live portfolios, the owner's own
  *   domain and no branding. When Pro ends there are 14 days of grace, then the
  *   account is back on Basic (extra portfolios rest; nothing is deleted).
  * - AI is paid separately at cost (credits or the owner's own API key) and
@@ -51,17 +51,20 @@ export const PLANS: Record<PlanId, PlanLimits> = {
     storageMb: 100, blog: true, autoSync: true,
   },
   pro: {
-    id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 9000, month: 900 },
+    id: "pro", name: "Pro", summary: "A year of your site on your own domain, with up to 10 changes done for you.", prices: { year: 1000, month: 900 },
     portfolios: 3, publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
     storageMb: 1000, blog: true, autoSync: true,
   },
 };
 
 /**
- * Billing periods customers can choose at checkout. Yearly is hidden for now (owner's
- * decision, October 2026); its price stays so existing yearly plans keep renewing.
+ * Billing periods customers can choose at checkout. Since 10 October 2026 Pro is one
+ * payment for a year (owner's decision); the monthly price stays so any monthly
+ * plan already running keeps renewing.
  */
-export const OFFERED_INTERVALS: readonly BillingInterval[] = ["month"];
+export const OFFERED_INTERVALS: readonly BillingInterval[] = ["year"];
+/** Changes the team makes for a Pro customer during their year, on request. */
+export const PRO_CUSTOM_EDITS = 10;
 
 export const isPaidPlan = (value: unknown): value is PaidPlanId => value === "pro";
 export const isInterval = (value: unknown): value is BillingInterval => value === "year" || value === "month";

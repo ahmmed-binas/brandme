@@ -4,7 +4,7 @@ import { appOrigin, stripeConfigured } from "@/lib/payments/stripe";
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 
-/** Starts Stripe Checkout for Pro ({ plan, interval: "month" }) or a credit pack ({ credits }). */
+/** Starts Stripe Checkout for Pro ({ plan, interval: "year" }) or a credit pack ({ credits }). */
 export const POST = route(async (request: Request) => {
   if (!databaseConfigured() || !stripeConfigured()) return jsonError(503, "Payments aren’t switched on for this site yet.");
   const user = await getCurrentUser();
@@ -13,7 +13,7 @@ export const POST = route(async (request: Request) => {
   if (body instanceof Response) return body;
   const { plan, interval, credits } = (body ?? {}) as { plan?: unknown; interval?: unknown; credits?: unknown };
   try {
-    const url = credits !== undefined ? await startCreditsCheckout(user, credits, appOrigin(request)) : await startPlanCheckout(user, plan, interval ?? "month", appOrigin(request));
+    const url = credits !== undefined ? await startCreditsCheckout(user, credits, appOrigin(request)) : await startPlanCheckout(user, plan, interval ?? "year", appOrigin(request));
     return Response.json({ url });
   } catch (error) {
     if (error instanceof BillingError) return jsonError(error.status, error.message);

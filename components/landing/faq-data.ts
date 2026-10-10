@@ -2,7 +2,7 @@ import { PLANS, formatUsd } from "@/lib/plans";
 
 /** Shared by the FAQ section and its FAQPage structured data, so they never drift apart. */
 export const FAQ = [
-  { q: "How much does it cost?", a: `One portfolio with a blog is free for as long as you like, with no card needed. Pro is ${formatUsd(PLANS.pro.prices.month!)} a month for up to three sites on your own domain without our link. AI is sold at what it costs us plus 5%, or you can use your own Claude key.` },
+  { q: "How much does it cost?", a: `One portfolio with a blog is free for as long as you like, with no card needed. Pro is ${formatUsd(PLANS.pro.prices.year!)} for a whole year, with up to 10 changes done for you, for up to three sites on your own domain without our link. AI is sold at what it costs us plus 5%, or you can use your own Claude key.` },
   { q: "Will my portfolio stay up to date?", a: "Yes, on every plan. The Investigator checks your own profiles on the schedule you choose, looks for new roles, talks, awards and articles, and either asks you first or updates your site for you. Your first check is free." },
   { q: "Can I use a domain I already own?", a: "Yes. Add two DNS records at your domain provider. The editor shows you exactly which ones, checks them for you, and switches the domain on with HTTPS as soon as they’re in place." },
   { q: "Will the AI make things up about me?", a: "No. The assistant only rewrites text you’ve written or imported, and it isn’t allowed to change your name, dates, links or skills. If a request needs facts it doesn’t have, it tells you what to add." },
