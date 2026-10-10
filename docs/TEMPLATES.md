@@ -58,3 +58,15 @@ Sample agents are in `lib/templates/personas-realestate.ts`. Their photos are fr
 ### Marketing clips (TikTok, Reels, Shorts)
 
 `node scripts/samples/tiktok-clips.mjs [id,id]` records a 1080×1920 silent clip of each template on a phone-sized screen, scrolling and using its interactive parts (scripts per template at the top of the file), into `marketing/clips/` (not committed). Needs the app running with `TEMPLATES_REQUIRE_APPROVAL=false`, ffmpeg, and a Chromium browser (`BROWSER_CHANNEL=msedge` or `chrome`, or `CHROMIUM_PATH`). Add music and captions in the app you post from.
+
+## UAE collection (live GPU backgrounds)
+
+Mirage (prime Dubai), Yield (off-plan investors), Majlis (bilingual English/Arabic, right to left), Keys (rentals, paid in cheques) and Debut (new agents, short-video style) are built for UAE agents. Sample agents are in `lib/templates/personas-uae.ts`. They start **pending**: approve them at `/templates/review`.
+
+Their moving backgrounds use the [`shaders`](https://www.npmjs.com/package/shaders) package (WebGPU), through `ShaderStage` in `realestate/re-shader.tsx`:
+
+- **Licence:** version 4 and later is MIT. Version 3 and earlier needed a paid commercial licence, so don't downgrade. It's pinned to an exact version in `package.json`. Presets copied from shaders.com are under that site's own terms, so compose effects from the package's components instead.
+- **Privacy:** the package can send performance reports to shaders.com. `ShaderStage` always passes `disableTelemetry`. Don't use its `Text` effect, because it loads Google Fonts.
+- **Fallback:** every stage paints a CSS background first. The shader only starts with WebGPU, with motion on (not in still captures or reduced motion) and near the screen.
+
+Calculators in these templates (DLD 4% fee, Golden Visa threshold of AED 2M, Ejari, DEWA deposits, rent cheques) are labelled as guides, with typical 2026 figures. Check them yearly.

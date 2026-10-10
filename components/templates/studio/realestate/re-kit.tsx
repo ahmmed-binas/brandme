@@ -160,10 +160,10 @@ export function mosaic(count: number): string[] {
 }
 
 /** Filter tabs for listing statuses: “All”, “For sale”, “Sold”… */
-export function StatusTabs({ options, value, onChange, className = "", tab }: { options: string[]; value: string | null; onChange: (value: string | null) => void; className?: string; tab: (active: boolean) => string }) {
+export function StatusTabs({ options, value, onChange, className = "", tab, name = (option) => option ?? "All" }: { options: string[]; value: string | null; onChange: (value: string | null) => void; className?: string; tab: (active: boolean) => string; name?: (option: string | null) => string }) {
   if (options.length < 2) return null;
   return <div role="tablist" aria-label="Filter homes" className={`flex flex-wrap gap-2 ${className}`}>
-    {[null, ...options].map((option) => <button key={option ?? "all"} type="button" role="tab" aria-selected={value === option} onClick={() => onChange(option)} className={tab(value === option)}>{option ?? "All"}</button>)}
+    {[null, ...options].map((option) => <button key={option ?? "all"} type="button" role="tab" aria-selected={value === option} onClick={() => onChange(option)} className={tab(value === option)}>{name(option)}</button>)}
   </div>;
 }
 
