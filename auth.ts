@@ -1,5 +1,7 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
+import { githubSignInReady, googleSignInReady } from "@/lib/auth-providers";
 import Credentials from "next-auth/providers/credentials";
 import { devLoginEnabled } from "@/lib/dev-login";
 import { saveGoogleUser } from "@/utils/user-account";
@@ -17,7 +19,8 @@ const CONSOLE_SESSION_MS = 12 * 60 * 60 * 1000;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
-    Google({}),
+    ...(googleSignInReady() ? [Google({})] : []),
+    ...(githubSignInReady() ? [GitHub({})] : []),
     // Email (or username) and password. Accounts are created at /signup (lib/accounts/passwords.ts).
     Credentials({
       id: "password",
@@ -71,6 +74,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // the stable Google account id is carried in the token to identify owners.
     jwt({ token, account }) {
       if (account?.provider === "google" && account.providerAccountId) token.providerAccountId = account.providerAccountId;
+      // GitHub ids are prefixed so they can never collide with a Google id; they share the Google-style rows.
+      if (account?.provider === "github" && account.providerAccountId) token.providerAccountId = `github:${account.providerAccountId}`;
       if (account?.provider === "dev" && account.providerAccountId) token.providerAccountId = account.providerAccountId;
       if ((account?.provider === "password" || account?.provider === "console") && account.providerAccountId) token.providerAccountId = account.providerAccountId;
       // Google and the local test login share Google-style rows; password accounts (and the console) have their own.
@@ -88,5 +93,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  events: { async signIn({ user, account }) { if ((account?.provider === "google" || account?.provider === "dev") && account.providerAccountId) await saveGoogleUser({ providerAccountId: account.providerAccountId, email: user.email, name: user.name, image: user.image }); } },
+  events: {
+    async signIn({ user, account }) {
+      if (!account?.providerAccountId) return;
+      if (account.provider === "google" || account.provider === "dev") await saveGoogleUser({ providerAccountId: account.providerAccountId, email: user.email, name: user.name, image: user.image });
+      if (account.provider === "github") await saveGoogleUser({ providerAccountId: `github:${account.providerAccountId}`, email: user.email, name: user.name, image: user.image });
+    },
+  },
 });

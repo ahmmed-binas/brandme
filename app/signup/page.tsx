@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import GoogleSignInButton from "@/components/common/GoogleSignInButton";
+import { githubSignInReady, googleSignInReady } from "@/lib/auth-providers";
 import { AuthCard, Divider, safeCallback } from "@/components/auth/AuthCard";
 import { SignUpForm } from "@/components/auth/AuthForms";
 
@@ -9,8 +10,8 @@ export const metadata: Metadata = { title: "Create an account", description: "Cr
 export default async function SignUpPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string | string[] }> }) {
   const callbackUrl = safeCallback((await searchParams).callbackUrl);
   return <AuthCard eyebrow="Free account" title="Create your account." intro="Build and publish your portfolio, rate templates, and share your own designs in the gallery." footer={<>Already have an account? <Link href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-medium text-ink underline underline-offset-4">Sign in</Link></>}>
-    <GoogleSignInButton callbackUrl={callbackUrl} />
-    <Divider label="or with email" />
+    <GoogleSignInButton callbackUrl={callbackUrl} google={googleSignInReady()} github={githubSignInReady()} />
+    {(googleSignInReady() || githubSignInReady()) && <Divider label="or with email" />}
     <SignUpForm callbackUrl={callbackUrl} />
   </AuthCard>;
 }

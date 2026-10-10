@@ -11,7 +11,7 @@ export async function ratingResponse(request: Request, key: string): Promise<Res
   }
   if (!databaseConfigured()) return jsonError(503, "Ratings need the database.");
   const user = await getCurrentUser();
-  if (!user) return jsonError(401, "Sign in to rate templates.");
+  if (!user) return jsonError(401, "Sign in to rate.");
   const body = await readJson(request, 200);
   if (body instanceof Response) return body;
   const stars = (body as { stars?: unknown } | null)?.stars;
