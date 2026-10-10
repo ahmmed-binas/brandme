@@ -19,7 +19,7 @@ export default async function EmailSettings() {
     ["SMTP_SECURE", mail.secure ? "true" : "false", ""],
     ["SMTP_USER", mail.user ?? "not set", "Usually the full mailbox address."],
     ["SMTP_PASSWORD", mail.passwordSet ? "set (hidden)" : "not set", "The mailbox password."],
-    ["SMTP_FROM", mail.from, "Who emails appear to come from. Use the same mailbox, e.g. “Formora <you@company.com>”."],
+    ["SMTP_FROM", mail.from, "Who emails appear to come from. Use the same mailbox, e.g. “Fuccura <you@company.com>”."],
     ["SMTP_TO", mail.supportInbox ?? "not set", "Where support requests and contact messages arrive."],
   ];
 

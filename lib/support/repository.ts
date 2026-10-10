@@ -87,6 +87,6 @@ export async function listTickets(viewer: { id: string; isStaff: boolean }, scop
   return tickets.rows.map((row) => ({
     id: row.id, subject: row.subject, category: row.category, status: row.status, createdAt: row.created_at.toISOString(), updatedAt: row.updated_at.toISOString(),
     owner: { id: row.owner_id, name: row.name, email: staffQueue ? row.email : null, plan: row.plan },
-    messages: messages.rows.filter((message) => message.ticket_id === row.id).map((message) => ({ id: message.id, body: message.body, fromStaff: message.from_staff, authorName: message.from_staff ? "Formora support" : message.name, createdAt: message.created_at.toISOString() })),
+    messages: messages.rows.filter((message) => message.ticket_id === row.id).map((message) => ({ id: message.id, body: message.body, fromStaff: message.from_staff, authorName: message.from_staff ? "Fuccura support" : message.name, createdAt: message.created_at.toISOString() })),
   }));
 }

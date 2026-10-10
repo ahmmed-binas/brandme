@@ -23,8 +23,8 @@ export function cnameTarget(): string {
   try { return new URL(process.env.APP_URL ?? "").hostname; } catch { return ""; }
 }
 
-export const verificationHost = (domain: string) => `_formora.${apexOf(domain)}`;
-export const verificationValue = (token: string) => `formora-verify=${token}`;
+export const verificationHost = (domain: string) => `_fuccura.${apexOf(domain)}`;
+export const verificationValue = (token: string) => `fuccura-verify=${token}`;
 
 export interface DnsRecord { type: string; name: string; value: string; purpose: string }
 

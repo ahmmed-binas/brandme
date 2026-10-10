@@ -60,7 +60,7 @@ export async function getPrice(domain: string): Promise<RegistrarPrice | null> {
   }
 }
 
-/** ICANN registrant details. The customer is the legal owner of the domain, not Formora. */
+/** ICANN registrant details. The customer is the legal owner of the domain, not Fuccura. */
 export interface RegistrantContact {
   firstName: string; lastName: string; email: string; phone: string;
   address1: string; city: string; state: string; zip: string; country: string;
@@ -74,7 +74,7 @@ export interface RegistrantContact {
  */
 export async function buyDomain(domain: string, expectedPrice: number, contact: RegistrantContact): Promise<{ orderId: string }> {
   const data = await vercel<{ orderId?: string }>("POST", `/v1/registrar/domains/${enc(domain)}/buy`, {
-    autoRenew: false, // Renewals are billed to the customer separately, so Formora never renews unpaid domains.
+    autoRenew: false, // Renewals are billed to the customer separately, so Fuccura never renews unpaid domains.
     years: 1,
     expectedPrice,
     contactInformation: contact,

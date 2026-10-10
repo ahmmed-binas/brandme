@@ -13,9 +13,9 @@ export const about = {
     email: "hello@yourdomain.com",
     links: [{ label: "LinkedIn", url: "https://www.linkedin.com/" }, { label: "GitHub", url: "https://github.com/" }],
   },
-  headline: "I built Formora because a good portfolio shouldn’t be a weekend project every year.",
+  headline: "I built Fuccura because a good portfolio shouldn’t be a weekend project every year.",
   letter: [
-    "Write a few paragraphs here about why you started Formora: the moment you realised updating a portfolio was a chore everyone put off, and what you wanted instead.",
+    "Write a few paragraphs here about why you started Fuccura: the moment you realised updating a portfolio was a chore everyone put off, and what you wanted instead.",
     "Say who it’s for, in plain words: developers, designers, photographers, researchers, anyone whose work deserves a proper home on the web.",
     "End with a promise you intend to keep, for example that prices stay low, that people’s work is never held hostage, and that a person answers every support message.",
   ],

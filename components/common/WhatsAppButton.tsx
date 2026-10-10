@@ -9,7 +9,7 @@ function Logo({ size = 28 }: { size?: number }) {
 }
 
 /**
- * A WhatsApp button that stays in the corner of every Formora page, so people
+ * A WhatsApp button that stays in the corner of every Fuccura page, so people
  * can ask a question in the app they already use. Not shown on customers'
  * sites, template previews or in the editor (see AppShell).
  */

@@ -116,7 +116,7 @@ export function DomainPanel({ templateId, personName, published }: { templateId:
         {domain.message && <p className="mt-2 text-xs leading-5 text-slate-600">{domain.message}</p>}
         {!published && domain.status === "active" && <p className="mt-2 text-xs text-amber-700">Publish your portfolio to show it on this domain.</p>}
         {domain.records.length > 0 && <table className="mt-3 w-full text-left text-xs"><thead className="text-slate-500"><tr><th className="pb-1 pr-2 font-semibold">Type</th><th className="pb-1 pr-2 font-semibold">Name</th><th className="pb-1 font-semibold">Value</th></tr></thead><tbody>{domain.records.map((record) => <tr key={`${record.type}-${record.name}-${record.value}`} className="border-t border-slate-100 align-top"><td className="py-1.5 pr-2 font-mono font-bold">{record.type}</td><td className="py-1.5 pr-2"><CopyValue value={record.name} /></td><td className="py-1.5"><CopyValue value={record.value} /><span className="mt-0.5 block text-[11px] text-slate-500">{record.purpose}</span></td></tr>)}</tbody></table>}
-        {domain.records.length > 0 && <p className="mt-2 text-[11px] leading-4 text-slate-500">If your provider adds your domain to names automatically, enter only the first part (for example <span className="font-mono">_formora</span> or <span className="font-mono">@</span>).</p>}
+        {domain.records.length > 0 && <p className="mt-2 text-[11px] leading-4 text-slate-500">If your provider adds your domain to names automatically, enter only the first part (for example <span className="font-mono">_fuccura</span> or <span className="font-mono">@</span>).</p>}
         <div className="mt-3 flex gap-2">
           {domain.status !== "active" && <button type="button" disabled={busy} onClick={() => void run(refresh)} className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-bold disabled:opacity-50"><RefreshCw size={12} className={busy ? "animate-spin" : ""} /> Check again</button>}
           <button type="button" disabled={busy || domain.status === "registering"} onClick={() => void remove()} className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-bold text-red-700 disabled:opacity-50"><Trash2 size={12} /> Disconnect</button>
@@ -126,7 +126,7 @@ export function DomainPanel({ templateId, personName, published }: { templateId:
     </div>;
   }
 
-  if (!capabilities.planAllows) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-600">Your own domain, like <b>{(personName || "yourname").toLowerCase().replace(/[^a-z0-9]+/g, "") || "yourname"}.com</b>, comes with <b>Pro</b> ({formatUsd(PLANS.pro.prices.month!)} a month). On {capabilities.planName} your site lives at your free Formora address.</p><a href="/pricing" className="inline-block rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">See Pro</a></div>;
+  if (!capabilities.planAllows) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-600">Your own domain, like <b>{(personName || "yourname").toLowerCase().replace(/[^a-z0-9]+/g, "") || "yourname"}.com</b>, comes with <b>Pro</b> ({formatUsd(PLANS.pro.prices.month!)} a month). On {capabilities.planName} your site lives at your free Fuccura address.</p><a href="/pricing" className="inline-block rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">See Pro</a></div>;
 
   if (!capabilities.canBuy && !capabilities.canConnect) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-500">Custom domains aren’t available on this server yet.</p></div>;
 
@@ -147,7 +147,7 @@ export function DomainPanel({ templateId, personName, published }: { templateId:
   if (view === "contact" && chosen) return <form onSubmit={(event) => { event.preventDefault(); void checkout(); }} className="space-y-2.5">
     {back}
     <p className="text-sm font-bold">{chosen.domain} <span className="font-normal text-slate-500">· {money(chosen.priceCents!)} for the first year</span></p>
-    <p className="text-xs leading-5 text-slate-500">Domain registries require the owner’s contact details. They’re sent to the registrar and not stored by Formora after registration.</p>
+    <p className="text-xs leading-5 text-slate-500">Domain registries require the owner’s contact details. They’re sent to the registrar and not stored by Fuccura after registration.</p>
     <div className="grid grid-cols-2 gap-2">
       <input required value={contact.firstName} onChange={(event) => setContact({ ...contact, firstName: event.target.value })} placeholder="First name" aria-label="First name" autoComplete="given-name" className={inputClass} />
       <input required value={contact.lastName} onChange={(event) => setContact({ ...contact, lastName: event.target.value })} placeholder="Last name" aria-label="Last name" autoComplete="family-name" className={inputClass} />

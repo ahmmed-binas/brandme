@@ -14,14 +14,14 @@ export const metadata: Metadata = {
 };
 
 const FEATURES: Record<PlanCard["id"], string[]> = {
-  basic: ["Every template, every colour and type option", "One portfolio at your free address; switch design any time and keep your content", "A blog on your portfolio", "The Investigator, on any schedule you choose", "Unlimited edits, saved as you type", `${PLANS.basic.storageMb} MB of images`, "A small “Made with Formora” link"],
-  pro: ["Everything in Basic", "Up to three portfolios side by side, all live", "Your own domain, connected for you, with HTTPS", "No Formora link on your site", `${PLANS.pro.storageMb / 1000} GB of images`],
+  basic: ["Every template, every colour and type option", "One portfolio at your free address; switch design any time and keep your content", "A blog on your portfolio", "The Investigator, on any schedule you choose", "Unlimited edits, saved as you type", `${PLANS.basic.storageMb} MB of images`, "A small “Made with Fuccura” link"],
+  pro: ["Everything in Basic", "Up to three portfolios side by side, all live", "Your own domain, connected for you, with HTTPS", "No Fuccura link on your site", `${PLANS.pro.storageMb / 1000} GB of images`],
 };
 
 const FAQ: Array<[string, string]> = [
   ["Can I see a demo first?", "Yes. Book a free 20-minute demo call and we’ll walk you through the editor, the designs made for your kind of work and the Investigator, using your own details if you like. You can also try any template in the editor without an account."],
   ["What does Custom include?", "A personal designer who works with you on your requirements: start from any of our 50+ designs or from something new, choose free stock photos together, and add, remove or change any section or element. We build it, publish it and can keep it up to date for you. Book a free call to talk it through; we agree a price before any work starts."],
-  ["Is Basic really free?", "Yes. One portfolio with a blog stays online for free for as long as you like, with a small “Made with Formora” link. We’d rather you use it and tell a friend than pay for something you’re unsure about."],
+  ["Is Basic really free?", "Yes. One portfolio with a blog stays online for free for as long as you like, with a small “Made with Fuccura” link. We’d rather you use it and tell a friend than pay for something you’re unsure about."],
   ["How does AI work if it isn’t in the price?", "AI costs real money every time it runs, so it’s paid separately and costs the same on every plan. Buy credits at what the AI costs us plus 5% (they never expire), or connect your own Claude or OpenAI API key and pay Anthropic or OpenAI directly. ChatGPT and Codex users can use an OpenAI key."],
   ["What’s the card fee?", `Stripe charges about 2.9% + 30¢ for each card payment. When you buy credits or a domain we show it as its own line, so the thing you’re buying is at cost. For example, $10 of credits is $10 + ${formatUsd(cardFeeCents(1000))}.`],
   ["How does the Investigator get paid for?", "Every account gets its first check free. After that, reading GitHub and blog feeds is free, and the AI step (reading your other profiles and searching the web) costs a few credits per check, or nothing extra with your own Claude key. You choose how often it runs."],

@@ -38,7 +38,7 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
   if (!post) notFound();
   const own = viewer?.id === post.author.id;
   const jsonLd = post.status === "published" && post.kind === "review" && post.rating
-    ? { "@context": "https://schema.org", "@type": "Review", name: post.title, reviewBody: post.body, datePublished: post.createdAt, author: { "@type": "Person", name: post.author.name }, reviewRating: { "@type": "Rating", ratingValue: post.rating, bestRating: 5 }, itemReviewed: { "@type": "SoftwareApplication", name: "Formora", applicationCategory: "DesignApplication" } }
+    ? { "@context": "https://schema.org", "@type": "Review", name: post.title, reviewBody: post.body, datePublished: post.createdAt, author: { "@type": "Person", name: post.author.name }, reviewRating: { "@type": "Rating", ratingValue: post.rating, bestRating: 5 }, itemReviewed: { "@type": "SoftwareApplication", name: "Fuccura", applicationCategory: "DesignApplication" } }
     : null;
 
   return <article className="mx-auto max-w-[860px] px-5 pb-24 pt-12 sm:px-8 lg:pt-16">

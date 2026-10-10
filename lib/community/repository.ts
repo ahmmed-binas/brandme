@@ -133,7 +133,7 @@ export async function createPost(viewer: Viewer, input: { kind: PostKind; title:
   } catch (error) {
     await client.query("ROLLBACK");
     // The one-review-per-person index can also catch a race between two tabs.
-    if ((error as { code?: string }).code === "23505") return { ok: false, status: 422, code: "already_reviewed", error: "You’ve already reviewed Formora. Edit your existing review instead." };
+    if ((error as { code?: string }).code === "23505") return { ok: false, status: 422, code: "already_reviewed", error: "You’ve already reviewed Fuccura. Edit your existing review instead." };
     throw error;
   } finally {
     client.release();

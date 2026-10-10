@@ -17,12 +17,12 @@ type Choice = "credits" | "anthropic" | "openai";
 const PROVIDERS = {
   anthropic: {
     name: "Claude", company: "Anthropic", placeholder: "sk-ant-…", console: "https://console.anthropic.com/settings/keys", consoleLabel: "console.anthropic.com",
-    steps: ["Sign in at console.anthropic.com and add a payment method under Billing.", "Open API keys and choose Create key. Name it “Formora”.", "Copy the key (it starts with sk-ant-) and paste it below."],
+    steps: ["Sign in at console.anthropic.com and add a payment method under Billing.", "Open API keys and choose Create key. Name it “Fuccura”.", "Copy the key (it starts with sk-ant-) and paste it below."],
     note: null as string | null,
   },
   openai: {
     name: "OpenAI", company: "OpenAI", placeholder: "sk-proj-…", console: "https://platform.openai.com/api-keys", consoleLabel: "platform.openai.com",
-    steps: ["Sign in at platform.openai.com (the same login as ChatGPT) and add credit under Billing.", "Open API keys and choose Create new secret key. Name it “Formora”.", "Copy the key (it starts with sk-) and paste it below."],
+    steps: ["Sign in at platform.openai.com (the same login as ChatGPT) and add credit under Billing.", "Open API keys and choose Create new secret key. Name it “Fuccura”.", "Copy the key (it starts with sk-) and paste it below."],
     note: "For ChatGPT and Codex users. A ChatGPT Plus, Pro or Codex subscription doesn’t include API access: OpenAI bills API use separately, from the credit you add on the platform. We use the newest GPT model your key can reach.",
   },
 } as const;
@@ -31,7 +31,7 @@ const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 const date = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const json = async (url: string, init?: RequestInit) => { const response = await fetch(url, { ...init, headers: { "Content-Type": "application/json" } }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error ?? "Something went wrong."); return body; };
 
-/** How the owner pays for AI: Formora credits, or their own Claude or OpenAI key. */
+/** How the owner pays for AI: Fuccura credits, or their own Claude or OpenAI key. */
 export function AiSettings({ ai, payments, reload }: { ai: AiBilling; payments: boolean; reload: () => void }) {
   const active: Choice | null = ai.ownKey?.provider ?? (ai.platformAi ? "credits" : null);
   const [choice, setChoice] = useState<Choice>(active ?? "openai");
@@ -56,17 +56,17 @@ export function AiSettings({ ai, payments, reload }: { ai: AiBilling; payments: 
 
   return <section className="mt-12">
     <div id="ai" className="flex scroll-mt-24 flex-wrap items-end justify-between gap-3 border-t border-rule pt-10"><h2 className="font-display text-[1.7rem] leading-none tracking-[-0.02em]">AI help</h2></div>
-    <p className="mt-4 max-w-[42rem] text-[0.98rem] leading-relaxed text-ink-soft">The assistant, imports and the Investigator are paid for separately from your plan, at the same price on every plan. Use Formora credits, or connect your own Claude or OpenAI account and pay them directly.</p>
+    <p className="mt-4 max-w-[42rem] text-[0.98rem] leading-relaxed text-ink-soft">The assistant, imports and the Investigator are paid for separately from your plan, at the same price on every plan. Use Fuccura credits, or connect your own Claude or OpenAI account and pay them directly.</p>
 
     <p className="mt-6 flex flex-wrap items-center gap-2 rounded-xl bg-ink px-4 py-3 text-[0.92rem] text-paper">
       <Sparkles size={15} className="shrink-0" />
       {ai.ownKey ? <>AI runs on <b className="font-medium">your {PROVIDERS[ai.ownKey.provider].name} key</b><span className="font-mono text-[0.85rem] text-paper/70">{ai.ownKey.hint}</span>{ai.ownKey.model && <span className="text-paper/70">· {ai.ownKey.model}</span>}{ai.ownKey.savedAt && <span className="text-paper/70">· added {date(ai.ownKey.savedAt)}</span>}</>
-        : ai.platformAi ? <>AI runs on <b className="font-medium">Formora credits</b><span className="text-paper/70">· {ai.credits.toLocaleString("en")} left</span></>
+        : ai.platformAi ? <>AI runs on <b className="font-medium">Fuccura credits</b><span className="text-paper/70">· {ai.credits.toLocaleString("en")} left</span></>
         : <>AI isn’t switched on yet. Connect your own Claude or OpenAI key to use it.</>}
     </p>
 
     <div role="radiogroup" aria-label="How AI is paid for" className="mt-5 grid gap-3 md:grid-cols-3">
-      {option("credits", "Formora credits", "Pay as you go. Sold at what the AI costs us plus 5%. Nothing to set up.")}
+      {option("credits", "Fuccura credits", "Pay as you go. Sold at what the AI costs us plus 5%. Nothing to set up.")}
       {option("anthropic", "Your Claude key", "Use your Anthropic account. No credits used.")}
       {option("openai", "Your OpenAI key", "For ChatGPT and Codex users. No credits used.")}
     </div>

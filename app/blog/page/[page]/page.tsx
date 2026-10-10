@@ -8,7 +8,7 @@ type Props = { params: Promise<{ page: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const number = Number((await params).page);
-  return { title: `Journal, page ${number}`, description: `Page ${number} of the Formora Journal: practical advice on portfolios for every kind of work.`, alternates: { canonical: `/blog/page/${number}` } };
+  return { title: `Journal, page ${number}`, description: `Page ${number} of the Fuccura Journal: practical advice on portfolios for every kind of work.`, alternates: { canonical: `/blog/page/${number}` } };
 }
 
 export default async function PaginatedBlogPage({ params }: Props) {

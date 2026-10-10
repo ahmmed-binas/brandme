@@ -28,7 +28,7 @@ export interface PlanLimits {
   publishedPortfolios: number;
   /** Cap on AI requests per day, whatever pays for them, so nobody can hammer the service. */
   aiEditsPerDay: number;
-  /** Whether a small "Made with Formora" link shows on published pages. */
+  /** Whether a small "Made with Fuccura" link shows on published pages. */
   showsBranding: boolean;
   /** Whether the owner can buy or connect a domain of their own. */
   ownDomain: boolean;

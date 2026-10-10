@@ -12,7 +12,7 @@ export interface EditablePost { id: string; kind: PostKind; title: string; body:
 
 const HINTS: Record<PostKind, { title: string; body: string }> = {
   suggestion: { title: "e.g. Let me reorder projects by dragging", body: "What would you like, and what would it help you do?" },
-  review: { title: "e.g. Published in an evening", body: "What worked, what didn’t, and who you’d recommend Formora to." },
+  review: { title: "e.g. Published in an evening", body: "What worked, what didn’t, and who you’d recommend Fuccura to." },
   design: { title: "e.g. Studio — a template for architects", body: "Who it’s for, the idea behind it, and anything you’d like feedback on." },
 };
 

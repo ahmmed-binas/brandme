@@ -46,7 +46,7 @@ A short quote from a manager, client or patient’s family does more than a para
 
 End with a clear next step: an email address, a phone number, a booking link. If you’re not looking for work, say what you *are* open to: speaking, mentoring, consulting.
 
-Formora has templates drawn for these jobs specifically. [Find yours by job title](/for) and you’ll start with sample content written for your role, which makes the blank page much less blank.`,
+Fuccura has templates drawn for these jobs specifically. [Find yours by job title](/for) and you’ll start with sample content written for your role, which makes the blank page much less blank.`,
   },
   {
     slug: "write-a-portfolio-introduction",
@@ -82,7 +82,7 @@ If you wouldn’t say it to someone at a conference, rewrite it. Spoken language
 
 Show the introduction to someone outside your field for five seconds, then ask them what you do. If they can’t say it back, it’s not clear enough yet.
 
-In the Formora editor, the *One-line introduction* field is this sentence. The AI assistant can suggest tighter versions, but the best ones always start from something you’ve written yourself.`,
+In the Fuccura editor, the *One-line introduction* field is this sentence. The AI assistant can suggest tighter versions, but the best ones always start from something you’ve written yourself.`,
   },
   {
     slug: "portfolio-project-case-study",
@@ -116,7 +116,7 @@ A photo, a diagram, a before-and-after, a page of the report, a screenshot. Even
 
 Three hundred words is plenty for most projects. If someone wants more, they’ll ask, and that conversation is the point of the portfolio.
 
-Every Formora template has a projects section with fields for exactly these parts: title, context, your role, description, image and links.`,
+Every Fuccura template has a projects section with fields for exactly these parts: title, context, your role, description, image and links.`,
   },
   {
     slug: "choose-portfolio-template",
@@ -144,7 +144,7 @@ A law firm partner and a tattoo artist both deserve a good portfolio, but not th
 
 ## Don’t worry about getting it wrong
 
-In Formora your content is stored separately from the design, so you can switch templates later without retyping anything. [Browse the templates](/templatechooser) or [search by job title](/for).`,
+In Fuccura your content is stored separately from the design, so you can switch templates later without retyping anything. [Browse the templates](/templatechooser) or [search by job title](/for).`,
   },
   {
     slug: "own-domain-name-for-portfolio",
@@ -176,7 +176,7 @@ Most names cost between $10 and $40 a year. Unusual endings like *.studio* or *.
 
 ## Connecting it
 
-In Formora you can buy a domain inside the editor and it connects automatically, with HTTPS set up for you. If you already own one, add the DNS records the editor shows you at your registrar and we verify them for you. Either way your portfolio is live on your own address in minutes.`,
+In Fuccura you can buy a domain inside the editor and it connects automatically, with HTTPS set up for you. If you already own one, add the DNS records the editor shows you at your registrar and we verify them for you. Either way your portfolio is live on your own address in minutes.`,
   },
   {
     slug: "portfolio-for-career-change",
@@ -206,7 +206,7 @@ A testimonial from a course tutor, a volunteer coordinator or a client from a si
 
 Don’t hide your previous career. Put it in the experience section with one line per role. Years of reliable work are evidence too.
 
-Formora lets you keep separate portfolios with different templates, so you can have one for the old field and one for the new while you make the move.`,
+Fuccura lets you keep separate portfolios with different templates, so you can have one for the old field and one for the new while you make the move.`,
   },
   {
     slug: "keep-your-portfolio-up-to-date",
@@ -236,7 +236,7 @@ A portfolio with five great projects beats one with fifteen mixed ones. Every we
 
 ## Let the boring parts update themselves
 
-If you publish code, talks or articles, Formora can check your GitHub and public profiles and suggest updates for you to approve. Nothing changes until you say so.
+If you publish code, talks or articles, Fuccura can check your GitHub and public profiles and suggest updates for you to approve. Nothing changes until you say so.
 
 ## Publish, then improve
 
@@ -268,7 +268,7 @@ Headings give a page its structure. Templates handle this for you; just keep you
 
 ## Don’t rely on motion
 
-Moving templates in Formora respect your visitors’ *reduce motion* setting automatically and show everything in its finished state.
+Moving templates in Fuccura respect your visitors’ *reduce motion* setting automatically and show everything in its finished state.
 
 ## Check on a phone
 

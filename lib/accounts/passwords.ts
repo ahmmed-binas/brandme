@@ -21,7 +21,7 @@ const PARAMS = { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 export const MIN_AGE = 16;
 export const MIN_PASSWORD = 10;
 export const USERNAME = /^[a-z0-9_]{3,24}$/;
-const RESERVED = new Set(["admin", "administrator", "root", "support", "help", "formora", "staff", "moderator", "system", "api", "gallery", "about", "pricing", "login", "signup", "account", "null", "undefined"]);
+const RESERVED = new Set(["admin", "administrator", "root", "support", "help", "formora", "fuccura", "staff", "moderator", "system", "api", "gallery", "about", "pricing", "login", "signup", "account", "null", "undefined"]);
 
 export class AccountError extends Error {
   constructor(message: string, readonly field?: string) { super(message); }

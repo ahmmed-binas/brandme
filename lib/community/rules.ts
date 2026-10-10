@@ -95,7 +95,7 @@ export function judgePost(draft: PostDraft, history: AuthorHistory, { editing = 
 
   if (!editing) {
     if (history.postsLastHour >= LIMITS.postsPerHour || history.postsLastDay >= LIMITS.postsPerDay) return refuse("rate_limited", "You’re posting faster than we allow. Please wait a little and try again.");
-    if (draft.kind === "review" && history.hasLiveReview) return refuse("already_reviewed", "You’ve already reviewed Formora. Edit your existing review instead.");
+    if (draft.kind === "review" && history.hasLiveReview) return refuse("already_reviewed", "You’ve already reviewed Fuccura. Edit your existing review instead.");
     const normalised = normaliseForDuplicates(body);
     if (history.recentBodies.some((previous) => normaliseForDuplicates(previous) === normalised)) return refuse("duplicate", "You’ve already posted this. Duplicates are refused to keep the board readable.");
   }

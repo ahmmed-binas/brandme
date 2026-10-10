@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
+import { Logo } from "@/components/common/Logo";
 import { brand, primaryNavigation } from "@/lib/brand";
 
 export default function Header() {
@@ -37,9 +38,8 @@ export default function Header() {
     <header className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-300 ${scrolled || menuOpen ? "border-b border-rule bg-paper/92 backdrop-blur-md" : "border-b border-transparent bg-paper/0"}`}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded focus:bg-ink focus:px-3 focus:py-2 focus:text-paper">Skip to content</a>
       <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between px-5 sm:px-8">
-        <Link href="/" className="group flex items-baseline gap-2" aria-label={`${brand.name}, home`}>
-          <span className="font-display text-[1.6rem] leading-none tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_72]">{brand.name}</span>
-          <span aria-hidden className="size-1.5 translate-y-[-0.2rem] rounded-full bg-signal transition-transform duration-300 group-hover:scale-150" />
+        <Link href="/" className="group flex items-center text-ink" aria-label={`${brand.name}, home`}>
+          <Logo />
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">

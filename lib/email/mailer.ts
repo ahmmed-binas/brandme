@@ -7,7 +7,7 @@ import { ensureSchema } from "@/utils/db-schema";
  * Outgoing email over SMTP, with your own company mailbox (Google Workspace,
  * Zoho, Microsoft 365, Fastmail, your host's mail server…). Set:
  *   SMTP_HOST, SMTP_PORT (587, or 465 with SMTP_SECURE=true), SMTP_USER,
- *   SMTP_PASSWORD, SMTP_FROM ("Formora <hello@yourdomain.com>"),
+ *   SMTP_PASSWORD, SMTP_FROM ("Fuccura <hello@yourdomain.com>"),
  *   SMTP_TO (where support and contact messages arrive).
  * Without SMTP the app still runs: emails are written to the server log.
  */
@@ -51,7 +51,7 @@ export async function sendTestMail(to: string): Promise<void> {
   }
 }
 
-export const fromAddress = () => process.env.SMTP_FROM || process.env.SMTP_USER || "Formora <no-reply@localhost>";
+export const fromAddress = () => process.env.SMTP_FROM || process.env.SMTP_USER || "Fuccura <no-reply@localhost>";
 export const supportInbox = () => process.env.SMTP_TO || process.env.SMTP_USER || null;
 
 export interface Mail { to: string; subject: string; text: string; html?: string; replyTo?: string }

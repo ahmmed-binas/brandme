@@ -32,6 +32,6 @@ export default function PublishedPortfolioView({ templateId, content, theme, sho
       theme={theme ?? undefined}
     />
     <PortfolioWriting templateId={templateId} content={content as StandardContent} home={home} posts={posts} />
-    {showsBranding && <Link href="/" className="fixed bottom-4 right-4 z-[60] rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 backdrop-blur transition hover:bg-white">Made with Formora</Link>}
+    {showsBranding && <Link href="/" className="fixed bottom-4 right-4 z-[60] rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 backdrop-blur transition hover:bg-white">Made with Fuccura</Link>}
   </>;
 }

@@ -10,7 +10,7 @@ import type { TemplateDefinition } from "./types";
 /**
  * Turns a studio template into a free, standalone project anyone can download:
  * Vite + React + Tailwind, the template's own component, the shared kit, its
- * sample content as JSON and the images it uses. No Formora account, server or
+ * sample content as JSON and the images it uses. No Fuccura account, server or
  * database is needed to run it. Zips are built on first request and cached.
  */
 
