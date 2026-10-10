@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, Lock } from "lucide-react";
+import type { StandardContent } from "@/lib/portfolio/schema";
+import type { TemplateDefinition } from "@/lib/templates/types";
 import { TEMPLATE_MOCKS } from "./TemplateMocks";
+import { HeroBackdrop } from "./HeroBackdrop";
+import { LiveTemplatePreview } from "./LiveTemplatePreview";
+
+/** A real template shown live in the hero, with its sample person's content. */
+export interface HeroShowcase { template: TemplateDefinition; content: StandardContent }
 
 const ROLE = "Product designer";
 const DEFAULT_NAME = "Ada Lovelace";
@@ -37,7 +44,7 @@ function TypedDomain({ domain }: { domain: string }) {
   return <span className="text-ink">{shown}<span aria-hidden className="ml-px inline-block h-[1em] w-px translate-y-[0.15em] animate-[blink_1.1s_steps(1)_infinite] bg-ink" /></span>;
 }
 
-function Specimen({ name, templateIndex, onTemplate, onInteract }: { name: string; templateIndex: number; onTemplate: (index: number) => void; onInteract: () => void }) {
+function Specimen({ name, templateIndex, onTemplate, onInteract, showcase }: { name: string; templateIndex: number; onTemplate: (index: number) => void; onInteract: () => void; showcase: HeroShowcase[] }) {
   const reduce = useReducedMotion();
   const frame = useRef<HTMLDivElement | null>(null);
   const pointerX = useMotionValue(0);
@@ -45,7 +52,14 @@ function Specimen({ name, templateIndex, onTemplate, onInteract }: { name: strin
   const rotateY = useSpring(useTransform(pointerX, [-0.5, 0.5], [-5, 5]), { stiffness: 140, damping: 18 });
   const rotateX = useSpring(useTransform(pointerY, [-0.5, 0.5], [4, -4]), { stiffness: 140, damping: 18 });
   const tabsId = useId();
-  const template = TEMPLATE_MOCKS[templateIndex];
+  // Real templates when there are approved ones to show; the drawn mock-ups otherwise.
+  const tabs = showcase.length
+    ? showcase.map((item) => ({ id: item.template.id, label: item.template.name, swatch: item.template.palettes?.[0]?.bg ?? "#111", ink: item.template.palettes?.[0]?.accent ?? "#c4851c" }))
+    : TEMPLATE_MOCKS.map(({ id, label, swatch, ink }) => ({ id, label, swatch, ink }));
+  const count = tabs.length;
+  const template = tabs[templateIndex % count]!;
+  const live = showcase[templateIndex % count];
+  const Mock = TEMPLATE_MOCKS[templateIndex % TEMPLATE_MOCKS.length]!.Mock;
   const displayName = name.trim() || "Your Name";
 
   const onPointerMove = (event: React.PointerEvent) => {
@@ -58,7 +72,7 @@ function Specimen({ name, templateIndex, onTemplate, onInteract }: { name: strin
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     event.preventDefault();
     onInteract();
-    const next = (templateIndex + (event.key === "ArrowRight" ? 1 : TEMPLATE_MOCKS.length - 1)) % TEMPLATE_MOCKS.length;
+    const next = (templateIndex + (event.key === "ArrowRight" ? 1 : count - 1)) % count;
     onTemplate(next);
     document.getElementById(`${tabsId}-${next}`)?.focus();
   };
@@ -93,14 +107,14 @@ function Specimen({ name, templateIndex, onTemplate, onInteract }: { name: strin
             exit={{ opacity: 0.6 }}
             transition={{ duration: 0.75, ease: [0.65, 0, 0.35, 1] }}
           >
-            <template.Mock name={displayName} role={ROLE} />
+            {live ? <LiveTemplatePreview template={live.template} content={{ ...live.content, name: displayName }} /> : <Mock name={displayName} role={ROLE} />}
           </motion.div>
         </AnimatePresence>
       </div>
     </motion.figure>
 
     <div role="tablist" aria-label="Template" onKeyDown={onKeyDown} className="mt-5 flex items-center justify-center gap-1">
-      {TEMPLATE_MOCKS.map((item, index) => {
+      {tabs.map((item, index) => {
         const selected = index === templateIndex;
         return <button
           key={item.id}
@@ -121,7 +135,7 @@ function Specimen({ name, templateIndex, onTemplate, onInteract }: { name: strin
   </div>;
 }
 
-export default function Hero() {
+export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
   const [name, setName] = useState("");
   const [templateIndex, setTemplateIndex] = useState(0);
   const [touched, setTouched] = useState(false);
@@ -130,12 +144,16 @@ export default function Hero() {
   // Gently cycle templates until the visitor takes over.
   useEffect(() => {
     if (touched || reduce) return;
-    const timer = window.setInterval(() => setTemplateIndex((index) => (index + 1) % TEMPLATE_MOCKS.length), 4200);
+    const timer = window.setInterval(() => setTemplateIndex((index) => (index + 1) % (showcase.length || TEMPLATE_MOCKS.length)), showcase.length ? 9000 : 4200);
     return () => window.clearInterval(timer);
-  }, [touched, reduce]);
+  }, [touched, reduce, showcase.length]);
 
   return <section aria-labelledby="hero-title" className="grain relative -mt-16 overflow-hidden pt-16">
-    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[38rem] bg-[radial-gradient(60%_60%_at_78%_20%,var(--signal-soft),transparent_70%)]" />
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-0">
+      <HeroBackdrop />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[var(--paper)]" />
+      <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[color-mix(in_oklab,var(--paper)_70%,transparent)] via-[color-mix(in_oklab,var(--paper)_25%,transparent)] to-transparent lg:w-3/5" />
+    </div>
     <div className="relative mx-auto grid max-w-[1320px] grid-cols-1 items-center gap-14 px-5 pb-20 pt-10 sm:px-8 lg:grid-cols-12 lg:gap-10 lg:pb-28 lg:pt-20">
       <div className="min-w-0 lg:col-span-6">
         <p className="rise font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft" style={{ "--i": 0 } as React.CSSProperties}>Portfolio builder · free to start</p>
@@ -178,7 +196,7 @@ export default function Hero() {
           Typed live. Try your own name
           <svg viewBox="0 0 120 60" className="absolute left-full top-2 ml-2 h-12 w-24 text-ink-soft"><path d="M2 8 C 40 2, 78 10, 96 44 M96 44 l-11 -3 M96 44 l2 -11" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
         </p>
-        <Specimen name={name || DEFAULT_NAME} templateIndex={templateIndex} onTemplate={setTemplateIndex} onInteract={() => setTouched(true)} />
+        <Specimen name={name || DEFAULT_NAME} templateIndex={templateIndex} onTemplate={setTemplateIndex} onInteract={() => setTouched(true)} showcase={showcase} />
       </div>
     </div>
   </section>;

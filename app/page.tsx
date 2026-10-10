@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import Hero from "@/components/landing/Hero";
+import Hero, { type HeroShowcase } from "@/components/landing/Hero";
+import { availableTemplates } from "@/lib/templates/approval";
+import { personaFor } from "@/lib/templates/personas";
 import HowItWorks from "@/components/landing/HowItWorks";
 import TemplateShowcase, { CollectionStrip } from "@/components/landing/TemplateShowcase";
 import Faq from "@/components/landing/Faq";
@@ -24,6 +26,18 @@ const OWNERSHIP = [
   { title: "Your data", body: "Delete your account and everything goes with it, straight away. No dark patterns, no ‘are you sure’ maze." },
 ];
 
+/** Shows newly approved templates in the hero within a few minutes. */
+export const revalidate = 300;
+
+/** Real templates for the hero's live preview, in this order, once the owner has approved them. */
+const HERO_TEMPLATES = ["mirage", "debut", "keys", "skyline", "front-door", "shoreline"];
+
+async function heroShowcase(): Promise<HeroShowcase[]> {
+  const available = await availableTemplates().catch(() => []);
+  return HERO_TEMPLATES.map((id) => available.find((template) => template.id === id)).filter((template) => template !== undefined).slice(0, 3)
+    .map((template) => ({ template, content: personaFor(template.persona) }));
+}
+
 function SectionHeading({ kicker, children, id }: { kicker: string; children: React.ReactNode; id: string }) {
   return <div className="max-w-[46rem]">
     <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">{kicker}</p>
@@ -31,7 +45,8 @@ function SectionHeading({ kicker, children, id }: { kicker: string; children: Re
   </div>;
 }
 
-export default function Home() {
+export default async function Home() {
+  const showcase = await heroShowcase();
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -50,7 +65,7 @@ export default function Home() {
 
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
-    <Hero />
+    <Hero showcase={showcase} />
 
     <HowItWorks />
 
