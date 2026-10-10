@@ -47,3 +47,7 @@ tests/e2e/node_modules/
 
 # Marketing videos recorded by scripts/samples/tiktok-clips.mjs
 /marketing/clips/
+/public/_review/
+/marketing/kestrel-demo/out/
+/marketing/kestrel-demo/*.mp4
+/marketing/kestrel-demo/voice.*
