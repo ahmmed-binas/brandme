@@ -20,7 +20,7 @@ export const about = {
     "End with a promise you intend to keep, for example that prices stay low, that people’s work is never held hostage, and that a person answers every support message.",
   ],
   principles: [
-    { title: "Cheap enough to forget", body: "One small payment a year, or five years at once. Your portfolio shouldn’t be a monthly bill." },
+    { title: "Cheap enough to forget", body: "Free to start. Pro is a small monthly payment you can stop any time." },
     { title: "Your work, your address", body: "Your own domain, your own words, and an export of everything whenever you want it." },
     { title: "It keeps itself current", body: "New projects, talks and roles are found for you. You approve them with one click." },
     { title: "A person replies", body: "Support is answered by the people who build the product." },

@@ -9,10 +9,10 @@ export interface PlanCard { id: "basic" | "pro"; name: string; summary: string; 
 
 const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
-/** Monthly/yearly toggle and the plan cards. Checkout opens Stripe; signed-out visitors sign in first and come back here. */
+/** The plan cards (Pro is paid monthly). Checkout opens Stripe; signed-out visitors sign in first and come back here. */
 export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plans: PlanCard[]; paymentsReady: boolean; bookingHref: string }) {
   const { status } = useSession();
-  const [interval, setInterval] = useState<"year" | "month">("year");
+  const interval = "month" as const;
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,14 +30,8 @@ export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plan
     }
   };
 
-  const pro = plans.find((plan) => plan.id === "pro");
-  const yearlySaving = pro?.prices.year && pro.prices.month ? Math.round((1 - pro.prices.year / (pro.prices.month * 12)) * 100) : 0;
-
   return <>
-    <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-      <div role="radiogroup" aria-label="Pay for Pro" className="inline-flex rounded-full border border-rule p-1">{(["year", "month"] as const).map((option) => <button key={option} type="button" role="radio" aria-checked={interval === option} onClick={() => setInterval(option)} className={`rounded-full px-4 py-1.5 text-[0.92rem] transition-colors ${interval === option ? "bg-ink text-paper" : "text-ink-soft hover:text-ink"}`}>{option === "year" ? `Yearly${yearlySaving > 0 ? ` · save ${yearlySaving}%` : ""}` : "Monthly"}</button>)}</div>
-    </div>
-    <ul className="mt-10 grid gap-5 lg:grid-cols-3">
+    <ul className="mt-12 grid gap-5 lg:grid-cols-3">
       {plans.map((plan) => {
         const free = plan.id === "basic";
         const price = plan.prices[interval];
@@ -45,7 +39,7 @@ export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plan
           <h2 className="font-display text-[2rem] leading-none">{plan.name}</h2>
           <p className={`mt-2 min-h-[3rem] text-[0.95rem] ${plan.highlight ? "text-paper/75" : "text-ink-soft"}`}>{plan.summary}</p>
           <p className="mt-6 flex items-baseline gap-2"><span className="font-display text-[3.4rem] leading-none tracking-[-0.03em]">{free ? "Free" : usd(price!)}</span>{!free && <span className={plan.highlight ? "text-paper/70" : "text-ink-soft"}>a {interval}</span>}</p>
-          <p className={`mt-1 text-[0.88rem] ${plan.highlight ? "text-paper/70" : "text-ink-faint"}`}>{free ? "No card needed, for as long as you like." : interval === "year" ? "Paid once a year. Renews until you switch it off." : "Paid each month. Renews until you switch it off."}</p>
+          <p className={`mt-1 text-[0.88rem] ${plan.highlight ? "text-paper/70" : "text-ink-faint"}`}>{free ? "No card needed, for as long as you like." : "Paid each month. Cancel any time."}</p>
           {free ? <Link href="/templatechooser" className="mt-6 inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Start free</Link>
             : <button type="button" disabled={!paymentsReady || busy !== null} onClick={() => void choose(plan)} className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink disabled:opacity-50">{busy === plan.id && <Loader2 size={15} className="animate-spin" />}{paymentsReady ? `Choose ${plan.name}` : "Coming soon"}</button>}
           <ul className="mt-7 space-y-2.5 text-[0.93rem]">{plan.features.map((feature) => <li key={feature} className="flex gap-2.5"><Check size={16} className={`mt-0.5 shrink-0 ${plan.highlight ? "text-signal" : "text-ink"}`} />{feature}</li>)}</ul>

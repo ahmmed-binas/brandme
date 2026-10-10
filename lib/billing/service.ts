@@ -2,7 +2,7 @@ import type Stripe from "stripe";
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import { stripe } from "@/lib/payments/stripe";
-import { INTERVAL_LABEL, PLANS, cardFeeCents, formatUsd, isInterval, isPaidPlan, priceFor, type BillingInterval } from "@/lib/plans";
+import { INTERVAL_LABEL, OFFERED_INTERVALS, PLANS, cardFeeCents, formatUsd, isInterval, isPaidPlan, priceFor, type BillingInterval } from "@/lib/plans";
 import { creditPack, grantCredits } from "./credits";
 import { emails } from "@/lib/email/templates";
 import { sendOnce } from "@/lib/email/mailer";
@@ -36,7 +36,7 @@ async function customerFor(user: CurrentUser): Promise<string> {
 export async function startPlanCheckout(user: CurrentUser, plan: unknown, interval: unknown, origin: string): Promise<string> {
   await ensureSchema();
   if (!isPaidPlan(plan)) throw new BillingError("Choose Pro.", 422);
-  if (!isInterval(interval)) throw new BillingError("Choose to pay monthly or yearly.", 422);
+  if (!isInterval(interval) || !OFFERED_INTERVALS.includes(interval)) throw new BillingError("Pro is paid monthly.", 422);
   const amount = priceFor(plan, interval);
   const months = interval === "year" ? 12 : 1;
   const order = await db.query<{ id: string }>("INSERT INTO billing_orders (owner_id, kind, plan, term_months, amount_cents) VALUES ($1, 'plan', $2, $3, $4) RETURNING id", [user.id, plan, months, amount]);

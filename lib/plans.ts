@@ -6,7 +6,7 @@
  * The model (free-first launch, see docs/plans/free-first-launch-plan.md):
  * - Basic is free for ever: every template, one live portfolio, a blog and the
  *   Investigator. Nothing is ever paused.
- * - Pro is paid yearly or monthly: up to three live portfolios, the owner's own
+ * - Pro is paid monthly: up to three live portfolios, the owner's own
  *   domain and no branding. When Pro ends there are 14 days of grace, then the
  *   account is back on Basic (extra portfolios rest; nothing is deleted).
  * - AI is paid separately at cost (credits or the owner's own API key) and
@@ -51,11 +51,17 @@ export const PLANS: Record<PlanId, PlanLimits> = {
     storageMb: 100, blog: true, autoSync: true,
   },
   pro: {
-    id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 6000, month: 600 },
+    id: "pro", name: "Pro", summary: "Up to three sites, on your own domain, without our name on them.", prices: { year: 9000, month: 900 },
     portfolios: 3, publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
     storageMb: 1000, blog: true, autoSync: true,
   },
 };
+
+/**
+ * Billing periods customers can choose at checkout. Yearly is hidden for now (owner's
+ * decision, October 2026); its price stays so existing yearly plans keep renewing.
+ */
+export const OFFERED_INTERVALS: readonly BillingInterval[] = ["month"];
 
 export const isPaidPlan = (value: unknown): value is PaidPlanId => value === "pro";
 export const isInterval = (value: unknown): value is BillingInterval => value === "year" || value === "month";

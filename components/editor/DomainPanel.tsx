@@ -126,7 +126,7 @@ export function DomainPanel({ templateId, personName, published }: { templateId:
     </div>;
   }
 
-  if (!capabilities.planAllows) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-600">Your own domain, like <b>{(personName || "yourname").toLowerCase().replace(/[^a-z0-9]+/g, "") || "yourname"}.com</b>, comes with <b>Pro</b> ({formatUsd(PLANS.pro.prices.year!)} a year or {formatUsd(PLANS.pro.prices.month!)} a month). On {capabilities.planName} your site lives at your free Formora address.</p><a href="/pricing" className="inline-block rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">See Pro</a></div>;
+  if (!capabilities.planAllows) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-600">Your own domain, like <b>{(personName || "yourname").toLowerCase().replace(/[^a-z0-9]+/g, "") || "yourname"}.com</b>, comes with <b>Pro</b> ({formatUsd(PLANS.pro.prices.month!)} a month). On {capabilities.planName} your site lives at your free Formora address.</p><a href="/pricing" className="inline-block rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white">See Pro</a></div>;
 
   if (!capabilities.canBuy && !capabilities.canConnect) return <div className="space-y-2">{header}<p className="text-xs leading-5 text-slate-500">Custom domains aren’t available on this server yet.</p></div>;
 

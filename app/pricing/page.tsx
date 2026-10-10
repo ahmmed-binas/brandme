@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing: free to start",
-  description: `${brand.name} is free for one portfolio with a blog. Pro is ${formatUsd(PLANS.pro.prices.year!)} a year or ${formatUsd(PLANS.pro.prices.month!)} a month for up to three sites on your own domain. AI at cost.`,
+  description: `${brand.name} is free for one portfolio with a blog. Pro is ${formatUsd(PLANS.pro.prices.month!)} a month for up to three sites on your own domain. AI at cost.`,
   alternates: { canonical: "/pricing" },
 };
 
@@ -25,7 +25,7 @@ const FAQ: Array<[string, string]> = [
   ["How does AI work if it isn’t in the price?", "AI costs real money every time it runs, so it’s paid separately and costs the same on every plan. Buy credits at what the AI costs us plus 5% (they never expire), or connect your own Claude or OpenAI API key and pay Anthropic or OpenAI directly. ChatGPT and Codex users can use an OpenAI key."],
   ["What’s the card fee?", `Stripe charges about 2.9% + 30¢ for each card payment. When you buy credits or a domain we show it as its own line, so the thing you’re buying is at cost. For example, $10 of credits is $10 + ${formatUsd(cardFeeCents(1000))}.`],
   ["How does the Investigator get paid for?", "Every account gets its first check free. After that, reading GitHub and blog feeds is free, and the AI step (reading your other profiles and searching the web) costs a few credits per check, or nothing extra with your own Claude key. You choose how often it runs."],
-  ["Will I be charged automatically?", "Only for Pro, and only if you choose it. We save your card for renewal, email yearly payers two weeks before, and you can switch renewal off any time in your account."],
+  ["Will I be charged automatically?", "Only for Pro, and only if you choose it. Pro renews each month on the card you paid with, and you can switch renewal off any time in your account."],
   ["What happens if Pro ends?", `Pro keeps working for another ${GRACE_DAYS} days while you decide. After that your account moves to free Basic: your first published site stays online, any others rest (visitors see a short holding page), and nothing is deleted.`],
   ["Can I get a refund?", "Yes, for Pro within 14 days of paying, and for credits you haven’t used. Stripe keeps its card fee when a payment is refunded, so you get back the payment minus that fee. Just reply to your receipt."],
   ["Do I need a domain?", "No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee."],
@@ -37,7 +37,6 @@ export default function PricingPage() {
     "@context": "https://schema.org", "@type": "Product", name: `${brand.name} portfolio hosting`, description: brand.description, brand: { "@type": "Brand", name: brand.name },
     offers: [
       { "@type": "Offer", name: "Basic plan", price: "0.00", priceCurrency: "USD", url: `${siteUrl}/pricing`, availability: "https://schema.org/InStock" },
-      { "@type": "Offer", name: "Pro plan, yearly", price: (PLANS.pro.prices.year! / 100).toFixed(2), priceCurrency: "USD", url: `${siteUrl}/pricing`, availability: "https://schema.org/InStock" },
       { "@type": "Offer", name: "Pro plan, monthly", price: (PLANS.pro.prices.month! / 100).toFixed(2), priceCurrency: "USD", url: `${siteUrl}/pricing`, availability: "https://schema.org/InStock" },
     ],
   };

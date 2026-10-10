@@ -31,7 +31,7 @@ export default function TermsPage() {
       <>The Investigator may only be used for your own profiles, with your consent.</>,
     ] },
     { title: "Plans and payments", body: [
-      <><b className="font-medium text-ink">Basic</b> is free. <b className="font-medium text-ink">Pro</b> costs {formatUsd(PLANS.pro.prices.year!)} a year or {formatUsd(PLANS.pro.prices.month!)} a month, paid in advance. Prices are in US dollars and shown before you pay; your bank may add its own currency fees.</>,
+      <><b className="font-medium text-ink">Basic</b> is free. <b className="font-medium text-ink">Pro</b> costs {formatUsd(PLANS.pro.prices.month!)} a month, paid in advance. Prices are in US dollars and shown before you pay; your bank may add its own currency fees.</>,
       <>Pro renews automatically with the card you paid with, each year or month, until you switch renewal off in your account. We email yearly payers two weeks before. If a renewal fails or you switch it off, Pro keeps working for {GRACE_DAYS} days and then your account moves to Basic: your first published site stays online, any others are taken offline, and nothing is deleted.</>,
       <><b className="font-medium text-ink">AI credits</b> are prepaid, priced at what the AI costs us plus 5%, and don’t expire. <b className="font-medium text-ink">Domains</b> are sold at the registrar’s price. For credits and domains, the card fee charged by Stripe is shown as its own line.</>,
     ] },

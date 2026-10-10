@@ -95,8 +95,8 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.08} className="flex flex-col bg-card p-8">
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Pro</p>
-            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">{formatUsd(PLANS.pro.prices.year!)}<span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ year</span></p>
-            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Your own domain, set up and secured for you", "Up to three live portfolios", "No Formora link on your site", `Or ${formatUsd(PLANS.pro.prices.month!)} a month`].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
+            <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">{formatUsd(PLANS.pro.prices.month!)}<span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ month</span></p>
+            <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">{["Your own domain, set up and secured for you", "Up to three live portfolios", "No Formora link on your site", "Cancel any time"].map((line) => <li key={line} className="flex gap-3"><span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />{line}</li>)}</ul>
             <Link href="/pricing" className="mt-auto pt-9 text-[0.95rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink">Compare Basic and Pro →</Link>
           </Reveal>
         </div>
