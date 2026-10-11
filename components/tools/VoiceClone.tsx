@@ -15,10 +15,11 @@ import {
 } from "@/lib/tools/browser-audio";
 import {
   CONSENT_SENTENCE,
-  MAX_CLIP_CHARS,
   READING_SCRIPT,
+  VOICE_PLANS,
   VOICE_STYLES,
   type VoiceClip,
+  type VoicePlan,
   type VoiceState,
   type VoiceStyle,
 } from "@/lib/tools/voice-config";
@@ -124,6 +125,8 @@ export function VoiceClone() {
         <Speak
           ready={state.voice?.status === "ready"}
           engineOnline={state.engineOnline}
+          plan={state.plan}
+          clipsToday={state.clipsToday}
           onSpeak={(text, style) =>
             send(
               fetch("/api/tools/voice/clips", {
@@ -135,6 +138,7 @@ export function VoiceClone() {
           }
         />
         <ClipList clips={state.clips} engineOnline={state.engineOnline} />
+        {state.clips.some((clip) => clip.status === "done") && <UseYourVoice />}
       </Panel>
 
       {error && (
@@ -511,16 +515,22 @@ function VoiceReady({ onRemake, onDelete }: { onRemake: () => void; onDelete: ()
 function Speak({
   ready,
   engineOnline,
+  plan,
+  clipsToday,
   onSpeak,
 }: {
   ready: boolean;
   engineOnline: boolean;
+  plan: VoicePlan;
+  clipsToday: number;
   onSpeak: (text: string, style: VoiceStyle) => Promise<true | void>;
 }) {
   const [text, setText] = useState("");
   const [style, setStyle] = useState<VoiceStyle>("natural");
   const [sending, setSending] = useState(false);
   const [queuedOffline, setQueuedOffline] = useState(false);
+  const limits = VOICE_PLANS[plan];
+  const left = Math.max(0, limits.clipsPerDay - clipsToday);
 
   const speak = async () => {
     setSending(true);
@@ -545,14 +555,14 @@ function Speak({
         id="voice-text"
         value={text}
         disabled={!ready}
-        maxLength={MAX_CLIP_CHARS}
+        maxLength={limits.maxChars}
         onChange={(event) => setText(event.target.value)}
         rows={6}
         placeholder="Welcome to this stunning two-bedroom apartment in Dubai Marina, with views across the water…"
         className="w-full resize-y rounded-xl border border-rule bg-paper px-4 py-3 text-[0.98rem] leading-relaxed text-ink outline-none transition focus:border-ink disabled:cursor-not-allowed"
       />
       <p className="mt-1 text-right text-[0.8rem] tabular-nums text-ink-soft">
-        {text.length} / {MAX_CLIP_CHARS}
+        {text.length} / {limits.maxChars}
       </p>
 
       <fieldset className="mt-3">
@@ -583,7 +593,7 @@ function Speak({
 
       <button
         type="button"
-        disabled={!ready || !text.trim() || sending}
+        disabled={!ready || !text.trim() || sending || left === 0}
         onClick={() => void speak()}
         className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-paper transition hover:bg-signal hover:text-signal-ink disabled:cursor-not-allowed disabled:opacity-40"
       >
@@ -591,6 +601,54 @@ function Speak({
         Read it in my voice
       </button>
       {queuedOffline && <NotAvailable what="Your clip is made" />}
+      <Allowance plan={plan} left={left} />
+    </div>
+  );
+}
+
+/** Today's clips left, and what Pro adds (limits in VOICE_PLANS). */
+function Allowance({ plan, left }: { plan: VoicePlan; left: number }) {
+  const limits = VOICE_PLANS[plan];
+  const pro = VOICE_PLANS.pro;
+  return (
+    <div className="mt-4 text-[0.85rem] text-ink-soft">
+      <p>
+        <span className="font-medium text-ink">
+          {left} of {limits.clipsPerDay}
+        </span>{" "}
+        {plan === "pro" ? "Pro" : "free"} clips left today · up to {limits.maxChars} characters each
+      </p>
+      {plan === "free" && (
+        <p className="mt-1">
+          <Link href="/pricing" className="font-medium text-ink underline underline-offset-4">
+            Pro
+          </Link>{" "}
+          gets {pro.clipsPerDay} clips a day, {pro.maxChars} characters each (about a minute), first place in
+          the queue, and clips kept {pro.keepDays} days.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * After the first finished clip: the free tool's job is to bring people to
+ * Fuccura's websites, so show where their new voice can work for them.
+ */
+function UseYourVoice() {
+  return (
+    <div className="mt-6 rounded-2xl bg-ink p-5 text-paper">
+      <p className="font-display text-xl">Let your voice market you.</p>
+      <p className="mt-2 text-[0.9rem] text-paper/75">
+        Put these clips on your reels, TikToks and listing tours, and send people to one place: your own
+        website. Pick a free design, click to edit, and it’s live in minutes.
+      </p>
+      <Link
+        href="/templatechooser"
+        className="mt-4 inline-flex rounded-full bg-paper px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-signal hover:text-signal-ink"
+      >
+        Make my free website
+      </Link>
     </div>
   );
 }

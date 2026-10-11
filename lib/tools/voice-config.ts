@@ -8,11 +8,24 @@
 export const MAX_SOURCE_BYTES = 6_000_000;
 /** About 40 seconds of the consent recording. */
 export const MAX_CONSENT_BYTES = 2_000_000;
-/** The longest text read aloud in one clip (about 25 seconds of speech). */
-export const MAX_CLIP_CHARS = 400;
-export const CLIPS_PER_DAY = 20;
-/** Clips are deleted after this many days. */
-export const CLIP_DAYS = 30;
+/**
+ * What each plan gets. Free is enough to try it and use it now and then; Pro is
+ * for people who make content every day. Speaking runs on one graphics card, so
+ * Pro work goes to the front of the queue. Change the numbers here.
+ *   clipsPerDay – clips in any 24 hours
+ *   maxChars    – the longest text in one clip (about 15 characters a second of speech)
+ *   keepDays    – how long finished clips are kept
+ *   voicesPerDay – how often the voice can be made again
+ */
+export const VOICE_PLANS = {
+  free: { label: "Free", clipsPerDay: 5, maxChars: 250, keepDays: 7, voicesPerDay: 2, priority: 0 },
+  pro: { label: "Pro", clipsPerDay: 50, maxChars: 1000, keepDays: 90, voicesPerDay: 10, priority: 1 },
+} as const;
+
+export type VoicePlan = keyof typeof VOICE_PLANS;
+
+/** Free clips from one internet connection a day, whatever the account (stops sign-up farming). */
+export const FREE_CLIPS_PER_IP = 15;
 
 /** Read into the microphone; the worker checks it is the same voice as the upload. */
 export const CONSENT_SENTENCE =
@@ -81,6 +94,9 @@ export interface VoiceClip {
 
 export interface VoiceState {
   engineOnline: boolean;
+  /** The account's tier and how much of today's allowance is used. */
+  plan: VoicePlan;
+  clipsToday: number;
   voice: { status: VoiceStatus; error: string | null; createdAt: string } | null;
   clips: VoiceClip[];
 }

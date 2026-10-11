@@ -1,11 +1,12 @@
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import {
-  CLIP_DAYS,
   CONSENT_SENTENCE,
+  VOICE_PLANS,
   VOICE_STYLES,
   isVoiceStyle,
   type ClipStatus,
+  type VoicePlan,
   type VoiceState,
   type VoiceStatus,
   type VoiceStyle,
@@ -44,6 +45,21 @@ export function cleanClipText(text: string): string {
     .trim();
 }
 
+/** Pro (while it's active or in its grace period) gets the Pro limits; everyone else Free. */
+export const voicePlanOf = (user: { plan: { id: string } }): VoicePlan =>
+  user.plan.id === "pro" ? "pro" : "free";
+
+/** Clips asked for in the last 24 hours (failed ones don't count: those were our fault). */
+export async function clipsToday(userId: string): Promise<number> {
+  await ensureSchema();
+  const result = await db.query<{ count: string }>(
+    `SELECT COUNT(*) AS count FROM voice_clips
+     WHERE user_id = $1 AND status <> 'failed' AND created_at > NOW() - INTERVAL '24 hours'`,
+    [userId],
+  );
+  return Number(result.rows[0]?.count ?? 0);
+}
+
 export async function engineOnline(): Promise<boolean> {
   await ensureSchema();
   const result = await db.query<{ online: boolean }>(
@@ -56,7 +72,7 @@ export async function engineOnline(): Promise<boolean> {
 }
 
 /** Everything the voice page shows for one account. */
-export async function voiceState(userId: string): Promise<VoiceState> {
+export async function voiceState(userId: string, plan: VoicePlan): Promise<VoiceState> {
   await ensureSchema();
   const voice = await db.query<{ status: VoiceStatus; error: string | null; created_at: Date }>(
     "SELECT status, error, created_at FROM voice_profiles WHERE user_id = $1",
@@ -73,7 +89,8 @@ export async function voiceState(userId: string): Promise<VoiceState> {
   }>(
     `SELECT c.id, c.text, c.style, c.status, c.error, c.created_at,
        (SELECT COUNT(*) FROM voice_clips q
-         WHERE q.status = 'queued' AND q.created_at < c.created_at) AS ahead
+         WHERE q.status = 'queued'
+           AND (q.priority > c.priority OR (q.priority = c.priority AND q.created_at < c.created_at))) AS ahead
      FROM voice_clips c
      WHERE c.user_id = $1
      ORDER BY c.created_at DESC
@@ -83,6 +100,8 @@ export async function voiceState(userId: string): Promise<VoiceState> {
   const row = voice.rows[0];
   return {
     engineOnline: await engineOnline(),
+    plan,
+    clipsToday: await clipsToday(userId),
     voice: row ? { status: row.status, error: row.error, createdAt: row.created_at.toISOString() } : null,
     clips: clips.rows.map((clip) => ({
       id: clip.id,
@@ -118,6 +137,7 @@ export async function queueClip(
   userId: string,
   text: string,
   style: VoiceStyle,
+  plan: VoicePlan,
 ): Promise<{ id: string } | { error: string }> {
   await ensureSchema();
   const voice = await db.query<{ id: string; status: VoiceStatus }>(
@@ -126,9 +146,12 @@ export async function queueClip(
   );
   const profile = voice.rows[0];
   if (!profile || profile.status !== "ready") return { error: "Your voice isn’t ready yet." };
+  const { priority, keepDays } = VOICE_PLANS[plan];
   const result = await db.query<{ id: string }>(
-    "INSERT INTO voice_clips (user_id, profile_id, text, style) VALUES ($1, $2, $3, $4) RETURNING id",
-    [userId, profile.id, text, style],
+    `INSERT INTO voice_clips (user_id, profile_id, text, style, priority, expires_at)
+     VALUES ($1, $2, $3, $4, $5, NOW() + make_interval(days => $6))
+     RETURNING id`,
+    [userId, profile.id, text, style, priority, keepDays],
   );
   return { id: result.rows[0]!.id };
 }
@@ -173,7 +196,7 @@ export async function workerSeen(name: string): Promise<void> {
 
 const claimable = `(status = 'queued' OR (status = 'working' AND claimed_at < NOW() - INTERVAL '${STUCK_MINUTES} minutes'))`;
 
-/** Hands the next job to a worker: new voices first (they're quick), then clips, oldest first. */
+/** Hands the next job to a worker: new voices first (they're quick), then clips, Pro first, oldest first. */
 export async function claimJob(): Promise<WorkerJob | null> {
   await ensureSchema();
   const voice = await db.query<{ id: string }>(
@@ -190,7 +213,7 @@ export async function claimJob(): Promise<WorkerJob | null> {
     `UPDATE voice_clips SET status = 'working', claimed_at = NOW()
      WHERE id = (
        SELECT id FROM voice_clips WHERE ${claimable}
-       ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED
+       ORDER BY priority DESC, created_at LIMIT 1 FOR UPDATE SKIP LOCKED
      )
      RETURNING id, profile_id, text, style`,
   );
@@ -263,12 +286,9 @@ export async function finishClip(
   );
 }
 
-/** Hourly clean-up: clips older than CLIP_DAYS. */
+/** Hourly clean-up: clips past their plan's keeping time. */
 export async function pruneVoiceClips(): Promise<number> {
   await ensureSchema();
-  const result = await db.query(
-    `DELETE FROM voice_clips WHERE created_at < NOW() - make_interval(days => $1)`,
-    [CLIP_DAYS],
-  );
+  const result = await db.query(`DELETE FROM voice_clips WHERE expires_at < NOW()`);
   return result.rowCount ?? 0;
 }

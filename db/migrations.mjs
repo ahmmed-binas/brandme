@@ -610,6 +610,17 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "022_voice_clip_plans",
+  statements: [
+    // Free and Pro limits (VOICE_PLANS in lib/tools/voice-config.ts): Pro clips go first
+    // in the queue, and each clip is kept for its plan's number of days.
+    `ALTER TABLE voice_clips ADD COLUMN IF NOT EXISTS priority SMALLINT NOT NULL DEFAULT 0`,
+    `ALTER TABLE voice_clips ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ`,
+    `UPDATE voice_clips SET expires_at = created_at + INTERVAL '30 days' WHERE expires_at IS NULL`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

@@ -3,7 +3,9 @@ import Link from "next/link";
 import { VoiceClone } from "@/components/tools/VoiceClone";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
-import { CLIP_DAYS, CLIPS_PER_DAY, VOICE_STYLES } from "@/lib/tools/voice-config";
+import { VOICE_PLANS, VOICE_STYLES } from "@/lib/tools/voice-config";
+
+const { free, pro } = VOICE_PLANS;
 
 const TITLE = "Free AI Voice Clone: text to speech in your own voice";
 const DESCRIPTION =
@@ -40,7 +42,7 @@ const TIPS = [
 const FAQ: Array<{ question: string; answer: string }> = [
   {
     question: "Is the AI voice clone really free?",
-    answer: `Yes. Making your voice is free, and you can make up to ${CLIPS_PER_DAY} clips a day, each up to about 25 seconds. You only need a free ${brand.name} account.`,
+    answer: `Yes. Making your voice is free with a free ${brand.name} account, and you get ${free.clipsPerDay} clips a day of up to ${free.maxChars} characters (about 15 seconds). Pro gets ${pro.clipsPerDay} clips a day of up to ${pro.maxChars} characters (about a minute), and its clips go first in the queue.`,
   },
   {
     question: "How much of my voice do you need?",
@@ -54,7 +56,7 @@ const FAQ: Array<{ question: string; answer: string }> = [
   },
   {
     question: "What happens to my recordings?",
-    answer: `Only the sound leaves your device, never the video. Once your voice is made, we delete your upload and consent recording and keep a 12-second sample to speak from. Clips are deleted after ${CLIP_DAYS} days, and you can delete your voice at any time.`,
+    answer: `Only the sound leaves your device, never the video. Once your voice is made, we delete your upload and consent recording and keep a 12-second sample to speak from. Clips are deleted after ${free.keepDays} days (${pro.keepDays} on Pro), and you can delete your voice at any time.`,
   },
   {
     question: "What styles can my voice speak in?",

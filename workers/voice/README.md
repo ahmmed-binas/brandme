@@ -7,7 +7,7 @@ jobs every few seconds, using outgoing connections only, so nothing needs openin
 - **New voice:** downloads the upload and the spoken consent and checks they sound like
   the same person. Then it keeps the clearest 12 seconds as the voice's sample. The
   website deletes the upload and the consent recording straight after.
-- **Clip:** reads the text in that voice, in the chosen style, adds a studio polish
+- **Clip:** reads the text in that voice (Pro clips first), in the chosen style, adds a studio polish
   (rumble cut, even loudness) and sends back an MP3.
 - **Watermark:** every clip carries Chatterbox's inaudible watermark (Resemble AI's Perth),
   so it can be identified as AI-made.
