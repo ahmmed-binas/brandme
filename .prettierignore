@@ -1,0 +1,15 @@
+# Generated, vendored or binary output
+node_modules/
+.next/
+out/
+coverage/
+public/
+marketing/
+package-lock.json
+tests/e2e/package-lock.json
+# Prose and data kept exactly as written
+*.md
+*.mdx
+*.pdf
+*.html
+.claude/
