@@ -14,7 +14,11 @@ import type { PublicPost } from "@/components/templates/PortfolioBlog";
  * engines should index: the owner's own domain when they have one (so the copy
  * at /p/<slug> doesn't compete with it), otherwise /p/<slug>.
  */
-export interface Site { portfolio: PublishedPortfolio; home: string; canonical: string }
+export interface Site {
+  portfolio: PublishedPortfolio;
+  home: string;
+  canonical: string;
+}
 
 export const sitePathFor = cache(async (slug: string): Promise<Site | null> => {
   if (!databaseConfigured() || !SLUG_PATTERN.test(slug)) return null;
@@ -33,13 +37,21 @@ export const siteForHost = cache(async (rawHost: string): Promise<Site | null> =
 });
 
 export const toPublic = (post: PortfolioPost, withBody = false): PublicPost => ({
-  slug: post.slug, title: post.title, summary: post.summary, cover: post.cover, publishedAt: post.publishedAt, readMinutes: post.readMinutes, ...(withBody ? { body: post.body, media: post.media } : {}),
+  slug: post.slug,
+  title: post.title,
+  summary: post.summary,
+  cover: post.cover,
+  publishedAt: post.publishedAt,
+  readMinutes: post.readMinutes,
+  ...(withBody ? { body: post.body, media: post.media } : {}),
 });
 
 /** Published posts for a live (not resting) site, newest first. */
 export async function sitePosts(site: Site, limit?: number): Promise<PublicPost[]> {
   if (site.portfolio.resting || !site.portfolio.hasBlog) return [];
-  return (await listPosts(site.portfolio.ownerId, site.portfolio.templateId, { limit })).map((post) => toPublic(post));
+  return (await listPosts(site.portfolio.ownerId, site.portfolio.templateId, { limit })).map((post) =>
+    toPublic(post),
+  );
 }
 
 export const sitePost = cache(async (site: Site, slug: string): Promise<PublicPost | null> => {

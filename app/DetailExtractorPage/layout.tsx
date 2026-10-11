@@ -6,4 +6,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/DetailExtractorPage" },
 };
 
-export default function DetailExtractorLayout({ children }: Readonly<{ children: React.ReactNode }>) { return children; }
+export default function DetailExtractorLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return children;
+}

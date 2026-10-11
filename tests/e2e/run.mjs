@@ -7,7 +7,9 @@ const shots = process.env.SHOTS;
 const log = (...args) => console.log("•", ...args);
 
 // Start from a clean account (domains.mjs uses the same one and leaves it published).
-execSync(`su postgres -c "psql -d formora -At -c \\"DELETE FROM app_users WHERE provider_account_id = 'google-test-1'\\""`);
+execSync(
+  `su postgres -c "psql -d formora -At -c \\"DELETE FROM app_users WHERE provider_account_id = 'google-test-1'\\""`,
+);
 const token = await encode({
   token: { name: "Test User", email: "test@example.com", providerAccountId: "google-test-1", sub: "x" },
   secret: process.env.AUTH_SECRET,
@@ -22,7 +24,10 @@ const errors = [];
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   page.on("pageerror", (error) => errors.push(`signed-out: ${error.message}`));
   await page.goto(`${BASE}/editor/template-one`);
-  await page.getByText("Saved on this device only").waitFor({ timeout: 15000 }).catch(() => {});
+  await page
+    .getByText("Saved on this device only")
+    .waitFor({ timeout: 15000 })
+    .catch(() => {});
   const name = page.locator('[data-editor-field="name"]');
   await name.fill("Ada Lovelace");
   const skills = page.locator('[data-editor-field="skills"] input');
@@ -40,9 +45,15 @@ const errors = [];
   await page.waitForTimeout(800);
   await page.reload();
   await page.waitForTimeout(800);
-  log("cleared title after reload:", JSON.stringify(await page.locator('[data-editor-field="professional-title"]').inputValue()));
+  log(
+    "cleared title after reload:",
+    JSON.stringify(await page.locator('[data-editor-field="professional-title"]').inputValue()),
+  );
   await page.getByRole("button", { name: /Publish/ }).click();
-  log("publish dialog when signed out shows:", await page.getByRole("link", { name: "Sign in to publish" }).isVisible());
+  log(
+    "publish dialog when signed out shows:",
+    await page.getByRole("link", { name: "Sign in to publish" }).isVisible(),
+  );
   if (shots) await page.screenshot({ path: `${shots}/editor-desktop.png` });
   await page.close();
 }
@@ -57,7 +68,10 @@ await context.addCookies([{ name: "authjs.session-token", value: token, url: BAS
   await page.getByText("Saved to your account").waitFor({ timeout: 15000 });
   await page.locator('[data-editor-field="name"]').fill("Ada Lovelace");
   await page.locator('[data-editor-field="professional-title"]').fill("Analyst & Writer");
-  await page.getByText("Saving…").waitFor({ timeout: 5000 }).catch(() => {});
+  await page
+    .getByText("Saving…")
+    .waitFor({ timeout: 5000 })
+    .catch(() => {});
   await page.getByText("Saved to your account").waitFor({ timeout: 10000 });
   log("cloud save status shown");
 
@@ -80,11 +94,19 @@ await context.addCookies([{ name: "authjs.session-token", value: token, url: BAS
   await pub.goto(`${BASE}/p/ada-lovelace`);
   const html = await pub.content();
   log("public page title:", await pub.title());
-  log("public page shows published name:", html.includes("Ada Lovelace"), "| leaks unpublished draft:", html.includes("Ada King"));
+  log(
+    "public page shows published name:",
+    html.includes("Ada Lovelace"),
+    "| leaks unpublished draft:",
+    html.includes("Ada King"),
+  );
   if (shots) await pub.screenshot({ path: `${shots}/public-page.png` });
 
   await page.getByRole("button", { name: /Live/ }).click();
-  log("dialog flags unpublished changes:", await page.getByText("You have changes that aren’t live yet").isVisible());
+  log(
+    "dialog flags unpublished changes:",
+    await page.getByText("You have changes that aren’t live yet").isVisible(),
+  );
   await page.getByRole("button", { name: "Publish latest changes" }).click();
   await page.getByText("Visitors see your latest version").waitFor({ timeout: 10000 });
   await pub.reload();
@@ -140,21 +162,65 @@ await context.addCookies([{ name: "authjs.session-token", value: token, url: BAS
   await page.waitForTimeout(4000);
   const frame = page.frameLocator('iframe[title$="live preview"]');
   const ftext = await frame.locator("body").innerText();
-  log("editorial preview shows edit:", ftext.includes("Grace Hopper"), "| editor field:", await page.getByLabel("Name", { exact: true }).first().inputValue(), "|", ftext.slice(0, 60).replace(/\n/g, " "));
+  log(
+    "editorial preview shows edit:",
+    ftext.includes("Grace Hopper"),
+    "| editor field:",
+    await page.getByLabel("Name", { exact: true }).first().inputValue(),
+    "|",
+    ftext.slice(0, 60).replace(/\n/g, " "),
+  );
 }
 
 // 5) API guards.
 {
   const api = context.request;
   const anon = await browser.newContext();
-  log("anonymous PUT status:", (await anon.request.put(`${BASE}/api/portfolios/template-one`, { data: { content: {} } })).status());
-  const evil = await api.put(`${BASE}/api/portfolios/template-one`, { data: { content: { name: "X", github: "javascript:alert(1)", projects: [{ title: "p", live_url: " JaVaScRiPt:alert(1)", image: "data:image/svg+xml;base64,PHN2Zz4=" }] }, theme: "<script>" } });
+  log(
+    "anonymous PUT status:",
+    (await anon.request.put(`${BASE}/api/portfolios/template-one`, { data: { content: {} } })).status(),
+  );
+  const evil = await api.put(`${BASE}/api/portfolios/template-one`, {
+    data: {
+      content: {
+        name: "X",
+        github: "javascript:alert(1)",
+        projects: [
+          { title: "p", live_url: " JaVaScRiPt:alert(1)", image: "data:image/svg+xml;base64,PHN2Zz4=" },
+        ],
+      },
+      theme: "<script>",
+    },
+  });
   const evilBody = await evil.json();
-  log("script links stripped:", JSON.stringify({ github: evilBody.draft.content.github, live: evilBody.draft.content.projects[0].live_url, image: evilBody.draft.content.projects[0].image, theme: evilBody.draft.theme }));
-  log("reserved slug:", (await api.post(`${BASE}/api/portfolios/template-one/publish`, { data: { slug: "admin" } })).status());
+  log(
+    "script links stripped:",
+    JSON.stringify({
+      github: evilBody.draft.content.github,
+      live: evilBody.draft.content.projects[0].live_url,
+      image: evilBody.draft.content.projects[0].image,
+      theme: evilBody.draft.theme,
+    }),
+  );
+  log(
+    "reserved slug:",
+    (await api.post(`${BASE}/api/portfolios/template-one/publish`, { data: { slug: "admin" } })).status(),
+  );
   log("unknown template:", (await api.get(`${BASE}/api/portfolios/not-a-template`)).status());
-  log("oversized body:", (await api.put(`${BASE}/api/portfolios/template-one`, { data: { content: { name: "x".repeat(5_000_000) } } })).status());
-  log("bad editorial shape:", (await api.put(`${BASE}/api/portfolios/editorial-developer`, { data: { content: { personal: {} } } })).status());
+  log(
+    "oversized body:",
+    (
+      await api.put(`${BASE}/api/portfolios/template-one`, {
+        data: { content: { name: "x".repeat(5_000_000) } },
+      })
+    ).status(),
+  );
+  log(
+    "bad editorial shape:",
+    (
+      await api.put(`${BASE}/api/portfolios/editorial-developer`, { data: { content: { personal: {} } } })
+    ).status(),
+  );
   log("AI without key:", (await api.post(`${BASE}/api/ai/assist`, { data: {} })).status());
   await anon.close();
 }

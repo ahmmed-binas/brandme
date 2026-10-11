@@ -6,8 +6,16 @@ import type { PortfolioData } from "./template-one/TemplateOne";
 import type { TemplateId } from "@/lib/templates/types";
 import { readPreviewDraft } from "@/lib/portfolio/browser-storage";
 import { getTemplate } from "@/lib/templates/catalog";
-import { isColorTheme, isEditorialShape, standardContentSchema, type StandardContent } from "@/lib/portfolio/schema";
-import { portfolioData as editorialDefaultData, type PortfolioData as EditorialData } from "./editorial-developer/data";
+import {
+  isColorTheme,
+  isEditorialShape,
+  standardContentSchema,
+  type StandardContent,
+} from "@/lib/portfolio/schema";
+import {
+  portfolioData as editorialDefaultData,
+  type PortfolioData as EditorialData,
+} from "./editorial-developer/data";
 
 const EMPTY_PORTFOLIO: PortfolioData = {
   name: "Your Name",
@@ -34,14 +42,16 @@ const DEMO_PORTFOLIO: PortfolioData = {
   projects: [
     {
       title: "Northstar Finance",
-      description: "A clear, approachable dashboard that helps growing teams understand their cash flow and make confident decisions.",
+      description:
+        "A clear, approachable dashboard that helps growing teams understand their cash flow and make confident decisions.",
       technologies: ["Next.js", "TypeScript", "Figma"],
       github: "https://github.com",
       live_url: "https://example.com",
     },
     {
       title: "Field Notes",
-      description: "A collaborative workspace for research teams to collect insights, organize evidence, and share the story behind their work.",
+      description:
+        "A collaborative workspace for research teams to collect insights, organize evidence, and share the story behind their work.",
       technologies: ["React", "Tailwind CSS", "Supabase"],
       live_url: "https://example.com",
     },
@@ -53,7 +63,8 @@ const DEMO_PORTFOLIO: PortfolioData = {
       location: "San Francisco, CA",
       start_date: "2022",
       end_date: "Present",
-      description: "Leading end-to-end product design for a B2B analytics platform, from discovery interviews to a scalable design system used by three product teams.",
+      description:
+        "Leading end-to-end product design for a B2B analytics platform, from discovery interviews to a scalable design system used by three product teams.",
       technologies: ["Figma", "Design systems", "User research"],
     },
     {
@@ -62,13 +73,20 @@ const DEMO_PORTFOLIO: PortfolioData = {
       location: "Remote",
       start_date: "2020",
       end_date: "2022",
-      description: "Built responsive marketing sites and product interfaces for early-stage companies, partnering closely with founders and brand designers.",
+      description:
+        "Built responsive marketing sites and product interfaces for early-stage companies, partnering closely with founders and brand designers.",
       technologies: ["React", "TypeScript", "Accessibility"],
     },
   ],
 };
 
-export default function PortfolioTemplateView({ templateId, sample }: { templateId: TemplateId; sample?: StandardContent }) {
+export default function PortfolioTemplateView({
+  templateId,
+  sample,
+}: {
+  templateId: TemplateId;
+  sample?: StandardContent;
+}) {
   // Studio templates start from their sample person, so the first paint is never placeholder text.
   const [portfolio, setPortfolio] = useState<PortfolioData>(() => sample ?? EMPTY_PORTFOLIO);
   const [theme, setTheme] = useState<"midnight" | "classic" | "dark" | "light">("midnight");
@@ -81,7 +99,11 @@ export default function PortfolioTemplateView({ templateId, sample }: { template
       const definition = getTemplate(templateId);
       const params = new URLSearchParams(window.location.search);
       // Studio templates preview with their sample person until the visitor has a draft of their own.
-      if (definition?.collection === "studio" && sample && (params.has("sample") || !readPreviewDraft(templateId))) {
+      if (
+        definition?.collection === "studio" &&
+        sample &&
+        (params.has("sample") || !readPreviewDraft(templateId))
+      ) {
         setPortfolio(sample);
         return;
       }
@@ -94,7 +116,8 @@ export default function PortfolioTemplateView({ templateId, sample }: { template
         const requestedTheme = new URLSearchParams(window.location.search).get("theme") ?? saved?.theme;
         if (isColorTheme(requestedTheme)) setTheme(requestedTheme);
         if (templateId === "editorial-developer") {
-          if (isEditorialShape(saved?.content) && !receivedFromEditor.current) setEditorialData(saved.content as unknown as EditorialData);
+          if (isEditorialShape(saved?.content) && !receivedFromEditor.current)
+            setEditorialData(saved.content as unknown as EditorialData);
           return;
         }
         const parsed = standardContentSchema.safeParse(saved?.content);
@@ -120,13 +143,19 @@ export default function PortfolioTemplateView({ templateId, sample }: { template
     };
     window.addEventListener("message", receiveEditorMessage);
     // Inside the editor's preview frame: ask for the current draft now that we can receive it.
-    if (window.parent !== window) window.parent.postMessage({ type: "editorial-preview-ready" }, window.location.origin);
+    if (window.parent !== window)
+      window.parent.postMessage({ type: "editorial-preview-ready" }, window.location.origin);
     return () => window.removeEventListener("message", receiveEditorMessage);
   }, [templateId]);
 
   return (
     <>
-      <TemplateRenderer templateId={templateId} portfolio={portfolio} theme={theme} editorialData={editorialData} />
+      <TemplateRenderer
+        templateId={templateId}
+        portfolio={portfolio}
+        theme={theme}
+        editorialData={editorialData}
+      />
     </>
   );
 }

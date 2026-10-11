@@ -15,11 +15,16 @@ export const POST = route(async (request: Request, { params }: { params: Promise
   if (body instanceof Response) return body;
   const { message, status } = (body ?? {}) as { message?: unknown; status?: unknown };
   if (status === "open" || status === "closed") {
-    if (!(await setTicketStatus(id, { id: viewer.id, isStaff: viewer.isModerator }, status))) return jsonError(404, "That request wasn’t found.");
+    if (!(await setTicketStatus(id, { id: viewer.id, isStaff: viewer.isModerator }, status)))
+      return jsonError(404, "That request wasn’t found.");
     return Response.json({ ok: true });
   }
   const user = await getCurrentUser();
-  const result = await addMessage(id, { id: viewer.id, name: user?.name ?? null, email: user?.email ?? null, isStaff: viewer.isModerator }, String(message ?? ""));
+  const result = await addMessage(
+    id,
+    { id: viewer.id, name: user?.name ?? null, email: user?.email ?? null, isStaff: viewer.isModerator },
+    String(message ?? ""),
+  );
   if (!result.ok) return jsonError(result.status, result.error);
   return Response.json({ ok: true });
 });

@@ -13,11 +13,19 @@ export const PATCH = route(async (request: Request, { params }: Context) => {
   const body = await readJson(request, 20_000);
   if (body instanceof Response) return body;
   const { title, body: text, rating, link } = (body ?? {}) as Record<string, unknown>;
-  const result = await updatePost(viewer, id, { title: String(title ?? ""), body: String(text ?? ""), rating: typeof rating === "number" ? rating : null, link: typeof link === "string" ? link : null });
+  const result = await updatePost(viewer, id, {
+    title: String(title ?? ""),
+    body: String(text ?? ""),
+    rating: typeof rating === "number" ? rating : null,
+    link: typeof link === "string" ? link : null,
+  });
   if (!result.ok) return refusal(result.status, result.code, result.error);
   revalidatePath("/community");
   revalidatePath(`/community/${id}`);
-  return Response.json({ post: result.post, held: result.verdict.outcome === "hold" ? result.verdict.reason : null });
+  return Response.json({
+    post: result.post,
+    held: result.verdict.outcome === "hold" ? result.verdict.reason : null,
+  });
 });
 
 /** Authors delete their own posts; moderators can delete any. */

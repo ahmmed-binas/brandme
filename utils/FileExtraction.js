@@ -31,14 +31,12 @@ function loadPdfjs() {
   pdfjsPromise ??= import("pdfjs-dist").then((pdfjsLib) => {
     pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
       "pdfjs-dist/build/pdf.worker.min.mjs",
-      import.meta.url
+      import.meta.url,
     ).toString();
     return pdfjsLib;
   });
   return pdfjsPromise;
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Config / logging
@@ -106,7 +104,7 @@ function validateFile(file) {
     throw new FileExtractionError(
       `File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). ` +
         `Max allowed is ${CONFIG.MAX_FILE_SIZE_MB}MB.`,
-      { code: "FILE_TOO_LARGE" }
+      { code: "FILE_TOO_LARGE" },
     );
   }
 }
@@ -124,7 +122,7 @@ export function extractTextFile(file) {
         new FileExtractionError("Failed to read text file.", {
           cause: reader.error,
           code: "TEXT_READ_FAILED",
-        })
+        }),
       );
     reader.readAsText(file);
   });
@@ -182,7 +180,7 @@ function invertCanvasColors(sourceCanvas) {
  * Runs OCR on an image, and optionally a second pass on a color-inverted
  * copy, concatenating both results. The inverted pass recovers light text
  * on dark backgrounds that the normal pass tends to miss.
- */async function recognizeWithDualPass(worker, canvas, onProgress) {
+ */ async function recognizeWithDualPass(worker, canvas, onProgress) {
   const normalText = await recognizeWithWorker(worker, canvas);
 
   if (!CONFIG.OCR_DUAL_PASS_INVERT) {
@@ -345,14 +343,10 @@ async function extractHeaderFooterText(arrayBuffer) {
     const JSZip = (await import("jszip")).default;
     const zip = await JSZip.loadAsync(arrayBuffer);
 
-    const partNames = Object.keys(zip.files).filter((name) =>
-      /^word\/(header|footer)\d*\.xml$/i.test(name)
-    );
+    const partNames = Object.keys(zip.files).filter((name) => /^word\/(header|footer)\d*\.xml$/i.test(name));
     if (partNames.length === 0) return "";
 
-    const xmlParts = await Promise.all(
-      partNames.map((name) => zip.file(name).async("text"))
-    );
+    const xmlParts = await Promise.all(partNames.map((name) => zip.file(name).async("text")));
 
     return xmlParts.map(extractTextFromDocxXml).filter(Boolean).join("\n");
   } catch (err) {
@@ -373,11 +367,7 @@ async function extractHeaderFooterText(arrayBuffer) {
 function extractTextFromDocxXml(xml) {
   const paragraphs = xml.match(/<w:p[ >][\s\S]*?<\/w:p>/g) || [];
   return paragraphs
-    .map((p) =>
-      [...p.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)]
-        .map((m) => decodeXmlEntities(m[1]))
-        .join("")
-    )
+    .map((p) => [...p.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)].map((m) => decodeXmlEntities(m[1])).join(""))
     .filter(Boolean)
     .join("\n");
 }
@@ -439,9 +429,7 @@ export async function extractExcel(file, options = {}) {
     }
 
     const sheetName =
-      typeof options.sheet === "string"
-        ? options.sheet
-        : workbook.SheetNames[options.sheet ?? 0];
+      typeof options.sheet === "string" ? options.sheet : workbook.SheetNames[options.sheet ?? 0];
 
     if (!sheetName || !workbook.Sheets[sheetName]) {
       throw new FileExtractionError(`Sheet not found: ${options.sheet}`, {
@@ -525,10 +513,9 @@ export async function extractFileContent(file, onProgress) {
     case "image":
       return extractImageText(file, onProgress);
     default:
-      throw new FileExtractionError(
-        `Unsupported file type for "${file.name}".`,
-        { code: "UNSUPPORTED_FILE_TYPE" }
-      );
+      throw new FileExtractionError(`Unsupported file type for "${file.name}".`, {
+        code: "UNSUPPORTED_FILE_TYPE",
+      });
   }
 }
 
@@ -657,9 +644,7 @@ export function categorizeOCRText(ocrText) {
   const text = ocrText.replace(/\r\n?/g, "\n").replace(/[ \t]+/g, " ");
 
   const extractSection = (heading, nextHeadings = []) => {
-    const nextRegex = nextHeadings.length
-      ? `(?=${nextHeadings.join("|")})`
-      : "(?=$)";
+    const nextRegex = nextHeadings.length ? `(?=${nextHeadings.join("|")})` : "(?=$)";
     const re = new RegExp(`${heading}:?\\s*([\\s\\S]*?)${nextRegex}`, "i");
     return text.match(re)?.[1]?.trim() || null;
   };
@@ -673,12 +658,9 @@ export function categorizeOCRText(ocrText) {
     result[key] = extractSection(CATEGORY_HEADINGS[key].join("|"), nextKeys);
   }
 
-  result.name = result.name
-    ? result.name.split("\n")[0].trim()
-    : extractName(text);
+  result.name = result.name ? result.name.split("\n")[0].trim() : extractName(text);
 
-  result.email =
-    text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i)?.[0] || null;
+  result.email = text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i)?.[0] || null;
   result.phone = extractPhoneNumber(text);
   result.linkedin = extractLinkedIn(text);
   result.github = extractGithub(text);
@@ -774,8 +756,6 @@ function extractGithub(text) {
   return m ? `github.com/${m[1]}` : null;
 }
 
-
-
 /**
  * Extracts a phone number with label-anchoring first (much higher
  * precision than a blind global scan), falling back to a scored search
@@ -787,10 +767,9 @@ function extractPhoneNumber(rawText) {
   // 1. Label-anchored search — "Phone:", "Mobile:", "Contact:", "Tel:", "Cell:"
   //    This is where a real phone number lives on almost every resume, so
   //    check it before ever touching the rest of the document.
-  const labelRegex = /(?:phone|mobile|contact(?:\s*(?:no|number))?|tel|cell)\s*[:.\-]?\s*(\+?\d[\d\s\-().]{7,18}\d)/gi;
-  const labeled = [...text.matchAll(labelRegex)]
-    .map((m) => normalizePhone(m[1]))
-    .filter(isPlausiblePhone);
+  const labelRegex =
+    /(?:phone|mobile|contact(?:\s*(?:no|number))?|tel|cell)\s*[:.\-]?\s*(\+?\d[\d\s\-().]{7,18}\d)/gi;
+  const labeled = [...text.matchAll(labelRegex)].map((m) => normalizePhone(m[1])).filter(isPlausiblePhone);
   if (labeled.length) return labeled[0];
 
   // 2. Fallback: scan all digit runs in the document, score candidates,
@@ -829,16 +808,16 @@ function isPlausiblePhone(str) {
   return true;
 }
 
-
 export function extractOCRJSON(ocrText) {
   if (!ocrText) return {};
 
-  const text = ocrText.replace(/\r\n?/g, "\n").replace(/[ \t]+/g, " ").trim();
+  const text = ocrText
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .trim();
 
   let email = null;
-  const emailMatches = text.match(
-    /\b[A-Za-z0-9._%+-]+\s*@?\s*[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g
-  );
+  const emailMatches = text.match(/\b[A-Za-z0-9._%+-]+\s*@?\s*[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g);
   if (emailMatches?.length) email = normalizeEmail(emailMatches[0]);
 
   const linkedin = extractLinkedIn(text);
@@ -849,33 +828,33 @@ export function extractOCRJSON(ocrText) {
   // "user123@...") can't be mistaken for a phone number.
   const phone = extractPhoneNumber(text);
 
-let name = null;
-for (const line of text.split("\n")) {
-  const cleanLine = line.trim();
+  let name = null;
+  for (const line of text.split("\n")) {
+    const cleanLine = line.trim();
 
-  // Title Case: "Haris Kaliyanathoppu"
-  if (/^([A-Z][a-z]+(?:\s[A-Z][a-z]+){1,2})$/.test(cleanLine)) {
-    name = cleanLine;
-    break;
-  }
+    // Title Case: "Haris Kaliyanathoppu"
+    if (/^([A-Z][a-z]+(?:\s[A-Z][a-z]+){1,2})$/.test(cleanLine)) {
+      name = cleanLine;
+      break;
+    }
 
-  // ALL CAPS: "HARIS KALIYANATHOPPU PARAMBU" — common resume header style
-  if (/^([A-Z]+(?:\s[A-Z]+){1,3})$/.test(cleanLine) && cleanLine.length <= 40) {
-    name = cleanLine
-      .split(" ")
-      .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-      .join(" ");
-    break;
+    // ALL CAPS: "HARIS KALIYANATHOPPU PARAMBU" — common resume header style
+    if (/^([A-Z]+(?:\s[A-Z]+){1,3})$/.test(cleanLine) && cleanLine.length <= 40) {
+      name = cleanLine
+        .split(" ")
+        .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+        .join(" ");
+      break;
+    }
   }
-}
 
   const skillsMatch = text.match(
-    /(skills|technical skills|special abilities)\s*[:\n]\s*([\s\S]*?)(?=(education|experience|$))/i
+    /(skills|technical skills|special abilities)\s*[:\n]\s*([\s\S]*?)(?=(education|experience|$))/i,
   );
   const skills = skillsMatch ? skillsMatch[2].trim() : null;
 
   const educationMatch = text.match(
-    /(education|education background|training courses)\s*[:\n]\s*([\s\S]*?)(?=(experience|skills|$))/i
+    /(education|education background|training courses)\s*[:\n]\s*([\s\S]*?)(?=(experience|skills|$))/i,
   );
   const education = educationMatch ? educationMatch[2].trim() : null;
 
@@ -888,7 +867,7 @@ for (const line of text.split("\n")) {
   }
 
   const experienceMatch = text.match(
-    /(experience|employment record|professional experience)\s*[:\n]\s*([\s\S]*?)(?=(education|skills|$))/i
+    /(experience|employment record|professional experience)\s*[:\n]\s*([\s\S]*?)(?=(education|skills|$))/i,
   );
   const experience = experienceMatch ? experienceMatch[2].trim() : null;
 

@@ -25,9 +25,14 @@ export const POST = route(async (request: Request) => {
 
   const body = await readJson(request, MAX_CONTENT_BYTES + 10_000);
   if (body instanceof Response) return body;
-  const { templateId, content, instruction } = (body ?? {}) as { templateId?: unknown; content?: unknown; instruction?: unknown };
+  const { templateId, content, instruction } = (body ?? {}) as {
+    templateId?: unknown;
+    content?: unknown;
+    instruction?: unknown;
+  };
   if (typeof templateId !== "string" || !isTemplateId(templateId)) return jsonError(404, "Unknown template.");
-  if (typeof instruction !== "string" || !instruction.trim()) return jsonError(422, "Tell the assistant what to change.");
+  if (typeof instruction !== "string" || !instruction.trim())
+    return jsonError(422, "Tell the assistant what to change.");
   if (instruction.length > 1000) return jsonError(422, "Keep requests under 1,000 characters.");
   const validation = validateContent(templateId, content);
   if (!validation.ok) return jsonError(422, validation.error);
@@ -43,8 +48,15 @@ export const POST = route(async (request: Request) => {
     }
     // Re-validate: the assistant's output passes the same gate as anything a user types.
     const checked = validateContent(templateId, result.content);
-    if (!checked.ok) return jsonError(502, "The assistant produced content that could not be used. Please try again.");
-    return Response.json({ content: checked.content, reply: result.reply, changed: result.changed, charged: bill.charged, credits: bill.balance });
+    if (!checked.ok)
+      return jsonError(502, "The assistant produced content that could not be used. Please try again.");
+    return Response.json({
+      content: checked.content,
+      reply: result.reply,
+      changed: result.changed,
+      charged: bill.charged,
+      credits: bill.balance,
+    });
   } catch (error) {
     await releaseRequest(user.id);
     throw error;

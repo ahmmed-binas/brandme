@@ -7,7 +7,11 @@ type Context = { params: Promise<{ templateId: string }> };
 export const GET = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  return Response.json({ posts: await listPosts(owner.user.id, owner.templateId, { drafts: true }), allowed: owner.user.plan.blog, planName: owner.user.plan.name });
+  return Response.json({
+    posts: await listPosts(owner.user.id, owner.templateId, { drafts: true }),
+    allowed: owner.user.plan.blog,
+    planName: owner.user.plan.name,
+  });
 });
 
 /** Starts a new post (a draft unless `publish: true`). */
@@ -18,7 +22,10 @@ export const POST = route(async (request: Request, { params }: Context) => {
   const body = await readJson(request, 110_000);
   if (body instanceof Response) return body;
   try {
-    return Response.json({ post: await createPost(owner.user.id, owner.templateId, (body ?? {}) as PostInput) }, { status: 201 });
+    return Response.json(
+      { post: await createPost(owner.user.id, owner.templateId, (body ?? {}) as PostInput) },
+      { status: 201 },
+    );
   } catch (error) {
     if (error instanceof PostError) return jsonError(422, error.message);
     throw error;

@@ -17,7 +17,8 @@ export const POST = route(async (request: Request) => {
   const body = await readJson(request, MAX_TEXT * 4 + 1_000);
   if (body instanceof Response) return body;
   const text = String((body as { text?: unknown } | null)?.text ?? "").trim();
-  if (text.length < 40) return jsonError(422, "Paste a bit more text — at least a few sentences about yourself.");
+  if (text.length < 40)
+    return jsonError(422, "Paste a bit more text — at least a few sentences about yourself.");
   if (text.length > MAX_TEXT) return jsonError(422, "That text is too long. Paste up to about 6,000 words.");
 
   const gate = await openAi(user);
@@ -32,11 +33,20 @@ export const POST = route(async (request: Request) => {
     // Same gate as anything a user types: drops unknown fields and unsafe links.
     const { location, ...content } = result.profile;
     const parsed = standardContentSchema.safeParse(content);
-    if (!parsed.success) return jsonError(502, "The assistant returned content that could not be used. Please try again.");
+    if (!parsed.success)
+      return jsonError(502, "The assistant returned content that could not be used. Please try again.");
     // Anything the text doesn't actually contain (a link, an employer, a year…) is dropped.
-    const { profile, removed } = groundProfile({ ...parsed.data, location: typeof location === "string" ? location : undefined }, text);
+    const { profile, removed } = groundProfile(
+      { ...parsed.data, location: typeof location === "string" ? location : undefined },
+      text,
+    );
     if (removed.length) console.info(`AI import: dropped ${removed.length} unsupported item(s)`);
-    return Response.json({ profile: compactProfile(profile), removed: removed.length, charged: bill.charged, credits: bill.balance });
+    return Response.json({
+      profile: compactProfile(profile),
+      removed: removed.length,
+      charged: bill.charged,
+      credits: bill.balance,
+    });
   } catch (error) {
     await releaseRequest(user.id);
     throw error;

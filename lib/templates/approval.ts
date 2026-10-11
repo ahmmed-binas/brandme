@@ -11,7 +11,11 @@ import { OWNER_DECISIONS } from "./decisions";
  * TEMPLATES_REQUIRE_APPROVAL=false to show every template without review.
  */
 export type ReviewStatus = "approved" | "changes" | "rejected" | "pending";
-export interface TemplateReview { status: ReviewStatus; note: string | null; reviewedAt: string | null }
+export interface TemplateReview {
+  status: ReviewStatus;
+  note: string | null;
+  reviewedAt: string | null;
+}
 
 export const approvalRequired = () => process.env.TEMPLATES_REQUIRE_APPROVAL !== "false";
 
@@ -20,8 +24,18 @@ export async function templateReviews(): Promise<Map<string, TemplateReview>> {
   if (!databaseConfigured()) return reviews;
   try {
     await ensureSchema();
-    const result = await db.query<{ template_id: string; status: ReviewStatus; note: string | null; reviewed_at: Date }>("SELECT template_id, status, note, reviewed_at FROM template_reviews");
-    for (const row of result.rows) reviews.set(row.template_id, { status: row.status, note: row.note, reviewedAt: row.reviewed_at.toISOString() });
+    const result = await db.query<{
+      template_id: string;
+      status: ReviewStatus;
+      note: string | null;
+      reviewed_at: Date;
+    }>("SELECT template_id, status, note, reviewed_at FROM template_reviews");
+    for (const row of result.rows)
+      reviews.set(row.template_id, {
+        status: row.status,
+        note: row.note,
+        reviewedAt: row.reviewed_at.toISOString(),
+      });
   } catch (error) {
     console.error("Template reviews unavailable", error);
   }
@@ -33,11 +47,15 @@ export function reviewOf(reviews: Map<string, TemplateReview>, template: Templat
   const stored = reviews.get(template.id);
   if (stored) return stored;
   const shipped = OWNER_DECISIONS[template.id];
-  return shipped ? { status: shipped.status, note: shipped.note ?? null, reviewedAt: null } : { status: "pending", note: null, reviewedAt: null };
+  return shipped
+    ? { status: shipped.status, note: shipped.note ?? null, reviewedAt: null }
+    : { status: "pending", note: null, reviewedAt: null };
 }
 
 /** Templates a visitor may see and use. Moderators see everything so they can review it. */
-export async function availableTemplates(moderator = false): Promise<Array<TemplateDefinition & { review: TemplateReview }>> {
+export async function availableTemplates(
+  moderator = false,
+): Promise<Array<TemplateDefinition & { review: TemplateReview }>> {
   const reviews = await templateReviews();
   return templateCatalog
     .map((template) => ({ ...template, review: reviewOf(reviews, template) }))
@@ -49,7 +67,12 @@ export async function isTemplateAvailable(template: TemplateDefinition, moderato
   return reviewOf(await templateReviews(), template).status === "approved";
 }
 
-export async function setTemplateReview(templateId: string, status: Exclude<ReviewStatus, "pending">, note: string | null, reviewerId: string) {
+export async function setTemplateReview(
+  templateId: string,
+  status: Exclude<ReviewStatus, "pending">,
+  note: string | null,
+  reviewerId: string,
+) {
   await ensureSchema();
   await db.query(
     `INSERT INTO template_reviews (template_id, status, note, reviewed_by) VALUES ($1, $2, $3, $4)

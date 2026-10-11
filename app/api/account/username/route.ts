@@ -9,7 +9,9 @@ export const PUT = route(async (request: Request) => {
   const body = await readJson(request, 500);
   if (body instanceof Response) return body;
   try {
-    return Response.json({ username: await setUsername(user.id, String((body as { username?: unknown } | null)?.username ?? "")) });
+    return Response.json({
+      username: await setUsername(user.id, String((body as { username?: unknown } | null)?.username ?? "")),
+    });
   } catch (error) {
     if (error instanceof AccountError) return jsonError(422, error.message);
     throw error;

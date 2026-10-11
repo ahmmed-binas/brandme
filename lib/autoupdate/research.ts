@@ -12,8 +12,6 @@ import { addSuggestions, fingerprint, knownTitles, type NewSuggestion } from "./
  * suggestion the owner can apply or dismiss. Nothing changes on its own.
  */
 
-
-
 const findingSchema = z.object({
   kind: z.enum(["role", "highlight", "project", "title"]),
   title: z.string().min(3).max(200),
@@ -43,48 +41,139 @@ export { findingSchema };
 
 /** Turns a cited finding into a suggestion the owner can apply (or that the Investigator applies for them). */
 export function findingToSuggestion(finding: Finding, source: "research" | "investigator"): NewSuggestion {
-  const base = { source, sourceUrl: finding.source_url, fingerprint: fingerprint("research", finding.kind, finding.title, finding.organisation) };
+  const base = {
+    source,
+    sourceUrl: finding.source_url,
+    fingerprint: fingerprint("research", finding.kind, finding.title, finding.organisation),
+  };
   switch (finding.kind) {
-    case "role": return { ...base, title: `New role: ${finding.title}${finding.organisation ? ` at ${finding.organisation}` : ""}`, detail: finding.detail, payload: { kind: "add_experience", experience: { job_title: finding.title, company: finding.organisation, start_date: finding.year, end_date: "Present", description: finding.detail } } };
-    case "title": return { ...base, title: `Update your headline to “${finding.title}”`, detail: finding.detail, payload: { kind: "set_field", field: "professional_title", value: finding.title } };
-    case "project": return { ...base, title: `Add project: ${finding.title}`, detail: finding.detail, payload: { kind: "add_project", project: { title: finding.title, description: finding.detail, year: finding.year, client: finding.organisation || undefined, live_url: finding.source_url } } };
-    default: return { ...base, title: finding.title, detail: finding.detail, payload: { kind: "add_highlight", highlight: { title: finding.title, detail: [finding.organisation, finding.detail].filter(Boolean).join(" — ").slice(0, 400), year: finding.year, url: finding.source_url } } };
+    case "role":
+      return {
+        ...base,
+        title: `New role: ${finding.title}${finding.organisation ? ` at ${finding.organisation}` : ""}`,
+        detail: finding.detail,
+        payload: {
+          kind: "add_experience",
+          experience: {
+            job_title: finding.title,
+            company: finding.organisation,
+            start_date: finding.year,
+            end_date: "Present",
+            description: finding.detail,
+          },
+        },
+      };
+    case "title":
+      return {
+        ...base,
+        title: `Update your headline to “${finding.title}”`,
+        detail: finding.detail,
+        payload: { kind: "set_field", field: "professional_title", value: finding.title },
+      };
+    case "project":
+      return {
+        ...base,
+        title: `Add project: ${finding.title}`,
+        detail: finding.detail,
+        payload: {
+          kind: "add_project",
+          project: {
+            title: finding.title,
+            description: finding.detail,
+            year: finding.year,
+            client: finding.organisation || undefined,
+            live_url: finding.source_url,
+          },
+        },
+      };
+    default:
+      return {
+        ...base,
+        title: finding.title,
+        detail: finding.detail,
+        payload: {
+          kind: "add_highlight",
+          highlight: {
+            title: finding.title,
+            detail: [finding.organisation, finding.detail].filter(Boolean).join(" — ").slice(0, 400),
+            year: finding.year,
+            url: finding.source_url,
+          },
+        },
+      };
   }
 }
 
 export function describePerson(content: StandardContent): string {
   const role = content.experience?.[0];
   return [
-    `Name: ${content.name}`, content.professional_title && `Headline: ${content.professional_title}`, content.location && `Location: ${content.location}`,
+    `Name: ${content.name}`,
+    content.professional_title && `Headline: ${content.professional_title}`,
+    content.location && `Location: ${content.location}`,
     role && `Current or latest role: ${role.job_title} at ${role.company}`,
-    ...[content.website, content.linkedin, content.github, ...(content.links ?? []).map((link) => link.url)].filter(Boolean).map((url) => `Link: ${url}`),
+    ...[content.website, content.linkedin, content.github, ...(content.links ?? []).map((link) => link.url)]
+      .filter(Boolean)
+      .map((url) => `Link: ${url}`),
     `Already on their portfolio: ${[...(content.projects ?? []).map((item) => item.title), ...(content.highlights ?? []).map((item) => item.title)].filter(Boolean).slice(0, 40).join("; ") || "nothing yet"}`,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function parseFindings(text: string) {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start < 0 || end <= start) return [];
-  try { return resultSchema.parse(JSON.parse(text.slice(start, end + 1))).findings; } catch { return []; }
+  try {
+    return resultSchema.parse(JSON.parse(text.slice(start, end + 1))).findings;
+  } catch {
+    return [];
+  }
 }
 
-export type ResearchResult = { ok: true; added: number; usage: AiUsage[] } | { ok: false; error: string; usage: AiUsage[] };
+export type ResearchResult =
+  { ok: true; added: number; usage: AiUsage[] } | { ok: false; error: string; usage: AiUsage[] };
 
-export async function runResearch(client: AiClient, ownerId: string, content: StandardContent): Promise<ResearchResult> {
+export async function runResearch(
+  client: AiClient,
+  ownerId: string,
+  content: StandardContent,
+): Promise<ResearchResult> {
   if (!content.name?.trim()) return { ok: false, error: "Add your name to your portfolio first.", usage: [] };
   let answer;
   try {
-    answer = await client.ask({ system: SYSTEM, user: `Find recent professional news about this person.\n\n${describePerson(content)}`, webSearch: 6 });
+    answer = await client.ask({
+      system: SYSTEM,
+      user: `Find recent professional news about this person.\n\n${describePerson(content)}`,
+      webSearch: 6,
+    });
   } catch (error) {
     if (!(error instanceof AiProviderError)) throw error;
-    return { ok: false, error: error.kind === "auth" ? "Your AI provider didn’t accept the saved API key. Check it in Account → AI." : "The research assistant couldn’t finish. Please try again later.", usage: [] };
+    return {
+      ok: false,
+      error:
+        error.kind === "auth"
+          ? "Your AI provider didn’t accept the saved API key. Check it in Account → AI."
+          : "The research assistant couldn’t finish. Please try again later.",
+      usage: [],
+    };
   }
   const { usage, text } = answer;
-  if (answer.stop === "refusal") return { ok: false, error: "The research assistant couldn’t help with that.", usage };
+  if (answer.stop === "refusal")
+    return { ok: false, error: "The research assistant couldn’t help with that.", usage };
 
   const known = await knownTitles(ownerId);
-  const findings = parseFindings(text).filter((finding) => finding.confidence !== "low" && safeLink(finding.source_url) && !known.has(finding.title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()));
+  const findings = parseFindings(text).filter(
+    (finding) =>
+      finding.confidence !== "low" &&
+      safeLink(finding.source_url) &&
+      !known.has(
+        finding.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim(),
+      ),
+  );
   const items = findings.map((finding) => findingToSuggestion(finding, "research"));
   const added = await addSuggestions(ownerId, items);
   await db.query("UPDATE app_users SET last_research_at = NOW() WHERE id = $1", [ownerId]);

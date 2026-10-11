@@ -9,7 +9,8 @@ export const POST = route(async (request: Request) => {
     await resetPassword(String(token ?? ""), String(password ?? ""));
     return Response.json({ ok: true });
   } catch (error) {
-    if (error instanceof AccountError) return Response.json({ error: error.message, field: error.field }, { status: 422 });
+    if (error instanceof AccountError)
+      return Response.json({ error: error.message, field: error.field }, { status: 422 });
     throw error;
   }
 });

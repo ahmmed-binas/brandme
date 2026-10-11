@@ -29,9 +29,16 @@ export default function CustomCursor() {
       const el = target.closest("[data-cursor]");
       if (el) {
         const kind = el.getAttribute("data-cursor");
-        if (kind === "view") { setVariant("view"); setLabel("VIEW"); }
-        else if (kind === "external") { setVariant("external"); setLabel("↗"); }
-        else { setVariant("interactive"); setLabel(null); }
+        if (kind === "view") {
+          setVariant("view");
+          setLabel("VIEW");
+        } else if (kind === "external") {
+          setVariant("external");
+          setLabel("↗");
+        } else {
+          setVariant("interactive");
+          setLabel(null);
+        }
       } else {
         setVariant("default");
         setLabel(null);
@@ -61,9 +68,7 @@ export default function CustomCursor() {
       }}
       transition={{ type: "spring", ...springConfig }}
     >
-      {label && (
-        <span className="font-mono text-[10px] tracking-widest text-[#ECEBE1]">{label}</span>
-      )}
+      {label && <span className="font-mono text-[10px] tracking-widest text-[#ECEBE1]">{label}</span>}
     </motion.div>
   );
 }

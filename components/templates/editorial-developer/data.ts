@@ -166,8 +166,7 @@ export const portfolioData = {
         "A SaaS tool currently in development that takes a developer's projects, experience, and skills and produces structured portfolio data — the same shape this site's own portfolioData object uses — ready to render into a site like this one automatically.",
       problem:
         "[ADD PROJECT DESCRIPTION — what specifically triggered building this: e.g. how long a manual portfolio update takes, or a gap in existing tools]",
-      approach:
-        "[ADD PROJECT DESCRIPTION — architecture/approach once finalized]",
+      approach: "[ADD PROJECT DESCRIPTION — architecture/approach once finalized]",
       architecture: "[ADD ARCHITECTURE DETAILS]",
       challenges: "[ADD CHALLENGES]",
       results: "[ADD RESULTS ONCE AVAILABLE]",
@@ -175,10 +174,7 @@ export const portfolioData = {
       featured: true,
       status: "in-progress",
       technologies: ["React", "Node.js", "Firebase"],
-      keyFeatures: [
-        "[ADD KEY FEATURE]",
-        "[ADD KEY FEATURE]",
-      ],
+      keyFeatures: ["[ADD KEY FEATURE]", "[ADD KEY FEATURE]"],
       github: "[ADD GITHUB URL]",
       liveUrl: "[ADD LIVE URL]",
       date: "2026",
@@ -191,10 +187,8 @@ export const portfolioData = {
       tagline: "Automates MySQL database backups.",
       description:
         "Built during a Software Developer internship at Kaizen Star Technologies to automate the manual process of backing up MySQL databases.",
-      problem:
-        "[ADD PROJECT DESCRIPTION — what the manual process looked like before this]",
-      approach:
-        "[ADD PROJECT DESCRIPTION — how the app is structured, scheduling, storage, etc.]",
+      problem: "[ADD PROJECT DESCRIPTION — what the manual process looked like before this]",
+      approach: "[ADD PROJECT DESCRIPTION — how the app is structured, scheduling, storage, etc.]",
       architecture: "[ADD ARCHITECTURE DETAILS]",
       challenges: "[ADD CHALLENGES]",
       results: "[ADD RESULTS]",
@@ -212,11 +206,7 @@ export const portfolioData = {
 
   skills: {
     frontend: [{ name: "React" }, { name: "JavaScript" }] as SkillEntry[],
-    backend: [
-      { name: "C#" },
-      { name: "ASP.NET" },
-      { name: "Node.js" },
-    ] as SkillEntry[],
+    backend: [{ name: "C#" }, { name: "ASP.NET" }, { name: "Node.js" }] as SkillEntry[],
     database: [{ name: "MySQL" }, { name: "Firebase" }] as SkillEntry[],
     devops: [] as SkillEntry[],
     ai: [] as SkillEntry[],
@@ -241,13 +231,37 @@ export const portfolioData = {
   certifications: [] as CertificationEntry[],
 
   engineeringApproach: [
-    { id: "discover", stage: "Discover", description: "Understand the actual problem and constraints before writing anything." },
-    { id: "design", stage: "Design", description: "Shape the data model and the interfaces around it first." },
-    { id: "architect", stage: "Architect", description: "Decide what has to be correct, and what can be simple." },
+    {
+      id: "discover",
+      stage: "Discover",
+      description: "Understand the actual problem and constraints before writing anything.",
+    },
+    {
+      id: "design",
+      stage: "Design",
+      description: "Shape the data model and the interfaces around it first.",
+    },
+    {
+      id: "architect",
+      stage: "Architect",
+      description: "Decide what has to be correct, and what can be simple.",
+    },
     { id: "build", stage: "Build", description: "Implement in small, working increments." },
-    { id: "test", stage: "Test", description: "Verify the parts that would be expensive to get wrong in production." },
-    { id: "ship", stage: "Ship", description: "Release deliberately, with a way to observe what happens next." },
-    { id: "improve", stage: "Improve", description: "Treat the first version as a draft, not a finish line." },
+    {
+      id: "test",
+      stage: "Test",
+      description: "Verify the parts that would be expensive to get wrong in production.",
+    },
+    {
+      id: "ship",
+      stage: "Ship",
+      description: "Release deliberately, with a way to observe what happens next.",
+    },
+    {
+      id: "improve",
+      stage: "Improve",
+      description: "Treat the first version as a draft, not a finish line.",
+    },
   ] as ApproachStage[],
 
   // Empty on purpose — hidden until real GitHub data or repos are wired in.

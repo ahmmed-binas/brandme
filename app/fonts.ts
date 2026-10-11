@@ -9,8 +9,16 @@ import localFont from "next/font/local";
 /** Fraunces — display serif with optical sizing; large settings get finer detail automatically. */
 export const display = localFont({
   src: [
-    { path: "../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2", style: "normal", weight: "100 900" },
-    { path: "../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2", style: "italic", weight: "100 900" },
+    {
+      path: "../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+    {
+      path: "../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2",
+      style: "italic",
+      weight: "100 900",
+    },
   ],
   variable: "--ff-display",
   display: "swap",
@@ -19,7 +27,13 @@ export const display = localFont({
 
 /** Hanken Grotesk — text face. */
 export const sans = localFont({
-  src: [{ path: "../node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2", style: "normal", weight: "100 900" }],
+  src: [
+    {
+      path: "../node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+  ],
   variable: "--ff-text",
   display: "swap",
   fallback: ["system-ui", "Segoe UI", "Helvetica", "Arial", "sans-serif"],
@@ -27,7 +41,13 @@ export const sans = localFont({
 
 /** JetBrains Mono — labels, addresses, numbers. */
 export const mono = localFont({
-  src: [{ path: "../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2", style: "normal", weight: "100 800" }],
+  src: [
+    {
+      path: "../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2",
+      style: "normal",
+      weight: "100 800",
+    },
+  ],
   variable: "--ff-code",
   display: "swap",
   preload: false,

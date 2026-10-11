@@ -1,11 +1,7 @@
 "use client";
 import type { StandardContent } from "@/lib/portfolio/schema";
 
-import {
-  FaGithub,
-  FaInstagram,
-  FaLinkedin,
-} from "react-icons/fa";
+import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -27,11 +23,9 @@ export type PortfolioExperience = NonNullable<StandardContent["experience"]>[num
 |--------------------------------------------------------------------------
 */
 
-const defaultProjectImage =
-  "/p1assets/firstpage.PNG";
+const defaultProjectImage = "/p1assets/firstpage.PNG";
 
-const rotationbooth =
-  "/p1assets/rotation booth.gif";
+const rotationbooth = "/p1assets/rotation booth.gif";
 
 /*
 |--------------------------------------------------------------------------
@@ -47,16 +41,11 @@ const rotationbooth =
 const defaultData: PortfolioData = {
   name: "Your Name",
 
-  professional_title:
-    "Web Developer",
+  professional_title: "Web Developer",
 
-  tagline:
-    "I build accessible, pixel-perfect digital experiences for the web.",
+  tagline: "I build accessible, pixel-perfect digital experiences for the web.",
 
-  summary: [
-    "Welcome to my portfolio.",
-    "This portfolio is generated from your portfolio data."
-  ],
+  summary: ["Welcome to my portfolio.", "This portfolio is generated from your portfolio data."],
 
   github: "",
   linkedin: "",
@@ -91,11 +80,9 @@ export default function TemplateTSXOne({
   |--------------------------------------------------------------------------
   */
 
-  const [activeSection, setActiveSection] =
-    useState("about");
+  const [activeSection, setActiveSection] = useState("about");
 
-  const torchRef =
-    useRef<HTMLDivElement>(null);
+  const torchRef = useRef<HTMLDivElement>(null);
 
   /*
   |--------------------------------------------------------------------------
@@ -103,11 +90,7 @@ export default function TemplateTSXOne({
   |--------------------------------------------------------------------------
   */
 
-  const sections = [
-    "about",
-    "experience",
-    "project",
-  ];
+  const sections = ["about", "experience", "project"];
 
   /*
   |--------------------------------------------------------------------------
@@ -115,8 +98,7 @@ export default function TemplateTSXOne({
   |--------------------------------------------------------------------------
   */
 
-  const active: PortfolioData =
-    finalData || defaultData;
+  const active: PortfolioData = finalData || defaultData;
 
   /*
   |--------------------------------------------------------------------------
@@ -125,24 +107,20 @@ export default function TemplateTSXOne({
   */
 
   useEffect(() => {
-    const sectionEls =
-      document.querySelectorAll("section");
+    const sectionEls = document.querySelectorAll("section");
 
-    const observer =
-      new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveSection(
-                entry.target.id
-              );
-            }
-          });
-        },
-        {
-          threshold: 0.6,
-        }
-      );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        threshold: 0.6,
+      },
+    );
 
     sectionEls.forEach((section) => {
       observer.observe(section);
@@ -161,13 +139,9 @@ export default function TemplateTSXOne({
 
   useEffect(() => {
     if (embedded) return;
-    const param =
-      new URLSearchParams(
-        window.location.search
-      );
+    const param = new URLSearchParams(window.location.search);
 
-    const queryTheme =
-      param.get("theme");
+    const queryTheme = param.get("theme");
 
     let bgColor = "";
     let textColor = "";
@@ -186,22 +160,15 @@ export default function TemplateTSXOne({
       textColor = "#ccd6f6";
     }
 
-    document.documentElement.style.backgroundColor =
-      bgColor;
+    document.documentElement.style.backgroundColor = bgColor;
 
-    document.documentElement.style.color =
-      textColor;
+    document.documentElement.style.color = textColor;
 
-    document.body.style.backgroundColor =
-      bgColor;
+    document.body.style.backgroundColor = bgColor;
 
-    document.body.style.color =
-      textColor;
+    document.body.style.color = textColor;
 
-    document.documentElement.style.setProperty(
-      "--theme-bg",
-      bgColor
-    );
+    document.documentElement.style.setProperty("--theme-bg", bgColor);
   }, [embedded]);
 
   /*
@@ -212,15 +179,12 @@ export default function TemplateTSXOne({
 
   useEffect(() => {
     if (embedded) return;
-    const handleMouseMove = (
-      e: MouseEvent
-    ) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const x = e.clientX;
       const y = e.clientY;
 
       if (torchRef.current) {
-        torchRef.current.style.background =
-          `radial-gradient(
+        torchRef.current.style.background = `radial-gradient(
             circle 400px at ${x}px ${y}px,
             rgba(255, 255, 255, 0.1),
             transparent 90%
@@ -228,16 +192,10 @@ export default function TemplateTSXOne({
       }
     };
 
-    document.addEventListener(
-      "mousemove",
-      handleMouseMove
-    );
+    document.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      document.removeEventListener(
-        "mousemove",
-        handleMouseMove
-      );
+      document.removeEventListener("mousemove", handleMouseMove);
     };
   }, [embedded]);
 
@@ -247,20 +205,11 @@ export default function TemplateTSXOne({
   |--------------------------------------------------------------------------
   */
 
-  const summary =
-    Array.isArray(active.summary)
-      ? active.summary
-      : [];
+  const summary = Array.isArray(active.summary) ? active.summary : [];
 
-  const projects =
-    Array.isArray(active.projects)
-      ? active.projects
-      : [];
+  const projects = Array.isArray(active.projects) ? active.projects : [];
 
-  const experience =
-    Array.isArray(active.experience)
-      ? active.experience
-      : [];
+  const experience = Array.isArray(active.experience) ? active.experience : [];
 
   const previewSidebarPosition = embedded
     ? "sticky top-0 z-30 self-start w-full shrink-0 xl:h-screen xl:w-120"
@@ -274,8 +223,10 @@ export default function TemplateTSXOne({
   */
 
   return (
-    <div style={{ overflowWrap: "anywhere" }} className={`relative min-h-screen flex flex-col xl:flex-row ${embedded ? "overflow-visible" : "overflow-x-hidden"} [&_h1]:break-words [&_h2]:break-words [&_h3]:break-words [&_p]:break-words [&_span]:break-words ${theme === "light" ? "bg-slate-50 text-slate-800 [&_h1]:text-slate-950 [&_h2]:text-slate-800 [&_h3]:text-slate-800 [&_p]:text-slate-600 [&_.text-gray-500]:text-slate-500" : theme === "dark" ? "bg-black text-slate-100" : theme === "classic" ? "bg-[#172554] text-[#dbeafe]" : "bg-[#0a192f] text-[#ccd6f6]"}`}>
-
+    <div
+      style={{ overflowWrap: "anywhere" }}
+      className={`relative min-h-screen flex flex-col xl:flex-row ${embedded ? "overflow-visible" : "overflow-x-hidden"} [&_h1]:break-words [&_h2]:break-words [&_h3]:break-words [&_p]:break-words [&_span]:break-words ${theme === "light" ? "bg-slate-50 text-slate-800 [&_h1]:text-slate-950 [&_h2]:text-slate-800 [&_h3]:text-slate-800 [&_p]:text-slate-600 [&_.text-gray-500]:text-slate-500" : theme === "dark" ? "bg-black text-slate-100" : theme === "classic" ? "bg-[#172554] text-[#dbeafe]" : "bg-[#0a192f] text-[#ccd6f6]"}`}
+    >
       {/* --------------------------------------------------------------- */}
       {/* Torch effect                                                    */}
       {/* --------------------------------------------------------------- */}
@@ -297,7 +248,9 @@ export default function TemplateTSXOne({
       {/* --------------------------------------------------------------- */}
 
       <div
-        style={embedded ? { position: "sticky", top: 0, alignSelf: "flex-start", height: "100vh" } : undefined}
+        style={
+          embedded ? { position: "sticky", top: 0, alignSelf: "flex-start", height: "100vh" } : undefined
+        }
         className={`
           w-full
           p-4
@@ -311,7 +264,6 @@ export default function TemplateTSXOne({
           ${previewSidebarPosition}
         `}
       >
-
         {/* Name */}
 
         <h1
@@ -366,7 +318,6 @@ export default function TemplateTSXOne({
         {/* ------------------------------------------------------------- */}
 
         <div className="flex hidden xl:block">
-
           <nav
             className="
               flex
@@ -375,28 +326,20 @@ export default function TemplateTSXOne({
               mt-10
             "
           >
-
             {sections.map((id) => (
               <a
                 key={id}
                 href={`#${id}`}
-                onClick={() =>
-                  setActiveSection(id)
-                }
+                onClick={() => setActiveSection(id)}
                 className={`
                   flex
                   items-center
                   space-x-3
                   cursor-pointer
                   group
-                  ${
-                    activeSection === id
-                      ? "text-gray-100 font-bold"
-                      : "text-gray-300"
-                  }
+                  ${activeSection === id ? "text-gray-100 font-bold" : "text-gray-300"}
                 `}
               >
-
                 <div
                   className={`
                     w-6
@@ -404,11 +347,7 @@ export default function TemplateTSXOne({
                     rounded-sm
                     transition-all
                     duration-300
-                    ${
-                      activeSection === id
-                        ? "w-12 bg-white"
-                        : "bg-white group-hover:w-12"
-                    }
+                    ${activeSection === id ? "w-12 bg-white" : "bg-white group-hover:w-12"}
                   `}
                 />
 
@@ -423,15 +362,11 @@ export default function TemplateTSXOne({
                     duration-300
                   "
                 >
-                  {id.charAt(0).toUpperCase() +
-                    id.slice(1)}
+                  {id.charAt(0).toUpperCase() + id.slice(1)}
                 </span>
-
               </a>
             ))}
-
           </nav>
-
         </div>
 
         {/* ------------------------------------------------------------- */}
@@ -446,7 +381,6 @@ export default function TemplateTSXOne({
             mt-10
           "
         >
-
           {/* GitHub */}
 
           {active.github && (
@@ -472,12 +406,7 @@ export default function TemplateTSXOne({
           {/* LinkedIn */}
 
           {active.linkedin && (
-            <a
-              href={active.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-            >
+            <a href={active.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
               <FaLinkedin
                 className="
                   text-gray-500
@@ -515,11 +444,7 @@ export default function TemplateTSXOne({
           {/* Email */}
 
           {active.email && (
-            <a
-              href={`mailto:${active.email}`}
-              className="group"
-              aria-label="Email"
-            >
+            <a href={`mailto:${active.email}`} className="group" aria-label="Email">
               <MdEmail
                 className="
                   text-gray-500
@@ -531,9 +456,7 @@ export default function TemplateTSXOne({
               />
             </a>
           )}
-
         </nav>
-
       </div>
 
       {/* --------------------------------------------------------------- */}
@@ -546,7 +469,6 @@ export default function TemplateTSXOne({
           scroll-smooth
         "
       >
-
         {/* ============================================================= */}
         {/* ABOUT                                                         */}
         {/* ============================================================= */}
@@ -563,7 +485,6 @@ export default function TemplateTSXOne({
             pt-7
           `}
         >
-
           <div
             className="
               max-w-3xl
@@ -571,16 +492,11 @@ export default function TemplateTSXOne({
               mt-10
             "
           >
-
             {summary.length > 0 ? (
-              summary.map(
-                (
-                  paragraph: string,
-                  index: number
-                ) => (
-                  <p
-                    key={index}
-                    className="
+              summary.map((paragraph: string, index: number) => (
+                <p
+                  key={index}
+                  className="
                       text-sm
                       sm:text-base
                       md:text-lg
@@ -588,11 +504,10 @@ export default function TemplateTSXOne({
                       leading-relaxed
                       mb-4
                     "
-                  >
-                    {paragraph}
-                  </p>
-                )
-              )
+                >
+                  {paragraph}
+                </p>
+              ))
             ) : (
               <p
                 className="
@@ -606,9 +521,7 @@ export default function TemplateTSXOne({
                 No summary available.
               </p>
             )}
-
           </div>
-
         </section>
 
         {/* ============================================================= */}
@@ -628,17 +541,11 @@ export default function TemplateTSXOne({
             gap-12
           `}
         >
-
           {projects.length > 0 ? (
-            projects.map(
-              (
-                project: PortfolioProject,
-                index: number
-              ) => (
-
-                <div
-                  key={index}
-                  className="
+            projects.map((project: PortfolioProject, index: number) => (
+              <div
+                key={index}
+                className="
                     flex
                     flex-col
                     md:flex-row
@@ -647,42 +554,33 @@ export default function TemplateTSXOne({
                     rounded-lg
                     overflow-hidden
                   "
-                >
+              >
+                {/* Project image */}
 
-                  {/* Project image */}
-
-                  <div
-                    className="
+                <div
+                  className="
                       min-w-0
                       md:w-1/2
                       relative
                       h-50
                     "
-                  >
-
-                    <Image
-                      src={
-                        project.image ||
-                        defaultProjectImage
-                      }
-                      alt={
-                        project.title ||
-                        "Project"
-                      }
-                      fill
-                      unoptimized
-                      className="
+                >
+                  <Image
+                    src={project.image || defaultProjectImage}
+                    alt={project.title || "Project"}
+                    fill
+                    unoptimized
+                    className="
                         object-cover
                         rounded-lg
                       "
-                    />
+                  />
+                </div>
 
-                  </div>
+                {/* Project content */}
 
-                  {/* Project content */}
-
-                  <div
-                    className="
+                <div
+                  className="
                       min-w-0
                       md:w-1/2
                       p-6
@@ -690,43 +588,34 @@ export default function TemplateTSXOne({
                       flex-col
                       justify-center
                     "
-                  >
-
-                    <h3
-                      className="
+                >
+                  <h3
+                    className="
                         text-2xl
                         font-semibold
                         mb-2
                       "
-                    >
-                      {project.title}
-                    </h3>
+                  >
+                    {project.title}
+                  </h3>
 
-                    <p>
-                      {project.description}
-                    </p>
+                  <p>{project.description}</p>
 
-                    {/* Technologies */}
+                  {/* Technologies */}
 
-                    {project.technologies &&
-                      project.technologies.length >
-                        0 && (
-                        <div
-                          className="
+                  {project.technologies && project.technologies.length > 0 && (
+                    <div
+                      className="
                             flex
                             flex-wrap
                             gap-2
                             mt-5
                           "
-                        >
-                          {project.technologies.map(
-                            (
-                              tech: string,
-                              techIndex: number
-                            ) => (
-                              <span
-                                key={techIndex}
-                                className="
+                    >
+                      {project.technologies.map((tech: string, techIndex: number) => (
+                        <span
+                          key={techIndex}
+                          className="
                                   bg-gray-200/90
                                   text-gray-800
                                   text-xs
@@ -736,71 +625,60 @@ export default function TemplateTSXOne({
                                   py-1
                                   rounded-full
                                 "
-                              >
-                                {tech}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      )}
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
-                    {/* Project links */}
+                  {/* Project links */}
 
-                    {(project.github ||
-                      project.live_url) && (
-                      <div
-                        className="
+                  {(project.github || project.live_url) && (
+                    <div
+                      className="
                           flex
                           gap-5
                           mt-5
                         "
-                      >
-
-                        {project.github && (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="
+                    >
+                      {project.github && (
+                        <a
+                          href={project.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
                               underline
                               hover:text-blue-400
                             "
-                          >
-                            GitHub
-                          </a>
-                        )}
+                        >
+                          GitHub
+                        </a>
+                      )}
 
-                        {project.live_url && (
-                          <a
-                            href={project.live_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="
+                      {project.live_url && (
+                        <a
+                          href={project.live_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
                               underline
                               hover:text-blue-400
                             "
-                          >
-                            Live
-                          </a>
-                        )}
-
-                      </div>
-                    )}
-
-                  </div>
-
+                        >
+                          Live
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-              )
-            )
+              </div>
+            ))
           ) : (
             <div className="py-20">
-              <p className="text-gray-500">
-                No projects available.
-              </p>
+              <p className="text-gray-500">No projects available.</p>
             </div>
           )}
-
         </section>
 
         {/* ============================================================= */}
@@ -818,24 +696,17 @@ export default function TemplateTSXOne({
             py-20
           `}
         >
-
           <div
             className="
               max-w-4xl
               mx-auto
             "
           >
-
             {experience.length > 0 ? (
-              experience.map(
-                (
-                  exp: PortfolioExperience,
-                  index: number
-                ) => {
-
-                  const experienceContent = (
-                    <div
-                      className="
+              experience.map((exp: PortfolioExperience, index: number) => {
+                const experienceContent = (
+                  <div
+                    className="
                         relative
                         group
                         rounded-2xl
@@ -849,12 +720,11 @@ export default function TemplateTSXOne({
                         border
                         border-white/10
                       "
-                    >
+                  >
+                    {/* Date */}
 
-                      {/* Date */}
-
-                      <span
-                        className="
+                    <span
+                      className="
                           block
                           text-xs
                           sm:text-sm
@@ -862,24 +732,21 @@ export default function TemplateTSXOne({
                           text-gray-400
                           mb-4
                         "
-                      >
-                        {exp.start_date}
+                    >
+                      {exp.start_date}
 
-                        {exp.start_date &&
-                          exp.end_date &&
-                          " — "}
+                      {exp.start_date && exp.end_date && " — "}
 
-                        {exp.end_date}
-                      </span>
+                      {exp.end_date}
+                    </span>
 
-                      {/* Content */}
+                    {/* Content */}
 
-                      <div className="text-left">
+                    <div className="text-left">
+                      {/* Job title */}
 
-                        {/* Job title */}
-
-                        <h3
-                          className="
+                      <h3
+                        className="
                             text-xl
                             sm:text-2xl
                             md:text-3xl
@@ -887,21 +754,19 @@ export default function TemplateTSXOne({
                             text-gray-300
                             mb-4
                           "
-                        >
-                          {exp.job_title}
+                      >
+                        {exp.job_title}
 
-                          {exp.job_title &&
-                            exp.location &&
-                            " — "}
+                        {exp.job_title && exp.location && " — "}
 
-                          {exp.location}
-                        </h3>
+                        {exp.location}
+                      </h3>
 
-                        {/* Company */}
+                      {/* Company */}
 
-                        {exp.company && (
-                          <p
-                            className="
+                      {exp.company && (
+                        <p
+                          className="
                               text-sm
                               sm:text-base
                               md:text-lg
@@ -909,16 +774,16 @@ export default function TemplateTSXOne({
                               font-semibold
                               mb-3
                             "
-                          >
-                            {exp.company}
-                          </p>
-                        )}
+                        >
+                          {exp.company}
+                        </p>
+                      )}
 
-                        {/* Description */}
+                      {/* Description */}
 
-                        {exp.description && (
-                          <p
-                            className="
+                      {exp.description && (
+                        <p
+                          className="
                               text-sm
                               sm:text-base
                               md:text-lg
@@ -926,33 +791,26 @@ export default function TemplateTSXOne({
                               leading-relaxed
                               mb-4
                             "
-                          >
-                            {exp.description}
-                          </p>
-                        )}
+                        >
+                          {exp.description}
+                        </p>
+                      )}
 
-                        {/* Technology stack */}
+                      {/* Technology stack */}
 
-                        {exp.technologies &&
-                          exp.technologies.length >
-                            0 && (
-                            <div
-                              className="
+                      {exp.technologies && exp.technologies.length > 0 && (
+                        <div
+                          className="
                                 flex
                                 flex-wrap
                                 gap-3
                                 mt-6
                               "
-                            >
-
-                              {exp.technologies.map(
-                                (
-                                  tech: string,
-                                  techIndex: number
-                                ) => (
-                                  <span
-                                    key={techIndex}
-                                    className="
+                        >
+                          {exp.technologies.map((tech: string, techIndex: number) => (
+                            <span
+                              key={techIndex}
+                              className="
                                       bg-gray-200/90
                                       text-gray-800
                                       text-xs
@@ -962,21 +820,18 @@ export default function TemplateTSXOne({
                                       py-1
                                       rounded-full
                                     "
-                                  >
-                                    {tech}
-                                  </span>
-                                )
-                              )}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-                            </div>
-                          )}
+                    {/* Hover overlay */}
 
-                      </div>
-
-                      {/* Hover overlay */}
-
-                      <div
-                        className="
+                    <div
+                      className="
                           absolute
                           inset-0
                           bg-blue-500/10
@@ -986,69 +841,60 @@ export default function TemplateTSXOne({
                           duration-300
                           pointer-events-none
                         "
-                      />
+                    />
+                  </div>
+                );
 
-                    </div>
-                  );
-
-                  /*
+                /*
                   |--------------------------------------------------------------------------
                   | If experience has a website, make the card clickable.
                   |--------------------------------------------------------------------------
                   */
 
-                  if (exp.website) {
-                    return (
-                      <a
-                        key={index}
-                        href={exp.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block mb-8"
-                      >
-                        {experienceContent}
-                      </a>
-                    );
-                  }
-
+                if (exp.website) {
                   return (
-                    <div
+                    <a
                       key={index}
-                      className="mb-8"
+                      href={exp.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block mb-8"
                     >
                       {experienceContent}
-                    </div>
+                    </a>
                   );
                 }
-              )
+
+                return (
+                  <div key={index} className="mb-8">
+                    {experienceContent}
+                  </div>
+                );
+              })
             ) : (
               <div className="py-20">
-                <p className="text-gray-500">
-                  No experience available.
-                </p>
+                <p className="text-gray-500">No experience available.</p>
               </div>
             )}
-
           </div>
-
         </section>
 
         {/* ============================================================= */}
         {/* FOOTER                                                         */}
         {/* ============================================================= */}
 
-
         {/* ============================================================= */}
         {/* Rotating booth                                                 */}
         {/* ============================================================= */}
 
-        {!embedded && <Image
-          src={rotationbooth}
-          alt="Rotating Booth"
-          width={80}
-          height={80}
-          unoptimized
-          className="
+        {!embedded && (
+          <Image
+            src={rotationbooth}
+            alt="Rotating Booth"
+            width={80}
+            height={80}
+            unoptimized
+            className="
             hidden
             md:block
             fixed
@@ -1061,10 +907,9 @@ export default function TemplateTSXOne({
             object-contain
             z-50
           "
-        />}
-
+          />
+        )}
       </main>
-
     </div>
   );
 }

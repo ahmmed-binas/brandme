@@ -9,7 +9,8 @@ import type { TemplateId } from "@/lib/templates/types";
 
 export const COLOR_THEMES = ["midnight", "classic", "dark", "light"] as const;
 export type ColorTheme = (typeof COLOR_THEMES)[number];
-export const isColorTheme = (value: unknown): value is ColorTheme => COLOR_THEMES.includes(value as ColorTheme);
+export const isColorTheme = (value: unknown): value is ColorTheme =>
+  COLOR_THEMES.includes(value as ColorTheme);
 
 /** Upper bound for a whole saved portfolio, images included. */
 export const MAX_CONTENT_BYTES = 4_500_000;
@@ -30,15 +31,21 @@ export function safeLink(value: string): string {
 export function safeImage(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) return "";
-  if (trimmed.startsWith("data:")) return SAFE_IMAGE_DATA_URL.test(trimmed) && trimmed.length <= MAX_IMAGE_DATA_URL_LENGTH ? trimmed : "";
+  if (trimmed.startsWith("data:"))
+    return SAFE_IMAGE_DATA_URL.test(trimmed) && trimmed.length <= MAX_IMAGE_DATA_URL_LENGTH ? trimmed : "";
   return UNSAFE_URL.test(trimmed) ? "" : trimmed;
 }
 
 const text = (max: number) => z.string().max(max).optional();
 const link = z.string().max(2000).transform(safeLink).optional();
-const list = (maxItems: number, maxLength: number) => z.array(z.string().max(maxLength)).max(maxItems).optional();
+const list = (maxItems: number, maxLength: number) =>
+  z.array(z.string().max(maxLength)).max(maxItems).optional();
 
-const image = z.string().max(MAX_IMAGE_DATA_URL_LENGTH + 100).transform(safeImage).optional();
+const image = z
+  .string()
+  .max(MAX_IMAGE_DATA_URL_LENGTH + 100)
+  .transform(safeImage)
+  .optional();
 
 export const standardProjectSchema = z.object({
   title: text(200),
@@ -65,7 +72,13 @@ export const standardExperienceSchema = z.object({
   website: link,
 });
 
-export const educationSchema = z.object({ school: text(200), degree: text(200), start_date: text(60), end_date: text(60), description: text(2000) });
+export const educationSchema = z.object({
+  school: text(200),
+  degree: text(200),
+  start_date: text(60),
+  end_date: text(60),
+  description: text(2000),
+});
 export const serviceSchema = z.object({ title: text(160), description: text(2000), price: text(80) });
 export const testimonialSchema = z.object({ quote: text(1200), name: text(120), role: text(160) });
 /** Awards, publications, exhibitions, talks, press: anything worth listing with a year. */
@@ -75,19 +88,37 @@ export const statSchema = z.object({ value: text(24), label: text(80) });
 export const linkSchema = z.object({ label: text(60), url: link });
 
 /** Every section a template can show. Templates declare which ones they use; the editor shows only those. */
-export const SECTION_KEYS = ["about", "projects", "experience", "skills", "education", "services", "testimonials", "highlights", "gallery", "stats", "contact"] as const;
+export const SECTION_KEYS = [
+  "about",
+  "projects",
+  "experience",
+  "skills",
+  "education",
+  "services",
+  "testimonials",
+  "highlights",
+  "gallery",
+  "stats",
+  "contact",
+] as const;
 export type SectionKey = (typeof SECTION_KEYS)[number];
 
 const HEX = /^#[0-9a-f]{6}$/i;
 /** Per-portfolio design choices. Each template interprets its own palette and font ids; unknown ids fall back to its defaults. */
-export const designSchema = z.object({
-  palette: z.string().max(40).optional(),
-  font: z.string().max(40).optional(),
-  accent: z.string().max(7).refine((value) => !value || HEX.test(value), "Accent must be a hex colour.").optional(),
-  hidden: z.array(z.enum(SECTION_KEYS)).max(SECTION_KEYS.length).optional(),
-  /** Free-form section titles, e.g. "Selected work" instead of "Projects". */
-  labels: z.partialRecord(z.enum(SECTION_KEYS), z.string().max(40)).optional(),
-}).optional();
+export const designSchema = z
+  .object({
+    palette: z.string().max(40).optional(),
+    font: z.string().max(40).optional(),
+    accent: z
+      .string()
+      .max(7)
+      .refine((value) => !value || HEX.test(value), "Accent must be a hex colour.")
+      .optional(),
+    hidden: z.array(z.enum(SECTION_KEYS)).max(SECTION_KEYS.length).optional(),
+    /** Free-form section titles, e.g. "Selected work" instead of "Projects". */
+    labels: z.partialRecord(z.enum(SECTION_KEYS), z.string().max(40)).optional(),
+  })
+  .optional();
 export type DesignSettings = NonNullable<z.infer<typeof designSchema>>;
 
 /** Content shape used by every "standard" template (Midnight, Kinetic and the whole studio collection). */
@@ -122,17 +153,38 @@ export const standardContentSchema = z.object({
 
 export type StandardContent = z.infer<typeof standardContentSchema>;
 
-const EDITORIAL_ARRAY_KEYS = ["experience", "projects", "education", "certifications", "engineeringApproach", "services", "testimonials"] as const;
+const EDITORIAL_ARRAY_KEYS = [
+  "experience",
+  "projects",
+  "education",
+  "certifications",
+  "engineeringApproach",
+  "services",
+  "testimonials",
+] as const;
 const EDITORIAL_OBJECT_KEYS = ["personal", "about", "skills", "openSource", "social", "snapshot"] as const;
-export const EDITORIAL_SKILL_CATEGORIES = ["frontend", "backend", "database", "devops", "ai", "tools"] as const;
+export const EDITORIAL_SKILL_CATEGORIES = [
+  "frontend",
+  "backend",
+  "database",
+  "devops",
+  "ai",
+  "tools",
+] as const;
 
 /** Structural check for the Editorial Developer template's richer content model. */
 export function isEditorialShape(value: unknown): value is Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const data = value as Record<string, unknown>;
-  return EDITORIAL_ARRAY_KEYS.every((key) => Array.isArray(data[key]))
-    && EDITORIAL_OBJECT_KEYS.every((key) => Boolean(data[key]) && typeof data[key] === "object" && !Array.isArray(data[key]))
-    && EDITORIAL_SKILL_CATEGORIES.every((category) => Array.isArray((data.skills as Record<string, unknown>)[category]));
+  return (
+    EDITORIAL_ARRAY_KEYS.every((key) => Array.isArray(data[key])) &&
+    EDITORIAL_OBJECT_KEYS.every(
+      (key) => Boolean(data[key]) && typeof data[key] === "object" && !Array.isArray(data[key]),
+    ) &&
+    EDITORIAL_SKILL_CATEGORIES.every((category) =>
+      Array.isArray((data.skills as Record<string, unknown>)[category]),
+    )
+  );
 }
 
 const IMAGE_KEY = /(avatar|image|photo|logo|thumbnail)$/i;
@@ -144,7 +196,8 @@ const MAX_DEPTH = 8;
  */
 export function sanitizeDeep(value: unknown, key = "", depth = 0): unknown {
   if (depth > MAX_DEPTH) return null;
-  if (typeof value === "string") return IMAGE_KEY.test(key) ? safeImage(value) : UNSAFE_URL.test(value) ? "" : value.slice(0, 10_000);
+  if (typeof value === "string")
+    return IMAGE_KEY.test(key) ? safeImage(value) : UNSAFE_URL.test(value) ? "" : value.slice(0, 10_000);
   if (typeof value === "number" || typeof value === "boolean" || value === null) return value;
   if (Array.isArray(value)) return value.slice(0, 100).map((item) => sanitizeDeep(item, key, depth + 1));
   if (typeof value === "object") {
@@ -162,21 +215,52 @@ export type ContentValidation = { ok: true; content: Record<string, unknown> } |
 
 /** Validates and cleans content for a template. The only gate content passes through before saving. */
 export function validateContent(templateId: TemplateId, content: unknown): ContentValidation {
-  if (JSON.stringify(content ?? null).length > MAX_CONTENT_BYTES) return { ok: false, error: "This portfolio is too large. Use fewer or smaller images." };
+  if (JSON.stringify(content ?? null).length > MAX_CONTENT_BYTES)
+    return { ok: false, error: "This portfolio is too large. Use fewer or smaller images." };
   if (templateId === "editorial-developer") {
     if (!isEditorialShape(content)) return { ok: false, error: "Required template sections are missing." };
     return { ok: true, content: sanitizeDeep(content) as Record<string, unknown> };
   }
   const parsed = standardContentSchema.safeParse(content);
-  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Some portfolio content is invalid." };
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Some portfolio content is invalid." };
   return { ok: true, content: parsed.data };
 }
 
 export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
-const RESERVED_SLUGS = new Set(["admin", "api", "app", "account", "login", "logout", "editor", "templates", "templatechooser", "pricing", "blog", "tools", "help", "support", "settings", "formora", "www", "mail", "about", "contact", "terms", "privacy"]);
+const RESERVED_SLUGS = new Set([
+  "admin",
+  "api",
+  "app",
+  "account",
+  "login",
+  "logout",
+  "editor",
+  "templates",
+  "templatechooser",
+  "pricing",
+  "blog",
+  "tools",
+  "help",
+  "support",
+  "settings",
+  "formora",
+  "www",
+  "mail",
+  "about",
+  "contact",
+  "terms",
+  "privacy",
+]);
 
 export function normaliseSlug(value: string): string {
-  return value.toLowerCase().trim().replace(/[^a-z0-9-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 40);
 }
 
 export function slugError(slug: string): string | null {

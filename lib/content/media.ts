@@ -20,21 +20,36 @@ export const MEDIA_HEIGHT = { min: 120, max: 1200, default: 420 };
 /** The video behind a YouTube or Vimeo link, or null. */
 export function parseVideoUrl(raw: string): { provider: "youtube" | "vimeo"; id: string } | null {
   let url: URL;
-  try { url = new URL(raw.trim()); } catch { return null; }
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return null;
+  }
   if (url.protocol !== "https:" && url.protocol !== "http:") return null;
   const host = url.hostname.replace(/^www\.|^m\./, "");
-  const id = (value: string | null | undefined, pattern: RegExp) => (value && pattern.test(value) ? value : null);
-  if (host === "youtu.be") { const v = id(url.pathname.slice(1).split("/")[0], /^[\w-]{11}$/); return v ? { provider: "youtube", id: v } : null; }
-  if (host === "youtube.com" || host === "youtube-nocookie.com") {
-    const v = id(url.searchParams.get("v"), /^[\w-]{11}$/) ?? id(url.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]{11})/)?.[1], /^[\w-]{11}$/);
+  const id = (value: string | null | undefined, pattern: RegExp) =>
+    value && pattern.test(value) ? value : null;
+  if (host === "youtu.be") {
+    const v = id(url.pathname.slice(1).split("/")[0], /^[\w-]{11}$/);
     return v ? { provider: "youtube", id: v } : null;
   }
-  if (host === "vimeo.com" || host === "player.vimeo.com") { const v = id(url.pathname.match(/(?:^|\/)(\d{6,12})(?:\/|$)/)?.[1], /^\d{6,12}$/); return v ? { provider: "vimeo", id: v } : null; }
+  if (host === "youtube.com" || host === "youtube-nocookie.com") {
+    const v =
+      id(url.searchParams.get("v"), /^[\w-]{11}$/) ??
+      id(url.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]{11})/)?.[1], /^[\w-]{11}$/);
+    return v ? { provider: "youtube", id: v } : null;
+  }
+  if (host === "vimeo.com" || host === "player.vimeo.com") {
+    const v = id(url.pathname.match(/(?:^|\/)(\d{6,12})(?:\/|$)/)?.[1], /^\d{6,12}$/);
+    return v ? { provider: "vimeo", id: v } : null;
+  }
   return null;
 }
 
 export const videoEmbedUrl = (media: Extract<PostMedia, { type: "video" }>) =>
-  media.provider === "youtube" ? `https://www.youtube-nocookie.com/embed/${media.id}` : `https://player.vimeo.com/video/${media.id}?dnt=1`;
+  media.provider === "youtube"
+    ? `https://www.youtube-nocookie.com/embed/${media.id}`
+    : `https://player.vimeo.com/video/${media.id}?dnt=1`;
 
 export class MediaError extends Error {}
 
@@ -50,15 +65,24 @@ export function cleanMedia(raw: unknown): PostMedia | null {
     return { type: "image", src, alt: text(input.alt, 300) };
   }
   if (input.type === "video") {
-    const video = typeof input.url === "string" ? parseVideoUrl(input.url)
-      : (input.provider === "youtube" && typeof input.id === "string" && /^[\w-]{11}$/.test(input.id)) || (input.provider === "vimeo" && typeof input.id === "string" && /^\d{6,12}$/.test(input.id)) ? { provider: input.provider as "youtube" | "vimeo", id: input.id as string } : null;
-    if (!video) throw new MediaError("Paste a YouTube or Vimeo link, like https://www.youtube.com/watch?v=… or https://vimeo.com/123456789.");
+    const video =
+      typeof input.url === "string"
+        ? parseVideoUrl(input.url)
+        : (input.provider === "youtube" && typeof input.id === "string" && /^[\w-]{11}$/.test(input.id)) ||
+            (input.provider === "vimeo" && typeof input.id === "string" && /^\d{6,12}$/.test(input.id))
+          ? { provider: input.provider as "youtube" | "vimeo", id: input.id as string }
+          : null;
+    if (!video)
+      throw new MediaError(
+        "Paste a YouTube or Vimeo link, like https://www.youtube.com/watch?v=… or https://vimeo.com/123456789.",
+      );
     return { type: "video", ...video, title: text(input.title, 200) };
   }
   if (input.type === "html") {
     const html = typeof input.html === "string" ? input.html : "";
     if (!html.trim()) return null;
-    if (html.length > MAX_MEDIA_HTML) throw new MediaError(`Keep custom HTML under ${MAX_MEDIA_HTML.toLocaleString("en")} characters.`);
+    if (html.length > MAX_MEDIA_HTML)
+      throw new MediaError(`Keep custom HTML under ${MAX_MEDIA_HTML.toLocaleString("en")} characters.`);
     const height = Math.round(Number(input.height) || MEDIA_HEIGHT.default);
     return { type: "html", html, height: Math.min(MEDIA_HEIGHT.max, Math.max(MEDIA_HEIGHT.min, height)) };
   }
@@ -67,5 +91,9 @@ export function cleanMedia(raw: unknown): PostMedia | null {
 
 /** Reads a stored value without throwing (old or hand-edited rows become "no media"). */
 export function readMedia(raw: unknown): PostMedia | null {
-  try { return cleanMedia(raw); } catch { return null; }
+  try {
+    return cleanMedia(raw);
+  } catch {
+    return null;
+  }
 }

@@ -16,7 +16,17 @@ import { motionOff } from "../motion";
  * Telemetry to shaders.com is always off: visitors to customers' sites are
  * not reported anywhere.
  */
-export function ShaderStage({ fallback, className = "", children, opacity = 1 }: { fallback: string; className?: string; children: ReactNode; opacity?: number }) {
+export function ShaderStage({
+  fallback,
+  className = "",
+  children,
+  opacity = 1,
+}: {
+  fallback: string;
+  className?: string;
+  children: ReactNode;
+  opacity?: number;
+}) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [near, setNear] = useState(false);
   const [able, setAble] = useState(false);
@@ -27,14 +37,35 @@ export function ShaderStage({ fallback, className = "", children, opacity = 1 }:
     const node = ref.current;
     if (!node || motionOff() || !("gpu" in navigator)) return;
     const frame = requestAnimationFrame(() => setAble(true));
-    const observer = new IntersectionObserver(([entry]) => setNear(Boolean(entry?.isIntersecting)), { rootMargin: "300px 0px" });
+    const observer = new IntersectionObserver(([entry]) => setNear(Boolean(entry?.isIntersecting)), {
+      rootMargin: "300px 0px",
+    });
     observer.observe(node);
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, []);
 
   const live = able && near && !failed;
-  return <div ref={ref} aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`} style={{ background: fallback }}>
-    {live && <Shader disableTelemetry onReady={() => setReady(true)} onUnavailable={() => setFailed(true)}
-      className="absolute inset-0 size-full transition-opacity duration-[1400ms]" style={{ opacity: ready ? opacity : 0 }}>{children}</Shader>}
-  </div>;
+  return (
+    <div
+      ref={ref}
+      aria-hidden
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
+      style={{ background: fallback }}
+    >
+      {live && (
+        <Shader
+          disableTelemetry
+          onReady={() => setReady(true)}
+          onUnavailable={() => setFailed(true)}
+          className="absolute inset-0 size-full transition-opacity duration-[1400ms]"
+          style={{ opacity: ready ? opacity : 0 }}
+        >
+          {children}
+        </Shader>
+      )}
+    </div>
+  );
 }

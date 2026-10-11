@@ -12,4 +12,5 @@ export async function requireViewer({ moderator = false } = {}) {
 }
 
 /** Refusals carry a machine-readable code so the UI can keep the author's text and explain. */
-export const refusal = (status: number, code: string, error: string) => Response.json({ error, code }, { status });
+export const refusal = (status: number, code: string, error: string) =>
+  Response.json({ error, code }, { status });

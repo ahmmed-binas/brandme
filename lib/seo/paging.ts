@@ -18,7 +18,19 @@ export function pageNumber(raw: string | string[] | undefined): number {
 
 export const pageSuffix = (page: number) => (page > 1 ? `, page ${page}` : "");
 
-export function pagedMetadata({ base, title, description, page, filtered = false }: { base: string; title: string; description: string; page: number; filtered?: boolean }): Metadata {
+export function pagedMetadata({
+  base,
+  title,
+  description,
+  page,
+  filtered = false,
+}: {
+  base: string;
+  title: string;
+  description: string;
+  page: number;
+  filtered?: boolean;
+}): Metadata {
   const url = page > 1 ? `${base}?page=${page}` : base;
   return {
     title: `${title}${pageSuffix(page)}`,

@@ -9,10 +9,12 @@ import { runMigrations } from "@/db/migrations.mjs";
 let ready: Promise<void> | undefined;
 
 export function ensureSchema(): Promise<void> {
-  ready ??= runMigrations(db, (message) => console.info(`[db] ${message}`)).then(() => undefined).catch((error) => {
-    ready = undefined; // Retry on the next request instead of caching a failure.
-    throw error;
-  });
+  ready ??= runMigrations(db, (message) => console.info(`[db] ${message}`))
+    .then(() => undefined)
+    .catch((error) => {
+      ready = undefined; // Retry on the next request instead of caching a failure.
+      throw error;
+    });
   return ready;
 }
 

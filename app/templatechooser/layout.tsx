@@ -6,4 +6,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/templatechooser" },
 };
 
-export default function TemplateChooserLayout({ children }: Readonly<{ children: React.ReactNode }>) { return children; }
+export default function TemplateChooserLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return children;
+}

@@ -16,8 +16,11 @@ export const DELETE = route(async (request: Request) => {
   if (!user) return jsonError(401, "Sign in to delete your account.");
   const body = await readJson(request, 200);
   if (body instanceof Response) return body;
-  if ((body as { confirm?: unknown } | null)?.confirm !== "DELETE") return jsonError(422, "Type DELETE to confirm.");
-  const slugs = (await listDrafts(user.id)).map((draft) => draft.slug).filter((slug): slug is string => Boolean(slug));
+  if ((body as { confirm?: unknown } | null)?.confirm !== "DELETE")
+    return jsonError(422, "Type DELETE to confirm.");
+  const slugs = (await listDrafts(user.id))
+    .map((draft) => draft.slug)
+    .filter((slug): slug is string => Boolean(slug));
   // Every table that references the user cascades from app_users.
   await db.query("DELETE FROM app_users WHERE id = $1", [user.id]);
   for (const slug of slugs) revalidatePath(`/p/${slug}`);

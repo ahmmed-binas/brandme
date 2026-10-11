@@ -11,7 +11,8 @@ export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   const template = getTemplate(owner.templateId);
-  if (!template || !(await isTemplateAvailable(template, owner.user.isAdmin))) return jsonError(404, "Unknown template.");
+  if (!template || !(await isTemplateAvailable(template, owner.user.isAdmin)))
+    return jsonError(404, "Unknown template.");
   const body = await readJson(request, 500);
   if (body instanceof Response) return body;
   const from = (body as { from?: unknown } | null)?.from;

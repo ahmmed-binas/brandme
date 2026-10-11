@@ -16,6 +16,7 @@ export const POST = route(async (request: Request, { params }: { params: Promise
   if (body instanceof Response) return body;
   const action = (body as { action?: unknown } | null)?.action;
   if (action !== "applied" && action !== "dismissed") return jsonError(422, "Choose apply or dismiss.");
-  if (!(await decideSuggestion(user.id, id, action))) return jsonError(404, "That suggestion was already handled.");
+  if (!(await decideSuggestion(user.id, id, action)))
+    return jsonError(404, "That suggestion was already handled.");
   return Response.json({ ok: true });
 });

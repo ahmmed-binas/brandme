@@ -16,7 +16,11 @@ function describe(content: Record<string, unknown>): { name?: string; title?: st
   const personal = content.personal as { name?: string; title?: string; positioning?: string } | undefined;
   if (personal) return { name: personal.name, title: personal.title, summary: personal.positioning };
   const summary = Array.isArray(content.summary) ? String(content.summary[0] ?? "") : undefined;
-  return { name: content.name as string | undefined, title: content.professional_title as string | undefined, summary: (content.tagline as string | undefined) || summary };
+  return {
+    name: content.name as string | undefined,
+    title: content.professional_title as string | undefined,
+    summary: (content.tagline as string | undefined) || summary,
+  };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -41,5 +45,16 @@ export default async function PublishedPortfolioPage({ params }: { params: Promi
   const portfolio = await load(slug);
   const site = await sitePathFor(slug);
   if (!portfolio || !site) notFound();
-  return <PublishedPortfolioView templateId={portfolio.templateId} content={portfolio.content} theme={portfolio.theme} showsBranding={portfolio.showsBranding} resting={portfolio.resting} ownerName={portfolio.ownerName} posts={await sitePosts(site, 3)} home={site.home} />;
+  return (
+    <PublishedPortfolioView
+      templateId={portfolio.templateId}
+      content={portfolio.content}
+      theme={portfolio.theme}
+      showsBranding={portfolio.showsBranding}
+      resting={portfolio.resting}
+      ownerName={portfolio.ownerName}
+      posts={await sitePosts(site, 3)}
+      home={site.home}
+    />
+  );
 }

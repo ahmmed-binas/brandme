@@ -31,19 +31,45 @@ export const MAX_POSTS = 300;
 export const BLOG_UPGRADE = "Blogs aren’t switched on for this account. Anything you’ve written is kept.";
 const MAX_BODY = 60_000;
 
-interface Row { id: string; slug: string; title: string; excerpt: string; body: string; cover: string | null; media: unknown; published_at: Date | null; updated_at: Date }
+interface Row {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  cover: string | null;
+  media: unknown;
+  published_at: Date | null;
+  updated_at: Date;
+}
 const COLUMNS = "id, slug, title, excerpt, body, cover, media, published_at, updated_at";
 
 const toPost = (row: Row): PortfolioPost => ({
-  id: row.id, slug: row.slug, title: row.title, excerpt: row.excerpt, summary: row.excerpt || summarise(row.body), body: row.body, cover: row.cover, media: readMedia(row.media),
-  publishedAt: row.published_at?.toISOString() ?? null, updatedAt: row.updated_at.toISOString(), readMinutes: readingMinutes(row.body),
+  id: row.id,
+  slug: row.slug,
+  title: row.title,
+  excerpt: row.excerpt,
+  summary: row.excerpt || summarise(row.body),
+  body: row.body,
+  cover: row.cover,
+  media: readMedia(row.media),
+  publishedAt: row.published_at?.toISOString() ?? null,
+  updatedAt: row.updated_at.toISOString(),
+  readMinutes: readingMinutes(row.body),
 });
 
-const summarise = (body: string) => { const text = plainText(body); return text.length > 180 ? `${text.slice(0, 177).replace(/\s+\S*$/, "")}…` : text; };
+const summarise = (body: string) => {
+  const text = plainText(body);
+  return text.length > 180 ? `${text.slice(0, 177).replace(/\s+\S*$/, "")}…` : text;
+};
 
 export class PostError extends Error {}
 
-export async function listPosts(ownerId: string, templateId: TemplateId, { drafts = false, limit = MAX_POSTS } = {}): Promise<PortfolioPost[]> {
+export async function listPosts(
+  ownerId: string,
+  templateId: TemplateId,
+  { drafts = false, limit = MAX_POSTS } = {},
+): Promise<PortfolioPost[]> {
   await ensureSchema();
   const result = await db.query<Row>(
     `SELECT ${COLUMNS} FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2 ${drafts ? "" : "AND published_at IS NOT NULL"}
@@ -53,13 +79,28 @@ export async function listPosts(ownerId: string, templateId: TemplateId, { draft
   return result.rows.map(toPost);
 }
 
-export async function getPost(ownerId: string, templateId: TemplateId, slug: string): Promise<PortfolioPost | null> {
+export async function getPost(
+  ownerId: string,
+  templateId: TemplateId,
+  slug: string,
+): Promise<PortfolioPost | null> {
   await ensureSchema();
-  const result = await db.query<Row>(`SELECT ${COLUMNS} FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2 AND slug = $3 AND published_at IS NOT NULL`, [ownerId, templateId, slug]);
+  const result = await db.query<Row>(
+    `SELECT ${COLUMNS} FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2 AND slug = $3 AND published_at IS NOT NULL`,
+    [ownerId, templateId, slug],
+  );
   return result.rows[0] ? toPost(result.rows[0]) : null;
 }
 
-export interface PostInput { title?: unknown; slug?: unknown; excerpt?: unknown; body?: unknown; cover?: unknown; media?: unknown; publish?: unknown }
+export interface PostInput {
+  title?: unknown;
+  slug?: unknown;
+  excerpt?: unknown;
+  body?: unknown;
+  cover?: unknown;
+  media?: unknown;
+  publish?: unknown;
+}
 
 function clean(input: PostInput, current?: PortfolioPost) {
   const text = (value: unknown, fallback = "") => (typeof value === "string" ? value : fallback);
@@ -70,8 +111,12 @@ function clean(input: PostInput, current?: PortfolioPost) {
   const rawCover = input.cover === null ? "" : text(input.cover, current?.cover ?? "").trim();
   const cover = rawCover ? safeUrl(rawCover) : null;
   let media: PostMedia | null;
-  try { media = input.media === undefined ? current?.media ?? null : cleanMedia(input.media); }
-  catch (error) { if (error instanceof MediaError) throw new PostError(error.message); throw error; }
+  try {
+    media = input.media === undefined ? (current?.media ?? null) : cleanMedia(input.media);
+  } catch (error) {
+    if (error instanceof MediaError) throw new PostError(error.message);
+    throw error;
+  }
   const publish = typeof input.publish === "boolean" ? input.publish : current?.publishedAt != null;
   if (publish && !title) throw new PostError("Give the post a title before publishing.");
   if (publish && plainText(body).length < 20) throw new PostError("Write a little more before publishing.");
@@ -79,40 +124,97 @@ function clean(input: PostInput, current?: PortfolioPost) {
 }
 
 /** Finds a free slug on this portfolio: “my-post”, then “my-post-2”… */
-async function freeSlug(ownerId: string, templateId: TemplateId, wanted: string, exceptId?: string): Promise<string> {
-  const taken = new Set((await db.query<{ slug: string }>("SELECT slug FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2 AND slug LIKE $3 AND id IS DISTINCT FROM $4", [ownerId, templateId, `${wanted}%`, exceptId ?? null])).rows.map((row) => row.slug));
+async function freeSlug(
+  ownerId: string,
+  templateId: TemplateId,
+  wanted: string,
+  exceptId?: string,
+): Promise<string> {
+  const taken = new Set(
+    (
+      await db.query<{ slug: string }>(
+        "SELECT slug FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2 AND slug LIKE $3 AND id IS DISTINCT FROM $4",
+        [ownerId, templateId, `${wanted}%`, exceptId ?? null],
+      )
+    ).rows.map((row) => row.slug),
+  );
   if (!taken.has(wanted)) return wanted;
   for (let n = 2; ; n++) if (!taken.has(`${wanted}-${n}`)) return `${wanted}-${n}`;
 }
 
-export async function createPost(ownerId: string, templateId: TemplateId, input: PostInput): Promise<PortfolioPost> {
+export async function createPost(
+  ownerId: string,
+  templateId: TemplateId,
+  input: PostInput,
+): Promise<PortfolioPost> {
   await ensureSchema();
-  const count = Number((await db.query<{ count: string }>("SELECT count(*) FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2", [ownerId, templateId])).rows[0]!.count);
+  const count = Number(
+    (
+      await db.query<{ count: string }>(
+        "SELECT count(*) FROM portfolio_posts WHERE owner_id = $1 AND template_id = $2",
+        [ownerId, templateId],
+      )
+    ).rows[0]!.count,
+  );
   if (count >= MAX_POSTS) throw new PostError(`A portfolio can have up to ${MAX_POSTS} posts.`);
   const values = clean(input);
   const slug = await freeSlug(ownerId, templateId, values.slug);
   const result = await db.query<Row>(
     `INSERT INTO portfolio_posts (owner_id, template_id, slug, title, excerpt, body, cover, published_at, media) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING ${COLUMNS}`,
-    [ownerId, templateId, slug, values.title, values.excerpt, values.body, values.cover, values.publish ? new Date() : null, values.media ? JSON.stringify(values.media) : null],
+    [
+      ownerId,
+      templateId,
+      slug,
+      values.title,
+      values.excerpt,
+      values.body,
+      values.cover,
+      values.publish ? new Date() : null,
+      values.media ? JSON.stringify(values.media) : null,
+    ],
   );
   return toPost(result.rows[0]!);
 }
 
-export async function updatePost(ownerId: string, templateId: TemplateId, id: string, input: PostInput): Promise<PortfolioPost | null> {
+export async function updatePost(
+  ownerId: string,
+  templateId: TemplateId,
+  id: string,
+  input: PostInput,
+): Promise<PortfolioPost | null> {
   await ensureSchema();
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
-  const row = (await db.query<Row>(`SELECT ${COLUMNS} FROM portfolio_posts WHERE id = $1 AND owner_id = $2 AND template_id = $3`, [id, ownerId, templateId])).rows[0];
+  const row = (
+    await db.query<Row>(
+      `SELECT ${COLUMNS} FROM portfolio_posts WHERE id = $1 AND owner_id = $2 AND template_id = $3`,
+      [id, ownerId, templateId],
+    )
+  ).rows[0];
   if (!row) return null;
   const current = toPost(row);
   const values = clean(input, current);
   // Published addresses stay put unless the owner changes them on purpose, so shared links keep working.
-  const wanted = typeof input.slug === "string" ? values.slug : current.publishedAt ? current.slug : slugify(values.title) || current.slug;
+  const wanted =
+    typeof input.slug === "string"
+      ? values.slug
+      : current.publishedAt
+        ? current.slug
+        : slugify(values.title) || current.slug;
   const slug = wanted === current.slug ? wanted : await freeSlug(ownerId, templateId, wanted, id);
   const result = await db.query<Row>(
     `UPDATE portfolio_posts SET slug = $2, title = $3, excerpt = $4, body = $5, cover = $6, media = $8,
        published_at = CASE WHEN $7 THEN COALESCE(published_at, NOW()) ELSE NULL END, updated_at = NOW()
      WHERE id = $1 RETURNING ${COLUMNS}`,
-    [id, slug, values.title, values.excerpt, values.body, values.cover, values.publish, values.media ? JSON.stringify(values.media) : null],
+    [
+      id,
+      slug,
+      values.title,
+      values.excerpt,
+      values.body,
+      values.cover,
+      values.publish,
+      values.media ? JSON.stringify(values.media) : null,
+    ],
   );
   return toPost(result.rows[0]!);
 }
@@ -120,5 +222,13 @@ export async function updatePost(ownerId: string, templateId: TemplateId, id: st
 export async function deletePost(ownerId: string, templateId: TemplateId, id: string): Promise<boolean> {
   await ensureSchema();
   if (!/^[0-9a-f-]{36}$/i.test(id)) return false;
-  return Boolean((await db.query("DELETE FROM portfolio_posts WHERE id = $1 AND owner_id = $2 AND template_id = $3", [id, ownerId, templateId])).rowCount);
+  return Boolean(
+    (
+      await db.query("DELETE FROM portfolio_posts WHERE id = $1 AND owner_id = $2 AND template_id = $3", [
+        id,
+        ownerId,
+        templateId,
+      ])
+    ).rowCount,
+  );
 }

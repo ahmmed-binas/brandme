@@ -17,7 +17,8 @@ export const PUT = route(async (request: Request) => {
   const user = await getCurrentUser();
   if (!user) return jsonError(401, "Sign in first.");
   // Each attempt calls the provider; stop anyone using this to test stolen keys.
-  if (!(await rateLimit(`ai-key:${user.id}`, 10, 3600))) return jsonError(429, "Too many attempts. Please wait an hour and try again.");
+  if (!(await rateLimit(`ai-key:${user.id}`, 10, 3600)))
+    return jsonError(429, "Too many attempts. Please wait an hour and try again.");
   const body = await readJson(request, 1_000);
   if (body instanceof Response) return body;
   const input = (body ?? {}) as { key?: unknown; provider?: unknown };
@@ -36,6 +37,9 @@ export const DELETE = route(async () => {
   if (!databaseConfigured()) return jsonError(503, "Accounts are not configured on this server.");
   const user = await getCurrentUser();
   if (!user) return jsonError(401, "Sign in first.");
-  await db.query("UPDATE app_users SET ai_key_enc = NULL, ai_key_hint = NULL, ai_key_model = NULL, ai_key_saved_at = NULL, ai_key_provider = 'anthropic' WHERE id = $1", [user.id]);
+  await db.query(
+    "UPDATE app_users SET ai_key_enc = NULL, ai_key_hint = NULL, ai_key_model = NULL, ai_key_saved_at = NULL, ai_key_provider = 'anthropic' WHERE id = $1",
+    [user.id],
+  );
   return Response.json({ removed: true });
 });

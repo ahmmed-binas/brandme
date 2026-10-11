@@ -18,10 +18,7 @@ export default function HelpCloud({
   // Close cloud when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        cloudRef.current &&
-        !cloudRef.current.contains(event.target as Node)
-      ) {
+      if (cloudRef.current && !cloudRef.current.contains(event.target as Node)) {
         setShowHelp(false);
       }
     }
@@ -49,15 +46,11 @@ export default function HelpCloud({
           ref={cloudRef}
           className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 ${width} p-3 bg-white border rounded shadow-lg z-[100]`}
         >
-          <p className="text-sm text-gray-800 mb-2">
-            Type your suggestion or question:
-          </p>
+          <p className="text-sm text-gray-800 mb-2">Type your suggestion or question:</p>
 
           <textarea
             value={inputValue}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setInputValue(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInputValue(e.target.value)}
             placeholder={placeholder}
             rows={3}
             className="w-full px-2 py-1 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 resize-none"

@@ -9,7 +9,8 @@ const MAX_EDGE = 1600;
  * typically 150–400 KB. Re-encoding also strips EXIF metadata such as GPS.
  */
 export async function compressImage(file: File): Promise<string> {
-  if (!file.type.startsWith("image/") || file.type === "image/svg+xml") throw new Error("Choose a PNG, JPEG, WebP, or GIF image.");
+  if (!file.type.startsWith("image/") || file.type === "image/svg+xml")
+    throw new Error("Choose a PNG, JPEG, WebP, or GIF image.");
   if (file.size > MAX_INPUT_BYTES) throw new Error("That image is larger than 15 MB. Choose a smaller one.");
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
@@ -36,7 +37,11 @@ export async function prepareImage(file: File, signedIn: boolean): Promise<strin
   const dataUrl = await compressImage(file);
   if (!signedIn) return dataUrl;
   const blob = await (await fetch(dataUrl)).blob();
-  const response = await fetch("/api/assets", { method: "POST", headers: { "Content-Type": blob.type }, body: blob });
+  const response = await fetch("/api/assets", {
+    method: "POST",
+    headers: { "Content-Type": blob.type },
+    body: blob,
+  });
   const body = await response.json().catch(() => ({}));
   if (response.status === 401) return dataUrl;
   if (!response.ok) throw new Error(body.error ?? "That image couldn’t be uploaded. Please try again.");

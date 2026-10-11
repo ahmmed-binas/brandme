@@ -7,14 +7,41 @@ import { AuthCard, Divider, safeCallback } from "@/components/auth/AuthCard";
 import { PasswordSignIn } from "@/components/auth/AuthForms";
 import { devLoginEnabled } from "@/lib/dev-login";
 
-export const metadata: Metadata = { title: "Sign in", description: "Sign in with Google, GitHub, or your email and password." };
+export const metadata: Metadata = {
+  title: "Sign in",
+  description: "Sign in with Google, GitHub, or your email and password.",
+};
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string | string[] }> }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string | string[] }>;
+}) {
   const callbackUrl = safeCallback((await searchParams).callbackUrl);
-  return <AuthCard eyebrow="Secure sign-in" title="Welcome back." footer={<>New here? <Link href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="font-medium text-ink underline underline-offset-4">Create an account</Link></>}>
-    <GoogleSignInButton callbackUrl={callbackUrl} google={googleSignInReady()} github={githubSignInReady()} />
-    {(googleSignInReady() || githubSignInReady()) && <Divider label="or with email" />}
-    <PasswordSignIn callbackUrl={callbackUrl} />
-    {devLoginEnabled() && <DevSignInForm callbackUrl={callbackUrl} />}
-  </AuthCard>;
+  return (
+    <AuthCard
+      eyebrow="Secure sign-in"
+      title="Welcome back."
+      footer={
+        <>
+          New here?{" "}
+          <Link
+            href={`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+            className="font-medium text-ink underline underline-offset-4"
+          >
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      <GoogleSignInButton
+        callbackUrl={callbackUrl}
+        google={googleSignInReady()}
+        github={githubSignInReady()}
+      />
+      {(googleSignInReady() || githubSignInReady()) && <Divider label="or with email" />}
+      <PasswordSignIn callbackUrl={callbackUrl} />
+      {devLoginEnabled() && <DevSignInForm callbackUrl={callbackUrl} />}
+    </AuthCard>
+  );
 }

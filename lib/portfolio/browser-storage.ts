@@ -10,7 +10,12 @@ import type { TemplateId } from "@/lib/templates/types";
  * different design without retyping. The shared copy never overrides a draft
  * saved in the person's account.
  */
-export interface DraftKeys { content: string; theme: string; savedAt: string; shared?: { content: string; theme: string } }
+export interface DraftKeys {
+  content: string;
+  theme: string;
+  savedAt: string;
+  shared?: { content: string; theme: string };
+}
 
 const SHARED_STANDARD = { content: "portfolioData", theme: "portfolioTheme" };
 
@@ -26,10 +31,17 @@ export function draftKeys(templateId: TemplateId): DraftKeys {
 const read = (key: string) => localStorage.getItem(key) ?? sessionStorage.getItem(key);
 
 /** Returns the template's own draft, else the shared standard draft with savedAt 0 (an account copy wins). */
-export function readDraft(keys: DraftKeys): { content: unknown; theme: string | null; savedAt: number } | null {
+export function readDraft(
+  keys: DraftKeys,
+): { content: unknown; theme: string | null; savedAt: number } | null {
   try {
     const own = read(keys.content);
-    if (own) return { content: JSON.parse(own), theme: read(keys.theme), savedAt: Number(localStorage.getItem(keys.savedAt) ?? 0) };
+    if (own)
+      return {
+        content: JSON.parse(own),
+        theme: read(keys.theme),
+        savedAt: Number(localStorage.getItem(keys.savedAt) ?? 0),
+      };
     const shared = keys.shared && read(keys.shared.content);
     if (shared) return { content: JSON.parse(shared), theme: read(keys.shared!.theme), savedAt: 0 };
     return null;
@@ -47,7 +59,12 @@ export function writeDraft(keys: DraftKeys, content: unknown, theme?: string | n
     localStorage.setItem(keys.savedAt, String(Date.now()));
     if (keys.shared) {
       // Best effort: the template's own copy above is the one that matters.
-      try { localStorage.setItem(keys.shared.content, serialized); if (theme) localStorage.setItem(keys.shared.theme, theme); } catch { /* shared seed is optional */ }
+      try {
+        localStorage.setItem(keys.shared.content, serialized);
+        if (theme) localStorage.setItem(keys.shared.theme, theme);
+      } catch {
+        /* shared seed is optional */
+      }
     }
     return true;
   } catch {

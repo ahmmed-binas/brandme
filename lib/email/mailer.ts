@@ -12,14 +12,18 @@ import { ensureSchema } from "@/utils/db-schema";
  * Without SMTP the app still runs: emails are written to the server log.
  */
 
-export const mailConfigured = () => Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD);
+export const mailConfigured = () =>
+  Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD);
 
 let transporter: Transporter | undefined;
 function transport(): Transporter {
   transporter ??= nodemailer.createTransport({
-    host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT ?? 587), secure: process.env.SMTP_SECURE === "true",
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === "true",
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
-    pool: true, maxConnections: 3,
+    pool: true,
+    maxConnections: 3,
   });
   return transporter;
 }
@@ -40,30 +44,56 @@ export function mailSettings() {
 
 /** Logs in to the mail server and sends one test email, so the superadmin can check the settings. */
 export async function sendTestMail(to: string): Promise<void> {
-  if (!mailConfigured()) throw new Error("SMTP isn’t set up yet: add SMTP_HOST, SMTP_USER and SMTP_PASSWORD to .env and restart.");
+  if (!mailConfigured())
+    throw new Error("SMTP isn’t set up yet: add SMTP_HOST, SMTP_USER and SMTP_PASSWORD to .env and restart.");
   // A fresh connection each time, so a changed password or port is really tested.
-  const test = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT ?? 587), secure: process.env.SMTP_SECURE === "true", auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD }, connectionTimeout: 15_000, greetingTimeout: 15_000, socketTimeout: 20_000 });
+  const test = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
+    connectionTimeout: 15_000,
+    greetingTimeout: 15_000,
+    socketTimeout: 20_000,
+  });
   try {
     await test.verify();
-    await test.sendMail({ from: fromAddress(), to, subject: "Test email: your email settings work", text: `This is a test from your website's email settings.\n\nIf you can read this, sign-up confirmations, password resets, receipts and Investigator reports will reach your customers.\n\nSent through ${process.env.SMTP_HOST}:${process.env.SMTP_PORT ?? 587} as ${process.env.SMTP_USER}.` });
+    await test.sendMail({
+      from: fromAddress(),
+      to,
+      subject: "Test email: your email settings work",
+      text: `This is a test from your website's email settings.\n\nIf you can read this, sign-up confirmations, password resets, receipts and Investigator reports will reach your customers.\n\nSent through ${process.env.SMTP_HOST}:${process.env.SMTP_PORT ?? 587} as ${process.env.SMTP_USER}.`,
+    });
   } finally {
     test.close();
   }
 }
 
-export const fromAddress = () => process.env.SMTP_FROM || process.env.SMTP_USER || "Fuccura <no-reply@localhost>";
+export const fromAddress = () =>
+  process.env.SMTP_FROM || process.env.SMTP_USER || "Fuccura <no-reply@localhost>";
 export const supportInbox = () => process.env.SMTP_TO || process.env.SMTP_USER || null;
 
-export interface Mail { to: string; subject: string; text: string; html?: string; replyTo?: string }
+export interface Mail {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+  replyTo?: string;
+}
 
 export async function sendMail(mail: Mail): Promise<void> {
   if (!mailConfigured()) {
     console.info(`[email not sent: SMTP not configured] to=${mail.to} subject="${mail.subject}"`);
     // Locally, print the whole email so links (verify, reset) can be followed without a mailbox.
-    if (process.env.NODE_ENV !== "production" || devLoginEnabled()) console.info(`[email body]\n${mail.text}\n[/email body]`);
+    if (process.env.NODE_ENV !== "production" || devLoginEnabled())
+      console.info(`[email body]\n${mail.text}\n[/email body]`);
     return;
   }
-  await transport().sendMail({ from: fromAddress(), ...mail, headers: { "X-Entity-Ref-ID": crypto.randomUUID() } });
+  await transport().sendMail({
+    from: fromAddress(),
+    ...mail,
+    headers: { "X-Entity-Ref-ID": crypto.randomUUID() },
+  });
 }
 
 /**
@@ -71,16 +101,30 @@ export async function sendMail(mail: Mail): Promise<void> {
  * Returns false when it was already sent. Failures are recorded and retried
  * by the next scheduled run.
  */
-export async function sendOnce(key: string, ownerId: string | null, kind: string, mail: Mail): Promise<boolean> {
+export async function sendOnce(
+  key: string,
+  ownerId: string | null,
+  kind: string,
+  mail: Mail,
+): Promise<boolean> {
   await ensureSchema();
-  const claimed = await db.query("INSERT INTO email_log (owner_id, kind, dedupe_key, status) VALUES ($1, $2, $3, 'sending') ON CONFLICT (dedupe_key) DO UPDATE SET status = 'sending' WHERE email_log.status = 'failed' RETURNING id", [ownerId, kind, key]);
+  const claimed = await db.query(
+    "INSERT INTO email_log (owner_id, kind, dedupe_key, status) VALUES ($1, $2, $3, 'sending') ON CONFLICT (dedupe_key) DO UPDATE SET status = 'sending' WHERE email_log.status = 'failed' RETURNING id",
+    [ownerId, kind, key],
+  );
   if (!claimed.rowCount) return false;
   try {
     await sendMail(mail);
-    await db.query("UPDATE email_log SET status = $2, error = NULL WHERE dedupe_key = $1", [key, mailConfigured() ? "sent" : "logged"]);
+    await db.query("UPDATE email_log SET status = $2, error = NULL WHERE dedupe_key = $1", [
+      key,
+      mailConfigured() ? "sent" : "logged",
+    ]);
     return true;
   } catch (error) {
-    await db.query("UPDATE email_log SET status = 'failed', error = $2 WHERE dedupe_key = $1", [key, (error as Error).message.slice(0, 500)]);
+    await db.query("UPDATE email_log SET status = 'failed', error = $2 WHERE dedupe_key = $1", [
+      key,
+      (error as Error).message.slice(0, 500),
+    ]);
     console.error("Email failed", kind, key, error);
     return false;
   }

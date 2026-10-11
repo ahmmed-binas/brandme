@@ -18,12 +18,20 @@ export const contactSchema = z.object({
   email: z.string().trim().email("Enter a valid email address."),
   phone: z.string().transform((value, context) => {
     const phone = normalisePhone(value);
-    if (!phone) context.addIssue({ code: "custom", message: "Enter your phone with its country code, e.g. +44 7700 900123." });
+    if (!phone)
+      context.addIssue({
+        code: "custom",
+        message: "Enter your phone with its country code, e.g. +44 7700 900123.",
+      });
     return phone ?? "";
   }),
   address1: field("Address", 200),
   city: field("City"),
   state: z.string().trim().max(100),
   zip: field("Postcode", 20),
-  country: z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/, "Choose a country."),
+  country: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z]{2}$/, "Choose a country."),
 }) satisfies z.ZodType<RegistrantContact, unknown>;

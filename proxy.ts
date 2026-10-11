@@ -19,13 +19,23 @@ const configuredHosts = new Set(
 );
 
 function safeHost(url?: string) {
-  try { return url ? new URL(url).hostname : undefined; } catch { return undefined; }
+  try {
+    return url ? new URL(url).hostname : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function isAppHost(host: string) {
   // Hosts without a dot ("localhost", or "app" when Caddy calls the app over the Docker
   // network) and raw IP addresses are always the app itself, never a customer domain.
-  return configuredHosts.has(host) || configuredHosts.has(host.replace(/^www\./, "")) || !host.includes(".") || /^[\d.]+$/.test(host) || host.startsWith("[");
+  return (
+    configuredHosts.has(host) ||
+    configuredHosts.has(host.replace(/^www\./, "")) ||
+    !host.includes(".") ||
+    /^[\d.]+$/.test(host) ||
+    host.startsWith("[")
+  );
 }
 
 const under = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
@@ -66,5 +76,9 @@ export function proxy(request: NextRequest) {
 export const config = {
   // Skip Next.js internals and static files (anything with an extension) so templates' assets still load.
   // sitemap.xml and robots.txt are included so each custom domain gets its own.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)", "/sitemap.xml", "/robots.txt"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.[a-zA-Z0-9]+$).*)",
+    "/sitemap.xml",
+    "/robots.txt",
+  ],
 };

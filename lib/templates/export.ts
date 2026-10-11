@@ -23,7 +23,9 @@ export const LICENSE_NAME = "MIT";
 /** "./realestate/Residence" for a template id, read from the registry so it never drifts. */
 async function componentPath(id: string): Promise<string | null> {
   const registry = await readFile(path.join(STUDIO, "registry.tsx"), "utf8");
-  const match = registry.match(new RegExp(`["']?${id}["']?:\\s*load\\(\\(\\) => import\\("\\./([^"]+)"\\)\\)`));
+  const match = registry.match(
+    new RegExp(`["']?${id}["']?:\\s*load\\(\\(\\) => import\\("\\./([^"]+)"\\)\\)`),
+  );
   return match ? match[1]! : null;
 }
 
@@ -129,7 +131,10 @@ const LICENSED = /^\/samples\/re\//;
 function withoutLicensedPhotos<T>(value: T): T {
   if (typeof value === "string") return (LICENSED.test(value) ? "" : value) as T;
   if (Array.isArray(value)) return value.map(withoutLicensedPhotos) as T;
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, withoutLicensedPhotos(child)])) as T;
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([key, child]) => [key, withoutLicensedPhotos(child)]),
+    ) as T;
   return value;
 }
 
@@ -137,8 +142,9 @@ function withoutLicensedPhotos<T>(value: T): T {
 function localImages(content: StandardContent): string[] {
   const found = new Set<string>();
   const visit = (value: unknown) => {
-    if (typeof value === "string") { if (/^\/[\w./-]+\.(webp|png|jpe?g|gif|svg)$/i.test(value)) found.add(value); }
-    else if (Array.isArray(value)) value.forEach(visit);
+    if (typeof value === "string") {
+      if (/^\/[\w./-]+\.(webp|png|jpe?g|gif|svg)$/i.test(value)) found.add(value);
+    } else if (Array.isArray(value)) value.forEach(visit);
     else if (value && typeof value === "object") Object.values(value).forEach(visit);
   };
   visit(content);
@@ -152,37 +158,131 @@ export async function templateZip(template: TemplateDefinition): Promise<Uint8Ar
   const relative = await componentPath(template.id);
   if (!relative) return null;
   const componentName = path.basename(relative);
-  const pkg = JSON.parse(await readFile(path.join(ROOT, "package.json"), "utf8")) as { dependencies: Record<string, string> };
+  const pkg = JSON.parse(await readFile(path.join(ROOT, "package.json"), "utf8")) as {
+    dependencies: Record<string, string>;
+  };
   const source = await readFile(path.join(STUDIO, `${relative}.tsx`), "utf8");
-  const fonts = [...new Set([...source.matchAll(/import "(@fontsource(?:-variable)?\/[^/"]+)[^"]*";/g)].map((match) => match[1]!))];
+  const fonts = [
+    ...new Set(
+      [...source.matchAll(/import "(@fontsource(?:-variable)?\/[^/"]+)[^"]*";/g)].map((match) => match[1]!),
+    ),
+  ];
   const usesMotion = source.includes('from "../motion"');
   const usesRealEstateKit = source.includes('from "./re-kit"');
   const content = withoutLicensedPhotos(sampleFor(template));
   const folder = `${template.id}-portfolio-template`;
   const files: Zippable = {};
-  const add = (name: string, data: string | Uint8Array) => { files[`${folder}/${name}`] = typeof data === "string" ? strToU8(data) : data; };
+  const add = (name: string, data: string | Uint8Array) => {
+    files[`${folder}/${name}`] = typeof data === "string" ? strToU8(data) : data;
+  };
 
-  add("package.json", JSON.stringify({
-    name: `${template.id}-portfolio`, private: true, version: "1.0.0", type: "module", license: LICENSE_NAME,
-    scripts: { dev: "vite --open", build: "vite build", preview: "vite preview" },
-    dependencies: { react: pkg.dependencies.react, "react-dom": pkg.dependencies["react-dom"], ...Object.fromEntries(fonts.map((name) => [name, pkg.dependencies[name] ?? "^5.3.0"])) },
-    devDependencies: { "@tailwindcss/vite": "^4.1.0", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0", "@vitejs/plugin-react": "^5.0.0", tailwindcss: "^4.1.0", typescript: "^5.6.0", vite: "^7.0.0" },
-  }, null, 2) + "\n");
-  add("vite.config.ts", `import { defineConfig } from "vite";\nimport react from "@vitejs/plugin-react";\nimport tailwindcss from "@tailwindcss/vite";\n\nexport default defineConfig({ plugins: [react(), tailwindcss()] });\n`);
-  add("tsconfig.json", JSON.stringify({ compilerOptions: { target: "ES2022", lib: ["ES2022", "DOM", "DOM.Iterable"], module: "ESNext", moduleResolution: "bundler", jsx: "react-jsx", strict: true, resolveJsonModule: true, skipLibCheck: true, noEmit: true, allowImportingTsExtensions: false }, include: ["src"] }, null, 2) + "\n");
-  add("index.html", `<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8" />\n    <link rel="icon" href="data:," />\n    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <title>${content.name ?? template.name} — ${content.professional_title ?? "Portfolio"}</title>\n    <meta name="description" content="${(content.tagline ?? template.description).replace(/"/g, "&quot;")}" />\n  </head>\n  <body>\n    <div id="root"></div>\n    <script type="module" src="/src/main.tsx"></script>\n  </body>\n</html>\n`);
+  add(
+    "package.json",
+    JSON.stringify(
+      {
+        name: `${template.id}-portfolio`,
+        private: true,
+        version: "1.0.0",
+        type: "module",
+        license: LICENSE_NAME,
+        scripts: { dev: "vite --open", build: "vite build", preview: "vite preview" },
+        dependencies: {
+          react: pkg.dependencies.react,
+          "react-dom": pkg.dependencies["react-dom"],
+          ...Object.fromEntries(fonts.map((name) => [name, pkg.dependencies[name] ?? "^5.3.0"])),
+        },
+        devDependencies: {
+          "@tailwindcss/vite": "^4.1.0",
+          "@types/react": "^19.0.0",
+          "@types/react-dom": "^19.0.0",
+          "@vitejs/plugin-react": "^5.0.0",
+          tailwindcss: "^4.1.0",
+          typescript: "^5.6.0",
+          vite: "^7.0.0",
+        },
+      },
+      null,
+      2,
+    ) + "\n",
+  );
+  add(
+    "vite.config.ts",
+    `import { defineConfig } from "vite";\nimport react from "@vitejs/plugin-react";\nimport tailwindcss from "@tailwindcss/vite";\n\nexport default defineConfig({ plugins: [react(), tailwindcss()] });\n`,
+  );
+  add(
+    "tsconfig.json",
+    JSON.stringify(
+      {
+        compilerOptions: {
+          target: "ES2022",
+          lib: ["ES2022", "DOM", "DOM.Iterable"],
+          module: "ESNext",
+          moduleResolution: "bundler",
+          jsx: "react-jsx",
+          strict: true,
+          resolveJsonModule: true,
+          skipLibCheck: true,
+          noEmit: true,
+          allowImportingTsExtensions: false,
+        },
+        include: ["src"],
+      },
+      null,
+      2,
+    ) + "\n",
+  );
+  add(
+    "index.html",
+    `<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8" />\n    <link rel="icon" href="data:," />\n    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <title>${content.name ?? template.name} — ${content.professional_title ?? "Portfolio"}</title>\n    <meta name="description" content="${(content.tagline ?? template.description).replace(/"/g, "&quot;")}" />\n  </head>\n  <body>\n    <div id="root"></div>\n    <script type="module" src="/src/main.tsx"></script>\n  </body>\n</html>\n`,
+  );
   add("src/index.css", `@import "tailwindcss";\n\nhtml, body, #root { margin: 0; min-height: 100%; }\n`);
-  add("src/main.tsx", `import { StrictMode } from "react";\nimport { createRoot } from "react-dom/client";\nimport "./index.css";\nimport Template from "./template/${componentName}";\nimport content from "./content.json";\nimport template from "./template.json";\nimport type { StandardContent, TemplateDefinition } from "./template/types";\n\ncreateRoot(document.getElementById("root")!).render(\n  <StrictMode>\n    <Template content={content as StandardContent} template={template as TemplateDefinition} />\n  </StrictMode>,\n);\n`);
+  add(
+    "src/main.tsx",
+    `import { StrictMode } from "react";\nimport { createRoot } from "react-dom/client";\nimport "./index.css";\nimport Template from "./template/${componentName}";\nimport content from "./content.json";\nimport template from "./template.json";\nimport type { StandardContent, TemplateDefinition } from "./template/types";\n\ncreateRoot(document.getElementById("root")!).render(\n  <StrictMode>\n    <Template content={content as StandardContent} template={template as TemplateDefinition} />\n  </StrictMode>,\n);\n`,
+  );
   add("src/content.json", JSON.stringify(content, null, 2) + "\n");
-  add("src/template.json", JSON.stringify({ id: template.id, name: template.name, sections: template.sections, palettes: template.palettes, fonts: template.fonts }, null, 2) + "\n");
+  add(
+    "src/template.json",
+    JSON.stringify(
+      {
+        id: template.id,
+        name: template.name,
+        sections: template.sections,
+        palettes: template.palettes,
+        fonts: template.fonts,
+      },
+      null,
+      2,
+    ) + "\n",
+  );
   add("src/template/types.ts", TYPES);
-  add(`src/template/${componentName}.tsx`, stripClient(source).replace(/from "\.\.\/(kit|motion)"/g, 'from "./$1"'));
-  add("src/template/kit.tsx", stripClient(await readFile(path.join(STUDIO, "kit.tsx"), "utf8")).replace(/from "@\/lib\/portfolio\/schema"|from "@\/lib\/templates\/types"/g, 'from "./types"'));
-  if (usesMotion || usesRealEstateKit) add("src/template/motion.tsx", stripClient(await readFile(path.join(STUDIO, "motion.tsx"), "utf8")));
-  if (usesRealEstateKit) add("src/template/re-kit.tsx", stripClient(await readFile(path.join(STUDIO, "realestate/re-kit.tsx"), "utf8")).replace(/from "\.\.\/(kit|motion)"/g, 'from "./$1"').replace(/from "@\/lib\/portfolio\/schema"/g, 'from "./types"'));
+  add(
+    `src/template/${componentName}.tsx`,
+    stripClient(source).replace(/from "\.\.\/(kit|motion)"/g, 'from "./$1"'),
+  );
+  add(
+    "src/template/kit.tsx",
+    stripClient(await readFile(path.join(STUDIO, "kit.tsx"), "utf8")).replace(
+      /from "@\/lib\/portfolio\/schema"|from "@\/lib\/templates\/types"/g,
+      'from "./types"',
+    ),
+  );
+  if (usesMotion || usesRealEstateKit)
+    add("src/template/motion.tsx", stripClient(await readFile(path.join(STUDIO, "motion.tsx"), "utf8")));
+  if (usesRealEstateKit)
+    add(
+      "src/template/re-kit.tsx",
+      stripClient(await readFile(path.join(STUDIO, "realestate/re-kit.tsx"), "utf8"))
+        .replace(/from "\.\.\/(kit|motion)"/g, 'from "./$1"')
+        .replace(/from "@\/lib\/portfolio\/schema"/g, 'from "./types"'),
+    );
   add("src/template/studio.css", await readFile(path.join(STUDIO, "studio.css"), "utf8"));
   for (const image of localImages(content)) {
-    try { add(`public${image}`, new Uint8Array(await readFile(path.join(ROOT, "public", image)))); } catch { /* a missing sample image just shows the placeholder */ }
+    try {
+      add(`public${image}`, new Uint8Array(await readFile(path.join(ROOT, "public", image))));
+    } catch {
+      /* a missing sample image just shows the placeholder */
+    }
   }
   add("README.md", readme(template, componentName));
   add("LICENSE", LICENSE(new Date().getFullYear()));

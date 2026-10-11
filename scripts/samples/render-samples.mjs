@@ -26,7 +26,14 @@ const FONTS = {
   Bodoni: font("@fontsource-variable/bodoni-moda", "bodoni-moda-latin-wght-normal.woff2"),
 };
 Object.assign(FONTS, moreFonts(font));
-const fontFaces = (await Promise.all(Object.entries(FONTS).map(async ([family, file]) => `@font-face{font-family:"${family}";src:url(data:font/woff2;base64,${(await readFile(file)).toString("base64")}) format("woff2");font-weight:100 900;font-display:block}`))).join("");
+const fontFaces = (
+  await Promise.all(
+    Object.entries(FONTS).map(
+      async ([family, file]) =>
+        `@font-face{font-family:"${family}";src:url(data:font/woff2;base64,${(await readFile(file)).toString("base64")}) format("woff2");font-weight:100 900;font-display:block}`,
+    ),
+  )
+).join("");
 
 /* ---------- Canvas helpers, executed in the page ---------- */
 const canvasLib = String.raw`
@@ -108,18 +115,52 @@ function still(o){const w=1600,h=670,c=canvas(w,h),g=c.getContext('2d'),r=rng(o.
 
 /* ---------- HTML scenes (UI, covers, posters, drawings, charts) ---------- */
 const html = {};
-const ui = (title, accent, body) => `<div style="width:1600px;height:1000px;background:#eef0f3;padding:56px;font-family:Inter;box-sizing:border-box">
+const ui = (
+  title,
+  accent,
+  body,
+) => `<div style="width:1600px;height:1000px;background:#eef0f3;padding:56px;font-family:Inter;box-sizing:border-box">
  <div style="height:100%;border-radius:18px;background:#fff;box-shadow:0 30px 80px rgba(20,30,50,.18);overflow:hidden;display:grid;grid-template-columns:230px 1fr">
   <aside style="background:#0f1420;color:#9aa3b5;padding:28px 22px;font-size:15px;line-height:2.4"><div style="color:#fff;font-weight:700;font-size:19px;margin-bottom:26px"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${accent};margin-right:10px"></span>${title}</div>${["Overview", "Activity", "Accounts", "Reports", "Settings"].map((item, i) => `<div style="${i === 0 ? `color:#fff;background:rgba(255,255,255,.07);margin:0 -10px;padding:0 10px;border-radius:8px` : ""}">${item}</div>`).join("")}</aside>
   <main style="padding:36px 40px;color:#141824">${body}</main></div></div>`;
-const spark = (seed, color, w = 520, h = 150) => { let s = seed; const pts = Array.from({ length: 30 }, (_, i) => { s = (s * 9301 + 49297) % 233280; return [i * (w / 29), h - 20 - (s / 233280) * (h * .55) - i * (h * .012)]; }); return `<svg width="${w}" height="${h}"><path d="M${pts.map((p) => p.join(",")).join(" L")}" fill="none" stroke="${color}" stroke-width="3"/><path d="M${pts.map((p) => p.join(",")).join(" L")} L${w},${h} L0,${h}Z" fill="${color}" opacity=".08"/></svg>`; };
-html["ui-ledger"] = ui("Ledgerline", "#2f6bff", `<div style="display:flex;justify-content:space-between;align-items:end"><div><div style="font-size:14px;color:#6b7385">Cash position · March</div><div style="font-size:46px;font-weight:700;letter-spacing:-.02em;margin-top:6px">$1,284,920</div></div><div style="font-size:14px;padding:10px 16px;border:1px solid #dfe3ea;border-radius:10px">Export</div></div>
- <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:30px 0">${[["Runway", "19.4 mo"], ["Burn", "$66.2k"], ["Collected", "94%"]].map(([k, v]) => `<div style="border:1px solid #e6e9ef;border-radius:14px;padding:18px"><div style="font-size:13px;color:#6b7385">${k}</div><div style="font-size:26px;font-weight:650;margin-top:6px">${v}</div></div>`).join("")}</div>
- <div style="border:1px solid #e6e9ef;border-radius:14px;padding:20px">${spark(11, "#2f6bff", 1150, 330)}</div>`);
-html["ui-transit"] = `<div style="width:1600px;height:1000px;background:#d8e3dc;display:flex;gap:60px;align-items:center;justify-content:center;font-family:Inter">${[0, 1, 2].map((n) => `<div style="width:330px;height:690px;border-radius:46px;background:#111;padding:12px;box-shadow:0 40px 80px rgba(0,0,0,.25);transform:translateY(${n === 1 ? -30 : 20}px)"><div style="height:100%;border-radius:36px;background:${n === 1 ? "#f6f3ea" : "#fff"};overflow:hidden;position:relative">
+const spark = (seed, color, w = 520, h = 150) => {
+  let s = seed;
+  const pts = Array.from({ length: 30 }, (_, i) => {
+    s = (s * 9301 + 49297) % 233280;
+    return [i * (w / 29), h - 20 - (s / 233280) * (h * 0.55) - i * (h * 0.012)];
+  });
+  return `<svg width="${w}" height="${h}"><path d="M${pts.map((p) => p.join(",")).join(" L")}" fill="none" stroke="${color}" stroke-width="3"/><path d="M${pts.map((p) => p.join(",")).join(" L")} L${w},${h} L0,${h}Z" fill="${color}" opacity=".08"/></svg>`;
+};
+html["ui-ledger"] = ui(
+  "Ledgerline",
+  "#2f6bff",
+  `<div style="display:flex;justify-content:space-between;align-items:end"><div><div style="font-size:14px;color:#6b7385">Cash position · March</div><div style="font-size:46px;font-weight:700;letter-spacing:-.02em;margin-top:6px">$1,284,920</div></div><div style="font-size:14px;padding:10px 16px;border:1px solid #dfe3ea;border-radius:10px">Export</div></div>
+ <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:30px 0">${[
+   ["Runway", "19.4 mo"],
+   ["Burn", "$66.2k"],
+   ["Collected", "94%"],
+ ]
+   .map(
+     ([k, v]) =>
+       `<div style="border:1px solid #e6e9ef;border-radius:14px;padding:18px"><div style="font-size:13px;color:#6b7385">${k}</div><div style="font-size:26px;font-weight:650;margin-top:6px">${v}</div></div>`,
+   )
+   .join("")}</div>
+ <div style="border:1px solid #e6e9ef;border-radius:14px;padding:20px">${spark(11, "#2f6bff", 1150, 330)}</div>`,
+);
+html["ui-transit"] =
+  `<div style="width:1600px;height:1000px;background:#d8e3dc;display:flex;gap:60px;align-items:center;justify-content:center;font-family:Inter">${[
+    0, 1, 2,
+  ]
+    .map(
+      (
+        n,
+      ) => `<div style="width:330px;height:690px;border-radius:46px;background:#111;padding:12px;box-shadow:0 40px 80px rgba(0,0,0,.25);transform:translateY(${n === 1 ? -30 : 20}px)"><div style="height:100%;border-radius:36px;background:${n === 1 ? "#f6f3ea" : "#fff"};overflow:hidden;position:relative">
  <svg width="306" height="${n === 0 ? 420 : 300}" style="display:block;background:#eef1ec">${Array.from({ length: 9 }, (_, i) => `<path d="M${-20 + i * 40},${40 + i * 30} C ${80 + i * 10},${120 - i * 5} ${150},${200 + i * 8} ${330},${60 + i * 25}" stroke="${["#e4572e", "#2a9d8f", "#264653", "#e9c46a"][i % 4]}" stroke-width="${i % 3 === 0 ? 6 : 3}" fill="none"/>`).join("")}<circle cx="150" cy="170" r="9" fill="#111"/><circle cx="150" cy="170" r="22" fill="#111" opacity=".12"/></svg>
- <div style="padding:20px"><div style="font-size:12px;letter-spacing:.12em;color:#6b6b6b">${["NEXT TRAIN", "YOUR ROUTE", "SAVED"][n]}</div><div style="font-size:30px;font-weight:700;margin:6px 0 14px;letter-spacing:-.02em">${["4 min", "Line 7 → 12", "Home · Work"][n]}</div>${[1, 2, 3].map((k) => `<div style="display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid #e5e2da;font-size:14px"><span>Stop ${k + n * 3}</span><span style="color:#6b6b6b">${k * 3 + n} min</span></div>`).join("")}</div></div></div>`).join("")}</div>`;
-html["ui-terminal"] = `<div style="width:1600px;height:1000px;background:radial-gradient(circle at 30% 20%,#2a2f3a,#0c0e12);display:grid;place-items:center;font-family:Mono"><div style="width:1240px;border-radius:14px;background:#0f1115;box-shadow:0 40px 100px rgba(0,0,0,.6);overflow:hidden;border:1px solid #2a2e36">
+ <div style="padding:20px"><div style="font-size:12px;letter-spacing:.12em;color:#6b6b6b">${["NEXT TRAIN", "YOUR ROUTE", "SAVED"][n]}</div><div style="font-size:30px;font-weight:700;margin:6px 0 14px;letter-spacing:-.02em">${["4 min", "Line 7 → 12", "Home · Work"][n]}</div>${[1, 2, 3].map((k) => `<div style="display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid #e5e2da;font-size:14px"><span>Stop ${k + n * 3}</span><span style="color:#6b6b6b">${k * 3 + n} min</span></div>`).join("")}</div></div></div>`,
+    )
+    .join("")}</div>`;
+html["ui-terminal"] =
+  `<div style="width:1600px;height:1000px;background:radial-gradient(circle at 30% 20%,#2a2f3a,#0c0e12);display:grid;place-items:center;font-family:Mono"><div style="width:1240px;border-radius:14px;background:#0f1115;box-shadow:0 40px 100px rgba(0,0,0,.6);overflow:hidden;border:1px solid #2a2e36">
  <div style="height:42px;background:#181b21;display:flex;align-items:center;gap:9px;padding:0 16px">${["#ff5f57", "#febc2e", "#28c840"].map((c) => `<span style="width:13px;height:13px;border-radius:50%;background:${c}"></span>`).join("")}<span style="margin-left:auto;margin-right:auto;color:#7d8590;font-size:14px">pgtrace — zsh</span></div>
  <pre style="margin:0;padding:30px 34px;color:#c9d1d9;font-size:19px;line-height:1.65;font-family:Mono">$ <span style="color:#79c0ff">pgtrace</span> watch --db orders --slow 40ms
 <span style="color:#7d8590">▸ attached to orders@10.0.4.12 (pg 16.2)</span>
@@ -133,26 +174,84 @@ html["ui-terminal"] = `<div style="width:1600px;height:1000px;background:radial-
   <span style="color:#7d8590">estimated p95 after: 9ms  (−96%)</span>
 
 $ <span style="background:#c9d1d9;color:#0f1115"> </span></pre></div></div>`;
-html["ui-health"] = `<div style="width:1600px;height:1000px;background:#f2e9df;font-family:Inter;position:relative;overflow:hidden"><div style="position:absolute;left:120px;top:110px;font-family:'Instrument Serif';font-size:120px;line-height:.9;color:#3b2a20">Breathe,<br/><i style="font-family:'Instrument Serif Italic'">then begin.</i></div>
+html["ui-health"] =
+  `<div style="width:1600px;height:1000px;background:#f2e9df;font-family:Inter;position:relative;overflow:hidden"><div style="position:absolute;left:120px;top:110px;font-family:'Instrument Serif';font-size:120px;line-height:.9;color:#3b2a20">Breathe,<br/><i style="font-family:'Instrument Serif Italic'">then begin.</i></div>
  ${[0, 1].map((n) => `<div style="position:absolute;right:${140 + n * 330}px;top:${150 + n * 70}px;width:300px;height:620px;border-radius:44px;background:${n ? "#3b2a20" : "#fffaf3"};box-shadow:0 30px 70px rgba(59,42,32,.25);padding:34px 26px;color:${n ? "#f2e9df" : "#3b2a20"}"><div style="font-size:13px;letter-spacing:.14em;opacity:.6">${n ? "TONIGHT" : "TODAY"}</div><div style="font-family:'Instrument Serif';font-size:44px;line-height:1;margin:12px 0 26px">${n ? "Wind down" : "Morning check-in"}</div><div style="width:200px;height:200px;margin:0 auto;border-radius:50%;background:radial-gradient(circle,${n ? "#c98b5e" : "#e8b89a"},transparent 70%)"></div><div style="margin-top:30px;font-size:15px;line-height:1.6;opacity:.75">${n ? "Seven minutes of slow breathing before sleep." : "How rested do you feel? Tap a word."}</div></div>`).join("")}</div>`;
-html["brand-identity"] = `<div style="width:1600px;height:1000px;background:#efe9dc;display:grid;grid-template-columns:1fr 1fr;font-family:Grotesk">
+html["brand-identity"] =
+  `<div style="width:1600px;height:1000px;background:#efe9dc;display:grid;grid-template-columns:1fr 1fr;font-family:Grotesk">
  <div style="background:#14321f;color:#e9f0d8;display:grid;place-items:center"><div style="text-align:center"><svg width="220" height="220" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#e9f0d8" stroke-width="3"/><path d="M50 14 C 30 40, 30 60, 50 86 C 70 60, 70 40, 50 14Z" fill="#e9f0d8"/></svg><div style="font-size:78px;font-weight:700;letter-spacing:-.04em;margin-top:24px">Fernhouse</div><div style="letter-spacing:.4em;font-size:16px;opacity:.7">NURSERY · EST. 1987</div></div></div>
  <div style="display:grid;grid-template-rows:1fr 1fr"><div style="display:grid;grid-template-columns:repeat(4,1fr)">${["#14321f", "#7aa35a", "#e9f0d8", "#d9622b"].map((c) => `<div style="background:${c};display:flex;align-items:end;padding:18px;font-size:14px;color:${c === "#e9f0d8" ? "#14321f" : "#fff"}">${c}</div>`).join("")}</div>
  <div style="padding:50px;color:#14321f"><div style="font-size:16px;letter-spacing:.2em">TYPE</div><div style="font-size:120px;font-weight:700;letter-spacing:-.05em;line-height:1">Aa Gg</div><div style="font-size:22px;margin-top:12px;opacity:.7">Grown slowly, sold kindly.</div></div></div></div>`;
-const cover = (bg, fg, title, author, art) => `<div style="width:1000px;height:1500px;background:${bg};color:${fg};position:relative;overflow:hidden;font-family:Fraunces">${art}<div style="position:absolute;left:80px;right:80px;bottom:110px"><div style="font-size:120px;line-height:.92;letter-spacing:-.03em">${title}</div><div style="margin-top:40px;font-family:Grotesk;letter-spacing:.3em;font-size:22px">${author}</div></div></div>`;
-html["cover-salt"] = cover("#e7dccb", "#1c2b3a", "The Salt<br/>Years", "ESSAYS · AMARA OSEI", `<div style="position:absolute;left:80px;top:90px;width:840px;height:700px;background:repeating-linear-gradient(0deg,#1c2b3a 0 3px,transparent 3px 22px);opacity:.85;clip-path:circle(42% at 50% 50%)"></div>`);
-html["cover-night"] = cover("#141414", "#f1e3c8", "Night<br/>Shift", "A NOVEL · AMARA OSEI", `<div style="position:absolute;right:-120px;top:120px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f1e3c8,#b8562b 60%,transparent 61%)"></div>`);
-html["cover-quarterly"] = cover("#c94f2c", "#fbeee4", "Field<br/><i>Notes</i>", "THE HARBOUR QUARTERLY · Nº 14", `<div style="position:absolute;inset:80px 80px auto;height:620px;border:3px solid #fbeee4;display:grid;place-items:center;font-size:200px;font-family:Fraunces">Nº 14</div>`);
-const poster = (bg, fg, big, small, extra = "") => `<div style="width:1200px;height:1500px;background:${bg};color:${fg};position:relative;overflow:hidden;font-family:Anton">${extra}<div style="position:absolute;left:70px;right:70px;bottom:80px;font-size:250px;line-height:.82;text-transform:uppercase">${big}</div><div style="position:absolute;left:74px;top:70px;font-family:Grotesk;font-size:24px;letter-spacing:.2em">${small}</div></div>`;
-html["poster-run"] = poster("#d7ff3a", "#101010", "Run<br/>your<br/>city", "NORTHLINE × CITY MARATHON 2025", `<div style="position:absolute;right:-200px;top:-150px;width:900px;height:900px;border-radius:50%;border:60px solid #101010"></div>`);
-html["poster-oat"] = poster("#f4efe6", "#3a2618", "Oat<br/>milk<br/>era", "OATLY-ISH · OOH CAMPAIGN", `<div style="position:absolute;right:80px;top:180px;width:420px;height:620px;background:#3a2618;border-radius:200px 200px 20px 20px"></div>`);
-html["poster-bank"] = poster("#1b2bd6", "#ffffff", "Money,<br/>minus<br/>jargon", "CLEARBANK · LAUNCH CAMPAIGN", `<div style="position:absolute;left:70px;top:150px;font-family:Grotesk;font-size:540px;line-height:1;opacity:.14">£</div>`);
-html["poster-gig"] = `<div style="width:1200px;height:1600px;background:#f2e3c6;color:#d0341f;font-family:Bowlby;position:relative;overflow:hidden"><div style="position:absolute;inset:60px;border:8px solid #d0341f"></div><div style="position:absolute;top:120px;width:100%;text-align:center;font-size:250px;line-height:.85">LOW<br/>TIDE</div><div style="position:absolute;top:720px;width:100%;text-align:center;font-family:Grotesk;font-weight:700;font-size:44px;letter-spacing:.3em;color:#1d1d1b">SPRING TOUR</div><div style="position:absolute;bottom:130px;width:100%;text-align:center;font-family:Grotesk;font-size:34px;line-height:1.7;color:#1d1d1b">LISBON · PORTO · MADRID<br/>BERLIN · LEIPZIG · PRAGUE</div><div style="position:absolute;left:50%;top:850px;transform:translateX(-50%);width:300px;height:300px;border-radius:50%;background:#d0341f"></div></div>`;
-const album = (bg, art, title) => `<div style="width:1200px;height:1200px;background:${bg};position:relative;overflow:hidden;font-family:Grotesk">${art}<div style="position:absolute;left:60px;bottom:50px;font-size:34px;letter-spacing:.25em;color:rgba(255,255,255,.85)">${title}</div></div>`;
-html["album-tide"] = album("#0d2a3a", `<div style="position:absolute;inset:0;background:repeating-radial-gradient(circle at 70% 30%,#e8c07a 0 2px,transparent 3px 26px)"></div>`, "LOW TIDE — SALT");
-html["album-glass"] = album("#e6e1d8", `<div style="position:absolute;left:300px;top:200px;width:600px;height:800px;background:linear-gradient(135deg,#ff6b4a,#7b2cbf);border-radius:300px 300px 0 0;filter:blur(2px)"></div>`, "GLASSHOUSE");
-html["album-field"] = album("#1d1d1b", `<svg width="1200" height="1200" style="position:absolute">${Array.from({ length: 40 }, (_, i) => `<line x1="0" y1="${i * 30}" x2="1200" y2="${i * 30 + Math.sin(i) * 120}" stroke="#d9d4c7" stroke-width="2" opacity="${.15 + (i % 5) * .15}"/>`).join("")}</svg>`, "FIELD RECORDINGS");
-html["album-sun"] = album("#f0b429", `<div style="position:absolute;left:150px;top:150px;width:900px;height:900px;border-radius:50%;background:#c2410c"></div><div style="position:absolute;left:0;right:0;top:640px;height:560px;background:#1e3a5f"></div>`, "SUNROOM SESSIONS");
+const cover = (bg, fg, title, author, art) =>
+  `<div style="width:1000px;height:1500px;background:${bg};color:${fg};position:relative;overflow:hidden;font-family:Fraunces">${art}<div style="position:absolute;left:80px;right:80px;bottom:110px"><div style="font-size:120px;line-height:.92;letter-spacing:-.03em">${title}</div><div style="margin-top:40px;font-family:Grotesk;letter-spacing:.3em;font-size:22px">${author}</div></div></div>`;
+html["cover-salt"] = cover(
+  "#e7dccb",
+  "#1c2b3a",
+  "The Salt<br/>Years",
+  "ESSAYS · AMARA OSEI",
+  `<div style="position:absolute;left:80px;top:90px;width:840px;height:700px;background:repeating-linear-gradient(0deg,#1c2b3a 0 3px,transparent 3px 22px);opacity:.85;clip-path:circle(42% at 50% 50%)"></div>`,
+);
+html["cover-night"] = cover(
+  "#141414",
+  "#f1e3c8",
+  "Night<br/>Shift",
+  "A NOVEL · AMARA OSEI",
+  `<div style="position:absolute;right:-120px;top:120px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f1e3c8,#b8562b 60%,transparent 61%)"></div>`,
+);
+html["cover-quarterly"] = cover(
+  "#c94f2c",
+  "#fbeee4",
+  "Field<br/><i>Notes</i>",
+  "THE HARBOUR QUARTERLY · Nº 14",
+  `<div style="position:absolute;inset:80px 80px auto;height:620px;border:3px solid #fbeee4;display:grid;place-items:center;font-size:200px;font-family:Fraunces">Nº 14</div>`,
+);
+const poster = (bg, fg, big, small, extra = "") =>
+  `<div style="width:1200px;height:1500px;background:${bg};color:${fg};position:relative;overflow:hidden;font-family:Anton">${extra}<div style="position:absolute;left:70px;right:70px;bottom:80px;font-size:250px;line-height:.82;text-transform:uppercase">${big}</div><div style="position:absolute;left:74px;top:70px;font-family:Grotesk;font-size:24px;letter-spacing:.2em">${small}</div></div>`;
+html["poster-run"] = poster(
+  "#d7ff3a",
+  "#101010",
+  "Run<br/>your<br/>city",
+  "NORTHLINE × CITY MARATHON 2025",
+  `<div style="position:absolute;right:-200px;top:-150px;width:900px;height:900px;border-radius:50%;border:60px solid #101010"></div>`,
+);
+html["poster-oat"] = poster(
+  "#f4efe6",
+  "#3a2618",
+  "Oat<br/>milk<br/>era",
+  "OATLY-ISH · OOH CAMPAIGN",
+  `<div style="position:absolute;right:80px;top:180px;width:420px;height:620px;background:#3a2618;border-radius:200px 200px 20px 20px"></div>`,
+);
+html["poster-bank"] = poster(
+  "#1b2bd6",
+  "#ffffff",
+  "Money,<br/>minus<br/>jargon",
+  "CLEARBANK · LAUNCH CAMPAIGN",
+  `<div style="position:absolute;left:70px;top:150px;font-family:Grotesk;font-size:540px;line-height:1;opacity:.14">£</div>`,
+);
+html["poster-gig"] =
+  `<div style="width:1200px;height:1600px;background:#f2e3c6;color:#d0341f;font-family:Bowlby;position:relative;overflow:hidden"><div style="position:absolute;inset:60px;border:8px solid #d0341f"></div><div style="position:absolute;top:120px;width:100%;text-align:center;font-size:250px;line-height:.85">LOW<br/>TIDE</div><div style="position:absolute;top:720px;width:100%;text-align:center;font-family:Grotesk;font-weight:700;font-size:44px;letter-spacing:.3em;color:#1d1d1b">SPRING TOUR</div><div style="position:absolute;bottom:130px;width:100%;text-align:center;font-family:Grotesk;font-size:34px;line-height:1.7;color:#1d1d1b">LISBON · PORTO · MADRID<br/>BERLIN · LEIPZIG · PRAGUE</div><div style="position:absolute;left:50%;top:850px;transform:translateX(-50%);width:300px;height:300px;border-radius:50%;background:#d0341f"></div></div>`;
+const album = (bg, art, title) =>
+  `<div style="width:1200px;height:1200px;background:${bg};position:relative;overflow:hidden;font-family:Grotesk">${art}<div style="position:absolute;left:60px;bottom:50px;font-size:34px;letter-spacing:.25em;color:rgba(255,255,255,.85)">${title}</div></div>`;
+html["album-tide"] = album(
+  "#0d2a3a",
+  `<div style="position:absolute;inset:0;background:repeating-radial-gradient(circle at 70% 30%,#e8c07a 0 2px,transparent 3px 26px)"></div>`,
+  "LOW TIDE — SALT",
+);
+html["album-glass"] = album(
+  "#e6e1d8",
+  `<div style="position:absolute;left:300px;top:200px;width:600px;height:800px;background:linear-gradient(135deg,#ff6b4a,#7b2cbf);border-radius:300px 300px 0 0;filter:blur(2px)"></div>`,
+  "GLASSHOUSE",
+);
+html["album-field"] = album(
+  "#1d1d1b",
+  `<svg width="1200" height="1200" style="position:absolute">${Array.from({ length: 40 }, (_, i) => `<line x1="0" y1="${i * 30}" x2="1200" y2="${i * 30 + Math.sin(i) * 120}" stroke="#d9d4c7" stroke-width="2" opacity="${0.15 + (i % 5) * 0.15}"/>`).join("")}</svg>`,
+  "FIELD RECORDINGS",
+);
+html["album-sun"] = album(
+  "#f0b429",
+  `<div style="position:absolute;left:150px;top:150px;width:900px;height:900px;border-radius:50%;background:#c2410c"></div><div style="position:absolute;left:0;right:0;top:640px;height:560px;background:#1e3a5f"></div>`,
+  "SUNROOM SESSIONS",
+);
 const plan = String.raw`<svg width="1600" height="1100" viewBox="0 0 1600 1100" style="background:#f6f4ee;font-family:Mono" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="h" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" stroke="#1a1a1a" stroke-width="1.2"/></pattern></defs>
 <g stroke="#1a1a1a" fill="none"><rect x="200" y="180" width="1000" height="640" stroke-width="16" fill="url(#h)" fill-opacity=".0"/>
 <path d="M200 180 h1000 v640 h-1000z" stroke-width="18"/><path d="M620 180 v300 M620 560 v260 M200 500 h260 M540 500 h80 M900 180 v220 M900 480 v340" stroke-width="10"/>
@@ -163,19 +262,87 @@ const plan = String.raw`<svg width="1600" height="1100" viewBox="0 0 1600 1100" 
 <g transform="translate(1270 820)"><rect width="300" height="230" fill="none" stroke="#1a1a1a" stroke-width="2"/><text x="20" y="44" font-size="22" fill="#1a1a1a">HOUSE ON A SLOPE</text><text x="20" y="84" font-size="16" fill="#555">GROUND FLOOR PLAN</text><text x="20" y="120" font-size="16" fill="#555">SCALE 1:100</text><text x="20" y="200" font-size="40" fill="#1a1a1a">A-101</text></g>
 <g transform="translate(1380 220)"><circle r="44" fill="none" stroke="#1a1a1a" stroke-width="2"/><path d="M0 -44 L14 10 L0 0 L-14 10Z" fill="#1a1a1a"/><text x="-8" y="-56" font-size="20" fill="#1a1a1a">N</text></g></svg>`;
 html["arch-plan"] = plan;
-html["arch-section"] = String.raw`<svg width="1600" height="1100" viewBox="0 0 1600 1100" style="background:#efe7d8" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#2b2620"><path d="M80 820 C 400 800, 700 700, 1520 560" stroke-width="3"/><path d="M80 860 C 400 840, 700 740, 1520 600" stroke-width="1" stroke-dasharray="6 6"/>
+html["arch-section"] =
+  String.raw`<svg width="1600" height="1100" viewBox="0 0 1600 1100" style="background:#efe7d8" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#2b2620"><path d="M80 820 C 400 800, 700 700, 1520 560" stroke-width="3"/><path d="M80 860 C 400 840, 700 740, 1520 600" stroke-width="1" stroke-dasharray="6 6"/>
 <path d="M360 790 v-360 h520 l120 -120 h300 v300" stroke-width="12"/><path d="M360 600 h640 M760 430 v360" stroke-width="6"/><path d="M1000 310 v380 l300 -120" stroke-width="6"/>
-${Array.from({ length: 14 }, (_, i) => `<path d="M${400 + i * 24} 600 l20 -26" stroke-width="2"/>`).join("")}<circle cx="1320" cy="230" r="60" stroke-width="2"/>${Array.from({ length: 8 }, (_, i) => `<line x1="1320" y1="230" x2="${1320 + Math.cos(i * .8) * 110}" y2="${230 + Math.sin(i * .8) * 110}" stroke-width="1"/>`).join("")}
+${Array.from({ length: 14 }, (_, i) => `<path d="M${400 + i * 24} 600 l20 -26" stroke-width="2"/>`).join("")}<circle cx="1320" cy="230" r="60" stroke-width="2"/>${Array.from({ length: 8 }, (_, i) => `<line x1="1320" y1="230" x2="${1320 + Math.cos(i * 0.8) * 110}" y2="${230 + Math.sin(i * 0.8) * 110}" stroke-width="1"/>`).join("")}
 <path d="M420 430 L760 790" stroke="#b5562a" stroke-width="2" stroke-dasharray="10 8"/></g><text x="90" y="1040" font-family="Mono" font-size="22" fill="#2b2620">SECTION A–A · SUN PATH, 21 JUNE · 1:200</text></svg>`;
-html["arch-model"] = `<div style="width:1600px;height:1067px;background:linear-gradient(#cfd5d8,#eef0ef);display:grid;place-items:center"><div style="position:relative;width:900px;height:600px;transform:perspective(1600px) rotateX(55deg) rotateZ(-32deg)">${[[0, 0, 500, 300, 160], [520, 0, 380, 300, 260], [0, 320, 900, 280, 80]].map(([x, y, w, h, z]) => `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:#f4f1ea;box-shadow:${Array.from({ length: Math.round(z / 8) }, (_, i) => `${i + 1}px ${i + 1}px 0 #d9d3c7`).join(",")},${z / 2}px ${z / 2}px 60px rgba(0,0,0,.25)"></div>`).join("")}</div></div>`;
-const chart = (title, body) => `<div style="width:1600px;height:1000px;background:#fbfaf7;font-family:Inter;padding:70px 80px;box-sizing:border-box;color:#191919"><div style="font-size:16px;letter-spacing:.16em;color:#8a8a8a">FIGURE</div><div style="font-family:Fraunces;font-size:54px;letter-spacing:-.02em;margin:8px 0 40px">${title}</div>${body}</div>`;
-html["chart-scatter"] = chart("Delivery delay vs. distance, 41k orders", `<svg width="1440" height="680"><g stroke="#dcd8cf">${[0, 1, 2, 3, 4].map((i) => `<line x1="60" x2="1420" y1="${40 + i * 150}" y2="${40 + i * 150}"/>`).join("")}</g>${Array.from({ length: 900 }, (_, i) => { const x = 70 + ((i * 7919) % 1340); const y = 640 - (x - 70) * .32 - ((i * 104729) % 260); return `<circle cx="${x}" cy="${Math.max(50, y)}" r="3" fill="${i % 9 === 0 ? "#d1495b" : "#30638e"}" opacity=".55"/>`; }).join("")}<path d="M70 640 L1410 210" stroke="#191919" stroke-width="3"/></svg>`);
-html["chart-bars"] = chart("Churn by onboarding path", `<div style="display:flex;align-items:end;gap:46px;height:600px;border-bottom:2px solid #191919">${[62, 48, 31, 22, 14, 9].map((v, i) => `<div style="flex:1;text-align:center"><div style="font-size:24px;margin-bottom:10px">${v}%</div><div style="height:${v * 8}px;background:${i === 4 ? "#d1495b" : "#30638e"}"></div><div style="font-size:16px;color:#6a6a6a;margin-top:14px">Path ${String.fromCharCode(65 + i)}</div></div>`).join("")}</div>`);
-html["chart-lines"] = chart("Forecast vs. actual demand, weekly", `<svg width="1440" height="660">${[0, 1, 2].map((k) => { let y = 400; const d = Array.from({ length: 60 }, (_, i) => { y += Math.sin(i * .4 + k) * 22 - (k === 0 ? 2.2 : 1.6); return `${20 + i * 24},${y}`; }).join(" L"); return `<path d="M${d}" fill="none" stroke="${["#191919", "#30638e", "#d1495b"][k]}" stroke-width="${k ? 3 : 2}" ${k === 2 ? 'stroke-dasharray="10 8"' : ""}/>`; }).join("")}</svg>`);
-html["chart-umap"] = chart("UMAP of 180,000 embryonic cells, E6.5–E8.5", `<svg width="1440" height="680">${[["#30638e", 380, 330], ["#d1495b", 760, 220], ["#edae49", 1080, 380], ["#00798c", 560, 520], ["#66a182", 980, 560]].map(([colour, cx, cy], k) => Array.from({ length: 420 }, (_, i) => { const a = (i * 2.399) % 6.283, r = Math.sqrt((i * 7919 % 1000) / 1000) * (90 + k * 12); return `<circle cx="${cx + Math.cos(a) * r * 1.4}" cy="${cy + Math.sin(a) * r * .8}" r="2.6" fill="${colour}" opacity=".55"/>`; }).join("")).join("")}<path d="M380 330 C 520 300, 620 240, 760 220 S 1000 300, 1080 380" fill="none" stroke="#191919" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/></svg>`);
-html["chart-trajectory"] = chart("Posterior pseudotime with 90% credible bands", `<svg width="1440" height="660"><path d="M40 560 C 300 540, 500 420, 760 300 S 1200 120, 1400 100 L1400 190 C 1200 220, 1000 330, 760 400 S 300 600, 40 620Z" fill="#30638e" opacity=".14"/><path d="M40 590 C 300 570, 500 450, 760 350 S 1200 160, 1400 145" fill="none" stroke="#30638e" stroke-width="4"/>${Array.from({ length: 160 }, (_, i) => { const x = 40 + i * 8.5; const y = 590 - (x - 40) * .33 + Math.sin(i * 1.7) * 38; return `<circle cx="${x}" cy="${y}" r="3" fill="#d1495b" opacity=".6"/>`; }).join("")}</svg>`);
-html["slide-deck"] = `<div style="width:1600px;height:1000px;background:#111;display:grid;place-items:center;font-family:Grotesk"><div style="width:1360px;height:765px;background:#f5f1e8;padding:70px;box-sizing:border-box;position:relative"><div style="font-size:18px;letter-spacing:.2em;color:#888">Q3 REVIEW · 04 / 18</div><div style="font-family:Fraunces;font-size:110px;line-height:.95;letter-spacing:-.03em;margin-top:40px;color:#151515">Retention is<br/>the <i style="color:#c2410c">growth</i> plan.</div><div style="position:absolute;right:70px;bottom:70px;font-size:160px;font-weight:700;color:#c2410c">+38%</div></div></div>`;
-html["calm-water"] = `<div style="width:1600px;height:1067px;background:radial-gradient(ellipse at 50% 40%,#d9e4dc,#9fb7aa 60%,#6f8f80);position:relative;overflow:hidden">${Array.from({ length: 14 }, (_, i) => `<div style="position:absolute;left:50%;top:48%;width:${120 + i * 120}px;height:${50 + i * 50}px;transform:translate(-50%,-50%);border-radius:50%;border:${i % 3 ? 1 : 2}px solid rgba(255,255,255,${.5 - i * .03})"></div>`).join("")}</div>`;
+html["arch-model"] =
+  `<div style="width:1600px;height:1067px;background:linear-gradient(#cfd5d8,#eef0ef);display:grid;place-items:center"><div style="position:relative;width:900px;height:600px;transform:perspective(1600px) rotateX(55deg) rotateZ(-32deg)">${[
+    [0, 0, 500, 300, 160],
+    [520, 0, 380, 300, 260],
+    [0, 320, 900, 280, 80],
+  ]
+    .map(
+      ([x, y, w, h, z]) =>
+        `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:#f4f1ea;box-shadow:${Array.from({ length: Math.round(z / 8) }, (_, i) => `${i + 1}px ${i + 1}px 0 #d9d3c7`).join(",")},${z / 2}px ${z / 2}px 60px rgba(0,0,0,.25)"></div>`,
+    )
+    .join("")}</div></div>`;
+const chart = (title, body) =>
+  `<div style="width:1600px;height:1000px;background:#fbfaf7;font-family:Inter;padding:70px 80px;box-sizing:border-box;color:#191919"><div style="font-size:16px;letter-spacing:.16em;color:#8a8a8a">FIGURE</div><div style="font-family:Fraunces;font-size:54px;letter-spacing:-.02em;margin:8px 0 40px">${title}</div>${body}</div>`;
+html["chart-scatter"] = chart(
+  "Delivery delay vs. distance, 41k orders",
+  `<svg width="1440" height="680"><g stroke="#dcd8cf">${[0, 1, 2, 3, 4].map((i) => `<line x1="60" x2="1420" y1="${40 + i * 150}" y2="${40 + i * 150}"/>`).join("")}</g>${Array.from(
+    { length: 900 },
+    (_, i) => {
+      const x = 70 + ((i * 7919) % 1340);
+      const y = 640 - (x - 70) * 0.32 - ((i * 104729) % 260);
+      return `<circle cx="${x}" cy="${Math.max(50, y)}" r="3" fill="${i % 9 === 0 ? "#d1495b" : "#30638e"}" opacity=".55"/>`;
+    },
+  ).join("")}<path d="M70 640 L1410 210" stroke="#191919" stroke-width="3"/></svg>`,
+);
+html["chart-bars"] = chart(
+  "Churn by onboarding path",
+  `<div style="display:flex;align-items:end;gap:46px;height:600px;border-bottom:2px solid #191919">${[62, 48, 31, 22, 14, 9].map((v, i) => `<div style="flex:1;text-align:center"><div style="font-size:24px;margin-bottom:10px">${v}%</div><div style="height:${v * 8}px;background:${i === 4 ? "#d1495b" : "#30638e"}"></div><div style="font-size:16px;color:#6a6a6a;margin-top:14px">Path ${String.fromCharCode(65 + i)}</div></div>`).join("")}</div>`,
+);
+html["chart-lines"] = chart(
+  "Forecast vs. actual demand, weekly",
+  `<svg width="1440" height="660">${[0, 1, 2]
+    .map((k) => {
+      let y = 400;
+      const d = Array.from({ length: 60 }, (_, i) => {
+        y += Math.sin(i * 0.4 + k) * 22 - (k === 0 ? 2.2 : 1.6);
+        return `${20 + i * 24},${y}`;
+      }).join(" L");
+      return `<path d="M${d}" fill="none" stroke="${["#191919", "#30638e", "#d1495b"][k]}" stroke-width="${k ? 3 : 2}" ${k === 2 ? 'stroke-dasharray="10 8"' : ""}/>`;
+    })
+    .join("")}</svg>`,
+);
+html["chart-umap"] = chart(
+  "UMAP of 180,000 embryonic cells, E6.5–E8.5",
+  `<svg width="1440" height="680">${[
+    ["#30638e", 380, 330],
+    ["#d1495b", 760, 220],
+    ["#edae49", 1080, 380],
+    ["#00798c", 560, 520],
+    ["#66a182", 980, 560],
+  ]
+    .map(([colour, cx, cy], k) =>
+      Array.from({ length: 420 }, (_, i) => {
+        const a = (i * 2.399) % 6.283,
+          r = Math.sqrt(((i * 7919) % 1000) / 1000) * (90 + k * 12);
+        return `<circle cx="${cx + Math.cos(a) * r * 1.4}" cy="${cy + Math.sin(a) * r * 0.8}" r="2.6" fill="${colour}" opacity=".55"/>`;
+      }).join(""),
+    )
+    .join(
+      "",
+    )}<path d="M380 330 C 520 300, 620 240, 760 220 S 1000 300, 1080 380" fill="none" stroke="#191919" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"/></svg>`,
+);
+html["chart-trajectory"] = chart(
+  "Posterior pseudotime with 90% credible bands",
+  `<svg width="1440" height="660"><path d="M40 560 C 300 540, 500 420, 760 300 S 1200 120, 1400 100 L1400 190 C 1200 220, 1000 330, 760 400 S 300 600, 40 620Z" fill="#30638e" opacity=".14"/><path d="M40 590 C 300 570, 500 450, 760 350 S 1200 160, 1400 145" fill="none" stroke="#30638e" stroke-width="4"/>${Array.from(
+    { length: 160 },
+    (_, i) => {
+      const x = 40 + i * 8.5;
+      const y = 590 - (x - 40) * 0.33 + Math.sin(i * 1.7) * 38;
+      return `<circle cx="${x}" cy="${y}" r="3" fill="#d1495b" opacity=".6"/>`;
+    },
+  ).join("")}</svg>`,
+);
+html["slide-deck"] =
+  `<div style="width:1600px;height:1000px;background:#111;display:grid;place-items:center;font-family:Grotesk"><div style="width:1360px;height:765px;background:#f5f1e8;padding:70px;box-sizing:border-box;position:relative"><div style="font-size:18px;letter-spacing:.2em;color:#888">Q3 REVIEW · 04 / 18</div><div style="font-family:Fraunces;font-size:110px;line-height:.95;letter-spacing:-.03em;margin-top:40px;color:#151515">Retention is<br/>the <i style="color:#c2410c">growth</i> plan.</div><div style="position:absolute;right:70px;bottom:70px;font-size:160px;font-weight:700;color:#c2410c">+38%</div></div></div>`;
+html["calm-water"] =
+  `<div style="width:1600px;height:1067px;background:radial-gradient(ellipse at 50% 40%,#d9e4dc,#9fb7aa 60%,#6f8f80);position:relative;overflow:hidden">${Array.from({ length: 14 }, (_, i) => `<div style="position:absolute;left:50%;top:48%;width:${120 + i * 120}px;height:${50 + i * 50}px;transform:translate(-50%,-50%);border-radius:50%;border:${i % 3 ? 1 : 2}px solid rgba(255,255,255,${0.5 - i * 0.03})"></div>`).join("")}</div>`;
 
 /* ---------- Scene list ---------- */
 const canvasScenes = {
@@ -203,20 +370,35 @@ const canvasScenes = {
 };
 Object.assign(canvasScenes, moreCanvasScenes);
 Object.assign(html, moreHtml);
-const sizes = { ui: [1600, 1000], cover: [1000, 1500], poster: [1200, 1500], album: [1200, 1200], arch: [1600, 1100], chart: [1600, 1000], slide: [1600, 1000], brand: [1600, 1000], calm: [1600, 1067] };
+const sizes = {
+  ui: [1600, 1000],
+  cover: [1000, 1500],
+  poster: [1200, 1500],
+  album: [1200, 1200],
+  arch: [1600, 1100],
+  chart: [1600, 1000],
+  slide: [1600, 1000],
+  brand: [1600, 1000],
+  calm: [1600, 1067],
+};
 
 const filter = process.argv[2];
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
 const page = await browser.newPage({ deviceScaleFactor: 1 });
 const save = async (name, png, width) => {
-  await sharp(png).resize({ width: Math.min(width, 1600), withoutEnlargement: true }).webp({ quality: 74 }).toFile(path.join(out, `${name}.webp`));
+  await sharp(png)
+    .resize({ width: Math.min(width, 1600), withoutEnlargement: true })
+    .webp({ quality: 74 })
+    .toFile(path.join(out, `${name}.webp`));
   console.log("✓", name);
 };
 
 for (const [name, call] of Object.entries(canvasScenes)) {
   if (filter && !name.includes(filter)) continue;
-  await page.setContent(`<html><body style="margin:0;background:#000"><script>${canvasLib}${moreCanvasLib}</script></body></html>`);
+  await page.setContent(
+    `<html><body style="margin:0;background:#000"><script>${canvasLib}${moreCanvasLib}</script></body></html>`,
+  );
   const data = await page.evaluate(`(()=>{const c=${call};return c.toDataURL('image/png')})()`);
   const buffer = Buffer.from(data.split(",")[1], "base64");
   await save(name, buffer, 1600);
@@ -225,7 +407,10 @@ for (const [name, markup] of Object.entries(html)) {
   if (filter && !name.includes(filter)) continue;
   const [w, h] = sizes[name.split("-")[0]] ?? [1600, 1000];
   await page.setViewportSize({ width: w, height: h });
-  await page.setContent(`<html><head><style>${fontFaces} body{margin:0} *{box-sizing:border-box}</style></head><body>${markup}</body></html>`, { waitUntil: "load" });
+  await page.setContent(
+    `<html><head><style>${fontFaces} body{margin:0} *{box-sizing:border-box}</style></head><body>${markup}</body></html>`,
+    { waitUntil: "load" },
+  );
   await page.evaluate(() => document.fonts.ready);
   await save(name, await page.screenshot({ clip: { x: 0, y: 0, width: w, height: h } }), w);
 }

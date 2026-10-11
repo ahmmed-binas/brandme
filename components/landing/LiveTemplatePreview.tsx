@@ -14,7 +14,13 @@ const LAYOUT_WIDTH = 1280;
  * a working website; still for reduced motion. Clicks pass to the frame, not
  * the template.
  */
-export function LiveTemplatePreview({ template, content }: { template: TemplateDefinition; content: StandardContent }) {
+export function LiveTemplatePreview({
+  template,
+  content,
+}: {
+  template: TemplateDefinition;
+  content: StandardContent;
+}) {
   const box = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(0.4);
   useEffect(() => {
@@ -26,12 +32,20 @@ export function LiveTemplatePreview({ template, content }: { template: TemplateD
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  return <div ref={box} className="absolute inset-0 overflow-hidden" aria-hidden>
-    <div className="pointer-events-none origin-top-left select-none" style={{ width: LAYOUT_WIDTH, transform: `scale(${scale})` }} inert>
-      <div className="[animation:hero-pan_26s_ease-in-out_infinite_alternate] motion-reduce:animate-none">
-        <StudioTemplate template={template} content={content} />
+  return (
+    <div ref={box} className="absolute inset-0 overflow-hidden" aria-hidden>
+      <div
+        className="pointer-events-none origin-top-left select-none"
+        style={{ width: LAYOUT_WIDTH, transform: `scale(${scale})` }}
+        inert
+      >
+        <div className="[animation:hero-pan_26s_ease-in-out_infinite_alternate] motion-reduce:animate-none">
+          <StudioTemplate template={template} content={content} />
+        </div>
       </div>
+      <style>
+        {"@keyframes hero-pan{0%,12%{transform:translateY(0)}88%,100%{transform:translateY(-1100px)}}"}
+      </style>
     </div>
-    <style>{"@keyframes hero-pan{0%,12%{transform:translateY(0)}88%,100%{transform:translateY(-1100px)}}"}</style>
-  </div>;
+  );
 }

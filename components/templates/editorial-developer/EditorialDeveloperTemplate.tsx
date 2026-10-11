@@ -22,13 +22,29 @@ import type { PortfolioData } from "./data";
 
 /** This template owns its design tokens; content never controls presentation. */
 export default function EditorialDeveloperTemplate({ data }: { data?: PortfolioData }) {
-  return <EditorialDataProvider data={data}>
-    <div className="editorial-developer" data-template="editorial-developer">
-      <EditorSectionLinker />
-      <CustomCursor />
-      <Navigation />
-      <main><Hero /><DeveloperSnapshot /><About /><Experience /><Projects /><Skills /><EngineeringApproach /><Education /><Certifications /><OpenSource /><Services /><Testimonials /><Contact /></main>
-      <Footer />
-    </div>
-  </EditorialDataProvider>;
+  return (
+    <EditorialDataProvider data={data}>
+      <div className="editorial-developer" data-template="editorial-developer">
+        <EditorSectionLinker />
+        <CustomCursor />
+        <Navigation />
+        <main>
+          <Hero />
+          <DeveloperSnapshot />
+          <About />
+          <Experience />
+          <Projects />
+          <Skills />
+          <EngineeringApproach />
+          <Education />
+          <Certifications />
+          <OpenSource />
+          <Services />
+          <Testimonials />
+          <Contact />
+        </main>
+        <Footer />
+      </div>
+    </EditorialDataProvider>
+  );
 }

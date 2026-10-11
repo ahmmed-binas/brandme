@@ -10,7 +10,11 @@ async function admin() {
   return user && user.isAdmin ? user : jsonError(404, "Not found.");
 }
 
-const refresh = (slug?: string) => { revalidatePath("/blog"); if (slug) revalidatePath(`/blog/${slug}`); revalidatePath("/sitemap.xml"); };
+const refresh = (slug?: string) => {
+  revalidatePath("/blog");
+  if (slug) revalidatePath(`/blog/${slug}`);
+  revalidatePath("/sitemap.xml");
+};
 
 /** Every post, drafts included. Admins only. */
 export const GET = route(async () => {
@@ -28,7 +32,20 @@ export const POST = route(async (request: Request) => {
   const input = (body ?? {}) as Record<string, unknown>;
   const text = (key: string) => (typeof input[key] === "string" ? (input[key] as string) : "");
   try {
-    const post = await saveJournalPost({ title: text("title"), description: text("description"), category: text("category"), body: text("body"), slug: text("slug"), cover: text("cover") || null, media: input.media ?? null, publish: input.publish === true }, user.id, text("originalSlug") || undefined);
+    const post = await saveJournalPost(
+      {
+        title: text("title"),
+        description: text("description"),
+        category: text("category"),
+        body: text("body"),
+        slug: text("slug"),
+        cover: text("cover") || null,
+        media: input.media ?? null,
+        publish: input.publish === true,
+      },
+      user.id,
+      text("originalSlug") || undefined,
+    );
     refresh(post.slug);
     if (text("originalSlug") && text("originalSlug") !== post.slug) refresh(text("originalSlug"));
     return Response.json({ post });

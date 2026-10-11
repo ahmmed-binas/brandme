@@ -24,7 +24,9 @@ export default function Services() {
                 </div>
                 <div className="flex flex-wrap content-start gap-2 md:justify-end">
                   {s.technologies.map((t) => (
-                    <span key={t} className="font-mono text-xs text-muted">{t}</span>
+                    <span key={t} className="font-mono text-xs text-muted">
+                      {t}
+                    </span>
                   ))}
                 </div>
               </div>

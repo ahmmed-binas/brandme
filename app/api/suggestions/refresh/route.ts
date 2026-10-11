@@ -18,18 +18,34 @@ export const POST = route(async (request: Request) => {
   const body = await readJson(request, 500);
   if (body instanceof Response) return body;
   const { kind, templateId } = (body ?? {}) as { kind?: unknown; templateId?: unknown };
-  const row = (await db.query<{ github_username: string | null; last_synced_at: Date | null; last_research_at: Date | null }>("SELECT github_username, last_synced_at, last_research_at FROM app_users WHERE id = $1", [user.id])).rows[0]!;
+  const row = (
+    await db.query<{
+      github_username: string | null;
+      last_synced_at: Date | null;
+      last_research_at: Date | null;
+    }>("SELECT github_username, last_synced_at, last_research_at FROM app_users WHERE id = $1", [user.id])
+  ).rows[0]!;
 
   if (kind === "github") {
     if (!row.github_username) return jsonError(422, "Add your GitHub username first.");
-    if (row.last_synced_at && Date.now() - row.last_synced_at.getTime() < 10 * 60_000) return jsonError(429, "Checked a few minutes ago. Try again shortly.");
-    try { return Response.json({ added: await syncGitHub(user.id, row.github_username) }); }
-    catch (error) { if (error instanceof GitHubImportError) return jsonError(error.status, error.message); throw error; }
+    if (row.last_synced_at && Date.now() - row.last_synced_at.getTime() < 10 * 60_000)
+      return jsonError(429, "Checked a few minutes ago. Try again shortly.");
+    try {
+      return Response.json({ added: await syncGitHub(user.id, row.github_username) });
+    } catch (error) {
+      if (error instanceof GitHubImportError) return jsonError(error.status, error.message);
+      throw error;
+    }
   }
 
   if (kind === "research") {
-    if (typeof templateId !== "string" || !isTemplateId(templateId)) return jsonError(404, "Unknown template.");
-    if (row.last_research_at && Date.now() - row.last_research_at.getTime() < 12 * 3600_000) return jsonError(429, "The last search was recent. New results usually take a while to appear; try again tomorrow.");
+    if (typeof templateId !== "string" || !isTemplateId(templateId))
+      return jsonError(404, "Unknown template.");
+    if (row.last_research_at && Date.now() - row.last_research_at.getTime() < 12 * 3600_000)
+      return jsonError(
+        429,
+        "The last search was recent. New results usually take a while to appear; try again tomorrow.",
+      );
     const draft = await getDraft(user.id, templateId);
     const content = standardContentSchema.safeParse(draft?.content);
     if (!content.success) return jsonError(422, "Save your portfolio first so we know who to look for.");
@@ -37,7 +53,11 @@ export const POST = route(async (request: Request) => {
     if (!gate.ok) return jsonError(gate.status, gate.error);
     try {
       const result = await runResearch(gate.access.client, user.id, content.data);
-      const bill = await settleAi(gate.access, result.usage.length ? sumUsage(result.usage) : null, "Career research");
+      const bill = await settleAi(
+        gate.access,
+        result.usage.length ? sumUsage(result.usage) : null,
+        "Career research",
+      );
       if (!result.ok) return jsonError(502, result.error);
       return Response.json({ added: result.added, charged: bill.charged, credits: bill.balance });
     } catch (error) {

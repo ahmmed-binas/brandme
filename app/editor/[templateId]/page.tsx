@@ -8,7 +8,13 @@ import { getCurrentUser } from "@/utils/user-account";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { sampleFor } from "@/lib/templates/samples";
 
-export default async function EditorPage({ params, searchParams }: { params: Promise<{ templateId: string }>; searchParams: Promise<{ role?: string }> }) {
+export default async function EditorPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ templateId: string }>;
+  searchParams: Promise<{ role?: string }>;
+}) {
   const { templateId } = await params;
   const template = getTemplate(templateId);
   if (!template) notFound();
@@ -20,10 +26,25 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
     // Sample content is written for the chosen job title; suggest the titles this design suits first.
     const role = roleById((await searchParams).role);
     const suits = (profession: string) => Boolean(template.professions?.includes(profession as never));
-    const roles = [...ROLES].sort((a, b) => Number(suits(b.profession)) - Number(suits(a.profession)) || a.label.localeCompare(b.label)).map((item) => ({ id: item.id, label: item.label, suggested: suits(item.profession) }));
-    return <StudioEditor template={template} sample={sampleFor(template, role?.id)} role={role?.id ?? ""} roles={roles} />;
+    const roles = [...ROLES]
+      .sort(
+        (a, b) => Number(suits(b.profession)) - Number(suits(a.profession)) || a.label.localeCompare(b.label),
+      )
+      .map((item) => ({ id: item.id, label: item.label, suggested: suits(item.profession) }));
+    return (
+      <StudioEditor
+        template={template}
+        sample={sampleFor(template, role?.id)}
+        role={role?.id ?? ""}
+        roles={roles}
+      />
+    );
   }
-  return template.editor === "dedicated" ? <EditorialDeveloperEditor template={template} /> : <PortfolioEditor template={template} />;
+  return template.editor === "dedicated" ? (
+    <EditorialDeveloperEditor template={template} />
+  ) : (
+    <PortfolioEditor template={template} />
+  );
 }
 
 // Depends on who is signed in; never pre-render at build time.

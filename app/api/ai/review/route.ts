@@ -11,14 +11,26 @@ export const POST = route(async (request: Request) => {
   if (!user) return jsonError(401, "Sign in to ask for a review.");
   const body = await readJson(request, MAX_REVIEW_CHARS + 5_000);
   if (body instanceof Response) return body;
-  const { title, body: text, excerpt } = (body ?? {}) as { title?: unknown; body?: unknown; excerpt?: unknown };
+  const {
+    title,
+    body: text,
+    excerpt,
+  } = (body ?? {}) as { title?: unknown; body?: unknown; excerpt?: unknown };
   if (typeof text !== "string") return jsonError(422, "Nothing to review yet.");
 
   const gate = await openAi(user);
   if (!gate.ok) return jsonError(gate.status, gate.error);
   try {
-    const result = await reviewPost(gate.access.client, { title: typeof title === "string" ? title.slice(0, 300) : "", body: text, excerpt: typeof excerpt === "string" ? excerpt.slice(0, 500) : "" });
-    const bill = await settleAi(gate.access, result.usage ? sumUsage(result.usage) : null, "Post review (Rowan)");
+    const result = await reviewPost(gate.access.client, {
+      title: typeof title === "string" ? title.slice(0, 300) : "",
+      body: text,
+      excerpt: typeof excerpt === "string" ? excerpt.slice(0, 500) : "",
+    });
+    const bill = await settleAi(
+      gate.access,
+      result.usage ? sumUsage(result.usage) : null,
+      "Post review (Rowan)",
+    );
     if (!result.ok) {
       if (!result.usage) await releaseRequest(user.id);
       return jsonError(result.status, result.error);

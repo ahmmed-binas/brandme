@@ -20,7 +20,10 @@ export default function Hero() {
   };
 
   return (
-    <section id="top" className="relative flex min-h-screen items-center border-b border-line px-6 pt-28 md:px-10">
+    <section
+      id="top"
+      className="relative flex min-h-screen items-center border-b border-line px-6 pt-28 md:px-10"
+    >
       <div className="mx-auto grid w-full max-w-content items-center gap-14 md:grid-cols-[1.3fr_1fr]">
         <motion.div variants={container} initial="hidden" animate="show">
           <motion.p variants={item} className="mb-6 font-mono text-xs uppercase text-muted">
@@ -40,7 +43,10 @@ export default function Hero() {
             {personal.positioning}
           </motion.p>
 
-          <motion.div variants={item} className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs text-muted">
+          <motion.div
+            variants={item}
+            className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs text-muted"
+          >
             <span>{personal.location}</span>
             <span className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-signal" />

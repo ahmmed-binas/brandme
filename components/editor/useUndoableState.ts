@@ -8,7 +8,11 @@ const COALESCE_MS = 800;
 
 /** useState with undo and redo, so a deleted project or an unwanted AI rewrite is one click away. */
 export function useUndoableState<T>(initial: T) {
-  const [store, setStore] = useState<{ present: T; past: T[]; future: T[] }>({ present: initial, past: [], future: [] });
+  const [store, setStore] = useState<{ present: T; past: T[]; future: T[] }>({
+    present: initial,
+    past: [],
+    future: [],
+  });
   const lastChange = useRef(0);
 
   const update = useCallback((change: (current: T) => T, options?: { checkpoint?: boolean }) => {
@@ -18,7 +22,11 @@ export function useUndoableState<T>(initial: T) {
     setStore((current) => {
       const next = change(current.present);
       if (next === current.present) return current;
-      return { present: next, past: startsNewStep ? [...current.past.slice(-(MAX_HISTORY - 1)), current.present] : current.past, future: [] };
+      return {
+        present: next,
+        past: startsNewStep ? [...current.past.slice(-(MAX_HISTORY - 1)), current.present] : current.past,
+        future: [],
+      };
     });
   }, []);
 
@@ -27,13 +35,37 @@ export function useUndoableState<T>(initial: T) {
 
   const undo = useCallback(() => {
     lastChange.current = 0;
-    setStore((current) => current.past.length ? { present: current.past[current.past.length - 1]!, past: current.past.slice(0, -1), future: [current.present, ...current.future] } : current);
+    setStore((current) =>
+      current.past.length
+        ? {
+            present: current.past[current.past.length - 1]!,
+            past: current.past.slice(0, -1),
+            future: [current.present, ...current.future],
+          }
+        : current,
+    );
   }, []);
 
   const redo = useCallback(() => {
     lastChange.current = 0;
-    setStore((current) => current.future.length ? { present: current.future[0]!, past: [...current.past, current.present], future: current.future.slice(1) } : current);
+    setStore((current) =>
+      current.future.length
+        ? {
+            present: current.future[0]!,
+            past: [...current.past, current.present],
+            future: current.future.slice(1),
+          }
+        : current,
+    );
   }, []);
 
-  return { state: store.present, update, reset, undo, redo, canUndo: store.past.length > 0, canRedo: store.future.length > 0 };
+  return {
+    state: store.present,
+    update,
+    reset,
+    undo,
+    redo,
+    canUndo: store.past.length > 0,
+    canRedo: store.future.length > 0,
+  };
 }

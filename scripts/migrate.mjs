@@ -6,7 +6,12 @@ if (!process.env.DATABASE_URL) {
   console.error("DATABASE_URL is not set.");
   process.exit(1);
 }
-const ssl = process.env.DATABASE_SSL === "require" ? { rejectUnauthorized: false } : process.env.DATABASE_SSL === "verify" ? { rejectUnauthorized: true } : undefined;
+const ssl =
+  process.env.DATABASE_SSL === "require"
+    ? { rejectUnauthorized: false }
+    : process.env.DATABASE_SSL === "verify"
+      ? { rejectUnauthorized: true }
+      : undefined;
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl, max: 1 });
 try {
   const applied = await runMigrations(pool, (message) => console.log(message));

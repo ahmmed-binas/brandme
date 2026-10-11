@@ -6,7 +6,14 @@ import { useSession } from "next-auth/react";
 import { Check, Loader2, MessageCircle } from "lucide-react";
 import { brand } from "@/lib/brand";
 
-export interface PlanCard { id: "basic" | "pro"; name: string; summary: string; prices: { year?: number; month?: number }; features: string[]; highlight?: boolean }
+export interface PlanCard {
+  id: "basic" | "pro";
+  name: string;
+  summary: string;
+  prices: { year?: number; month?: number };
+  features: string[];
+  highlight?: boolean;
+}
 
 const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
@@ -15,17 +22,33 @@ const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
  * visitors sign in first and come back here. Until payments are switched on, paid
  * plans keep their price, say “Coming soon” and offer early access on WhatsApp.
  */
-export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plans: PlanCard[]; paymentsReady: boolean; bookingHref: string }) {
+export default function PlanPicker({
+  plans,
+  paymentsReady,
+  bookingHref,
+}: {
+  plans: PlanCard[];
+  paymentsReady: boolean;
+  bookingHref: string;
+}) {
   const { status } = useSession();
   const interval = "year" as const;
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const choose = async (plan: PlanCard) => {
-    if (status !== "authenticated") { window.location.assign(`/login?callbackUrl=${encodeURIComponent("/pricing")}`); return; }
-    setBusy(plan.id); setError(null);
+    if (status !== "authenticated") {
+      window.location.assign(`/login?callbackUrl=${encodeURIComponent("/pricing")}`);
+      return;
+    }
+    setBusy(plan.id);
+    setError(null);
     try {
-      const response = await fetch("/api/billing/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: plan.id, interval }) });
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: plan.id, interval }),
+      });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error ?? "The payment page couldn’t be opened.");
       window.location.assign(body.url);
@@ -35,39 +58,142 @@ export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plan
     }
   };
 
-  return <>
-    <ul className="mt-12 grid gap-5 lg:grid-cols-3">
-      {plans.map((plan) => {
-        const free = plan.id === "basic";
-        const price = plan.prices[interval];
-        const early = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`Hi! I’d like ${brand.name} ${plan.name} (${usd(price ?? 0)} a ${interval}) when it launches.`)}`;
-        return <li key={plan.id} className={`relative flex flex-col rounded-2xl border p-7 ${plan.highlight ? "border-ink bg-ink text-paper" : "border-rule bg-[color-mix(in_oklab,var(--ink)_3%,transparent)]"}`}>
-          {!free && !paymentsReady && <span className="absolute right-5 top-5 rounded-full bg-signal px-3 py-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-signal-ink">Coming soon</span>}
-          <h2 className="font-display text-[2rem] leading-none">{plan.name}</h2>
-          <p className={`mt-2 min-h-[3rem] text-[0.95rem] ${plan.highlight ? "text-paper/75" : "text-ink-soft"}`}>{plan.summary}</p>
-          <p className="mt-6 flex items-baseline gap-2"><span className="font-display text-[3.4rem] leading-none tracking-[-0.03em]">{free ? "Free" : usd(price!)}</span>{!free && <span className={plan.highlight ? "text-paper/70" : "text-ink-soft"}>a {interval}</span>}</p>
-          <p className={`mt-1 text-[0.88rem] ${plan.highlight ? "text-paper/70" : "text-ink-faint"}`}>{free ? "No card needed, for as long as you like." : "One payment for 12 months. No automatic renewal."}</p>
-          {free ? <Link href="/templatechooser" className="mt-6 inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Start free</Link>
-            : paymentsReady
-              ? <button type="button" disabled={busy !== null} onClick={() => void choose(plan)} className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink disabled:opacity-50">{busy === plan.id && <Loader2 size={15} className="animate-spin" />}Choose {plan.name}</button>
-              : <a href={early} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink"><MessageCircle size={16} /> Get early access on WhatsApp</a>}
-          {!free && !paymentsReady && <p className={`mt-2 text-center text-[0.82rem] ${plan.highlight ? "text-paper/60" : "text-ink-faint"}`}>Online payment opens soon. Everything in Basic is free now.</p>}
-          <ul className="mt-7 space-y-2.5 text-[0.93rem]">{plan.features.map((feature) => <li key={feature} className="flex gap-2.5"><Check size={16} className={`mt-0.5 shrink-0 ${plan.highlight ? "text-signal" : "text-ink"}`} />{feature}</li>)}</ul>
-        </li>;
-      })}
-      <li className="flex flex-col rounded-2xl border border-dashed border-rule p-7">
-        <h2 className="font-display text-[2rem] leading-none">Custom</h2>
-        <p className="mt-2 min-h-[3rem] text-[0.95rem] text-ink-soft">A website designed around you, with your own designer, built and looked after for you.</p>
-        <p className="mt-6 font-display text-[2.2rem] leading-none tracking-[-0.02em]">Free call first</p>
-        <p className="mt-1 text-[0.88rem] text-ink-faint">Tell us your custom design requirements on a free 20-minute call. We agree a price before any work starts.</p>
-        <Link href={bookingHref} className="mt-6 inline-flex items-center justify-center rounded-full border border-ink px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-ink hover:text-paper">Book a free call</Link>
-        <ul className="mt-7 space-y-2.5 text-[0.93rem]">{["A personal designer who works with you", "Start from 50+ designs, or something new", "Free stock photos to choose from", "Add, remove or change any section or element", "Done for you: we build it and keep it up to date", "More than three sites, teams and agencies"].map((feature) => <li key={feature} className="flex gap-2.5"><Check size={16} className="mt-0.5 shrink-0 text-ink" />{feature}</li>)}</ul>
-      </li>
-    </ul>
-    {error && <p role="alert" className="mt-4 text-center text-[0.95rem] text-[color:var(--destructive)]">{error}</p>}
-    <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-[color-mix(in_oklab,var(--ink)_5%,transparent)] px-6 py-5 text-center sm:flex-row sm:text-left">
-      <p className="text-[0.98rem]"><b className="font-medium">Want to see it first?</b> <span className="text-ink-soft">Book a free demo call: we’ll show you the editor, the designs made for your job and the Investigator, and answer your questions. No card, no obligation.</span></p>
-      <Link href={bookingHref} className="shrink-0 rounded-full bg-ink px-5 py-2.5 text-[0.92rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Book a free demo</Link>
-    </div>
-  </>;
+  return (
+    <>
+      <ul className="mt-12 grid gap-5 lg:grid-cols-3">
+        {plans.map((plan) => {
+          const free = plan.id === "basic";
+          const price = plan.prices[interval];
+          const early = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`Hi! I’d like ${brand.name} ${plan.name} (${usd(price ?? 0)} a ${interval}) when it launches.`)}`;
+          return (
+            <li
+              key={plan.id}
+              className={`relative flex flex-col rounded-2xl border p-7 ${plan.highlight ? "border-ink bg-ink text-paper" : "border-rule bg-[color-mix(in_oklab,var(--ink)_3%,transparent)]"}`}
+            >
+              {!free && !paymentsReady && (
+                <span className="absolute right-5 top-5 rounded-full bg-signal px-3 py-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-signal-ink">
+                  Coming soon
+                </span>
+              )}
+              <h2 className="font-display text-[2rem] leading-none">{plan.name}</h2>
+              <p
+                className={`mt-2 min-h-[3rem] text-[0.95rem] ${plan.highlight ? "text-paper/75" : "text-ink-soft"}`}
+              >
+                {plan.summary}
+              </p>
+              <p className="mt-6 flex items-baseline gap-2">
+                <span className="font-display text-[3.4rem] leading-none tracking-[-0.03em]">
+                  {free ? "Free" : usd(price!)}
+                </span>
+                {!free && (
+                  <span className={plan.highlight ? "text-paper/70" : "text-ink-soft"}>a {interval}</span>
+                )}
+              </p>
+              <p className={`mt-1 text-[0.88rem] ${plan.highlight ? "text-paper/70" : "text-ink-faint"}`}>
+                {free
+                  ? "No card needed, for as long as you like."
+                  : "One payment for 12 months. No automatic renewal."}
+              </p>
+              {free ? (
+                <Link
+                  href="/templatechooser"
+                  className="mt-6 inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink"
+                >
+                  Start free
+                </Link>
+              ) : paymentsReady ? (
+                <button
+                  type="button"
+                  disabled={busy !== null}
+                  onClick={() => void choose(plan)}
+                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink disabled:opacity-50"
+                >
+                  {busy === plan.id && <Loader2 size={15} className="animate-spin" />}Choose {plan.name}
+                </button>
+              ) : (
+                <a
+                  href={early}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink"
+                >
+                  <MessageCircle size={16} /> Get early access on WhatsApp
+                </a>
+              )}
+              {!free && !paymentsReady && (
+                <p
+                  className={`mt-2 text-center text-[0.82rem] ${plan.highlight ? "text-paper/60" : "text-ink-faint"}`}
+                >
+                  Online payment opens soon. Everything in Basic is free now.
+                </p>
+              )}
+              <ul className="mt-7 space-y-2.5 text-[0.93rem]">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex gap-2.5">
+                    <Check
+                      size={16}
+                      className={`mt-0.5 shrink-0 ${plan.highlight ? "text-signal" : "text-ink"}`}
+                    />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })}
+        <li className="flex flex-col rounded-2xl border border-dashed border-rule p-7">
+          <h2 className="font-display text-[2rem] leading-none">Custom</h2>
+          <p className="mt-2 min-h-[3rem] text-[0.95rem] text-ink-soft">
+            A website designed around you, with your own designer, built and looked after for you.
+          </p>
+          <p className="mt-6 font-display text-[2.2rem] leading-none tracking-[-0.02em]">Free call first</p>
+          <p className="mt-1 text-[0.88rem] text-ink-faint">
+            Tell us your custom design requirements on a free 20-minute call. We agree a price before any work
+            starts.
+          </p>
+          <Link
+            href={bookingHref}
+            className="mt-6 inline-flex items-center justify-center rounded-full border border-ink px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
+          >
+            Book a free call
+          </Link>
+          <ul className="mt-7 space-y-2.5 text-[0.93rem]">
+            {[
+              "A personal designer who works with you",
+              "Start from 50+ designs, or something new",
+              "Free stock photos to choose from",
+              "Add, remove or change any section or element",
+              "Done for you: we build it and keep it up to date",
+              "More than three sites, teams and agencies",
+            ].map((feature) => (
+              <li key={feature} className="flex gap-2.5">
+                <Check size={16} className="mt-0.5 shrink-0 text-ink" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+        </li>
+      </ul>
+      {error && (
+        <p role="alert" className="mt-4 text-center text-[0.95rem] text-[color:var(--destructive)]">
+          {error}
+        </p>
+      )}
+      <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl bg-[color-mix(in_oklab,var(--ink)_5%,transparent)] px-6 py-5 text-center sm:flex-row sm:text-left">
+        <p className="text-[0.98rem]">
+          <b className="font-medium">Want to see it first?</b>{" "}
+          <span className="text-ink-soft">
+            Book a free demo call: we’ll show you the editor, the designs made for your job and the
+            Investigator, and answer your questions. No card, no obligation.
+          </span>
+        </p>
+        <Link
+          href={bookingHref}
+          className="shrink-0 rounded-full bg-ink px-5 py-2.5 text-[0.92rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink"
+        >
+          Book a free demo
+        </Link>
+      </div>
+    </>
+  );
 }

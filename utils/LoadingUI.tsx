@@ -6,10 +6,7 @@ interface LoadingBarsProps {
   progress?: number | null;
 }
 
-export default function LoadingBars({
-  message = "Processing...",
-  progress = null,
-}: LoadingBarsProps) {
+export default function LoadingBars({ message = "Processing...", progress = null }: LoadingBarsProps) {
   const array = [1, 2, 3, 4, 5, 6];
 
   return (

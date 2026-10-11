@@ -8,7 +8,11 @@ export function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const template = getTemplate(params.get("template") ?? "");
   const role = params.get("role");
-  if (!template || template.collection !== "studio") return NextResponse.json({ error: "Unknown template." }, { status: 404 });
+  if (!template || template.collection !== "studio")
+    return NextResponse.json({ error: "Unknown template." }, { status: 404 });
   if (role && !roleById(role)) return NextResponse.json({ error: "Unknown job title." }, { status: 404 });
-  return NextResponse.json({ content: sampleFor(template, role) }, { headers: { "Cache-Control": "public, max-age=3600" } });
+  return NextResponse.json(
+    { content: sampleFor(template, role) },
+    { headers: { "Cache-Control": "public, max-age=3600" } },
+  );
 }

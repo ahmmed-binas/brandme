@@ -11,8 +11,14 @@ export const POST = route(async (request: Request, { params }: { params: Promise
   const body = await readJson(request, 4_000);
   if (body instanceof Response) return body;
   const { action, note } = (body ?? {}) as { action?: unknown; note?: unknown };
-  if (action !== "approve" && action !== "refuse" && action !== "remove") return jsonError(422, "Unknown action.");
-  const result = await moderatePost(viewer.id, id, action as ModerationAction, typeof note === "string" ? note : null);
+  if (action !== "approve" && action !== "refuse" && action !== "remove")
+    return jsonError(422, "Unknown action.");
+  const result = await moderatePost(
+    viewer.id,
+    id,
+    action as ModerationAction,
+    typeof note === "string" ? note : null,
+  );
   if (!result.ok) return jsonError(result.status, result.error);
   revalidatePath("/community");
   revalidatePath(`/community/${id}`);

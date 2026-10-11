@@ -14,4 +14,5 @@ export function consoleBase(): string {
 }
 
 /** A link inside the console, as the browser should see it. */
-export const consoleHref = (path = "") => `${consoleBase()}${!path || path.startsWith("/") || path.startsWith("?") ? path : `/${path}`}`;
+export const consoleHref = (path = "") =>
+  `${consoleBase()}${!path || path.startsWith("/") || path.startsWith("?") ? path : `/${path}`}`;

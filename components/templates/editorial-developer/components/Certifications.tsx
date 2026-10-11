@@ -18,9 +18,14 @@ export default function Certifications() {
             <RevealOnScroll key={c.id}>
               <div className="border border-line p-5">
                 <p className="font-display text-lg">{c.name}</p>
-                <p className="mt-1 font-mono text-xs text-muted">{c.organization} · {c.date}</p>
+                <p className="mt-1 font-mono text-xs text-muted">
+                  {c.organization} · {c.date}
+                </p>
                 {c.credentialUrl && (
-                  <a href={c.credentialUrl} className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-accent underline-hover">
+                  <a
+                    href={c.credentialUrl}
+                    className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-accent underline-hover"
+                  >
                     View credential <ExternalLink size={12} />
                   </a>
                 )}

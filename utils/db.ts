@@ -10,9 +10,12 @@ import { Pool, type PoolConfig } from "pg";
  */
 function sslConfig(): PoolConfig["ssl"] {
   switch (process.env.DATABASE_SSL) {
-    case "require": return { rejectUnauthorized: false };
-    case "verify": return { rejectUnauthorized: true };
-    default: return undefined;
+    case "require":
+      return { rejectUnauthorized: false };
+    case "verify":
+      return { rejectUnauthorized: true };
+    default:
+      return undefined;
   }
 }
 
@@ -36,13 +39,31 @@ const globalForDb = globalThis as unknown as { dbPool: Pool | undefined };
 export const db = globalForDb.dbPool ?? createPool();
 globalForDb.dbPool = db;
 
-const UNAVAILABLE_CODES = new Set(["ECONNREFUSED", "ENOTFOUND", "ETIMEDOUT", "ECONNRESET", "EAI_AGAIN", "57P01", "57P03", "53300", "08000", "08001", "08003", "08006"]);
+const UNAVAILABLE_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+  "ECONNRESET",
+  "EAI_AGAIN",
+  "57P01",
+  "57P03",
+  "53300",
+  "08000",
+  "08001",
+  "08003",
+  "08006",
+]);
 
 /** Whether an error means "the database can't be reached right now" rather than a bug. */
 export function isDatabaseUnavailable(error: unknown): boolean {
   const candidate = error as { code?: string; message?: string; cause?: unknown } | null;
   if (!candidate) return false;
   if (candidate.code && UNAVAILABLE_CODES.has(candidate.code)) return true;
-  if (/connection terminated|timeout exceeded when trying to connect|connect ECONNREFUSED/i.test(candidate.message ?? "")) return true;
+  if (
+    /connection terminated|timeout exceeded when trying to connect|connect ECONNREFUSED/i.test(
+      candidate.message ?? "",
+    )
+  )
+    return true;
   return candidate.cause ? isDatabaseUnavailable(candidate.cause) : false;
 }

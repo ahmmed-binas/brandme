@@ -59,17 +59,24 @@ const toDraft = (row: PortfolioRow): PortfolioDraft => ({
 
 export async function getDraft(ownerId: string, templateId: TemplateId): Promise<PortfolioDraft | null> {
   await ensureSchema();
-  const result = await db.query<PortfolioRow>(`${SELECT_DRAFT} WHERE owner_id = $1 AND template_id = $2`, [ownerId, templateId]);
+  const result = await db.query<PortfolioRow>(`${SELECT_DRAFT} WHERE owner_id = $1 AND template_id = $2`, [
+    ownerId,
+    templateId,
+  ]);
   return result.rows[0] ? toDraft(result.rows[0]) : null;
 }
 
 export async function listDrafts(ownerId: string): Promise<PortfolioDraft[]> {
   await ensureSchema();
-  const result = await db.query<PortfolioRow>(`${SELECT_DRAFT} WHERE owner_id = $1 ORDER BY updated_at DESC`, [ownerId]);
+  const result = await db.query<PortfolioRow>(
+    `${SELECT_DRAFT} WHERE owner_id = $1 ORDER BY updated_at DESC`,
+    [ownerId],
+  );
   return result.rows.map(toDraft);
 }
 
-export type SaveResult = { ok: true; draft: PortfolioDraft } | { ok: false; conflict: PortfolioDraft } | { ok: false; full: true };
+export type SaveResult =
+  { ok: true; draft: PortfolioDraft } | { ok: false; conflict: PortfolioDraft } | { ok: false; full: true };
 
 export interface Room {
   /** Whether a new portfolio can be started with this template. */
@@ -83,14 +90,21 @@ export interface Room {
 /** What the owner's plan leaves room for, seen from one template's editor. */
 export async function roomFor(user: CurrentUser, templateId: TemplateId): Promise<Room> {
   await ensureSchema();
-  const rows = await db.query<{ template_id: TemplateId; content: Record<string, unknown> }>("SELECT template_id, content FROM portfolios WHERE owner_id = $1 ORDER BY updated_at DESC", [user.id]);
+  const rows = await db.query<{ template_id: TemplateId; content: Record<string, unknown> }>(
+    "SELECT template_id, content FROM portfolios WHERE owner_id = $1 ORDER BY updated_at DESC",
+    [user.id],
+  );
   const others = rows.rows.filter((row) => row.template_id !== templateId);
   const has = rows.rows.length > others.length;
   return {
     canStart: has || rows.rows.length < user.plan.portfolios,
     max: user.plan.portfolios,
     planName: user.plan.name,
-    others: others.map((row) => ({ templateId: row.template_id, name: String(row.content.name ?? (row.content.personal as { name?: string } | undefined)?.name ?? ""), switchable: validateContent(templateId, row.content).ok })),
+    others: others.map((row) => ({
+      templateId: row.template_id,
+      name: String(row.content.name ?? (row.content.personal as { name?: string } | undefined)?.name ?? ""),
+      switchable: validateContent(templateId, row.content).ok,
+    })),
   };
 }
 
@@ -100,11 +114,23 @@ export async function roomFor(user: CurrentUser, templateId: TemplateId): Promis
  * or device saved since), nothing is written and the newer draft is returned
  * so the user can choose. `force` overwrites after the user chose to.
  */
-export async function saveDraft(ownerId: string, templateId: TemplateId, content: Record<string, unknown>, theme: ColorTheme | null, baseVersion: number | null, force = false, maxPortfolios = Infinity): Promise<SaveResult> {
+export async function saveDraft(
+  ownerId: string,
+  templateId: TemplateId,
+  content: Record<string, unknown>,
+  theme: ColorTheme | null,
+  baseVersion: number | null,
+  force = false,
+  maxPortfolios = Infinity,
+): Promise<SaveResult> {
   await ensureSchema();
   if (Number.isFinite(maxPortfolios)) {
-    const owned = await db.query<{ template_id: string }>("SELECT template_id FROM portfolios WHERE owner_id = $1", [ownerId]);
-    if (!owned.rows.some((row) => row.template_id === templateId) && owned.rows.length >= maxPortfolios) return { ok: false, full: true };
+    const owned = await db.query<{ template_id: string }>(
+      "SELECT template_id FROM portfolios WHERE owner_id = $1",
+      [ownerId],
+    );
+    if (!owned.rows.some((row) => row.template_id === templateId) && owned.rows.length >= maxPortfolios)
+      return { ok: false, full: true };
   }
   const result = await db.query(
     `INSERT INTO portfolios (owner_id, template_id, content, theme) VALUES ($1, $2, $3, $4)
@@ -118,7 +144,8 @@ export async function saveDraft(ownerId: string, templateId: TemplateId, content
   return result.rowCount ? { ok: true, draft } : { ok: false, conflict: draft };
 }
 
-export type SwitchResult = { ok: true; draft: PortfolioDraft } | { ok: false; status: 404 | 409 | 422; error: string };
+export type SwitchResult =
+  { ok: true; draft: PortfolioDraft } | { ok: false; status: 404 | 409 | 422; error: string };
 
 /**
  * Moves a portfolio to another design: the same content, address, blog posts,
@@ -126,25 +153,67 @@ export type SwitchResult = { ok: true; draft: PortfolioDraft } | { ok: false; st
  * design's own settings (its colour palette) are dropped. If the portfolio is
  * published, the live site shows the new design straight away.
  */
-export async function switchTemplate(ownerId: string, from: TemplateId, to: TemplateId): Promise<SwitchResult> {
+export async function switchTemplate(
+  ownerId: string,
+  from: TemplateId,
+  to: TemplateId,
+): Promise<SwitchResult> {
   await ensureSchema();
   if (from === to) return { ok: false, status: 409, error: "That’s already this design." };
   const client = await db.connect();
   try {
     await client.query("BEGIN");
-    const source = (await client.query<{ id: string; content: Record<string, unknown>; published_content: Record<string, unknown> | null }>(
-      "SELECT id, content, published_content FROM portfolios WHERE owner_id = $1 AND template_id = $2 FOR UPDATE", [ownerId, from])).rows[0];
-    if (!source) { await client.query("ROLLBACK"); return { ok: false, status: 404, error: "We couldn’t find that portfolio." }; }
-    if ((await client.query("SELECT 1 FROM portfolios WHERE owner_id = $1 AND template_id = $2", [ownerId, to])).rowCount) { await client.query("ROLLBACK"); return { ok: false, status: 409, error: "You already have a portfolio with this design." }; }
+    const source = (
+      await client.query<{
+        id: string;
+        content: Record<string, unknown>;
+        published_content: Record<string, unknown> | null;
+      }>(
+        "SELECT id, content, published_content FROM portfolios WHERE owner_id = $1 AND template_id = $2 FOR UPDATE",
+        [ownerId, from],
+      )
+    ).rows[0];
+    if (!source) {
+      await client.query("ROLLBACK");
+      return { ok: false, status: 404, error: "We couldn’t find that portfolio." };
+    }
+    if (
+      (await client.query("SELECT 1 FROM portfolios WHERE owner_id = $1 AND template_id = $2", [ownerId, to]))
+        .rowCount
+    ) {
+      await client.query("ROLLBACK");
+      return { ok: false, status: 409, error: "You already have a portfolio with this design." };
+    }
     const content = validateContent(to, source.content);
     const published = source.published_content ? validateContent(to, source.published_content) : null;
-    if (!content.ok || (published && !published.ok)) { await client.query("ROLLBACK"); return { ok: false, status: 422, error: "This design stores content differently, so it can’t be moved automatically. Copy your words across by hand, or choose another design." }; }
+    if (!content.ok || (published && !published.ok)) {
+      await client.query("ROLLBACK");
+      return {
+        ok: false,
+        status: 422,
+        error:
+          "This design stores content differently, so it can’t be moved automatically. Copy your words across by hand, or choose another design.",
+      };
+    }
     await client.query(
       `UPDATE portfolios SET template_id = $2, content = $3, theme = NULL, published_content = $4, published_theme = NULL, version = version + 1, updated_at = NOW() WHERE id = $1`,
-      [source.id, to, JSON.stringify(content.content), published?.ok ? JSON.stringify(published.content) : null],
+      [
+        source.id,
+        to,
+        JSON.stringify(content.content),
+        published?.ok ? JSON.stringify(published.content) : null,
+      ],
     );
-    for (const table of ["portfolio_posts", "custom_domains", "domain_orders", "investigator_runs"]) await client.query(`UPDATE ${table} SET template_id = $3 WHERE owner_id = $1 AND template_id = $2`, [ownerId, from, to]);
-    await client.query("UPDATE investigator_settings SET template_id = $3 WHERE owner_id = $1 AND template_id = $2", [ownerId, from, to]);
+    for (const table of ["portfolio_posts", "custom_domains", "domain_orders", "investigator_runs"])
+      await client.query(`UPDATE ${table} SET template_id = $3 WHERE owner_id = $1 AND template_id = $2`, [
+        ownerId,
+        from,
+        to,
+      ]);
+    await client.query(
+      "UPDATE investigator_settings SET template_id = $3 WHERE owner_id = $1 AND template_id = $2",
+      [ownerId, from, to],
+    );
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);
@@ -156,10 +225,13 @@ export async function switchTemplate(ownerId: string, from: TemplateId, to: Temp
 }
 
 export type PublishResult =
-  | { ok: true; draft: PortfolioDraft }
-  | { ok: false; status: 404 | 409 | 402; error: string };
+  { ok: true; draft: PortfolioDraft } | { ok: false; status: 404 | 409 | 402; error: string };
 
-export async function publish(user: CurrentUser, templateId: TemplateId, slug: string): Promise<PublishResult> {
+export async function publish(
+  user: CurrentUser,
+  templateId: TemplateId,
+  slug: string,
+): Promise<PublishResult> {
   await ensureSchema();
   const client = await db.connect();
   try {
@@ -181,9 +253,16 @@ export async function publish(user: CurrentUser, templateId: TemplateId, slug: s
     const liveElsewhere = owned.rows.filter((row) => row.published_at && row.id !== portfolio.id).length;
     if (liveElsewhere >= user.plan.publishedPortfolios) {
       await client.query("ROLLBACK");
-      return { ok: false, status: 402, error: `The ${user.plan.name} plan includes ${user.plan.publishedPortfolios} live portfolio${user.plan.publishedPortfolios === 1 ? "" : "s"}. Unpublish another portfolio or upgrade to publish this one.` };
+      return {
+        ok: false,
+        status: 402,
+        error: `The ${user.plan.name} plan includes ${user.plan.publishedPortfolios} live portfolio${user.plan.publishedPortfolios === 1 ? "" : "s"}. Unpublish another portfolio or upgrade to publish this one.`,
+      };
     }
-    const taken = await client.query("SELECT 1 FROM portfolios WHERE slug = $1 AND id <> $2", [slug, portfolio.id]);
+    const taken = await client.query("SELECT 1 FROM portfolios WHERE slug = $1 AND id <> $2", [
+      slug,
+      portfolio.id,
+    ]);
     if (taken.rowCount) {
       await client.query("ROLLBACK");
       return { ok: false, status: 409, error: "That address is already taken. Try another." };
@@ -196,7 +275,8 @@ export async function publish(user: CurrentUser, templateId: TemplateId, slug: s
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);
     // A concurrent publish can still claim the slug between our check and update.
-    if ((error as { code?: string }).code === "23505") return { ok: false, status: 409, error: "That address is already taken. Try another." };
+    if ((error as { code?: string }).code === "23505")
+      return { ok: false, status: 409, error: "That address is already taken. Try another." };
     throw error;
   } finally {
     client.release();
@@ -207,7 +287,10 @@ export async function publish(user: CurrentUser, templateId: TemplateId, slug: s
 /** Takes the portfolio offline. The address stays reserved for this owner so links can be restored. */
 export async function unpublish(ownerId: string, templateId: TemplateId): Promise<PortfolioDraft | null> {
   await ensureSchema();
-  await db.query("UPDATE portfolios SET published_content = NULL, published_theme = NULL, published_at = NULL WHERE owner_id = $1 AND template_id = $2", [ownerId, templateId]);
+  await db.query(
+    "UPDATE portfolios SET published_content = NULL, published_theme = NULL, published_at = NULL WHERE owner_id = $1 AND template_id = $2",
+    [ownerId, templateId],
+  );
   return getDraft(ownerId, templateId);
 }
 
@@ -230,13 +313,27 @@ export async function getPublished(slug: string): Promise<PublishedPortfolio | n
 }
 
 /** The published portfolio behind a custom domain. */
-export async function getPublishedFor(ownerId: string, templateId: TemplateId): Promise<PublishedPortfolio | null> {
+export async function getPublishedFor(
+  ownerId: string,
+  templateId: TemplateId,
+): Promise<PublishedPortfolio | null> {
   return findPublished("p.owner_id = $1 AND p.template_id = $2", [ownerId, templateId]);
 }
 
 async function findPublished(where: string, params: unknown[]): Promise<PublishedPortfolio | null> {
   await ensureSchema();
-  const result = await db.query<{ owner_id: string; template_id: TemplateId; published_content: Record<string, unknown>; published_theme: ColorTheme | null; published_at: Date; plan: string; plan_expires_at: Date | null; plan_interval: string; name: string | null; live_rank: string }>(
+  const result = await db.query<{
+    owner_id: string;
+    template_id: TemplateId;
+    published_content: Record<string, unknown>;
+    published_theme: ColorTheme | null;
+    published_at: Date;
+    plan: string;
+    plan_expires_at: Date | null;
+    plan_interval: string;
+    name: string | null;
+    live_rank: string;
+  }>(
     `SELECT p.owner_id, p.template_id, p.published_content, p.published_theme, p.published_at, u.plan, u.plan_expires_at, u.plan_interval, u.name,
        (SELECT COUNT(*) FROM portfolios o WHERE o.owner_id = p.owner_id AND o.published_at IS NOT NULL AND (o.published_at, o.id) <= (p.published_at, p.id)) AS live_rank
      FROM portfolios p JOIN app_users u ON u.id = p.owner_id
@@ -247,7 +344,14 @@ async function findPublished(where: string, params: unknown[]): Promise<Publishe
   if (!row) return null;
   const standing = standingOf(row);
   return {
-    ownerId: row.owner_id, templateId: row.template_id, content: row.published_content, theme: row.published_theme, updatedAt: row.published_at.toISOString(),
-    showsBranding: standing.plan.showsBranding, hasBlog: standing.plan.blog, resting: Number(row.live_rank) > standing.plan.publishedPortfolios, ownerName: (row.published_content.name as string | undefined) ?? row.name,
+    ownerId: row.owner_id,
+    templateId: row.template_id,
+    content: row.published_content,
+    theme: row.published_theme,
+    updatedAt: row.published_at.toISOString(),
+    showsBranding: standing.plan.showsBranding,
+    hasBlog: standing.plan.blog,
+    resting: Number(row.live_rank) > standing.plan.publishedPortfolios,
+    ownerName: (row.published_content.name as string | undefined) ?? row.name,
   };
 }

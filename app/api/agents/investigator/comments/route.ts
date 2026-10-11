@@ -8,7 +8,10 @@ import { databaseConfigured } from "@/utils/db-schema";
 export const GET = route(async () => {
   if (!databaseConfigured()) return Response.json({ comments: [], viewer: null });
   const viewer = await getViewer();
-  return Response.json({ comments: await listAgentComments("investigator"), viewer: viewer ? { id: viewer.id, isModerator: viewer.isModerator } : null });
+  return Response.json({
+    comments: await listAgentComments("investigator"),
+    viewer: viewer ? { id: viewer.id, isModerator: viewer.isModerator } : null,
+  });
 });
 
 /** POST { body }: adds a comment, after the community spam rules. */
@@ -30,5 +33,7 @@ export const DELETE = route(async (request: Request) => {
   const viewer = await getViewer();
   if (!viewer) return jsonError(401, "Sign in first.");
   const id = new URL(request.url).searchParams.get("id") ?? "";
-  return (await deleteAgentComment(viewer, id)) ? Response.json({ deleted: true }) : jsonError(404, "That comment can’t be removed.");
+  return (await deleteAgentComment(viewer, id))
+    ? Response.json({ deleted: true })
+    : jsonError(404, "That comment can’t be removed.");
 });

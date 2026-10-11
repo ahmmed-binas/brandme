@@ -10,8 +10,16 @@ import { useEditorialData } from "../EditorialDataContext";
 export default function Terminal() {
   const portfolioData = useEditorialData();
   const commands: Record<string, () => string[]> = {
-    whoami: () => [portfolioData.personal.name, `${portfolioData.personal.title} · ${portfolioData.personal.subtitle}`, portfolioData.personal.location],
-    stack: () => [...portfolioData.skills.frontend.map((s) => s.name), ...portfolioData.skills.backend.map((s) => s.name), ...portfolioData.skills.database.map((s) => s.name)],
+    whoami: () => [
+      portfolioData.personal.name,
+      `${portfolioData.personal.title} · ${portfolioData.personal.subtitle}`,
+      portfolioData.personal.location,
+    ],
+    stack: () => [
+      ...portfolioData.skills.frontend.map((s) => s.name),
+      ...portfolioData.skills.backend.map((s) => s.name),
+      ...portfolioData.skills.database.map((s) => s.name),
+    ],
     projects: () => portfolioData.projects.map((p) => `${p.name} — ${p.tagline}`),
     status: () => [portfolioData.personal.availability],
     help: () => ["Available commands: whoami, stack, projects, status, clear"],
@@ -25,7 +33,10 @@ export default function Terminal() {
   useEffect(() => {
     const introCmd = "whoami";
     if (shouldReduceMotion) {
-      setLines([{ type: "cmd", text: introCmd }, ...commands.whoami().map((t) => ({ type: "out" as const, text: t }))]);
+      setLines([
+        { type: "cmd", text: introCmd },
+        ...commands.whoami().map((t) => ({ type: "out" as const, text: t })),
+      ]);
       setTypedIntro(true);
       return;
     }
@@ -36,7 +47,10 @@ export default function Terminal() {
       if (i >= introCmd.length) {
         clearInterval(interval);
         setTimeout(() => {
-          setLines([{ type: "cmd", text: introCmd }, ...commands.whoami().map((t) => ({ type: "out" as const, text: t }))]);
+          setLines([
+            { type: "cmd", text: introCmd },
+            ...commands.whoami().map((t) => ({ type: "out" as const, text: t })),
+          ]);
           setInput("");
           setTypedIntro(true);
         }, 400);
@@ -82,8 +96,10 @@ export default function Terminal() {
               <span>{line.text}</span>
             </div>
           ) : (
-            <div key={idx} className="pl-5 text-muted">{line.text}</div>
-          )
+            <div key={idx} className="pl-5 text-muted">
+              {line.text}
+            </div>
+          ),
         )}
         {typedIntro && (
           <form
@@ -114,9 +130,7 @@ export default function Terminal() {
           </div>
         )}
       </div>
-      <div className="border-t border-line px-4 py-2 text-[11px] text-muted">
-        try: {available.join(", ")}
-      </div>
+      <div className="border-t border-line px-4 py-2 text-[11px] text-muted">try: {available.join(", ")}</div>
     </motion.div>
   );
 }

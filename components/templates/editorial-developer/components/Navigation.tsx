@@ -34,7 +34,7 @@ export default function Navigation() {
           if (entry.isIntersecting) setActive(entry.target.id);
         });
       },
-      { rootMargin: "-45% 0px -45% 0px" }
+      { rootMargin: "-45% 0px -45% 0px" },
     );
     SECTIONS.forEach((s) => {
       const el = document.getElementById(s.id);
@@ -46,7 +46,9 @@ export default function Navigation() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
-        scrolled ? "bg-bg/85 backdrop-blur border-b border-line" : "bg-transparent border-b border-transparent"
+        scrolled
+          ? "bg-bg/85 backdrop-blur border-b border-line"
+          : "bg-transparent border-b border-transparent"
       }`}
     >
       <nav className="mx-auto flex max-w-content items-center justify-between px-6 py-5 md:px-10">
@@ -105,11 +107,7 @@ export default function Navigation() {
             <ul className="flex flex-col px-6 py-6 gap-5">
               {SECTIONS.map((s) => (
                 <li key={s.id}>
-                  <a
-                    href={`#${s.id}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="font-display text-2xl"
-                  >
+                  <a href={`#${s.id}`} onClick={() => setMobileOpen(false)} className="font-display text-2xl">
                     {s.label}
                   </a>
                 </li>

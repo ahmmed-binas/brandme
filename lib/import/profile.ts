@@ -10,12 +10,21 @@ import { EDITORIAL_SKILL_CATEGORIES, type StandardContent } from "@/lib/portfoli
 export type ImportedProfile = StandardContent & { location?: string };
 
 const filled = (value?: string) => Boolean(value?.trim());
-const nonEmpty = <T,>(items?: T[]) => (items?.length ? items : undefined);
+const nonEmpty = <T>(items?: T[]) => (items?.length ? items : undefined);
 
 /** Drops empty fields so a merge only touches what the source actually provided. */
 export function compactProfile(profile: ImportedProfile): ImportedProfile {
   const output: ImportedProfile = {};
-  for (const key of ["name", "professional_title", "tagline", "email", "github", "linkedin", "instagram", "location"] as const) {
+  for (const key of [
+    "name",
+    "professional_title",
+    "tagline",
+    "email",
+    "github",
+    "linkedin",
+    "instagram",
+    "location",
+  ] as const) {
     if (filled(profile[key])) output[key] = profile[key]!.trim();
   }
   const summary = profile.summary?.map((item) => item.trim()).filter(Boolean);
@@ -31,7 +40,10 @@ export function compactProfile(profile: ImportedProfile): ImportedProfile {
   const highlights = profile.highlights?.filter((item) => filled(item.title));
   if (highlights?.length) output.highlights = highlights.slice(0, 40);
   const links = profile.links?.filter((item) => filled(item.url));
-  if (links?.length) output.links = [...new Map(links.map((item) => [item.url!.replace(/\/+$/, "").toLowerCase(), item])).values()].slice(0, 12);
+  if (links?.length)
+    output.links = [
+      ...new Map(links.map((item) => [item.url!.replace(/\/+$/, "").toLowerCase(), item])).values(),
+    ].slice(0, 12);
   return output;
 }
 
@@ -66,33 +78,95 @@ export function mergeIntoStandard(current: StandardContent, imported: ImportedPr
     summary: nonEmpty(profile.summary) ?? current.summary,
     skills: nonEmpty(profile.skills) ?? current.skills,
     // Imported projects keep any image the user already added to a project of the same name.
-    projects: nonEmpty(profile.projects)?.map((project) => ({ ...project, image: project.image || current.projects?.find((existing) => existing.title === project.title)?.image })) ?? current.projects,
+    projects:
+      nonEmpty(profile.projects)?.map((project) => ({
+        ...project,
+        image: project.image || current.projects?.find((existing) => existing.title === project.title)?.image,
+      })) ?? current.projects,
     experience: nonEmpty(profile.experience) ?? current.experience,
     education: nonEmpty(profile.education) ?? current.education,
     // Highlights and links are added to (not replaced), skipping ones already there.
-    highlights: profile.highlights ? [...(current.highlights ?? []), ...profile.highlights.filter((item) => !current.highlights?.some((existing) => existing.title?.toLowerCase() === item.title?.toLowerCase()))].slice(0, 40) : current.highlights,
-    links: profile.links ? [...(current.links ?? []), ...profile.links.filter((item) => !current.links?.some((existing) => existing.url?.replace(/\/+$/, "").toLowerCase() === item.url?.replace(/\/+$/, "").toLowerCase()))].slice(0, 12) : current.links,
+    highlights: profile.highlights
+      ? [
+          ...(current.highlights ?? []),
+          ...profile.highlights.filter(
+            (item) =>
+              !current.highlights?.some(
+                (existing) => existing.title?.toLowerCase() === item.title?.toLowerCase(),
+              ),
+          ),
+        ].slice(0, 40)
+      : current.highlights,
+    links: profile.links
+      ? [
+          ...(current.links ?? []),
+          ...profile.links.filter(
+            (item) =>
+              !current.links?.some(
+                (existing) =>
+                  existing.url?.replace(/\/+$/, "").toLowerCase() ===
+                  item.url?.replace(/\/+$/, "").toLowerCase(),
+              ),
+          ),
+        ].slice(0, 12)
+      : current.links,
   };
 }
 
 /** Matches whole technology names, including ones that start or end with symbols such as "C#" or ".NET". */
 const terms = (pattern: string) => new RegExp(`(?:^|[^a-z0-9])(?:${pattern})(?![a-z0-9])`, "i");
-const SKILL_GROUPS: Array<[typeof EDITORIAL_SKILL_CATEGORIES[number], RegExp]> = [
-  ["ai", terms("ai|ml|machine learning|llms?|nlp|pytorch|tensorflow|openai|claude|langchain|computer vision|data science")],
-  ["database", terms("sql|mysql|postgres(?:ql)?|mongo(?:db)?|redis|sqlite|firebase|supabase|dynamodb|oracle|mariadb|elasticsearch")],
-  ["devops", terms("docker|kubernetes|k8s|aws|azure|gcp|google cloud|terraform|ansible|ci/?cd|github actions|jenkins|linux|nginx|vercel|netlify")],
-  ["frontend", terms("react|vue|angular|svelte|next(?:\\.js)?|nuxt|html5?|css3?|sass|tailwind(?: css)?|javascript|typescript|redux|figma|ui|ux")],
-  ["backend", terms("node(?:\\.js)?|express|nest(?:js)?|c#|\\.net|asp\\.net(?: core)?|java|spring|kotlin|python|django|flask|fastapi|go(?:lang)?|rust|php|laravel|ruby|rails|graphql|rest")],
+const SKILL_GROUPS: Array<[(typeof EDITORIAL_SKILL_CATEGORIES)[number], RegExp]> = [
+  [
+    "ai",
+    terms(
+      "ai|ml|machine learning|llms?|nlp|pytorch|tensorflow|openai|claude|langchain|computer vision|data science",
+    ),
+  ],
+  [
+    "database",
+    terms(
+      "sql|mysql|postgres(?:ql)?|mongo(?:db)?|redis|sqlite|firebase|supabase|dynamodb|oracle|mariadb|elasticsearch",
+    ),
+  ],
+  [
+    "devops",
+    terms(
+      "docker|kubernetes|k8s|aws|azure|gcp|google cloud|terraform|ansible|ci/?cd|github actions|jenkins|linux|nginx|vercel|netlify",
+    ),
+  ],
+  [
+    "frontend",
+    terms(
+      "react|vue|angular|svelte|next(?:\\.js)?|nuxt|html5?|css3?|sass|tailwind(?: css)?|javascript|typescript|redux|figma|ui|ux",
+    ),
+  ],
+  [
+    "backend",
+    terms(
+      "node(?:\\.js)?|express|nest(?:js)?|c#|\\.net|asp\\.net(?: core)?|java|spring|kotlin|python|django|flask|fastapi|go(?:lang)?|rust|php|laravel|ruby|rails|graphql|rest",
+    ),
+  ],
 ];
-const categoriseSkill = (skill: string) => SKILL_GROUPS.find(([, pattern]) => pattern.test(skill))?.[0] ?? "tools";
-const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "project";
+const categoriseSkill = (skill: string) =>
+  SKILL_GROUPS.find(([, pattern]) => pattern.test(skill))?.[0] ?? "tools";
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60) || "project";
 
 /** Editorial Developer: maps the common profile into its richer model, keeping sections imports don't cover. */
 export function mergeIntoEditorial(current: EditorialData, imported: ImportedProfile): EditorialData {
   const profile = compactProfile(imported);
   const stamp = Date.now().toString(36);
   const skills = profile.skills
-    ? Object.fromEntries(EDITORIAL_SKILL_CATEGORIES.map((category) => [category, profile.skills!.filter((skill) => categoriseSkill(skill) === category).map((name) => ({ name }))])) as EditorialData["skills"]
+    ? (Object.fromEntries(
+        EDITORIAL_SKILL_CATEGORIES.map((category) => [
+          category,
+          profile.skills!.filter((skill) => categoriseSkill(skill) === category).map((name) => ({ name })),
+        ]),
+      ) as EditorialData["skills"])
     : current.skills;
   return {
     ...current,
@@ -104,38 +178,52 @@ export function mergeIntoEditorial(current: EditorialData, imported: ImportedPro
       location: profile.location ?? current.personal.location,
       email: profile.email ?? current.personal.email,
     },
-    about: profile.summary ? { ...current.about, introduction: profile.summary[0], philosophy: profile.summary.slice(1).join("\n\n") || current.about.philosophy } : current.about,
-    social: { ...current.social, github: profile.github ?? current.social.github, linkedin: profile.linkedin ?? current.social.linkedin },
+    about: profile.summary
+      ? {
+          ...current.about,
+          introduction: profile.summary[0],
+          philosophy: profile.summary.slice(1).join("\n\n") || current.about.philosophy,
+        }
+      : current.about,
+    social: {
+      ...current.social,
+      github: profile.github ?? current.social.github,
+      linkedin: profile.linkedin ?? current.social.linkedin,
+    },
     contact: profile.email ? { ...current.contact, email: profile.email } : current.contact,
     skills,
-    projects: profile.projects ? profile.projects.map((project, index) => ({
-      id: `project-${stamp}-${index}`,
-      slug: `${slugify(project.title ?? "project")}-${index}`,
-      name: project.title ?? "Project",
-      tagline: project.description?.split(/(?<=[.!?])\s/)[0] ?? "",
-      description: project.description ?? "",
-      problem: "",
-      approach: "",
-      role: "Developer",
-      featured: index < 2,
-      status: "shipped" as const,
-      technologies: project.technologies ?? [],
-      keyFeatures: [],
-      github: project.github,
-      liveUrl: project.live_url,
-      date: "",
-    })) : current.projects,
-    experience: profile.experience ? profile.experience.map((item, index) => ({
-      id: `experience-${stamp}-${index}`,
-      company: item.company ?? "",
-      role: item.job_title ?? "",
-      location: item.location ?? "",
-      startDate: item.start_date ?? "",
-      endDate: item.end_date ?? "",
-      summary: item.description ?? "",
-      responsibilities: [],
-      technologies: item.technologies ?? [],
-      achievements: [],
-    })) : current.experience,
+    projects: profile.projects
+      ? profile.projects.map((project, index) => ({
+          id: `project-${stamp}-${index}`,
+          slug: `${slugify(project.title ?? "project")}-${index}`,
+          name: project.title ?? "Project",
+          tagline: project.description?.split(/(?<=[.!?])\s/)[0] ?? "",
+          description: project.description ?? "",
+          problem: "",
+          approach: "",
+          role: "Developer",
+          featured: index < 2,
+          status: "shipped" as const,
+          technologies: project.technologies ?? [],
+          keyFeatures: [],
+          github: project.github,
+          liveUrl: project.live_url,
+          date: "",
+        }))
+      : current.projects,
+    experience: profile.experience
+      ? profile.experience.map((item, index) => ({
+          id: `experience-${stamp}-${index}`,
+          company: item.company ?? "",
+          role: item.job_title ?? "",
+          location: item.location ?? "",
+          startDate: item.start_date ?? "",
+          endDate: item.end_date ?? "",
+          summary: item.description ?? "",
+          responsibilities: [],
+          technologies: item.technologies ?? [],
+          achievements: [],
+        }))
+      : current.experience,
   };
 }

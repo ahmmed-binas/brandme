@@ -13,7 +13,12 @@ export const GET = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
   const planAllows = owner.user.plan.ownDomain;
-  const capabilities = { canBuy: planAllows && serverDomainsConfigured() && registrarConfigured() && stripeConfigured(), canConnect: planAllows && serverDomainsConfigured(), planAllows, planName: owner.user.plan.name };
+  const capabilities = {
+    canBuy: planAllows && serverDomainsConfigured() && registrarConfigured() && stripeConfigured(),
+    canConnect: planAllows && serverDomainsConfigured(),
+    planAllows,
+    planName: owner.user.plan.name,
+  };
   if (!serverDomainsConfigured()) return Response.json({ domain: null, orders: [], capabilities });
   try {
     return Response.json({ ...(await domainOverview(owner.user, owner.templateId)), capabilities });
@@ -30,7 +35,8 @@ export const POST = route(async (request: Request, { params }: Context) => {
   const body = await readJson(request, 1_000);
   if (body instanceof Response) return body;
   const domain = normaliseDomain(String((body as { domain?: unknown } | null)?.domain ?? ""));
-  if (!isValidDomain(domain)) return jsonError(422, "Enter a domain like yourname.com or portfolio.yourname.com.");
+  if (!isValidDomain(domain))
+    return jsonError(422, "Enter a domain like yourname.com or portfolio.yourname.com.");
   try {
     return Response.json({ domain: await connectDomain(owner.user, owner.templateId, domain) });
   } catch (error) {

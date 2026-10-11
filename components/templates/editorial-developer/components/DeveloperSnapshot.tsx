@@ -41,14 +41,18 @@ export default function DeveloperSnapshot() {
   const portfolioData = useEditorialData();
   const { snapshot, personal, projects, skills } = portfolioData;
   const yearsNum = Number.parseInt(snapshot.yearsBuilding, 10);
-  const technologyCount = new Set([
-    ...skills.frontend,
-    ...skills.backend,
-    ...skills.database,
-    ...skills.devops,
-    ...skills.ai,
-    ...skills.tools,
-  ].map((skill) => skill.name.trim()).filter(Boolean)).size;
+  const technologyCount = new Set(
+    [
+      ...skills.frontend,
+      ...skills.backend,
+      ...skills.database,
+      ...skills.devops,
+      ...skills.ai,
+      ...skills.tools,
+    ]
+      .map((skill) => skill.name.trim())
+      .filter(Boolean),
+  ).size;
   const stats = [
     Number.isFinite(yearsNum) ? { value: yearsNum, suffix: "+", label: "Years building" } : null,
     projects.length ? { value: projects.length, suffix: "+", label: "Projects" } : null,
@@ -58,7 +62,9 @@ export default function DeveloperSnapshot() {
   return (
     <section id="snapshot" className="border-b border-line px-6 py-20 md:px-10">
       <div className="mx-auto grid max-w-content grid-cols-2 gap-x-8 lg:grid-cols-4">
-        {stats.map((stat) => <Stat key={stat.label} {...stat} />)}
+        {stats.map((stat) => (
+          <Stat key={stat.label} {...stat} />
+        ))}
         <div className="border-t border-line py-6">
           <div className="font-display text-xl font-medium leading-tight md:text-2xl">
             {personal.availability}

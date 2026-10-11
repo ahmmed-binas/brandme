@@ -14,13 +14,32 @@ import { siteUrl } from "@/lib/site";
  * part of what customers' portfolios are for. They get the same rules.
  */
 const PRIVATE = [
-  "/api/", "/editor/", "/account", "/login", "/signup", "/forgot-password", "/reset-password",
-  "/admin", "/console", "/templates/review", "/community/moderation", "/gallery/submit", "/sites/",
+  "/api/",
+  "/editor/",
+  "/account",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/admin",
+  "/console",
+  "/templates/review",
+  "/community/moderation",
+  "/gallery/submit",
+  "/sites/",
 ];
 
 const AI_CRAWLERS = [
-  "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User",
-  "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot-Extended",
+  "GPTBot",
+  "OAI-SearchBot",
+  "ChatGPT-User",
+  "ClaudeBot",
+  "Claude-SearchBot",
+  "Claude-User",
+  "PerplexityBot",
+  "Perplexity-User",
+  "Google-Extended",
+  "Applebot-Extended",
 ];
 
 export default function robots(): MetadataRoute.Robots {

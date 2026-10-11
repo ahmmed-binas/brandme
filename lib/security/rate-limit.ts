@@ -21,7 +21,9 @@ export async function rateLimit(key: string, limit: number, windowSeconds: numbe
 /** Old windows are useless; the hourly job clears anything older than a day. */
 export async function pruneRateLimits(): Promise<number> {
   await ensureSchema();
-  return (await db.query("DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL '1 day'")).rowCount ?? 0;
+  return (
+    (await db.query("DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL '1 day'")).rowCount ?? 0
+  );
 }
 
 /** True when `key` has failed `limit` times in the current window (failures recorded with `recordFailure`). */
@@ -42,7 +44,9 @@ export async function recordFailure(key: string, windowSeconds: number): Promise
  * The visitor's IP address. Behind Caddy (the only way in, in production) the
  * first X-Forwarded-For entry is set by Caddy itself, so it can't be forged.
  */
-export function clientIp(request: Request | { headers?: { get?: (name: string) => string | null } } | undefined): string {
+export function clientIp(
+  request: Request | { headers?: { get?: (name: string) => string | null } } | undefined,
+): string {
   const headers = request?.headers;
   const forwarded = headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim();
   return forwarded || headers?.get?.("x-real-ip")?.trim() || "local";

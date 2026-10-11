@@ -10,40 +10,130 @@ import { getTemplate } from "@/lib/templates/catalog";
 import type { TemplateId } from "@/lib/templates/types";
 import { AiSettings, type AiBilling } from "@/components/account/AiSettings";
 
-interface AccountPortfolio { templateId: TemplateId; name: string; slug: string | null; publishedAt: string | null; updatedAt: string; hasUnpublishedChanges: boolean }
+interface AccountPortfolio {
+  templateId: TemplateId;
+  name: string;
+  slug: string | null;
+  publishedAt: string | null;
+  updatedAt: string;
+  hasUnpublishedChanges: boolean;
+}
 interface Billing {
-  plan: { id: string; name: string; standing: "active" | "grace"; daysLeft: number; endsAt: string | null; interval: "year" | "month"; autoRenew: boolean; hasCard: boolean };
+  plan: {
+    id: string;
+    name: string;
+    standing: "active" | "grace";
+    daysLeft: number;
+    endsAt: string | null;
+    interval: "year" | "month";
+    autoRenew: boolean;
+    hasCard: boolean;
+  };
   ai: AiBilling;
   emailsOptOut: boolean;
   payments: boolean;
-  orders: Array<{ id: string; kind: string; plan: string | null; term_years: number | null; term_months: number | null; credits: number | null; amount_cents: number; status: string; created_at: string }>;
+  orders: Array<{
+    id: string;
+    kind: string;
+    plan: string | null;
+    term_years: number | null;
+    term_months: number | null;
+    credits: number | null;
+    amount_cents: number;
+    status: string;
+    created_at: string;
+  }>;
 }
 
 const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
-const date = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const json = async (url: string, init?: RequestInit) => { const response = await fetch(url, { ...init, headers: { "Content-Type": "application/json" } }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error ?? "Something went wrong."); return body; };
+const date = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const json = async (url: string, init?: RequestInit) => {
+  const response = await fetch(url, { ...init, headers: { "Content-Type": "application/json" } });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error ?? "Something went wrong.");
+  return body;
+};
 
 function Heading({ id, title, children }: { id: string; title: string; children?: React.ReactNode }) {
-  return <div id={id} className="flex scroll-mt-24 flex-wrap items-end justify-between gap-3 border-t border-rule pt-10"><h2 className="font-display text-[1.7rem] leading-none tracking-[-0.02em]">{title}</h2>{children}</div>;
+  return (
+    <div
+      id={id}
+      className="flex scroll-mt-24 flex-wrap items-end justify-between gap-3 border-t border-rule pt-10"
+    >
+      <h2 className="font-display text-[1.7rem] leading-none tracking-[-0.02em]">{title}</h2>
+      {children}
+    </div>
+  );
 }
 
 function Plan({ billing, reload }: { billing: Billing; reload: () => void }) {
   const { plan } = billing;
   const [busy, setBusy] = useState(false);
   const pro = plan.id === "pro";
-  const line = !pro ? "Basic, free. One live portfolio with a blog and the Investigator; upgrade to Pro for up to three sites and your own domain."
-    : plan.standing === "grace" ? `Your Pro plan has ended. It keeps working for ${plan.daysLeft} more day${plan.daysLeft === 1 ? "" : "s"}, then your account moves to free Basic. Nothing is deleted.`
-    : `Pro, paid ${plan.interval === "month" ? "monthly" : "yearly"}, until ${date(plan.endsAt!)}.`;
-  return <section className="mt-10">
-    <Heading id="plan" title="Plan"><Link href="/pricing" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">{!pro ? "See Pro" : plan.standing !== "active" ? "Renew Pro" : "Plans"}</Link></Heading>
-    <p className="mt-4 text-[1.05rem]">{line}</p>
-    {pro && plan.hasCard && <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft">
-      <input type="checkbox" checked={plan.autoRenew} disabled={busy} onChange={async (event) => { setBusy(true); await json("/api/account/settings", { method: "PUT", body: JSON.stringify({ autoRenew: event.target.checked }) }).catch(() => undefined); setBusy(false); reload(); }} className="mt-1" />
-      <span>{plan.interval === "month" ? "Renew automatically each month with the card you used." : "Renew automatically each year with the card you used. We email you two weeks before."}</span>
-    </label>}
-    {billing.orders.length > 0 && <details className="mt-5 text-[0.92rem]"><summary className="cursor-pointer text-ink-soft">Payment history</summary>
-      <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule">{billing.orders.map((order) => <li key={order.id} className="flex justify-between gap-4 px-4 py-2.5"><span>{order.kind === "credits" ? `${order.credits?.toLocaleString("en")} credits` : `${order.plan?.[0]?.toUpperCase()}${order.plan?.slice(1)} ${order.kind === "renewal" ? "renewal" : `· ${order.term_months === 1 ? "1 month" : order.term_months ? `${order.term_months / 12} yr` : `${order.term_years} yr`}`}`}<span className="ml-2 text-ink-faint">{date(order.created_at)}</span></span><span className={order.status === "paid" ? "" : "text-[color:var(--destructive)]"}>{usd(order.amount_cents)}{order.status !== "paid" && ` · ${order.status}`}</span></li>)}</ul></details>}
-  </section>;
+  const line = !pro
+    ? "Basic, free. One live portfolio with a blog and the Investigator; upgrade to Pro for up to three sites and your own domain."
+    : plan.standing === "grace"
+      ? `Your Pro plan has ended. It keeps working for ${plan.daysLeft} more day${plan.daysLeft === 1 ? "" : "s"}, then your account moves to free Basic. Nothing is deleted.`
+      : `Pro, paid ${plan.interval === "month" ? "monthly" : "yearly"}, until ${date(plan.endsAt!)}.`;
+  return (
+    <section className="mt-10">
+      <Heading id="plan" title="Plan">
+        <Link
+          href="/pricing"
+          className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal"
+        >
+          {!pro ? "See Pro" : plan.standing !== "active" ? "Renew Pro" : "Plans"}
+        </Link>
+      </Heading>
+      <p className="mt-4 text-[1.05rem]">{line}</p>
+      {pro && plan.hasCard && (
+        <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft">
+          <input
+            type="checkbox"
+            checked={plan.autoRenew}
+            disabled={busy}
+            onChange={async (event) => {
+              setBusy(true);
+              await json("/api/account/settings", {
+                method: "PUT",
+                body: JSON.stringify({ autoRenew: event.target.checked }),
+              }).catch(() => undefined);
+              setBusy(false);
+              reload();
+            }}
+            className="mt-1"
+          />
+          <span>
+            {plan.interval === "month"
+              ? "Renew automatically each month with the card you used."
+              : "Renew automatically each year with the card you used. We email you two weeks before."}
+          </span>
+        </label>
+      )}
+      {billing.orders.length > 0 && (
+        <details className="mt-5 text-[0.92rem]">
+          <summary className="cursor-pointer text-ink-soft">Payment history</summary>
+          <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule">
+            {billing.orders.map((order) => (
+              <li key={order.id} className="flex justify-between gap-4 px-4 py-2.5">
+                <span>
+                  {order.kind === "credits"
+                    ? `${order.credits?.toLocaleString("en")} credits`
+                    : `${order.plan?.[0]?.toUpperCase()}${order.plan?.slice(1)} ${order.kind === "renewal" ? "renewal" : `· ${order.term_months === 1 ? "1 month" : order.term_months ? `${order.term_months / 12} yr` : `${order.term_years} yr`}`}`}
+                  <span className="ml-2 text-ink-faint">{date(order.created_at)}</span>
+                </span>
+                <span className={order.status === "paid" ? "" : "text-[color:var(--destructive)]"}>
+                  {usd(order.amount_cents)}
+                  {order.status !== "paid" && ` · ${order.status}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  );
 }
 
 function Portfolios() {
@@ -51,28 +141,109 @@ function Portfolios() {
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/portfolios").then(async (response) => { const body = await response.json().catch(() => ({})); if (cancelled) return; if (response.ok) setItems(body.portfolios); else setError(body.error ?? "Your portfolios could not be loaded."); }).catch(() => { if (!cancelled) setError("Your portfolios could not be loaded."); });
-    return () => { cancelled = true; };
+    fetch("/api/portfolios")
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (cancelled) return;
+        if (response.ok) setItems(body.portfolios);
+        else setError(body.error ?? "Your portfolios could not be loaded.");
+      })
+      .catch(() => {
+        if (!cancelled) setError("Your portfolios could not be loaded.");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
-  return <section className="mt-12">
-    <Heading id="portfolios" title="Portfolios"><Link href="/templatechooser" className="text-[0.92rem] underline underline-offset-4">New portfolio</Link></Heading>
-    {error ? <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{error}</p> : !items ? <p className="mt-5 text-sm text-ink-soft">Loading…</p>
-      : items.length === 0 ? <p className="mt-5 rounded-xl border border-dashed border-rule p-6 text-[0.95rem] text-ink-soft">Nothing saved yet. <Link href="/templatechooser" className="text-ink underline">Choose a template</Link> and it saves here as you edit.</p>
-      : <ul className="mt-5 divide-y divide-rule rounded-xl border border-rule">{items.map((item) => <li key={item.templateId} className="flex flex-wrap items-center justify-between gap-3 p-4">
-        <div className="min-w-0"><p className="truncate font-medium">{item.name || "Untitled portfolio"}</p><p className="text-[0.82rem] text-ink-soft">{getTemplate(item.templateId)?.name ?? item.templateId} · edited {date(item.updatedAt)}</p>
-          {item.publishedAt && item.slug ? <p className="mt-1 flex items-center gap-1 text-[0.82rem] text-emerald-800"><Globe size={12} /> Live at /p/{item.slug}{item.hasUnpublishedChanges && <span className="text-amber-800"> · unpublished changes</span>}</p> : <p className="mt-1 text-[0.82rem] text-ink-faint">Not published</p>}</div>
-        <div className="flex gap-2">{item.publishedAt && item.slug && <a href={`/p/${item.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-rule px-3 py-1.5 text-[0.88rem] hover:border-ink"><ExternalLink size={13} /> View</a>}
-          <Link href={`/editor/${item.templateId}`} className="inline-flex items-center gap-1 rounded-full bg-ink px-4 py-1.5 text-[0.88rem] text-paper"><PencilLine size={13} /> Edit</Link></div>
-      </li>)}</ul>}
-  </section>;
+  return (
+    <section className="mt-12">
+      <Heading id="portfolios" title="Portfolios">
+        <Link href="/templatechooser" className="text-[0.92rem] underline underline-offset-4">
+          New portfolio
+        </Link>
+      </Heading>
+      {error ? (
+        <p className="mt-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{error}</p>
+      ) : !items ? (
+        <p className="mt-5 text-sm text-ink-soft">Loading…</p>
+      ) : items.length === 0 ? (
+        <p className="mt-5 rounded-xl border border-dashed border-rule p-6 text-[0.95rem] text-ink-soft">
+          Nothing saved yet.{" "}
+          <Link href="/templatechooser" className="text-ink underline">
+            Choose a template
+          </Link>{" "}
+          and it saves here as you edit.
+        </p>
+      ) : (
+        <ul className="mt-5 divide-y divide-rule rounded-xl border border-rule">
+          {items.map((item) => (
+            <li key={item.templateId} className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div className="min-w-0">
+                <p className="truncate font-medium">{item.name || "Untitled portfolio"}</p>
+                <p className="text-[0.82rem] text-ink-soft">
+                  {getTemplate(item.templateId)?.name ?? item.templateId} · edited {date(item.updatedAt)}
+                </p>
+                {item.publishedAt && item.slug ? (
+                  <p className="mt-1 flex items-center gap-1 text-[0.82rem] text-emerald-800">
+                    <Globe size={12} /> Live at /p/{item.slug}
+                    {item.hasUnpublishedChanges && (
+                      <span className="text-amber-800"> · unpublished changes</span>
+                    )}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-[0.82rem] text-ink-faint">Not published</p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {item.publishedAt && item.slug && (
+                  <a
+                    href={`/p/${item.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 rounded-full border border-rule px-3 py-1.5 text-[0.88rem] hover:border-ink"
+                  >
+                    <ExternalLink size={13} /> View
+                  </a>
+                )}
+                <Link
+                  href={`/editor/${item.templateId}`}
+                  className="inline-flex items-center gap-1 rounded-full bg-ink px-4 py-1.5 text-[0.88rem] text-paper"
+                >
+                  <PencilLine size={13} /> Edit
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
 }
 
 function Emails({ billing, reload }: { billing: Billing; reload: () => void }) {
-  return <section className="mt-12">
-    <Heading id="emails" title="Emails" />
-    <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft"><input type="checkbox" checked={!billing.emailsOptOut} onChange={async (event) => { await json("/api/account/settings", { method: "PUT", body: JSON.stringify({ emailsOptOut: !event.target.checked }) }).catch(() => undefined); reload(); }} className="mt-1" />
-      <span>Send me reminders about my plan, and a weekly note when there are updates for my portfolio. Receipts are always sent.</span></label>
-  </section>;
+  return (
+    <section className="mt-12">
+      <Heading id="emails" title="Emails" />
+      <label className="mt-4 flex items-start gap-3 text-[0.95rem] text-ink-soft">
+        <input
+          type="checkbox"
+          checked={!billing.emailsOptOut}
+          onChange={async (event) => {
+            await json("/api/account/settings", {
+              method: "PUT",
+              body: JSON.stringify({ emailsOptOut: !event.target.checked }),
+            }).catch(() => undefined);
+            reload();
+          }}
+          className="mt-1"
+        />
+        <span>
+          Send me reminders about my plan, and a weekly note when there are updates for my portfolio. Receipts
+          are always sent.
+        </span>
+      </label>
+    </section>
+  );
 }
 
 function DeleteAccount() {
@@ -81,32 +252,88 @@ function DeleteAccount() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const remove = async () => {
-    setBusy(true); setError(null);
-    const response = await fetch("/api/account", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: typed }) });
+    setBusy(true);
+    setError(null);
+    const response = await fetch("/api/account", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirm: typed }),
+    });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) { setError(body.error ?? "Your account could not be deleted."); setBusy(false); return; }
+    if (!response.ok) {
+      setError(body.error ?? "Your account could not be deleted.");
+      setBusy(false);
+      return;
+    }
     await signOut({ callbackUrl: "/" });
   };
-  return <section className="mt-12">
-    <Heading id="delete" title="Delete account" />
-    <p className="mt-4 text-[0.92rem] text-ink-soft">Removes your profile, every portfolio (published pages go offline), images, domain connections and community posts. This can’t be undone. Domains you bought stay registered in your name; unused credits and prepaid time are not refunded automatically, so <Link href="/community/support" className="underline">ask us</Link> first if that matters.</p>
-    {!open ? <button onClick={() => setOpen(true)} className="mt-3 rounded-full border border-[color:var(--destructive)]/40 px-4 py-2 text-[0.88rem] text-[color:var(--destructive)]">Delete my account…</button>
-      : <div className="mt-3 flex flex-wrap items-center gap-2">
-        <input value={typed} onChange={(event) => setTyped(event.target.value)} placeholder="Type DELETE" aria-label="Type DELETE to confirm" className="rounded-lg border border-rule bg-transparent px-3 py-2 text-sm" />
-        <button disabled={typed !== "DELETE" || busy} onClick={() => void remove()} className="rounded-full bg-[color:var(--destructive)] px-4 py-2 text-sm text-white disabled:opacity-40">{busy ? "Deleting…" : "Permanently delete"}</button>
-        <button onClick={() => { setOpen(false); setTyped(""); }} className="px-2 text-sm text-ink-soft">Cancel</button>
-        {error && <p className="w-full text-sm text-[color:var(--destructive)]">{error}</p>}
-      </div>}
-  </section>;
+  return (
+    <section className="mt-12">
+      <Heading id="delete" title="Delete account" />
+      <p className="mt-4 text-[0.92rem] text-ink-soft">
+        Removes your profile, every portfolio (published pages go offline), images, domain connections and
+        community posts. This can’t be undone. Domains you bought stay registered in your name; unused credits
+        and prepaid time are not refunded automatically, so{" "}
+        <Link href="/community/support" className="underline">
+          ask us
+        </Link>{" "}
+        first if that matters.
+      </p>
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="mt-3 rounded-full border border-[color:var(--destructive)]/40 px-4 py-2 text-[0.88rem] text-[color:var(--destructive)]"
+        >
+          Delete my account…
+        </button>
+      ) : (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <input
+            value={typed}
+            onChange={(event) => setTyped(event.target.value)}
+            placeholder="Type DELETE"
+            aria-label="Type DELETE to confirm"
+            className="rounded-lg border border-rule bg-transparent px-3 py-2 text-sm"
+          />
+          <button
+            disabled={typed !== "DELETE" || busy}
+            onClick={() => void remove()}
+            className="rounded-full bg-[color:var(--destructive)] px-4 py-2 text-sm text-white disabled:opacity-40"
+          >
+            {busy ? "Deleting…" : "Permanently delete"}
+          </button>
+          <button
+            onClick={() => {
+              setOpen(false);
+              setTyped("");
+            }}
+            className="px-2 text-sm text-ink-soft"
+          >
+            Cancel
+          </button>
+          {error && <p className="w-full text-sm text-[color:var(--destructive)]">{error}</p>}
+        </div>
+      )}
+    </section>
+  );
 }
 
 export default function AccountPage() {
   const { data: session, status } = useSession();
   const [billing, setBilling] = useState<Billing | null>(null);
   // Returning from Stripe: ?paid=plan or ?paid=credits.
-  const [paid] = useState<string | null>(() => (typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("paid")));
-  const load = useCallback(() => { fetch("/api/account/billing").then((response) => response.ok ? response.json() : null).then(setBilling).catch(() => undefined); }, []);
-  useEffect(() => { if (status === "authenticated") load(); }, [status, load]);
+  const [paid] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("paid"),
+  );
+  const load = useCallback(() => {
+    fetch("/api/account/billing")
+      .then((response) => (response.ok ? response.json() : null))
+      .then(setBilling)
+      .catch(() => undefined);
+  }, []);
+  useEffect(() => {
+    if (status === "authenticated") load();
+  }, [status, load]);
   useEffect(() => {
     if (!paid) return;
     // The webhook usually lands within seconds; refresh once more to pick it up.
@@ -114,24 +341,105 @@ export default function AccountPage() {
     return () => window.clearTimeout(timer);
   }, [paid, load]);
 
-  if (status === "loading") return <main className="px-5 py-16"><p className="mx-auto max-w-3xl text-ink-soft">Loading your account…</p></main>;
-  if (!session?.user) return <main className="px-5 py-16"><div className="mx-auto max-w-md rounded-2xl border border-rule bg-card p-8"><h1 className="font-display text-[2.2rem] leading-[1.05] tracking-[-0.02em]">Sign in to your account</h1><p className="mt-3 text-ink-soft">Use Google or your email and password.</p><div className="mt-6 flex flex-wrap gap-3"><GoogleSignInButton /><Link href="/login?callbackUrl=/account" className="inline-flex items-center rounded-xl border border-rule px-5 py-3 text-sm font-bold">Sign in with email</Link></div></div></main>;
-  return <main className="px-5 pb-24 pt-14">
-    <div className="mx-auto max-w-3xl">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Account</p><h1 className="mt-2 font-display text-[clamp(2.2rem,5vw,3.2rem)] leading-none tracking-[-0.02em]">{session.user.name || "Your account"}</h1><p className="mt-2 text-ink-soft">{session.user.email}</p></div>
-        <button onClick={() => void signOut({ callbackUrl: "/" })} className="inline-flex items-center gap-2 rounded-full border border-rule px-4 py-2 text-[0.9rem] hover:border-ink"><LogOut size={15} /> Sign out</button>
+  if (status === "loading")
+    return (
+      <main className="px-5 py-16">
+        <p className="mx-auto max-w-3xl text-ink-soft">Loading your account…</p>
+      </main>
+    );
+  if (!session?.user)
+    return (
+      <main className="px-5 py-16">
+        <div className="mx-auto max-w-md rounded-2xl border border-rule bg-card p-8">
+          <h1 className="font-display text-[2.2rem] leading-[1.05] tracking-[-0.02em]">
+            Sign in to your account
+          </h1>
+          <p className="mt-3 text-ink-soft">Use Google or your email and password.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <GoogleSignInButton />
+            <Link
+              href="/login?callbackUrl=/account"
+              className="inline-flex items-center rounded-xl border border-rule px-5 py-3 text-sm font-bold"
+            >
+              Sign in with email
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  return (
+    <main className="px-5 pb-24 pt-14">
+      <div className="mx-auto max-w-3xl">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Account</p>
+            <h1 className="mt-2 font-display text-[clamp(2.2rem,5vw,3.2rem)] leading-none tracking-[-0.02em]">
+              {session.user.name || "Your account"}
+            </h1>
+            <p className="mt-2 text-ink-soft">{session.user.email}</p>
+          </div>
+          <button
+            onClick={() => void signOut({ callbackUrl: "/" })}
+            className="inline-flex items-center gap-2 rounded-full border border-rule px-4 py-2 text-[0.9rem] hover:border-ink"
+          >
+            <LogOut size={15} /> Sign out
+          </button>
+        </div>
+        <ProfileSection />
+        {paid && (
+          <p
+            role="status"
+            className="mt-8 rounded-xl bg-emerald-50 px-4 py-3 text-[0.95rem] text-emerald-950"
+          >
+            Thank you, your payment went through.{" "}
+            {paid === "credits" ? "Your credits are on their way." : "Your plan is active."} A receipt is in
+            your inbox.
+          </p>
+        )}
+        {billing ? (
+          <Plan billing={billing} reload={load} />
+        ) : (
+          <p className="mt-10 text-sm text-ink-soft">Loading your plan…</p>
+        )}
+        <Portfolios />
+        {billing && <AiSettings ai={billing.ai} payments={billing.payments} reload={load} />}
+        <section className="mt-12">
+          <Heading id="updates" title="The Investigator">
+            <Link
+              href="/account/investigator"
+              className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal"
+            >
+              Set it up
+            </Link>
+          </Heading>
+          <p className="mt-4 text-[0.95rem] text-ink-soft">
+            Keeps your website up to date with your career. It checks your own profiles on the schedule you
+            choose (any schedule, on every plan; your first check is free), finds new jobs, talks, awards and
+            articles, and either asks you first or updates your site for you.
+          </p>
+        </section>
+        {billing && <Emails billing={billing} reload={load} />}
+        <section className="mt-12">
+          <Heading id="domains" title="Domains" />
+          <p className="mt-4 text-[0.95rem] text-ink-soft">
+            See when the domains you bought here expire, and renew them.{" "}
+            <Link href="/account/domains" className="text-ink underline underline-offset-4">
+              Your domains
+            </Link>
+          </p>
+        </section>
+        <section className="mt-12">
+          <Heading id="help" title="Help" />
+          <p className="mt-4 text-[0.95rem] text-ink-soft">
+            Questions about billing, domains or anything else?{" "}
+            <Link href="/community/support" className="text-ink underline underline-offset-4">
+              Open a support request
+            </Link>
+            ; a person replies, usually within a working day.
+          </p>
+        </section>
+        <DeleteAccount />
       </div>
-      <ProfileSection />
-      {paid && <p role="status" className="mt-8 rounded-xl bg-emerald-50 px-4 py-3 text-[0.95rem] text-emerald-950">Thank you, your payment went through. {paid === "credits" ? "Your credits are on their way." : "Your plan is active."} A receipt is in your inbox.</p>}
-      {billing ? <Plan billing={billing} reload={load} /> : <p className="mt-10 text-sm text-ink-soft">Loading your plan…</p>}
-      <Portfolios />
-      {billing && <AiSettings ai={billing.ai} payments={billing.payments} reload={load} />}
-      <section className="mt-12"><Heading id="updates" title="The Investigator"><Link href="/account/investigator" className="rounded-full bg-ink px-4 py-2 text-[0.9rem] text-paper hover:bg-signal">Set it up</Link></Heading><p className="mt-4 text-[0.95rem] text-ink-soft">Keeps your website up to date with your career. It checks your own profiles on the schedule you choose (any schedule, on every plan; your first check is free), finds new jobs, talks, awards and articles, and either asks you first or updates your site for you.</p></section>
-      {billing && <Emails billing={billing} reload={load} />}
-      <section className="mt-12"><Heading id="domains" title="Domains" /><p className="mt-4 text-[0.95rem] text-ink-soft">See when the domains you bought here expire, and renew them. <Link href="/account/domains" className="text-ink underline underline-offset-4">Your domains</Link></p></section>
-      <section className="mt-12"><Heading id="help" title="Help" /><p className="mt-4 text-[0.95rem] text-ink-soft">Questions about billing, domains or anything else? <Link href="/community/support" className="text-ink underline underline-offset-4">Open a support request</Link>; a person replies, usually within a working day.</p></section>
-      <DeleteAccount />
-    </div>
-  </main>;
+    </main>
+  );
 }

@@ -17,10 +17,7 @@ export default function InfoCloud({
   // Close cloud when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        cloudRef.current &&
-        !cloudRef.current.contains(event.target as Node)
-      ) {
+      if (cloudRef.current && !cloudRef.current.contains(event.target as Node)) {
         setShowInfo(false);
       }
     }

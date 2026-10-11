@@ -3,13 +3,21 @@
  * /admin/journal: an edit is saved to the database under the same slug and
  * replaces the version here. New posts written there live only in the database.
  */
-export interface BuiltInArticle { slug: string; title: string; description: string; category: string; publishedAt: string; body: string }
+export interface BuiltInArticle {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  publishedAt: string;
+  body: string;
+}
 
 export const BUILT_IN_ARTICLES: BuiltInArticle[] = [
   {
     slug: "what-to-put-on-a-portfolio",
     title: "What to put on a portfolio when your work isn’t visual",
-    description: "Nurses, accountants, salespeople and engineers can have a portfolio too. Here is what goes on one when you don’t make pictures for a living.",
+    description:
+      "Nurses, accountants, salespeople and engineers can have a portfolio too. Here is what goes on one when you don’t make pictures for a living.",
     category: "Portfolio strategy",
     publishedAt: "2026-09-28",
     body: `Most portfolio advice is written for designers and photographers. If your work is a ward round, a closed quarter, a passed audit or a building that didn’t fall down, it can feel like a portfolio isn’t for you. It is. You just show different evidence.
@@ -51,7 +59,8 @@ Fuccura has templates drawn for these jobs specifically. [Find yours by job titl
   {
     slug: "write-a-portfolio-introduction",
     title: "How to write an introduction people actually finish",
-    description: "The first two lines of your portfolio decide whether anyone reads the rest. A simple formula for writing them.",
+    description:
+      "The first two lines of your portfolio decide whether anyone reads the rest. A simple formula for writing them.",
     category: "Writing",
     publishedAt: "2026-09-24",
     body: `People decide in a few seconds whether your portfolio is relevant to them. The introduction is where they decide. Most introductions waste those seconds on adjectives.
@@ -87,7 +96,8 @@ In the Fuccura editor, the *One-line introduction* field is this sentence. The A
   {
     slug: "portfolio-project-case-study",
     title: "A simple structure for a project case study",
-    description: "Problem, approach, result: a four-part structure that makes any project easy to follow, with examples from different jobs.",
+    description:
+      "Problem, approach, result: a four-part structure that makes any project easy to follow, with examples from different jobs.",
     category: "Case studies",
     publishedAt: "2026-09-20",
     body: `A case study is just a well-told project. The structure below works for a rebrand, a hospital audit, a kitchen refit or a sales campaign.
@@ -121,7 +131,8 @@ Every Fuccura template has a projects section with fields for exactly these part
   {
     slug: "choose-portfolio-template",
     title: "How to choose a portfolio template that fits your work",
-    description: "Pick a design for the people who will read it, not for yourself. Four questions that make the choice quick.",
+    description:
+      "Pick a design for the people who will read it, not for yourself. Four questions that make the choice quick.",
     category: "Design",
     publishedAt: "2026-09-16",
     body: `A template should make your work easier to understand. It shouldn’t compete with it. Ask these four questions and the choice usually makes itself.
@@ -149,7 +160,8 @@ In Fuccura your content is stored separately from the design, so you can switch 
   {
     slug: "own-domain-name-for-portfolio",
     title: "Why your portfolio should be on your own domain name",
-    description: "yourname.com looks more professional, is easier to remember and stays yours if you change platforms. How to get one and what it costs.",
+    description:
+      "yourname.com looks more professional, is easier to remember and stays yours if you change platforms. How to get one and what it costs.",
     category: "Getting online",
     publishedAt: "2026-09-12",
     body: `A portfolio at *yourname.com* is easier to say out loud, easier to put on a business card and harder to forget than one buried in someone else’s web address.
@@ -181,7 +193,8 @@ In Fuccura you can buy a domain inside the editor and it connects automatically,
   {
     slug: "portfolio-for-career-change",
     title: "Building a portfolio when you’re changing careers",
-    description: "You don’t need experience in the new field to show you can do the job. How to use transferable work and small projects as evidence.",
+    description:
+      "You don’t need experience in the new field to show you can do the job. How to use transferable work and small projects as evidence.",
     category: "Career",
     publishedAt: "2026-09-08",
     body: `Changing careers creates a chicken-and-egg problem: you need experience to get the job, and the job to get experience. A portfolio breaks the loop because it shows ability, not job titles.
@@ -211,7 +224,8 @@ Fuccura lets you keep separate portfolios with different templates, so you can h
   {
     slug: "keep-your-portfolio-up-to-date",
     title: "Keeping your portfolio up to date without it becoming a chore",
-    description: "A fifteen-minute routine every quarter keeps a portfolio current. What to add, what to remove, and what to automate.",
+    description:
+      "A fifteen-minute routine every quarter keeps a portfolio current. What to add, what to remove, and what to automate.",
     category: "Workflow",
     publishedAt: "2026-09-04",
     body: `Most portfolios are out of date because updating them feels like a project. It doesn’t have to be. A short routine, done regularly, keeps yours current.
@@ -245,7 +259,8 @@ Your portfolio doesn’t have to be finished to be useful. Publish the good-enou
   {
     slug: "portfolio-accessibility-basics",
     title: "Accessibility basics every portfolio should get right",
-    description: "Readable text, real alt text, enough contrast and links that make sense: small changes that help every visitor.",
+    description:
+      "Readable text, real alt text, enough contrast and links that make sense: small changes that help every visitor.",
     category: "Design",
     publishedAt: "2026-08-31",
     body: `An accessible portfolio is easier for everyone to use, including the hiring manager reading it on a phone on a train. These basics cover most of it.

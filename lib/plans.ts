@@ -46,14 +46,32 @@ export const WELCOME_CREDITS = 60;
 
 export const PLANS: Record<PlanId, PlanLimits> = {
   basic: {
-    id: "basic", name: "Basic", summary: "Your portfolio online with a blog, free for as long as you like.", prices: {},
-    portfolios: 1, publishedPortfolios: 1, aiEditsPerDay: 30, showsBranding: true, ownDomain: false,
-    storageMb: 100, blog: true, autoSync: true,
+    id: "basic",
+    name: "Basic",
+    summary: "Your portfolio online with a blog, free for as long as you like.",
+    prices: {},
+    portfolios: 1,
+    publishedPortfolios: 1,
+    aiEditsPerDay: 30,
+    showsBranding: true,
+    ownDomain: false,
+    storageMb: 100,
+    blog: true,
+    autoSync: true,
   },
   pro: {
-    id: "pro", name: "Pro", summary: "A year of your site on your own domain, with up to 10 changes done for you.", prices: { year: 1000, month: 900 },
-    portfolios: 3, publishedPortfolios: 3, aiEditsPerDay: 80, showsBranding: false, ownDomain: true,
-    storageMb: 1000, blog: true, autoSync: true,
+    id: "pro",
+    name: "Pro",
+    summary: "A year of your site on your own domain, with up to 10 changes done for you.",
+    prices: { year: 1000, month: 900 },
+    portfolios: 3,
+    publishedPortfolios: 3,
+    aiEditsPerDay: 80,
+    showsBranding: false,
+    ownDomain: true,
+    storageMb: 1000,
+    blog: true,
+    autoSync: true,
   },
 };
 
@@ -108,14 +126,20 @@ export interface AccountStanding {
 
 const DAY = 86_400_000;
 
-export function standingOf(row: { plan: string; plan_expires_at: Date | string | null; plan_interval?: string | null }, now = new Date()): AccountStanding {
+export function standingOf(
+  row: { plan: string; plan_expires_at: Date | string | null; plan_interval?: string | null },
+  now = new Date(),
+): AccountStanding {
   const interval: BillingInterval = row.plan_interval === "month" ? "month" : "year";
   const plan = planFor(row.plan);
-  if (plan.id === "basic" || !row.plan_expires_at) return { standing: "active", plan: PLANS.basic, interval, endsAt: null, daysLeft: 0 };
+  if (plan.id === "basic" || !row.plan_expires_at)
+    return { standing: "active", plan: PLANS.basic, interval, endsAt: null, daysLeft: 0 };
   const endsAt = new Date(row.plan_expires_at);
   const remaining = endsAt.getTime() - now.getTime();
-  if (remaining > 0) return { standing: "active", plan, interval, endsAt, daysLeft: Math.ceil(remaining / DAY) };
+  if (remaining > 0)
+    return { standing: "active", plan, interval, endsAt, daysLeft: Math.ceil(remaining / DAY) };
   const graceLeft = remaining + GRACE_DAYS * DAY;
-  if (graceLeft > 0) return { standing: "grace", plan, interval, endsAt, daysLeft: Math.ceil(graceLeft / DAY) };
+  if (graceLeft > 0)
+    return { standing: "grace", plan, interval, endsAt, daysLeft: Math.ceil(graceLeft / DAY) };
   return { standing: "active", plan: PLANS.basic, interval, endsAt: null, daysLeft: 0 };
 }

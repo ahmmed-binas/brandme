@@ -3,18 +3,32 @@ import { importFromGitHub } from "@/lib/import/github";
 import { addSuggestions, fingerprint, knownTitles, type NewSuggestion } from "./suggestions";
 
 /** New public repositories, as suggestions, without saving them. */
-export async function githubSuggestions(ownerId: string, username: string, source: "github" | "investigator" = "github"): Promise<NewSuggestion[]> {
+export async function githubSuggestions(
+  ownerId: string,
+  username: string,
+  source: "github" | "investigator" = "github",
+): Promise<NewSuggestion[]> {
   const profile = await importFromGitHub(username);
   const known = await knownTitles(ownerId);
-  const normalise = (title?: string) => (title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-  const items: NewSuggestion[] = (profile.projects ?? []).filter((project) => project.title && !known.has(normalise(project.title))).slice(0, 4).map((project) => ({
-    source,
-    title: `Add “${project.title}” from GitHub`,
-    detail: project.description || null,
-    sourceUrl: project.github ?? null,
-    fingerprint: fingerprint("github", username, project.title ?? ""),
-    payload: { kind: "add_project", project: { ...project, year: String(new Date().getFullYear()), category: "Open source" } },
-  }));
+  const normalise = (title?: string) =>
+    (title ?? "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  const items: NewSuggestion[] = (profile.projects ?? [])
+    .filter((project) => project.title && !known.has(normalise(project.title)))
+    .slice(0, 4)
+    .map((project) => ({
+      source,
+      title: `Add “${project.title}” from GitHub`,
+      detail: project.description || null,
+      sourceUrl: project.github ?? null,
+      fingerprint: fingerprint("github", username, project.title ?? ""),
+      payload: {
+        kind: "add_project",
+        project: { ...project, year: String(new Date().getFullYear()), category: "Open source" },
+      },
+    }));
   return items;
 }
 

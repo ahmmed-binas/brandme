@@ -93,7 +93,12 @@ export const moreCanvasScenes = {
 };
 
 /* ---------- HTML scenes ---------- */
-const sheet = (body, title, sub, scale) => `<svg width="1600" height="1100" viewBox="0 0 1600 1100" xmlns="http://www.w3.org/2000/svg" style="background:#f7f6f1;font-family:Mono">
+const sheet = (
+  body,
+  title,
+  sub,
+  scale,
+) => `<svg width="1600" height="1100" viewBox="0 0 1600 1100" xmlns="http://www.w3.org/2000/svg" style="background:#f7f6f1;font-family:Mono">
 <defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#dfe6ee" stroke-width="1"/></pattern>
 <pattern id="wood" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(8)"><path d="M0 7 Q 3.5 4 7 7 T 14 7" fill="none" stroke="#b07a3a" stroke-width="1.2" opacity=".55"/></pattern>
 <pattern id="conc" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="3" cy="4" r="1.2" fill="#777"/><circle cx="9" cy="9" r=".8" fill="#777"/><path d="M6 1 l2 2" stroke="#777"/></pattern></defs>
@@ -102,7 +107,8 @@ ${body}
 <g transform="translate(1180 900)"><rect width="390" height="170" fill="#f7f6f1" stroke="#1a1a1a" stroke-width="2"/><path d="M0 60 H390 M0 120 H390 M240 120 V170" stroke="#1a1a1a"/><text x="18" y="40" font-size="22" fill="#1a1a1a">${title}</text><text x="18" y="96" font-size="16" fill="#444">${sub}</text><text x="18" y="152" font-size="15" fill="#444">ARDEN PARTNERSHIP</text><text x="258" y="152" font-size="15" fill="#444">${scale}</text></g></svg>`;
 
 export const moreHtml = {};
-moreHtml["eng-bridge"] = sheet(String.raw`<g stroke="#1a1a1a" fill="none" stroke-width="3">
+moreHtml["eng-bridge"] = sheet(
+  String.raw`<g stroke="#1a1a1a" fill="none" stroke-width="3">
 <path d="M150 560 H1450" stroke-width="7"/><path d="M150 380 H1450" stroke-width="7"/>
 ${Array.from({ length: 12 }, (_, i) => `<path d="M${150 + i * 108.3} 560 L${204 + i * 108.3} 380 L${258 + i * 108.3} 560"/>`).join("")}
 ${Array.from({ length: 25 }, (_, i) => `<path d="M${150 + i * 54.16} 560 v14" stroke-width="2"/>`).join("")}
@@ -112,8 +118,13 @@ ${Array.from({ length: 25 }, (_, i) => `<path d="M${150 + i * 54.16} 560 v14" st
 <g stroke="#b5302a" fill="#b5302a" font-size="18" stroke-width="1.6"><path d="M150 300 H1450 M150 288 v24 M1450 288 v24"/><text x="740" y="290" stroke="none">46 000</text>
 <path d="M1500 380 V560 M1488 380 h24 M1488 560 h24"/><text x="1515" y="478" stroke="none">2 800</text>
 <path d="M150 980 H 1450" stroke-dasharray="4 6"/><text x="160" y="1010" stroke="none">DECK SOFFIT +12.400 · ABUTMENT A</text><text x="1180" y="1010" stroke="none">ABUTMENT B</text></g>
-<g font-size="17" fill="#1a1a1a"><text x="160" y="210">WARREN TRUSS · S355 CHS TOP & BOTTOM CHORDS</text><text x="160" y="238">LIFTED IN ONE PIECE · 62 t · NIGHT POSSESSION</text><text x="160" y="266" fill="#555">ALL DIMENSIONS IN mm UNLESS NOTED</text></g>`, "KELVIN FOOTBRIDGE", "GENERAL ARRANGEMENT · ELEVATION", "1:200");
-moreHtml["eng-detail"] = sheet(String.raw`<g stroke="#1a1a1a" fill="none" stroke-width="3">
+<g font-size="17" fill="#1a1a1a"><text x="160" y="210">WARREN TRUSS · S355 CHS TOP & BOTTOM CHORDS</text><text x="160" y="238">LIFTED IN ONE PIECE · 62 t · NIGHT POSSESSION</text><text x="160" y="266" fill="#555">ALL DIMENSIONS IN mm UNLESS NOTED</text></g>`,
+  "KELVIN FOOTBRIDGE",
+  "GENERAL ARRANGEMENT · ELEVATION",
+  "1:200",
+);
+moreHtml["eng-detail"] = sheet(
+  String.raw`<g stroke="#1a1a1a" fill="none" stroke-width="3">
 <rect x="620" y="110" width="260" height="760" fill="url(#wood)"/><rect x="620" y="110" width="260" height="760"/>
 <rect x="160" y="360" width="460" height="300" fill="url(#wood)"/><rect x="160" y="360" width="460" height="300"/><rect x="880" y="360" width="460" height="300" fill="url(#wood)"/><rect x="880" y="360" width="460" height="300"/>
 <path d="M440 510 H1060" stroke="#2b5d8a" stroke-width="10"/><rect x="430" y="380" width="640" height="16" fill="#2b5d8a" stroke="#2b5d8a" opacity=".25"/>
@@ -122,34 +133,135 @@ ${[480, 540, 960, 1020].flatMap((x) => [440, 510, 580].map((y) => `<circle cx="$
 <g font-size="17" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="1"><path d="M480 440 L300 200" fill="none"/><text x="140" y="190" stroke="none">M20 DOWELS, 8.8 · 3 ROWS</text>
 <path d="M760 510 L1150 220" fill="none"/><text x="1000" y="205" stroke="none">10mm FLITCH PLATE S275, INTUMESCENT</text>
 <path d="M300 660 L250 780" fill="none"/><text x="150" y="805" stroke="none">GL28h 200×360 BEAM</text><path d="M750 870 L760 960" fill="none"/><text x="660" y="985" stroke="none">GL28h 360×360 COLUMN</text></g>
-<g stroke="#b5302a" fill="#b5302a" font-size="17" stroke-width="1.4"><path d="M160 700 H620 M160 690 v20 M620 690 v20"/><text x="360" y="730" stroke="none">460</text><path d="M110 360 V660 M100 360 h20 M100 660 h20"/><text x="40" y="515" stroke="none">300</text></g>`, "DETAIL 7", "GLULAM BEAM TO COLUMN · FLITCH", "1:10");
+<g stroke="#b5302a" fill="#b5302a" font-size="17" stroke-width="1.4"><path d="M160 700 H620 M160 690 v20 M620 690 v20"/><text x="360" y="730" stroke="none">460</text><path d="M110 360 V660 M100 360 h20 M100 660 h20"/><text x="40" y="515" stroke="none">300</text></g>`,
+  "DETAIL 7",
+  "GLULAM BEAM TO COLUMN · FLITCH",
+  "1:10",
+);
 
-moreHtml["job-rewire"] = `<svg width="1600" height="1100" viewBox="0 0 1600 1100" xmlns="http://www.w3.org/2000/svg" style="background:#fbfaf6;font-family:Mono">
+moreHtml["job-rewire"] =
+  `<svg width="1600" height="1100" viewBox="0 0 1600 1100" xmlns="http://www.w3.org/2000/svg" style="background:#fbfaf6;font-family:Mono">
 <rect width="1600" height="1100" fill="#fbfaf6"/><g stroke="#1d1d1d" fill="none"><path d="M140 140 H1300 V900 H140Z" stroke-width="14"/><path d="M620 140 V520 M620 600 V900 M140 520 H400 M480 520 H620 M980 140 V420 M980 500 V900 M620 640 H980" stroke-width="8"/></g>
 <g font-size="22" fill="#1d1d1d"><text x="300" y="320">LOUNGE</text><text x="760" y="300">KITCHEN / DINER</text><text x="1080" y="300">STUDY</text><text x="280" y="720">HALL</text><text x="740" y="790">UTILITY</text><text x="1090" y="720">WC</text></g>
-${[[180, 200], [560, 200], [180, 470], [560, 470], [680, 180], [920, 180], [920, 380], [680, 380], [1040, 200], [1260, 200], [1260, 470], [700, 600], [940, 600], [300, 850]].map(([x, y]) => `<g transform="translate(${x} ${y})"><circle r="15" fill="#fff" stroke="#c0392b" stroke-width="3"/><path d="M-7 -4 v8 M7 -4 v8" stroke="#c0392b" stroke-width="3"/></g>`).join("")}
-${[[380, 330], [800, 330], [1140, 330], [380, 700], [800, 760], [1140, 700]].map(([x, y]) => `<g transform="translate(${x} ${y})" stroke="#2c5aa0" stroke-width="3" fill="#fff"><circle r="18"/><path d="M-12 -12 L12 12 M12 -12 L-12 12"/></g>`).join("")}
+${[
+  [180, 200],
+  [560, 200],
+  [180, 470],
+  [560, 470],
+  [680, 180],
+  [920, 180],
+  [920, 380],
+  [680, 380],
+  [1040, 200],
+  [1260, 200],
+  [1260, 470],
+  [700, 600],
+  [940, 600],
+  [300, 850],
+]
+  .map(
+    ([x, y]) =>
+      `<g transform="translate(${x} ${y})"><circle r="15" fill="#fff" stroke="#c0392b" stroke-width="3"/><path d="M-7 -4 v8 M7 -4 v8" stroke="#c0392b" stroke-width="3"/></g>`,
+  )
+  .join("")}
+${[
+  [380, 330],
+  [800, 330],
+  [1140, 330],
+  [380, 700],
+  [800, 760],
+  [1140, 700],
+]
+  .map(
+    ([x, y]) =>
+      `<g transform="translate(${x} ${y})" stroke="#2c5aa0" stroke-width="3" fill="#fff"><circle r="18"/><path d="M-12 -12 L12 12 M12 -12 L-12 12"/></g>`,
+  )
+  .join("")}
 <g fill="none" stroke-width="3"><path d="M180 200 Q 370 170 560 200 Q 600 330 560 470 Q 370 500 180 470 Q 150 330 180 200" stroke="#c0392b" stroke-dasharray="12 7"/><path d="M680 180 Q 800 150 920 180 Q 950 280 920 380 Q 800 410 680 380" stroke="#c0392b" stroke-dasharray="12 7"/><path d="M380 330 Q 600 420 800 330 Q 960 260 1140 330" stroke="#2c5aa0" stroke-dasharray="4 7"/><path d="M380 700 Q 590 820 800 760 Q 970 700 1140 700" stroke="#2c5aa0" stroke-dasharray="4 7"/></g>
 <g transform="translate(330 860)"><rect x="-50" y="-30" width="100" height="56" fill="#1d1d1d"/><text x="-38" y="6" font-size="16" fill="#fff">CU 18w</text></g>
 <g transform="translate(1340 160)" font-size="17" fill="#1d1d1d"><text y="0">KEY</text><g transform="translate(14 36)"><circle r="12" fill="#fff" stroke="#c0392b" stroke-width="3"/><text x="28" y="6">Double socket</text></g><g transform="translate(14 76)" stroke="#2c5aa0" stroke-width="3" fill="#fff"><circle r="12"/><path d="M-8 -8 L8 8 M8 -8 L-8 8"/></g><text x="42" y="82">Ceiling light</text><path d="M0 116 h28" stroke="#c0392b" stroke-width="3" stroke-dasharray="10 6"/><text x="42" y="122">Ring final, 32A</text><path d="M0 156 h28" stroke="#2c5aa0" stroke-width="3" stroke-dasharray="4 6"/><text x="42" y="162">Lighting, 6A</text></g>
 <g transform="translate(1180 940)"><rect width="380" height="130" fill="#fbfaf6" stroke="#1d1d1d" stroke-width="2"/><text x="18" y="40" font-size="21" fill="#1d1d1d">BISHOPSTON REWIRE</text><text x="18" y="74" font-size="15" fill="#555">GROUND FLOOR · SOCKETS & LIGHTING</text><text x="18" y="108" font-size="15" fill="#555">GALLAGHER ELECTRICAL · REV C</text></g>
 <text x="140" y="1000" font-family="Caveat" font-size="40" fill="#c0392b">extra double by the sofa + USB-C ✓</text></svg>`;
 
-const label = ["MAIN", "Kitchen ring", "Cooker", "Lights down", "Lights up", "Sockets up", "Shower", "EV charger", "Boiler", "Garage", "Smoke alarms", "Utility", "Spare"];
-moreHtml["job-panel"] = `<div style="width:1600px;height:1000px;background:radial-gradient(circle at 40% 30%,#e9e4da,#bdb5a8);display:grid;place-items:center;font-family:Inter">
+const label = [
+  "MAIN",
+  "Kitchen ring",
+  "Cooker",
+  "Lights down",
+  "Lights up",
+  "Sockets up",
+  "Shower",
+  "EV charger",
+  "Boiler",
+  "Garage",
+  "Smoke alarms",
+  "Utility",
+  "Spare",
+];
+moreHtml["job-panel"] =
+  `<div style="width:1600px;height:1000px;background:radial-gradient(circle at 40% 30%,#e9e4da,#bdb5a8);display:grid;place-items:center;font-family:Inter">
 <div style="width:1260px;border-radius:14px;background:linear-gradient(#fbfbf9,#e9e8e3);box-shadow:0 40px 80px -30px rgba(40,30,20,.55),inset 0 2px 0 #fff;padding:50px 46px 40px">
 <div style="display:flex;justify-content:space-between;font-size:15px;letter-spacing:.14em;color:#8a857c;margin-bottom:22px"><span>RCBO CONSUMER UNIT · 18 WAY · AMD 3</span><span>TESTED 03/2025</span></div>
-<div style="display:flex;gap:4px;background:#2a2a2a;padding:18px 16px;border-radius:6px">${label.map((name, i) => `<div style="flex:${i === 0 ? 2.2 : 1};background:linear-gradient(${i === 0 ? "#c33a2c,#8f2219" : "#f6f6f3,#d9d8d2"});border-radius:4px;height:300px;position:relative;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)">
+<div style="display:flex;gap:4px;background:#2a2a2a;padding:18px 16px;border-radius:6px">${label
+    .map(
+      (
+        name,
+        i,
+      ) => `<div style="flex:${i === 0 ? 2.2 : 1};background:linear-gradient(${i === 0 ? "#c33a2c,#8f2219" : "#f6f6f3,#d9d8d2"});border-radius:4px;height:300px;position:relative;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)">
  <div style="position:absolute;left:50%;top:90px;width:${i === 0 ? 46 : 26}px;height:70px;transform:translateX(-50%);background:${i === 0 ? "#6e1710" : i === 12 ? "#1d1d1d" : "#1d1d1d"};border-radius:4px"><div style="position:absolute;left:3px;right:3px;top:${i === 12 ? 40 : 4}px;height:26px;background:${i === 0 ? "#ffd7cf" : "#f4f4f1"};border-radius:3px"></div></div>
  ${i ? `<div style="position:absolute;left:50%;top:190px;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;background:#e2b13c;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)"></div><div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:12px;color:#5d5a54">B${[32, 40, 6, 6, 32, 40, 40, 16, 20, 6, 32, 6][i - 1] ?? 6}</div>` : `<div style="position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:13px;color:#fff;letter-spacing:.1em">100A</div>`}
-</div>`).join("")}</div>
+</div>`,
+    )
+    .join("")}</div>
 <div style="display:flex;gap:4px;margin-top:12px;padding:0 16px">${label.map((name, i) => `<div style="flex:${i === 0 ? 2.2 : 1};font-family:Caveat;font-size:21px;line-height:1;color:#1f3b8c;text-align:center;transform:rotate(-2deg)">${name}</div>`).join("")}</div></div></div>`;
 
-moreHtml["lesson-board"] = `<div style="width:1600px;height:1000px;background:#2c4a7a;position:relative;overflow:hidden;font-family:Caveat">
+moreHtml["lesson-board"] =
+  `<div style="width:1600px;height:1000px;background:#2c4a7a;position:relative;overflow:hidden;font-family:Caveat">
 <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 9px)"></div>
 <div style="position:absolute;inset:0;border:34px solid transparent;border-image:repeating-linear-gradient(45deg,#f2c14e 0 22px,#e85d75 22px 44px,#4cc9a0 44px 66px) 34"></div>
-<div style="position:absolute;top:70px;left:0;right:0;text-align:center">${"KITCHEN CHEMISTRY".split("").map((ch, i) => ch === " " ? `<span style="display:inline-block;width:40px"></span>` : `<span style="display:inline-block;margin:0 3px;padding:8px 14px;background:${["#f2c14e", "#fffaf0", "#e85d75", "#4cc9a0"][i % 4]};color:#1d2a44;font-family:Anton;font-size:64px;transform:rotate(${(i % 3) - 1}deg);box-shadow:0 6px 0 rgba(0,0,0,.2)">${ch}</span>`).join("")}</div>
-${[[110, 260, -3, "#fffdf6", "Red cabbage indicator", "lemon = PINK<br/>soap = GREEN<br/>bicarb = BLUE-GREEN"], [560, 250, 2, "#fef3c7", "Which fizzes most?", "1st: bicarb + vinegar<br/>2nd: bicarb + lemon<br/>salt + vinegar: nothing"], [1040, 270, -2, "#fffdf6", "Why does bread rise?", "yeast makes CO₂<br/>gluten traps it<br/>heat sets it"], [180, 610, 3, "#e0f2fe", "Salt crystals", "day 1 · day 4 · day 9<br/>slower cooling =<br/>bigger crystals!"], [1080, 620, -3, "#fce7f3", "Year 8 predictions", "Amira: 70% fizz<br/>Josh: 'it'll explode'<br/>(it did not)"]].map(([x, y, rot, bg, head, body]) => `<div style="position:absolute;left:${x}px;top:${y}px;width:360px;padding:26px 28px;background:${bg};transform:rotate(${rot}deg);box-shadow:0 18px 30px -12px rgba(0,0,0,.45);color:#1d2a44"><div style="position:absolute;top:-12px;left:50%;width:22px;height:22px;border-radius:50%;background:#e63946;box-shadow:0 3px 0 #9b1d26"></div><div style="font-size:38px;font-weight:700;line-height:1">${head}</div><div style="font-size:30px;line-height:1.15;margin-top:12px">${body}</div></div>`).join("")}
+<div style="position:absolute;top:70px;left:0;right:0;text-align:center">${"KITCHEN CHEMISTRY"
+    .split("")
+    .map((ch, i) =>
+      ch === " "
+        ? `<span style="display:inline-block;width:40px"></span>`
+        : `<span style="display:inline-block;margin:0 3px;padding:8px 14px;background:${["#f2c14e", "#fffaf0", "#e85d75", "#4cc9a0"][i % 4]};color:#1d2a44;font-family:Anton;font-size:64px;transform:rotate(${(i % 3) - 1}deg);box-shadow:0 6px 0 rgba(0,0,0,.2)">${ch}</span>`,
+    )
+    .join("")}</div>
+${[
+  [110, 260, -3, "#fffdf6", "Red cabbage indicator", "lemon = PINK<br/>soap = GREEN<br/>bicarb = BLUE-GREEN"],
+  [
+    560,
+    250,
+    2,
+    "#fef3c7",
+    "Which fizzes most?",
+    "1st: bicarb + vinegar<br/>2nd: bicarb + lemon<br/>salt + vinegar: nothing",
+  ],
+  [1040, 270, -2, "#fffdf6", "Why does bread rise?", "yeast makes CO₂<br/>gluten traps it<br/>heat sets it"],
+  [
+    180,
+    610,
+    3,
+    "#e0f2fe",
+    "Salt crystals",
+    "day 1 · day 4 · day 9<br/>slower cooling =<br/>bigger crystals!",
+  ],
+  [
+    1080,
+    620,
+    -3,
+    "#fce7f3",
+    "Year 8 predictions",
+    "Amira: 70% fizz<br/>Josh: 'it'll explode'<br/>(it did not)",
+  ],
+]
+  .map(
+    ([x, y, rot, bg, head, body]) =>
+      `<div style="position:absolute;left:${x}px;top:${y}px;width:360px;padding:26px 28px;background:${bg};transform:rotate(${rot}deg);box-shadow:0 18px 30px -12px rgba(0,0,0,.45);color:#1d2a44"><div style="position:absolute;top:-12px;left:50%;width:22px;height:22px;border-radius:50%;background:#e63946;box-shadow:0 3px 0 #9b1d26"></div><div style="font-size:38px;font-weight:700;line-height:1">${head}</div><div style="font-size:30px;line-height:1.15;margin-top:12px">${body}</div></div>`,
+  )
+  .join("")}
 <div style="position:absolute;left:600px;top:600px;width:420px;padding:22px;background:#fffdf6;transform:rotate(-1deg);box-shadow:0 18px 30px -12px rgba(0,0,0,.45)"><div style="font-size:34px;font-weight:700;color:#1d2a44">The pH scale</div><div style="display:flex;margin-top:12px;height:54px">${["#e63946", "#f3722c", "#f8961e", "#f9c74f", "#90be6d", "#43aa8b", "#4d908e", "#577590", "#3a5a9b", "#5e3c99", "#7b2cbf"].map((c, i) => `<div style="flex:1;background:${c};display:grid;place-items:center;color:#fff;font-family:Inter;font-weight:700;font-size:16px">${i * 1 + 1}</div>`).join("")}</div><div style="display:flex;justify-content:space-between;font-size:26px;color:#1d2a44;margin-top:6px"><span>acid</span><span>neutral</span><span>alkali</span></div></div></div>`;
 
-export const moreFonts = (font) => ({ Caveat: font("@fontsource-variable/caveat", "caveat-latin-wght-normal.woff2") });
+export const moreFonts = (font) => ({
+  Caveat: font("@fontsource-variable/caveat", "caveat-latin-wght-normal.woff2"),
+});

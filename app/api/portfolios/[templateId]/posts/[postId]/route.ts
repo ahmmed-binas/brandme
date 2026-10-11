@@ -11,7 +11,12 @@ export const PATCH = route(async (request: Request, { params }: Context) => {
   const body = await readJson(request, 110_000);
   if (body instanceof Response) return body;
   try {
-    const post = await updatePost(owner.user.id, owner.templateId, (await params).postId, (body ?? {}) as PostInput);
+    const post = await updatePost(
+      owner.user.id,
+      owner.templateId,
+      (await params).postId,
+      (body ?? {}) as PostInput,
+    );
     return post ? Response.json({ post }) : jsonError(404, "That post no longer exists.");
   } catch (error) {
     if (error instanceof PostError) return jsonError(422, error.message);
@@ -22,5 +27,7 @@ export const PATCH = route(async (request: Request, { params }: Context) => {
 export const DELETE = route(async (_request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  return await deletePost(owner.user.id, owner.templateId, (await params).postId) ? Response.json({ ok: true }) : jsonError(404, "That post no longer exists.");
+  return (await deletePost(owner.user.id, owner.templateId, (await params).postId))
+    ? Response.json({ ok: true })
+    : jsonError(404, "That post no longer exists.");
 });

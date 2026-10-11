@@ -35,5 +35,12 @@ export interface Role {
   starter: RoleStarter;
 }
 
-export const role = (id: string, label: string, plural: string, profession: ProfessionId, aliases: string[], starter: RoleStarter, templates?: string[]): Role =>
-  ({ id, label, plural, profession, aliases, starter, templates });
+export const role = (
+  id: string,
+  label: string,
+  plural: string,
+  profession: ProfessionId,
+  aliases: string[],
+  starter: RoleStarter,
+  templates?: string[],
+): Role => ({ id, label, plural, profession, aliases, starter, templates });

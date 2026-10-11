@@ -12,7 +12,10 @@ export const POST = route(async (request: Request) => {
   const body = await readJson(request, 30_000);
   if (body instanceof Response) return body;
   const { subject, category, message } = (body ?? {}) as Record<string, unknown>;
-  const result = await createTicket({ id: user.id, name: user.name, email: user.email }, { subject: String(subject ?? ""), category: String(category ?? ""), body: String(message ?? "") });
+  const result = await createTicket(
+    { id: user.id, name: user.name, email: user.email },
+    { subject: String(subject ?? ""), category: String(category ?? ""), body: String(message ?? "") },
+  );
   if (!result.ok) return jsonError(result.status, result.error);
   return Response.json({ id: result.id }, { status: 201 });
 });

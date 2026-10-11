@@ -20,7 +20,9 @@ export async function readJson(request: Request, maxBytes: number): Promise<unkn
 }
 
 /** Common guard for owner-only portfolio routes. */
-export async function requireOwner(params: Promise<{ templateId: string }>): Promise<{ user: CurrentUser; templateId: TemplateId } | Response> {
+export async function requireOwner(
+  params: Promise<{ templateId: string }>,
+): Promise<{ user: CurrentUser; templateId: TemplateId } | Response> {
   if (!databaseConfigured()) return jsonError(503, "Account saving is not configured on this server.");
   const { templateId } = await params;
   if (!isTemplateId(templateId)) return jsonError(404, "Unknown template.");
@@ -43,13 +45,23 @@ const UNSAFE = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 function crossSite(request: Request): Response | null {
   if (!UNSAFE.has(request.method)) return null;
   const site = request.headers.get("sec-fetch-site");
-  if (site === "cross-site") return jsonError(403, "This request came from another website, so it was refused.");
+  if (site === "cross-site")
+    return jsonError(403, "This request came from another website, so it was refused.");
   const origin = request.headers.get("origin");
   if (!origin || origin === "null") return null;
   let originHost: string;
-  try { originHost = new URL(origin).host.toLowerCase(); } catch { return jsonError(403, "This request came from another website, so it was refused."); }
-  const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "").split(",")[0]!.trim().toLowerCase();
-  return host && originHost !== host ? jsonError(403, "This request came from another website, so it was refused.") : null;
+  try {
+    originHost = new URL(origin).host.toLowerCase();
+  } catch {
+    return jsonError(403, "This request came from another website, so it was refused.");
+  }
+  const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "")
+    .split(",")[0]!
+    .trim()
+    .toLowerCase();
+  return host && originHost !== host
+    ? jsonError(403, "This request came from another website, so it was refused.")
+    : null;
 }
 
 /**
@@ -66,7 +78,10 @@ export function route<C = unknown>(handler: Handler<C>): Handler<C> {
     } catch (error) {
       if (isDatabaseUnavailable(error)) {
         console.error(`[api] database unavailable on ${request.method} ${new URL(request.url).pathname}`);
-        return jsonError(503, "We can’t reach our database right now. Your changes are still saved on this device; try again in a minute.");
+        return jsonError(
+          503,
+          "We can’t reach our database right now. Your changes are still saved on this device; try again in a minute.",
+        );
       }
       console.error(`[api] ${request.method} ${new URL(request.url).pathname} failed`, error);
       return jsonError(500, "Something went wrong on our side. Please try again.");

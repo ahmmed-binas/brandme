@@ -1,16 +1,27 @@
 "use client";
-import { useCallback, useMemo, useState, type ChangeEvent, type DragEvent, type FocusEvent, type FormEvent, type KeyboardEvent, type MouseEvent } from "react";
 import {
-  getFileType,
-  extractFileContent,
-  cleanOCRText,
-  extractOCRJSON,
-} from "@/utils/FileExtraction";
+  useCallback,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type FocusEvent,
+  type FormEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
+import { getFileType, extractFileContent, cleanOCRText, extractOCRJSON } from "@/utils/FileExtraction";
 import LoadingBars from "@/utils/LoadingUI";
 import InfoCloud from "@/utils/cloudInfo";
 
 /** Text read from an uploaded CV, shown as HTML: escaped first, so markup inside a file can't run. */
-const textToHtml = (text: string) => (text ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!).replace(/\n/g, "<br>");
+const textToHtml = (text: string) =>
+  (text ?? "")
+    .replace(
+      /[&<>"']/g,
+      (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!,
+    )
+    .replace(/\n/g, "<br>");
 
 const UPLOAD_GIF_SRC = "/uploadcv.gif";
 
@@ -186,7 +197,7 @@ function DetailExtractorPage() {
     setProgress(0);
     try {
       const rawContent = await extractFileContent(fileToProcess, (p: number) =>
-        setProgress(Math.round(p * 100))
+        setProgress(Math.round(p * 100)),
       );
       const cleanContent = cleanOCRText(rawContent);
       setCvText(cleanContent);
@@ -244,19 +255,12 @@ function DetailExtractorPage() {
 
   const handleEducationChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEducation((prev) =>
-      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry))
-    );
+    setEducation((prev) => prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)));
   };
 
-  const handleProjectChange = (
-    index: number,
-    e: { target: { name: string; value: string } }
-  ) => {
+  const handleProjectChange = (index: number, e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
-    setProjects((prev) =>
-      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry))
-    );
+    setProjects((prev) => prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)));
   };
 
   const handleProjectImageChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
@@ -266,19 +270,14 @@ function DetailExtractorPage() {
     const previewUrl = URL.createObjectURL(selected);
     setProjects((prev) =>
       prev.map((entry, i) =>
-        i === index ? { ...entry, project_pic: previewUrl, project_file: selected } : entry
-      )
+        i === index ? { ...entry, project_pic: previewUrl, project_file: selected } : entry,
+      ),
     );
   };
 
-  const handleExperienceChange = (
-    index: number,
-    e: { target: { name: string; value: string } }
-  ) => {
+  const handleExperienceChange = (index: number, e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
-    setExperience((prev) =>
-      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry))
-    );
+    setExperience((prev) => prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)));
   };
 
   const handleTechnologyChange = (expIndex: number, techIndex: number, value: string) => {
@@ -289,29 +288,26 @@ function DetailExtractorPage() {
               ...entry,
               technologies: entry.technologies.map((tech, t) => (t === techIndex ? value : tech)),
             }
-          : entry
-      )
+          : entry,
+      ),
     );
   };
 
   // ================= ADD / DELETE =================
   const addEducation = () => setEducation((prev) => [...prev, { ...EMPTY_EDUCATION }]);
-  const deleteEducation = (index: number) =>
-    setEducation((prev) => prev.filter((_, i) => i !== index));
+  const deleteEducation = (index: number) => setEducation((prev) => prev.filter((_, i) => i !== index));
 
   const addProject = () => setProjects((prev) => [...prev, { ...EMPTY_PROJECT }]);
-  const deleteProject = (index: number) =>
-    setProjects((prev) => prev.filter((_, i) => i !== index));
+  const deleteProject = (index: number) => setProjects((prev) => prev.filter((_, i) => i !== index));
 
   const addExperience = () => setExperience((prev) => [...prev, { ...EMPTY_EXPERIENCE, technologies: [""] }]);
-  const deleteExperience = (index: number) =>
-    setExperience((prev) => prev.filter((_, i) => i !== index));
+  const deleteExperience = (index: number) => setExperience((prev) => prev.filter((_, i) => i !== index));
 
   const addTechnology = (expIndex: number) =>
     setExperience((prev) =>
       prev.map((entry, i) =>
-        i === expIndex ? { ...entry, technologies: [...entry.technologies, ""] } : entry
-      )
+        i === expIndex ? { ...entry, technologies: [...entry.technologies, ""] } : entry,
+      ),
     );
 
   const deleteTechnology = (expIndex: number, techIndex: number) =>
@@ -319,8 +315,8 @@ function DetailExtractorPage() {
       prev.map((entry, i) =>
         i === expIndex
           ? { ...entry, technologies: entry.technologies.filter((_, t) => t !== techIndex) }
-          : entry
-      )
+          : entry,
+      ),
     );
 
   // ================= WORD COUNT =================
@@ -328,12 +324,13 @@ function DetailExtractorPage() {
 
   const handleWordCount = (
     e: ChangeEvent<HTMLInputElement> | { currentTarget: HTMLDivElement },
-    field: WordCountField
+    field: WordCountField,
   ) => {
     const target = e.currentTarget as HTMLInputElement | HTMLDivElement;
-    const text = "isContentEditable" in target && target.isContentEditable
-      ? target.innerText
-      : (target as HTMLInputElement).value ?? "";
+    const text =
+      "isContentEditable" in target && target.isContentEditable
+        ? target.innerText
+        : ((target as HTMLInputElement).value ?? "");
     setWordCount((prev) => ({ ...prev, [field]: text.length }));
   };
 
@@ -366,11 +363,7 @@ function DetailExtractorPage() {
     insertLineBreak(e.currentTarget);
   };
 
-  const trimEditableOnInput = (
-    e: FormEvent<HTMLDivElement>,
-    field: WordCountField,
-    maxChars: number
-  ) => {
+  const trimEditableOnInput = (e: FormEvent<HTMLDivElement>, field: WordCountField, maxChars: number) => {
     const el = e.currentTarget;
     handleWordCount({ currentTarget: el }, field);
     if (el.innerText.length <= maxChars) return;
@@ -399,14 +392,15 @@ function DetailExtractorPage() {
       name: formData.name.trim(),
       professional_title: formData.professional_title.trim(),
       tagline: formData.about_yourself_sm.trim(),
-      summary: formData.summary_about_yourself
-        ? [getPlainText(formData.summary_about_yourself)]
-        : [],
+      summary: formData.summary_about_yourself ? [getPlainText(formData.summary_about_yourself)] : [],
       github: formData.github_link.trim(),
       linkedin: formData.linkedin_link.trim(),
       instagram: formData.instagram_link.trim(),
       email: formData.email.trim(),
-      skills: formData.skills.split(/[,\n]/).map((skill) => skill.trim()).filter(Boolean),
+      skills: formData.skills
+        .split(/[,\n]/)
+        .map((skill) => skill.trim())
+        .filter(Boolean),
       projects: projects
         .filter((project) => project.project_name.trim() || project.project_summary.trim())
         .map((project) => ({
@@ -434,123 +428,78 @@ function DetailExtractorPage() {
   };
 
   function mapAIDataToForm(aiData: any) {
+    return {
+      form: {
+        name: aiData.name || "",
+        professional_title: aiData.professional_title || "",
 
-  return {
+        about_yourself_sm: aiData.summary?.slice(0, 65) || "",
 
-    form: {
-      name: aiData.name || "",
-      professional_title: aiData.professional_title || "",
+        summary_about_yourself: aiData.summary || "",
 
-      about_yourself_sm:
-        aiData.summary?.slice(0, 65) || "",
+        email: aiData.email || "",
+        phone: aiData.phone || "",
+        address: aiData.address || "",
 
-      summary_about_yourself:
-        aiData.summary || "",
+        linkedin_link: aiData.linkedin || "",
 
-      email: aiData.email || "",
-      phone: aiData.phone || "",
-      address: aiData.address || "",
+        github_link: aiData.github || "",
 
-      linkedin_link:
-        aiData.linkedin || "",
+        instagram_link: "",
 
-      github_link:
-        aiData.github || "",
+        skills: Array.isArray(aiData.skills) ? aiData.skills.join(", ") : "",
+      },
 
-      instagram_link: "",
+      experience: (aiData.experience || []).map((exp: any) => ({
+        work_institution_name: exp.company || "",
 
-      skills:
-        Array.isArray(aiData.skills)
-          ? aiData.skills.join(", ")
-          : "",
+        work_title: exp.job_title || "",
 
-    },
+        place_of_work: exp.location || "",
 
+        link_for_company: "",
 
-    experience:
-      (aiData.experience || []).map((exp:any)=>({
+        work_summary: exp.description || "",
 
-        work_institution_name:
-          exp.company || "",
+        start_date: exp.start_date || "",
 
-        work_title:
-          exp.job_title || "",
+        end_date: exp.end_date || "",
 
-        place_of_work:
-          exp.location || "",
-
-        link_for_company:
-          "",
-
-        work_summary:
-          exp.description || "",
-
-        start_date:
-          exp.start_date || "",
-
-        end_date:
-          exp.end_date || "",
-
-        technologies:
-          exp.technologies || [""]
-
+        technologies: exp.technologies || [""],
       })),
 
+      education: (aiData.education || []).map((edu: any) => ({
+        institution: edu.institution || "",
 
+        subject: edu.degree || "",
 
-    education:
+        startDate: edu.start_date || "",
 
-      (aiData.education || []).map((edu:any)=>({
+        endDate: edu.end_date || "",
 
-        institution:
-          edu.institution || "",
-
-        subject:
-          edu.degree || "",
-
-        startDate:
-          edu.start_date || "",
-
-        endDate:
-          edu.end_date || "",
-
-        place:
-          edu.location || ""
-
+        place: edu.location || "",
       })),
 
+      projects: (aiData.projects || []).map((project: any) => ({
+        project_name: project.name || "",
 
-    projects:
+        project_pic: "",
 
-      (aiData.projects || []).map((project:any)=>({
-
-        project_name:
-          project.name || "",
-
-        project_pic:
-          "",
-
-        project_summary:
-          project.description || ""
-
-      }))
-
-  };
-
-}
-const handleAIProcess = async () => {
-  if (!cvText.trim()) {
-    setAiError("Upload a CV first — there's no text to summarize yet.");
-    return;
+        project_summary: project.description || "",
+      })),
+    };
   }
+  const handleAIProcess = async () => {
+    if (!cvText.trim()) {
+      setAiError("Upload a CV first — there's no text to summarize yet.");
+      return;
+    }
 
-  setAiLoading(true);
-  setAiError(null);
+    setAiLoading(true);
+    setAiError(null);
 
-  try {
-    const response = await fetch(
-      "http://localhost:5000/api/ai/generate-summary",
-      {
+    try {
+      const response = await fetch("http://localhost:5000/api/ai/generate-summary", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -558,265 +507,171 @@ const handleAIProcess = async () => {
         body: JSON.stringify({
           cv_text: cvText,
         }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI summary request failed (${response.status})`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`AI summary request failed (${response.status})`);
-    }
+      const aiData = await response.json();
 
-    const aiData = await response.json();
+      console.log("FINAL AI DATA:", aiData);
 
-    console.log("FINAL AI DATA:", aiData);
+      // server.js returns 200 OK even on failure paths, using
+      // { error: ... } or { warning: ..., raw: ... } instead of a
+      // proper HTTP error status — so response.ok alone won't catch
+      // these. Check explicitly before touching form state.
+      if (aiData.error) {
+        setAiError(aiData.error);
+        return;
+      }
 
-    // server.js returns 200 OK even on failure paths, using
-    // { error: ... } or { warning: ..., raw: ... } instead of a
-    // proper HTTP error status — so response.ok alone won't catch
-    // these. Check explicitly before touching form state.
-    if (aiData.error) {
-      setAiError(aiData.error);
-      return;
-    }
+      if (aiData.warning) {
+        console.warn("AI warning:", aiData.warning, aiData.raw);
+        setAiError(
+          "The AI response wasn't fully usable — some fields may be missing. You can fill them in manually.",
+        );
+        // Fall through: some paths still return partial/raw data worth
+        // keeping in the form, so we don't `return` here.
+      }
 
-    if (aiData.warning) {
-      console.warn("AI warning:", aiData.warning, aiData.raw);
-      setAiError(
-        "The AI response wasn't fully usable — some fields may be missing. You can fill them in manually."
-      );
-      // Fall through: some paths still return partial/raw data worth
-      // keeping in the form, so we don't `return` here.
-    }
+      // -------- MAIN FORM DATA --------
 
-    // -------- MAIN FORM DATA --------
+      setFormData((prev) => ({
+        ...prev,
 
-    setFormData((prev) => ({
-      ...prev,
+        name: aiData.name || prev.name,
 
-      name:
-        aiData.name || prev.name,
+        professional_title: aiData.professional_title || prev.professional_title,
 
-      professional_title:
-        aiData.professional_title || prev.professional_title,
+        about_yourself_sm: aiData.summary ? aiData.summary.substring(0, 65) : prev.about_yourself_sm,
 
+        summary_about_yourself: aiData.summary || prev.summary_about_yourself,
 
-      about_yourself_sm:
-        aiData.summary
-          ? aiData.summary.substring(0,65)
-          : prev.about_yourself_sm,
+        email: aiData.email || prev.email,
 
+        phone: aiData.phone || prev.phone,
 
-  
+        address: aiData.address || prev.address,
 
-      summary_about_yourself:
-        aiData.summary || prev.summary_about_yourself,
+        linkedin_link: aiData.linkedin || prev.linkedin_link,
 
+        github_link: aiData.github || prev.github_link,
 
-      email:
-        aiData.email || prev.email,
+        skills: Array.isArray(aiData.skills) ? aiData.skills.join(", ") : prev.skills,
+      }));
 
+      // -------- SUMMARY EDITOR --------
 
-      phone:
-        aiData.phone || prev.phone,
+      const editor = document.getElementById("summaryEditor");
 
+      if (editor && aiData.summary) {
+        editor.innerText = aiData.summary;
+      }
 
-      address:
-        aiData.address || prev.address,
+      // -------- EXPERIENCE --------
 
+      if (Array.isArray(aiData.experience) && aiData.experience.length > 0) {
+        setExperience(
+          aiData.experience.map((exp: any) => ({
+            work_institution_name: exp.company || "",
 
-      linkedin_link:
-        aiData.linkedin || prev.linkedin_link,
+            work_title: exp.job_title || "",
 
+            place_of_work: exp.location || "",
 
-      github_link:
-        aiData.github || prev.github_link,
+            link_for_company: "",
 
+            work_summary: exp.description || "",
 
-      skills:
-        Array.isArray(aiData.skills)
-          ? aiData.skills.join(", ")
-          : prev.skills
-
-    }));
-
-
-
-
-
-    // -------- SUMMARY EDITOR --------
-
-    const editor =
-      document.getElementById("summaryEditor");
-
-
-    if (editor && aiData.summary) {
-      editor.innerText = aiData.summary;
-    }
-
-
-
-
-    // -------- EXPERIENCE --------
-
-    if (
-      Array.isArray(aiData.experience) &&
-      aiData.experience.length > 0
-    ) {
-
-      setExperience(
-        aiData.experience.map((exp:any)=>({
-
-          work_institution_name:
-            exp.company || "",
-
-          work_title:
-            exp.job_title || "",
-
-          place_of_work:
-            exp.location || "",
-
-          link_for_company:
-            "",
-
-          work_summary:
-            exp.description || "",
-
-          start_date:
-            exp.start_date || "",
-
-          end_date:
-            exp.end_date || "",
-
-          technologies:
-            exp.technologies?.length
-              ? exp.technologies
-              : [""]
-
-        }))
-      );
-
-    }
-
-
-
-
-    // -------- EDUCATION --------
-
-    if (
-      Array.isArray(aiData.education) &&
-      aiData.education.length > 0
-    ) {
-
-      setEducation(
-        aiData.education.map((edu:any)=>({
-
-          institution:
-            edu.institution || "",
-
-          subject:
-            edu.degree || "",
-
-          startDate:
-            edu.start_date || "",
-
-          endDate:
-            edu.end_date || "",
-
-          place:
-            edu.location || ""
-
-        }))
-      );
-
-    }
-
-
-
-
-    // -------- PROJECTS --------
-
-    if (
-      Array.isArray(aiData.projects) &&
-      aiData.projects.length > 0
-    ) {
-
-      setProjects(
-        aiData.projects.map((project:any)=>({
-
-          project_name:
-            project.name || "",
-
-          project_pic:
-            "",
-
-          project_summary:
-            project.description || ""
-
-        }))
-      );
-
-    }
-
-
-
-    // -------- SAVE FOR TEMPLATE PREVIEW --------
-    // Lets TemplateChooser render the same data via TemplateTSXOne
-    // whenever the user navigates there, without prop drilling across
-    // routes. Shaped to match PortfolioData, not the internal
-    // formData/experience/education/projects state above.
-
-    const previewData = {
-      name: aiData.name || formData.name || "",
-      professional_title: aiData.professional_title || formData.professional_title || "",
-      tagline: formData.about_yourself_sm || formData.summary_about_yourself || "",
-      summary: aiData.summary ? [aiData.summary] : [],
-      github: aiData.github || formData.github_link || "",
-      linkedin: aiData.linkedin || formData.linkedin_link || "",
-      instagram: formData.instagram_link || "",
-      email: aiData.email || formData.email || "",
-      skills: Array.isArray(aiData.skills) ? aiData.skills : [],
-      projects: Array.isArray(aiData.projects)
-        ? aiData.projects.map((p: any) => ({
-            title: p.name || "",
-            description: p.description || "",
-            technologies: p.technologies || [],
-            github: p.github || "",
-            live_url: p.live_url || "",
-          }))
-        : [],
-      experience: Array.isArray(aiData.experience)
-        ? aiData.experience.map((exp: any) => ({
-            job_title: exp.job_title || "",
-            company: exp.company || "",
-            location: exp.location || "",
             start_date: exp.start_date || "",
+
             end_date: exp.end_date || "",
-            description: exp.description || "",
-            technologies: exp.technologies || [],
-          }))
-        : [],
-    };
 
-    sessionStorage.setItem("portfolioData", JSON.stringify(previewData));
+            technologies: exp.technologies?.length ? exp.technologies : [""],
+          })),
+        );
+      }
 
+      // -------- EDUCATION --------
 
+      if (Array.isArray(aiData.education) && aiData.education.length > 0) {
+        setEducation(
+          aiData.education.map((edu: any) => ({
+            institution: edu.institution || "",
 
-  } catch (error) {
+            subject: edu.degree || "",
 
-    console.error(
-      "AI summary error:",
-      error
-    );
+            startDate: edu.start_date || "",
 
-    setAiError(
-      "Couldn't generate a summary right now. Please try again."
-    );
+            endDate: edu.end_date || "",
 
-  } finally {
+            place: edu.location || "",
+          })),
+        );
+      }
 
-    setAiLoading(false);
+      // -------- PROJECTS --------
 
-  }
-};
+      if (Array.isArray(aiData.projects) && aiData.projects.length > 0) {
+        setProjects(
+          aiData.projects.map((project: any) => ({
+            project_name: project.name || "",
+
+            project_pic: "",
+
+            project_summary: project.description || "",
+          })),
+        );
+      }
+
+      // -------- SAVE FOR TEMPLATE PREVIEW --------
+      // Lets TemplateChooser render the same data via TemplateTSXOne
+      // whenever the user navigates there, without prop drilling across
+      // routes. Shaped to match PortfolioData, not the internal
+      // formData/experience/education/projects state above.
+
+      const previewData = {
+        name: aiData.name || formData.name || "",
+        professional_title: aiData.professional_title || formData.professional_title || "",
+        tagline: formData.about_yourself_sm || formData.summary_about_yourself || "",
+        summary: aiData.summary ? [aiData.summary] : [],
+        github: aiData.github || formData.github_link || "",
+        linkedin: aiData.linkedin || formData.linkedin_link || "",
+        instagram: formData.instagram_link || "",
+        email: aiData.email || formData.email || "",
+        skills: Array.isArray(aiData.skills) ? aiData.skills : [],
+        projects: Array.isArray(aiData.projects)
+          ? aiData.projects.map((p: any) => ({
+              title: p.name || "",
+              description: p.description || "",
+              technologies: p.technologies || [],
+              github: p.github || "",
+              live_url: p.live_url || "",
+            }))
+          : [],
+        experience: Array.isArray(aiData.experience)
+          ? aiData.experience.map((exp: any) => ({
+              job_title: exp.job_title || "",
+              company: exp.company || "",
+              location: exp.location || "",
+              start_date: exp.start_date || "",
+              end_date: exp.end_date || "",
+              description: exp.description || "",
+              technologies: exp.technologies || [],
+            }))
+          : [],
+      };
+
+      sessionStorage.setItem("portfolioData", JSON.stringify(previewData));
+    } catch (error) {
+      console.error("AI summary error:", error);
+
+      setAiError("Couldn't generate a summary right now. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-100 p-4 sm:p-8">
       {loading && <LoadingBars message="Loading" progress={progress} />}
@@ -824,7 +679,10 @@ const handleAIProcess = async () => {
       <div className="mx-auto mb-6 max-w-5xl">
         <p className="text-sm font-bold uppercase tracking-[0.16em] text-blue-700">Portfolio studio</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Build it your way.</h1>
-        <p className="mt-2 max-w-2xl text-slate-600">Edit every word, project, image, and experience manually—or import a CV to use as a starting point. Nothing is published until you choose to preview it.</p>
+        <p className="mt-2 max-w-2xl text-slate-600">
+          Edit every word, project, image, and experience manually—or import a CV to use as a starting point.
+          Nothing is published until you choose to preview it.
+        </p>
       </div>
       <div className="mx-auto flex w-full max-w-5xl min-h-[680px] bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Left Section - CV Upload */}
@@ -867,7 +725,10 @@ const handleAIProcess = async () => {
             {dragActive && <p className="text-sm mt-1 text-blue-500">Drop the file here...</p>}
           </div>
 
-          <p className="mt-5 rounded-lg bg-blue-50 p-3 text-center text-xs leading-5 text-blue-900">AI-assisted import is optional. Connect an AI provider only after reviewing its privacy terms and explicitly consenting to share your information.</p>
+          <p className="mt-5 rounded-lg bg-blue-50 p-3 text-center text-xs leading-5 text-blue-900">
+            AI-assisted import is optional. Connect an AI provider only after reviewing its privacy terms and
+            explicitly consenting to share your information.
+          </p>
 
           <button
             type="button"
@@ -1008,65 +869,62 @@ const handleAIProcess = async () => {
                 />
               </div>
 
-         <div className="relative">
+              <div className="relative">
+                {/* Show template only when AI summary is empty */}
+                {!formData.summary_about_yourself && (
+                  <div className="absolute inset-0 text-gray-400 opacity-40 pointer-events-none whitespace-pre-line px-2 py-1 text-[0.65rem]">
+                    <p className="text-xs md:text-base leading-relaxed mb-4">
+                      I’m a developer passionate about crafting accessible, pixel-perfect web experiences that
+                      fuse thoughtful design with robust engineering.
+                    </p>
 
-  {/* Show template only when AI summary is empty */}
-  {!formData.summary_about_yourself && (
-    <div className="absolute inset-0 text-gray-400 opacity-40 pointer-events-none whitespace-pre-line px-2 py-1 text-[0.65rem]">
-      <p className="text-xs md:text-base leading-relaxed mb-4">
-        I’m a developer passionate about crafting accessible, pixel-perfect web
-        experiences that fuse thoughtful design with robust engineering.
-      </p>
+                    <p className="text-xs md:text-base leading-relaxed mb-4">
+                      I thrive at the intersection of design and development — building interfaces that look
+                      great, perform efficiently, and remain inclusive for all users.
+                    </p>
 
-      <p className="text-xs md:text-base leading-relaxed mb-4">
-        I thrive at the intersection of design and development — building interfaces
-        that look great, perform efficiently, and remain inclusive for all users.
-      </p>
+                    <p className="text-base md:text-lg leading-relaxed mb-4">
+                      During my internship at{" "}
+                      <span className="font-semibold text-blue-600">Kaizen Star Technologies</span>, I worked
+                      independently to design, develop, and deploy projects.
+                    </p>
 
-      <p className="text-base md:text-lg leading-relaxed mb-4">
-        During my internship at{" "}
-        <span className="font-semibold text-blue-600">
-          Kaizen Star Technologies
-        </span>,
-        I worked independently to design, develop, and deploy projects.
-      </p>
+                    <p className="text-base md:text-lg leading-relaxed">
+                      My goal is to provide{" "}
+                      <span className="font-semibold text-blue-600">
+                        real-world solutions powered by artificial intelligence
+                      </span>
+                      .
+                    </p>
+                  </div>
+                )}
 
-      <p className="text-base md:text-lg leading-relaxed">
-        My goal is to provide{" "}
-        <span className="font-semibold text-blue-600">
-          real-world solutions powered by artificial intelligence
-        </span>
-        .
-      </p>
-    </div>
-  )}
-
-  <div
-    id="summaryEditor"
-    contentEditable
-    suppressContentEditableWarning
-    dir="ltr"
-    onFocus={() => handleFocus("about_yrselfInput")}
-    style={{
-      direction: "ltr",
-      textAlign: "left",
-      unicodeBidi: "bidi-override",
-      caretColor: "black",
-      whiteSpace: "pre-wrap",
-      wordBreak: "break-word",
-    }}
-    className="relative border border-gray-300 rounded-md w-full min-h-auto px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 bg-transparent z-10"
-    onBlur={(e) => {
-      const cleaned = e.currentTarget.innerHTML.replace(/\u200B/g, "");
-      setFormData((prev) => ({
-        ...prev,
-        summary_about_yourself: cleaned,
-      }));
-    }}
-    onInput={(e) => trimEditableOnInput(e, "about_yrselfInput", 800)}
-    onKeyDown={handleEditableKeyDown}
-  />
-</div>
+                <div
+                  id="summaryEditor"
+                  contentEditable
+                  suppressContentEditableWarning
+                  dir="ltr"
+                  onFocus={() => handleFocus("about_yrselfInput")}
+                  style={{
+                    direction: "ltr",
+                    textAlign: "left",
+                    unicodeBidi: "bidi-override",
+                    caretColor: "black",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                  className="relative border border-gray-300 rounded-md w-full min-h-auto px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-300 bg-transparent z-10"
+                  onBlur={(e) => {
+                    const cleaned = e.currentTarget.innerHTML.replace(/\u200B/g, "");
+                    setFormData((prev) => ({
+                      ...prev,
+                      summary_about_yourself: cleaned,
+                    }));
+                  }}
+                  onInput={(e) => trimEditableOnInput(e, "about_yrselfInput", 800)}
+                  onKeyDown={handleEditableKeyDown}
+                />
+              </div>
             </div>
 
             {/* Projects Section */}
@@ -1127,9 +985,7 @@ const handleAIProcess = async () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="font-medium text-sm flex justify-center">
-                      Project Summary
-                    </label>
+                    <label className="font-medium text-sm flex justify-center">Project Summary</label>
                     <div className="flex items-center gap-2 mb-1">
                       <button
                         type="button"
@@ -1150,9 +1006,9 @@ const handleAIProcess = async () => {
                       id={`projectSummary-${index}`}
                       contentEditable
                       suppressContentEditableWarning
-                       dangerouslySetInnerHTML={{
-    __html: textToHtml(project.project_summary),
-  }}
+                      dangerouslySetInnerHTML={{
+                        __html: textToHtml(project.project_summary),
+                      }}
                       dir="ltr"
                       onFocus={() => handleFocus("about_ProjectInput")}
                       style={{
@@ -1271,20 +1127,17 @@ const handleAIProcess = async () => {
                       <div className="absolute inset-0 text-gray-400 opacity-40 pointer-events-none whitespace-pre-line px-2 py-1 text-[0.65rem]">
                         <p className="text-sm md:text-base text-gray-400 mb-4">
                           Developed during my internship at{" "}
-                          <span className="font-semibold text-blue-600">
-                            Kaizen Star Technologies
-                          </span>
-                          , this project automated critical database backups for clients such as
-                          pharmacies and medical clinics.
+                          <span className="font-semibold text-blue-600">Kaizen Star Technologies</span>, this
+                          project automated critical database backups for clients such as pharmacies and
+                          medical clinics.
                         </p>
                         <p className="text-sm md:text-base text-gray-400 mb-4">
-                          Built with <span className="font-semibold">C#</span> and SQL dump
-                          techniques, it eliminated the need for manual intervention by scheduling
-                          secure, regular backups.
+                          Built with <span className="font-semibold">C#</span> and SQL dump techniques, it
+                          eliminated the need for manual intervention by scheduling secure, regular backups.
                         </p>
                         <p className="text-sm md:text-base text-gray-400">
-                          This project strengthened my problem-solving skills and demonstrated my
-                          ability to take a solution from concept to deployment.
+                          This project strengthened my problem-solving skills and demonstrated my ability to
+                          take a solution from concept to deployment.
                         </p>
                       </div>
 
@@ -1293,10 +1146,10 @@ const handleAIProcess = async () => {
                         contentEditable
                         suppressContentEditableWarning
                         dir="ltr"
-                         dangerouslySetInnerHTML={{
+                        dangerouslySetInnerHTML={{
                           __html: textToHtml(exp.work_summary),
                         }}
-                            onFocus={() => handleFocus("about_WorkInput")}
+                        onFocus={() => handleFocus("about_WorkInput")}
                         style={{
                           direction: "ltr",
                           textAlign: "left",
