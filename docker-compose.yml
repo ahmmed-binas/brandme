@@ -5,6 +5,11 @@
 #   docker compose up -d --build
 #
 # See docs/SELF_HOSTING.md.
+#
+# The server is shared with other work, so every service has a CPU and memory cap
+# (cpus = share of one core). Fuccura idles at about 150 MB and under 1% CPU.
+# On fuccura.com the app image is built on the owner's PC and loaded here by
+# scripts/deploy.ps1, so the server never runs a build.
 services:
   db:
     image: postgres:16-alpine
@@ -20,8 +25,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    cpus: 0.4
+    mem_limit: 512m
 
   app:
+    # The image name lets scripts/deploy.ps1 load a ready-built image (docker compose up --no-build).
+    image: fuccura-app:latest
     build:
       context: .
       # Pages pre-rendered during the build (robots.txt, the sitemap, pricing…) need the
@@ -44,6 +53,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    cpus: 0.75
+    mem_limit: 768m
 
   # Obscura (github.com/h4ckf0r0day/obscura, Apache-2.0): a small headless browser.
   # Only the app can reach it (no ports published). It refuses private/internal
@@ -54,6 +65,7 @@ services:
     image: h4ckf0r0day/obscura:0.2.4@sha256:772cf3bada266e81bc0fae0304074f4971a551e3766f412417f006273e202f0e
     restart: unless-stopped
     command: ["serve", "--port", "9222", "--workers", "2"]
+    cpus: 0.4
     mem_limit: 512m
 
   # Runs the scheduled jobs every hour: trial and renewal emails, renewals,
@@ -71,6 +83,8 @@ services:
       ]
     depends_on:
       - app
+    cpus: 0.05
+    mem_limit: 32m
 
   caddy:
     image: caddy:2-alpine
@@ -88,6 +102,8 @@ services:
       - caddy-config:/config
     depends_on:
       - app
+    cpus: 0.25
+    mem_limit: 128m
 
 volumes:
   postgres-data:
