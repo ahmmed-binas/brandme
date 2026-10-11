@@ -4,12 +4,13 @@ import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 import { consoleBase } from "@/lib/console/path";
 
 /**
- * Visitor counts for the superadmin console, without cookies.
+ * Visitor counts and journeys for the superadmin console, without cookies.
  *
- * Nothing that identifies a person is stored: no IP address, no cookie, no
- * user id. A visitor is a hash of (IP, browser, today's date, a secret), so the
- * same person counts once per day and can't be followed from one day to the
- * next. Bots and the admin pages aren't counted. Rows older than 400 days are
+ * No IP address or cookie is stored. A visitor is a hash of (IP, browser,
+ * today's date, a secret), so the same person counts once per day and can't be
+ * followed from one day to the next. Visitors who are signed in are linked to
+ * their account (user_id), so the owner can see what customers do. The browser's
+ * time zone gives a rough location. Bots and the admin pages aren't counted. Rows older than 400 days are
  * deleted by the hourly job.
  */
 
@@ -56,7 +57,15 @@ export interface ViewInput {
   referrer?: string | null;
   ip: string;
   userAgent: string;
+  /** The signed-in visitor's account, if any. */
+  userId?: string | null;
+  /** The browser's time zone, e.g. "Asia/Dubai". */
+  timeZone?: string | null;
 }
+
+/** Keeps only well-formed time zone names like "Asia/Dubai" or "America/Argentina/Salta". */
+const cleanTimeZone = (value?: string | null) =>
+  value && /^[A-Za-z_]+(\/[A-Za-z0-9_+-]+){0,2}$/.test(value) ? value.slice(0, 64) : null;
 
 /** Records one page view. Returns false when it isn't counted (bot, admin page, too many). */
 export async function recordView(input: ViewInput): Promise<boolean> {
@@ -89,7 +98,8 @@ export async function recordView(input: ViewInput): Promise<boolean> {
 
   await ensureSchema();
   await db.query(
-    "INSERT INTO page_views (host, path, kind, portfolio_slug, referrer, visitor, device) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    `INSERT INTO page_views (host, path, kind, portfolio_slug, referrer, visitor, device, user_id, time_zone)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     [
       host,
       path,
@@ -98,6 +108,8 @@ export async function recordView(input: ViewInput): Promise<boolean> {
       referrer,
       visitor,
       device(ua),
+      input.userId ?? null,
+      cleanTimeZone(input.timeZone),
     ],
   );
   return true;

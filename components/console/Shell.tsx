@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Activity,
   BarChart3,
   CalendarDays,
   ExternalLink,
@@ -17,6 +18,7 @@ import SignOut from "./SignOut";
 
 const NAV = [
   { href: "", label: "Dashboard", icon: BarChart3 },
+  { href: "/activity", label: "Activity", icon: Activity },
   { href: "/users", label: "Users", icon: Users },
   { href: "/calls", label: "Calls", icon: CalendarDays },
 ] as const;

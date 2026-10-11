@@ -546,6 +546,18 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "019_visit_journeys",
+  statements: [
+    // Visitor journeys for the console's Activity page. Signed-in visitors are linked
+    // to their account (shown to the owner only); everyone else stays an anonymous,
+    // daily-changing code. The time zone gives a rough location without any IP lookup.
+    `ALTER TABLE page_views ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES app_users(id) ON DELETE SET NULL`,
+    `ALTER TABLE page_views ADD COLUMN IF NOT EXISTS time_zone TEXT`,
+    `CREATE INDEX IF NOT EXISTS page_views_visitor_at ON page_views (visitor, at)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

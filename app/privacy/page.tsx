@@ -70,9 +70,12 @@ export default function PrivacyPage() {
           it finds is stored with your account so you can review or undo it.
         </>,
         <>
-          <b className="font-medium text-ink">Visitor counts.</b> We count page views without cookies and
-          without storing IP addresses: each visit is counted with a code that changes every day, so a visitor
-          can’t be followed from one day to the next. Counts are deleted after about 13 months.
+          <b className="font-medium text-ink">Visits.</b> We record which pages are opened, without cookies
+          and without storing IP addresses. Each visit gets a code that changes every day, so a visitor can’t
+          be followed from one day to the next. We also note the device type, the site that sent you and your
+          browser’s time zone (for a rough location). If you’re signed in, your visits are linked to your
+          account so we can see how customers use {brand.name} and fix what gets in their way. Visit records
+          are deleted after about 13 months.
         </>,
         <>
           <b className="font-medium text-ink">Messages.</b> Support requests, community posts and template

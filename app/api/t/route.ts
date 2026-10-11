@@ -1,5 +1,6 @@
 import { recordView } from "@/lib/analytics/track";
 import { tooManyAttempts } from "@/lib/accounts/passwords";
+import { getCurrentUser } from "@/utils/user-account";
 
 /** Page-view beacon (components/common/VisitBeacon.tsx). Always answers 204; counting never breaks a page. */
 export async function POST(request: Request) {
@@ -12,14 +13,18 @@ export async function POST(request: Request) {
     if (tooManyAttempts(`view:${ip}`, 300, 60 * 60_000)) return new Response(null, { status: 204 });
     const raw = await request.text();
     if (raw.length > 2_000) return new Response(null, { status: 204 });
-    const body = JSON.parse(raw) as { path?: unknown; referrer?: unknown };
+    const body = JSON.parse(raw) as { path?: unknown; referrer?: unknown; timeZone?: unknown };
     if (typeof body.path === "string") {
+      // Signed-in visitors are linked to their account so the owner can see their journey.
+      const user = await getCurrentUser().catch(() => null);
       await recordView({
         host: request.headers.get("host") ?? "",
         path: body.path,
         referrer: typeof body.referrer === "string" ? body.referrer : null,
         ip,
         userAgent: request.headers.get("user-agent") ?? "",
+        userId: user && !user.isSuperadmin ? user.id : null,
+        timeZone: typeof body.timeZone === "string" ? body.timeZone : null,
       });
     }
   } catch (error) {
