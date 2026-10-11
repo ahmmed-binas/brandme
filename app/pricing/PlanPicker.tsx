@@ -3,13 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, MessageCircle } from "lucide-react";
+import { brand } from "@/lib/brand";
 
 export interface PlanCard { id: "basic" | "pro"; name: string; summary: string; prices: { year?: number; month?: number }; features: string[]; highlight?: boolean }
 
 const usd = (cents: number) => `$${(cents / 100).toFixed(cents % 100 ? 2 : 0)}`;
 
-/** The plan cards (Pro is one payment for a year). Checkout opens Stripe; signed-out visitors sign in first and come back here. */
+/**
+ * The plan cards (Pro is one payment for a year). Checkout opens Stripe; signed-out
+ * visitors sign in first and come back here. Until payments are switched on, paid
+ * plans keep their price, say “Coming soon” and offer early access on WhatsApp.
+ */
 export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plans: PlanCard[]; paymentsReady: boolean; bookingHref: string }) {
   const { status } = useSession();
   const interval = "year" as const;
@@ -35,13 +40,18 @@ export default function PlanPicker({ plans, paymentsReady, bookingHref }: { plan
       {plans.map((plan) => {
         const free = plan.id === "basic";
         const price = plan.prices[interval];
-        return <li key={plan.id} className={`relative flex flex-col rounded-2xl border p-7 ${plan.highlight ? "border-ink bg-ink text-paper" : "border-rule bg-white/50"}`}>
+        const early = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`Hi! I’d like ${brand.name} ${plan.name} (${usd(price ?? 0)} a ${interval}) when it launches.`)}`;
+        return <li key={plan.id} className={`relative flex flex-col rounded-2xl border p-7 ${plan.highlight ? "border-ink bg-ink text-paper" : "border-rule bg-[color-mix(in_oklab,var(--ink)_3%,transparent)]"}`}>
+          {!free && !paymentsReady && <span className="absolute right-5 top-5 rounded-full bg-signal px-3 py-1 font-mono text-[10.5px] uppercase tracking-[0.14em] text-signal-ink">Coming soon</span>}
           <h2 className="font-display text-[2rem] leading-none">{plan.name}</h2>
           <p className={`mt-2 min-h-[3rem] text-[0.95rem] ${plan.highlight ? "text-paper/75" : "text-ink-soft"}`}>{plan.summary}</p>
           <p className="mt-6 flex items-baseline gap-2"><span className="font-display text-[3.4rem] leading-none tracking-[-0.03em]">{free ? "Free" : usd(price!)}</span>{!free && <span className={plan.highlight ? "text-paper/70" : "text-ink-soft"}>a {interval}</span>}</p>
           <p className={`mt-1 text-[0.88rem] ${plan.highlight ? "text-paper/70" : "text-ink-faint"}`}>{free ? "No card needed, for as long as you like." : "One payment for 12 months. No automatic renewal."}</p>
           {free ? <Link href="/templatechooser" className="mt-6 inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink">Start free</Link>
-            : <button type="button" disabled={!paymentsReady || busy !== null} onClick={() => void choose(plan)} className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink disabled:opacity-50">{busy === plan.id && <Loader2 size={15} className="animate-spin" />}{paymentsReady ? `Choose ${plan.name}` : "Coming soon"}</button>}
+            : paymentsReady
+              ? <button type="button" disabled={busy !== null} onClick={() => void choose(plan)} className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink disabled:opacity-50">{busy === plan.id && <Loader2 size={15} className="animate-spin" />}Choose {plan.name}</button>
+              : <a href={early} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.95rem] font-medium text-ink transition-colors hover:bg-signal hover:text-signal-ink"><MessageCircle size={16} /> Get early access on WhatsApp</a>}
+          {!free && !paymentsReady && <p className={`mt-2 text-center text-[0.82rem] ${plan.highlight ? "text-paper/60" : "text-ink-faint"}`}>Online payment opens soon. Everything in Basic is free now.</p>}
           <ul className="mt-7 space-y-2.5 text-[0.93rem]">{plan.features.map((feature) => <li key={feature} className="flex gap-2.5"><Check size={16} className={`mt-0.5 shrink-0 ${plan.highlight ? "text-signal" : "text-ink"}`} />{feature}</li>)}</ul>
         </li>;
       })}
