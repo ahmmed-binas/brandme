@@ -13,7 +13,17 @@
 #
 # Needs Docker Desktop running, and the "fuccura" SSH shortcut in ~/.ssh/config.
 
-$ErrorActionPreference = "Stop"
+# "Continue", not "Stop": Docker and SSH print normal progress on stderr, which Windows
+# PowerShell 5.1 would treat as a failure whenever the output is captured (e.g. by a
+# scheduled run). Each step checks its real exit code instead, through Step-Done.
+$ErrorActionPreference = "Continue"
+
+function Step-Done([string]$failure) {
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host $failure -ForegroundColor Red
+    exit 1
+  }
+}
 Set-Location (Join-Path $PSScriptRoot "..")
 
 $uncommitted = git status --porcelain --untracked-files=no
@@ -31,6 +41,7 @@ ssh fuccura "grep -E '^(APP_URL|NEXT_PUBLIC_CONTACT_EMAIL|NEXT_PUBLIC_WHATSAPP_N
     $name, $value = $_ -split "=", 2
     $settings[$name] = $value.Trim().Trim('"')
   }
+Step-Done "Couldn't reach the server over SSH; nothing was changed."
 if (-not $settings["APP_URL"]) { throw "APP_URL is missing from /opt/fuccura/.env on the server." }
 
 Write-Host "Packing the latest commit: $(git log --oneline -1)"
@@ -38,7 +49,9 @@ $folder = Join-Path $env:TEMP "fuccura-build"
 if (Test-Path $folder) { Remove-Item -Recurse -Force $folder }
 New-Item -ItemType Directory $folder | Out-Null
 git archive --format=tar -o "$folder.tar" HEAD
+Step-Done "git archive failed; nothing was changed."
 tar -xf "$folder.tar" -C $folder
+Step-Done "Unpacking the code failed; nothing was changed."
 Remove-Item "$folder.tar"
 
 Write-Host "Building the app image on this PC..."
@@ -48,18 +61,20 @@ docker build $folder `
   --build-arg "APP_URL=$($settings['APP_URL'])" `
   --build-arg "NEXT_PUBLIC_CONTACT_EMAIL=$($settings['NEXT_PUBLIC_CONTACT_EMAIL'])" `
   --build-arg "NEXT_PUBLIC_WHATSAPP_NUMBER=$($settings['NEXT_PUBLIC_WHATSAPP_NUMBER'])"
-if ($LASTEXITCODE -ne 0) { throw "The build failed; nothing was changed on the server." }
+Step-Done "The build failed; nothing was changed on the server."
 
 Write-Host "Sending the image to the server (compressed)..."
 # cmd's pipe passes binary data safely (PowerShell 5.1's pipe would corrupt it).
 cmd /c "docker save fuccura-app:latest | ssh -C fuccura docker load"
-if ($LASTEXITCODE -ne 0) { throw "Sending the image failed; the live site is unchanged." }
+Step-Done "Sending the image failed; the live site is unchanged."
 
 Write-Host "Sending the config files..."
 scp docker-compose.yml Caddyfile fuccura:/opt/fuccura/
+Step-Done "Sending the config files failed; the live site is unchanged."
 
 Write-Host "Restarting the app..."
 ssh fuccura "cd /opt/fuccura && docker compose up -d --no-build && docker compose ps"
+Step-Done 'Restarting failed. Check with: ssh fuccura "cd /opt/fuccura && docker compose ps"'
 
 Write-Host "Clearing old images and build cache on the server..."
 ssh fuccura "docker image prune -f && docker builder prune -af | tail -1"
