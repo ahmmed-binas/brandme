@@ -7,7 +7,11 @@ RUN npm ci
 
 FROM node:22-alpine AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+# The public address and settings baked into pre-rendered pages (see docker-compose.yml).
+ARG APP_URL
+ARG NEXT_PUBLIC_CONTACT_EMAIL
+ARG NEXT_PUBLIC_WHATSAPP_NUMBER
+ENV NEXT_TELEMETRY_DISABLED=1 APP_URL=$APP_URL NEXT_PUBLIC_CONTACT_EMAIL=$NEXT_PUBLIC_CONTACT_EMAIL NEXT_PUBLIC_WHATSAPP_NUMBER=$NEXT_PUBLIC_WHATSAPP_NUMBER
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
