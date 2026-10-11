@@ -42,7 +42,11 @@ export default async function AboutPage() {
           <div className="grid aspect-[4/5] w-full max-w-[18rem] place-items-center overflow-hidden rounded-2xl bg-ink/5 font-display text-[4rem] text-ink-soft">
             {founder.portrait ? (
               // eslint-disable-next-line @next/next/no-img-element -- a single local portrait
-              <img src={founder.portrait} alt={founder.name} className="size-full object-cover" />
+              <img
+                src={founder.portrait}
+                alt={`${founder.name}, founder of ${brand.name}`}
+                className="size-full object-cover"
+              />
             ) : (
               initials(founder.name)
             )}

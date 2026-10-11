@@ -10,7 +10,7 @@ export const about = {
     role: "Founder",
     location: "Dubai, UAE",
     origin: "From Kerala, India · Graduated in Poland",
-    portrait: "" as string, // e.g. "/about/portrait.jpg"
+    portrait: "/about/portrait.webp" as string,
     links: [
       { label: "TikTok", url: "" },
       { label: "Instagram", url: "" },
