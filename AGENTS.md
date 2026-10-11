@@ -55,6 +55,7 @@ End-to-end tests live in `tests/e2e/` (Playwright against the production build, 
 | Auto-updates (GitHub, research agent) | `lib/autoupdate/*`, hourly jobs `lib/jobs/scheduled.ts` (`POST /api/cron`) |
 | The Investigator, “Inspector Iqbal” (checks the owner's own profiles on a schedule, updates the site; avatar `components/agents/InspectorAvatar.tsx`, page `/agents/investigator` with ratings and comments `lib/agents/comments.ts`) | `lib/investigator/*` (page reader `reader.ts` with optional Obscura headless browser, fact-check `verify.ts`), `/account/investigator`, `app/api/investigator/*`, `docs/INVESTIGATOR.md` |
 | Imports' accuracy | `lib/import/grounding.ts` (drops AI-imported facts not in the source text), `lib/import/linkedin-export.ts`, `tests/e2e/accuracy.mts` |
+| Free voice clone tool (`/tools/voice`; queue and limits `lib/tools/voice.ts`, styles `lib/tools/voice-config.ts`; the speaking runs on the owner's PC GPU via `workers/voice/worker.py`, Chatterbox MIT, secret `TOOLS_WORKER_TOKEN`) | `components/tools/VoiceClone.tsx`, `app/api/tools/*`, `workers/voice/README.md` |
 | Community and support | `lib/community/*`, `lib/support/*`, `app/community/*` |
 | Superadmin console (dashboard, users, visitor counts) | `app/console/*` behind `SUPERADMIN_PATH`, `components/console/*`, `lib/console/metrics.ts`, `lib/analytics/track.ts` (+ `/api/t`, `components/common/VisitBeacon.tsx`), `docs/CONSOLE.md` |
 | Admin | `/admin` (go-live checklist `lib/setup-checks.ts`), moderators = `ADMIN_EMAILS` |

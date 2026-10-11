@@ -29,6 +29,7 @@ const COLUMNS = [
   {
     title: "Free tools",
     links: [
+      ["AI voice clone", "/tools/voice"],
       ["PDF editor", "/tools/pdf-editor"],
       ["Merge PDFs", "/tools/merge-pdf"],
       ["All tools", "/tools"],

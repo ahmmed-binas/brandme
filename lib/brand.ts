@@ -9,9 +9,15 @@ export const brand = {
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "971528338003",
 } as const;
 
+/** Free tools, listed under “Tools” in the menu and on /tools. Add new ones here. */
+export const toolsNavigation = [
+  { href: "/tools/voice", label: "AI Voice Clone", hint: "Text to speech in your own voice, free" },
+] as const;
+
 export const primaryNavigation = [
   { href: "/templatechooser", label: "Templates" },
   { href: "/agents", label: "Agents" },
+  { href: "/tools", label: "Tools", children: toolsNavigation },
   { href: "/blog", label: "Journal" },
   { href: "/about", label: "About" },
 ] as const;

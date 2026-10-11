@@ -10,6 +10,7 @@ import { syncGitHub } from "@/lib/autoupdate/github-sync";
 import { advanceOrders, remindRenewals } from "@/lib/domains/service";
 import { runDueInvestigations } from "@/lib/investigator/run";
 import { pruneViews } from "@/lib/analytics/track";
+import { pruneVoiceClips } from "@/lib/tools/voice";
 
 /**
  * Everything that happens on a schedule. Run hourly (see docker-compose's
@@ -152,6 +153,7 @@ export async function runScheduledJobs(): Promise<Record<string, unknown>> {
     await step("orphanedImages", deleteOrphanedAssets);
     await step("rateLimits", pruneRateLimits);
     await step("oldVisits", pruneViews);
+    await step("oldVoiceClips", pruneVoiceClips);
     return summary;
   } finally {
     await client.query("SELECT pg_advisory_unlock($1)", [LOCK]).catch(() => undefined);

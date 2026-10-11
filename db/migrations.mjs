@@ -558,6 +558,58 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "020_voice_tool",
+  statements: [
+    // The free voice tool (/tools/voice, lib/tools/voice.ts). One voice per account.
+    // The uploaded sound and the spoken consent are deleted once the voice is made;
+    // only the short sample it speaks from is kept, until the owner deletes it.
+    `CREATE TABLE IF NOT EXISTS voice_profiles (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL UNIQUE REFERENCES app_users(id) ON DELETE CASCADE,
+      status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'working', 'ready', 'failed')),
+      source_audio BYTEA,
+      consent_audio BYTEA,
+      sample_audio BYTEA,
+      similarity REAL,
+      error TEXT,
+      consented_at TIMESTAMPTZ NOT NULL,
+      claimed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+    // Text read aloud in a voice. Clips are deleted after 30 days.
+    `CREATE TABLE IF NOT EXISTS voice_clips (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      profile_id UUID NOT NULL REFERENCES voice_profiles(id) ON DELETE CASCADE,
+      text TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'working', 'done', 'failed')),
+      audio BYTEA,
+      audio_type TEXT,
+      error TEXT,
+      claimed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      finished_at TIMESTAMPTZ
+    )`,
+    `CREATE INDEX IF NOT EXISTS voice_clips_user ON voice_clips (user_id, created_at DESC)`,
+    `CREATE INDEX IF NOT EXISTS voice_clips_queue ON voice_clips (status, created_at)`,
+    // When each worker (a computer with a graphics card running workers/voice) last asked for work.
+    `CREATE TABLE IF NOT EXISTS tool_workers (
+      name TEXT PRIMARY KEY,
+      seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+  ],
+});
+
+migrations.push({
+  id: "021_voice_clip_styles",
+  statements: [
+    // How a clip is read: natural, narrator, presenter, advert or storyteller (VOICE_STYLES in lib/tools/voice.ts).
+    `ALTER TABLE voice_clips ADD COLUMN IF NOT EXISTS style TEXT NOT NULL DEFAULT 'natural'`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

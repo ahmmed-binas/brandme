@@ -10,6 +10,7 @@ import {
   ImageIcon,
   KeyRound,
   LockKeyhole,
+  Mic,
   Sparkles,
   WandSparkles,
 } from "lucide-react";
@@ -22,6 +23,13 @@ export const metadata: Metadata = {
 };
 
 const plannedTools = [
+  {
+    icon: Mic,
+    title: "AI voice clone",
+    description: "Record 30 seconds or upload a video, then type anything and hear it in your own voice.",
+    state: "Clone your voice free",
+    href: "/tools/voice",
+  },
   {
     icon: FileText,
     title: "PDF to text",
@@ -94,6 +102,14 @@ export default function ToolsPage() {
     mainEntity: [
       {
         "@type": "Question",
+        name: "Can I clone my own voice for free?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "Yes. The AI voice clone makes a copy of your own voice from about 30 seconds of speech and reads any text aloud in it, free with a Fuccura account.",
+        },
+      },
+      {
+        "@type": "Question",
         name: "Are Fuccura tools free?",
         acceptedAnswer: {
           "@type": "Answer",
@@ -150,6 +166,12 @@ export default function ToolsPage() {
                 clear privacy boundaries.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/tools/voice"
+                  className="rounded-xl bg-violet-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-800"
+                >
+                  Clone your voice free
+                </Link>
                 <a
                   href="#convert"
                   className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-800 dark:bg-white dark:text-slate-950"

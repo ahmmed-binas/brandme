@@ -34,6 +34,16 @@ const nextConfig = {
           },
         ],
       },
+      // The voice tool records from the microphone (only on this page, only when asked).
+      {
+        source: "/tools/voice",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(self), geolocation=(), payment=(), usb=(), interest-cohort=()",
+          },
+        ],
+      },
     ];
   },
   images: {

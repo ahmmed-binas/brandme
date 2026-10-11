@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
@@ -57,16 +57,20 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
-          {primaryNavigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              className={`relative text-[0.94rem] text-ink-soft transition-colors hover:text-ink after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-ink after:transition-transform after:duration-300 hover:after:scale-x-100 ${isActive(item.href) ? "text-ink after:scale-x-100" : ""}`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {primaryNavigation.map((item) => {
+            const link = (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`relative text-[0.94rem] text-ink-soft transition-colors hover:text-ink after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-ink after:transition-transform after:duration-300 hover:after:scale-x-100 ${isActive(item.href) ? "text-ink after:scale-x-100" : ""}`}
+              >
+                {item.label}
+              </Link>
+            );
+            if (!("children" in item)) return link;
+            return <NavDropdown key={item.href} trigger={link} items={item.children} />;
+          })}
         </nav>
 
         <div className="flex items-center gap-1.5">
@@ -74,7 +78,7 @@ export default function Header() {
             type="button"
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className="grid size-9 place-items-center rounded-full text-ink-soft transition hover:bg-ink/5 hover:text-ink"
-            aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+            aria-label={mounted ? `Switch to ${isDark ? "light" : "dark"} mode` : "Switch colour theme"}
           >
             {mounted && (isDark ? <Sun size={16} /> : <Moon size={16} />)}
           </button>
@@ -122,14 +126,26 @@ export default function Header() {
           className="border-t border-rule bg-paper px-5 pb-6 pt-2 md:hidden"
         >
           {primaryNavigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMenuOpen(false)}
-              className="block border-b border-rule py-4 font-display text-2xl text-ink"
-            >
-              {item.label}
-            </Link>
+            <div key={item.href} className="border-b border-rule">
+              <Link
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className="block py-4 font-display text-2xl text-ink"
+              >
+                {item.label}
+              </Link>
+              {"children" in item &&
+                item.children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="-mt-2 block pb-4 pl-4 text-ink-soft"
+                  >
+                    {child.label}
+                  </Link>
+                ))}
+            </div>
           ))}
           {session?.user && (
             <div className="mt-5 flex items-center gap-3">
@@ -180,5 +196,35 @@ export default function Header() {
         </nav>
       )}
     </header>
+  );
+}
+
+/**
+ * A menu item with a small panel underneath (e.g. Tools). The panel opens on
+ * hover and on keyboard focus; the item itself still links to its own page.
+ */
+function NavDropdown({
+  trigger,
+  items,
+}: {
+  trigger: ReactNode;
+  items: ReadonlyArray<{ href: string; label: string; hint: string }>;
+}) {
+  return (
+    <div className="group relative">
+      {trigger}
+      <div className="invisible absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 pt-4 opacity-0 transition duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+        <ul className="rounded-2xl border border-rule bg-paper p-2 shadow-xl">
+          {items.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="block rounded-xl px-3 py-2.5 transition hover:bg-ink/5">
+                <span className="block text-[0.94rem] font-medium text-ink">{item.label}</span>
+                <span className="block text-[0.82rem] text-ink-soft">{item.hint}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
