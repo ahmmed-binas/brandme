@@ -72,6 +72,8 @@ Owner's manuals: `docs/plans/running-formora-with-an-ai-agent.pdf` (how the site
 
 ## Conventions
 
+- **Editable code first (owner's rule):** the owner sometimes continues the work by hand, so write code a person can read and change: short lines, one JSX attribute per line when long, small well-named functions, a short comment for anything non-obvious. Run `npm run format` (Prettier) on what you change. Never compress code into long one-liners.
+- **Develop locally, then deploy:** build and test on the PC (`npm run dev`, `npx tsc --noEmit`, `npm run build`), commit, and only then deploy to the live server when the owner says so. Never edit the live server directly.
 - **Writing:** plain, warm, specific British English (colour, organise, “ ” quotes, en dash for ranges). No marketing filler. UI copy explains what happens next.
 - **Templates:** size with container queries (`@3xl:`, `cqw`), never viewport breakpoints or `position: fixed` (they render inside the editor and phone preview). Every visible piece of content gets `{...ed("path")}` so clicking it opens its field. Empty sections hide via `has()`. Respect `motionOff()` (static captures, reduced motion). Each template must show the name in an `<h1>` even with almost no content (`tests/e2e/blank.mjs`).
 - **APIs:** wrap handlers in `route()` from `lib/api/http.ts`; validate everything on the server; owner-only routes use `requireOwner`; admin routes check `user.isAdmin` (or `isSuperadmin`) and return 404 otherwise.
