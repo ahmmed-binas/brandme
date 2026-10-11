@@ -12,6 +12,7 @@ Settings (environment variables, or workers/voice/.env):
     TOOLS_WORKER_TOKEN  the same secret as the website's TOOLS_WORKER_TOKEN
     WORKER_NAME         this computer's name in the website's records (default: "pc")
 """
+import atexit
 import io
 import os
 import re
@@ -240,6 +241,12 @@ def speaker_similarity(model, first, second):
 
 samples_cache = {}  # voice id -> path of its sample on disk
 cache_folder = Path(tempfile.mkdtemp(prefix="fuccura-voices-"))
+# Customers' voice samples must not stay on this PC: delete the folder when the worker stops.
+atexit.register(shutil.rmtree, cache_folder, ignore_errors=True)
+# Clear any folders left by an earlier run that was killed before it could clean up.
+for leftover in Path(tempfile.gettempdir()).glob("fuccura-voices-*"):
+    if leftover != cache_folder:
+        shutil.rmtree(leftover, ignore_errors=True)
 
 
 def make_voice(model, job):
