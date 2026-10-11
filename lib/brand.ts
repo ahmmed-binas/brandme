@@ -12,6 +12,6 @@ export const brand = {
 export const primaryNavigation = [
   { href: "/templatechooser", label: "Templates" },
   { href: "/agents", label: "Agents" },
-  { href: "/community", label: "Community" },
   { href: "/blog", label: "Journal" },
+  { href: "/about", label: "About" },
 ] as const;

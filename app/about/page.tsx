@@ -51,24 +51,39 @@ export default async function AboutPage() {
           <p className="mt-1 text-ink-soft">
             {founder.role}, {brand.name} · {founder.location}
           </p>
+          <p className="mt-1 text-[0.92rem] text-ink-faint">{founder.origin}</p>
+          {/* No email address on the page: people write through the contact form or WhatsApp. */}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link
+              href="/contact"
+              className="rounded-full bg-ink px-4 py-2 text-[0.92rem] font-medium text-paper hover:bg-signal hover:text-signal-ink"
+            >
+              Send me a message
+            </Link>
+            <a
+              href={`https://wa.me/${brand.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-rule px-4 py-2 text-[0.92rem] hover:border-ink"
+            >
+              WhatsApp
+            </a>
+          </div>
           <ul className="mt-4 space-y-1 text-[0.95rem]">
-            <li>
-              <a href={`mailto:${founder.email}`} className="underline underline-offset-4">
-                {founder.email}
-              </a>
-            </li>
-            {founder.links.map((link) => (
-              <li key={link.url}>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-4"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {founder.links
+              .filter((link) => link.url)
+              .map((link) => (
+                <li key={link.url}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-4"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
           </ul>
         </aside>
         <div className="max-w-[40rem] space-y-5 text-[1.12rem] leading-[1.75]">
@@ -89,7 +104,7 @@ export default async function AboutPage() {
       </section>
 
       <section className="mt-24 border-t border-rule pt-12">
-        <h2 className="font-display text-[2.2rem]">What we believe</h2>
+        <h2 className="font-display text-[2.2rem]">What I believe</h2>
         <ul className="mt-8 grid gap-8 sm:grid-cols-2">
           {about.principles.map((item, index) => (
             <li key={item.title} className="border-t border-ink pt-4">
@@ -124,10 +139,7 @@ export default async function AboutPage() {
           >
             Browse templates
           </Link>
-          <Link
-            href="/community/support"
-            className="rounded-full border border-paper/30 px-6 py-3 hover:border-paper"
-          >
+          <Link href="/contact" className="rounded-full border border-paper/30 px-6 py-3 hover:border-paper">
             Say hello
           </Link>
         </div>

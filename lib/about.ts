@@ -1,31 +1,33 @@
 /**
- * Content for the About page. Replace the placeholders with your own story,
- * then set `placeholder` to false (it hides the "edit me" note admins see).
- * A portrait can go in public/about/ and be referenced as "/about/you.jpg".
+ * Content for the About page, written from an interview with the founder
+ * (October 2026). A portrait goes in public/about/ and is referenced as
+ * "/about/portrait.jpg"; links appear once they have a URL.
  */
 export const about = {
-  placeholder: true,
+  placeholder: false,
   founder: {
-    name: "Your Name",
+    name: "Ahmed Binas",
     role: "Founder",
-    location: "Your city",
+    location: "Dubai, UAE",
+    origin: "From Kerala, India · Graduated in Poland",
     portrait: "" as string, // e.g. "/about/portrait.jpg"
-    email: "hello@yourdomain.com",
     links: [
-      { label: "LinkedIn", url: "https://www.linkedin.com/" },
-      { label: "GitHub", url: "https://github.com/" },
+      { label: "TikTok", url: "" },
+      { label: "Instagram", url: "" },
     ],
   },
-  headline: "I built Fuccura because a good portfolio shouldn’t be a weekend project every year.",
+  headline: "I got my job because of a portfolio I built myself.",
   letter: [
-    "Write a few paragraphs here about why you started Fuccura: the moment you realised updating a portfolio was a chore everyone put off, and what you wanted instead.",
-    "Say who it’s for, in plain words: developers, designers, photographers, researchers, anyone whose work deserves a proper home on the web.",
-    "End with a promise you intend to keep, for example that prices stay low, that people’s work is never held hostage, and that a person answers every support message.",
+    "Hi, I’m Ahmed. I’m originally from Kerala, India, I studied computer science in Poland, and today I live in Dubai, where I build software and lead a team.",
+    "I didn’t get my position with a CV. I got it with a portfolio website I made by hand. That made me wonder: why doesn’t everyone have one? Most people I meet still send a CV, but I believe the future is links: one page that shows who you are and what you’ve done, that you can share anywhere.",
+    "The hard part is keeping it alive. Building a website is difficult if you don’t code, and updating it is the job everyone puts off. When I first had the idea, the technology to make that easy didn’t exist. Now it does, so I built Fuccura with it: designs drawn for every kind of work, an editor where you just click and type, and AI helpers that keep your site up to date while the words stay yours.",
+    "Fuccura is for people who don’t want to code. You should be able to see your website live, for free, in minutes, and update it as easily as sending a message. Seeing your own site live is a different feeling. I want everyone to have it.",
+    "My promise: the templates stay free to download, a basic site stays free, and I’ll always be straight with you about what costs money and why. AI and servers cost real money, so paid plans keep the lights on. Have an idea or need something custom? Get in touch. I take on personal and custom projects too.",
   ],
   principles: [
     {
-      title: "Cheap enough to forget",
-      body: "Free to start. Pro is a small monthly payment you can stop any time.",
+      title: "Free to start, fair after",
+      body: "Every template is free to download, and a basic site is free. Pro is one small payment for a year.",
     },
     {
       title: "Your work, your address",
@@ -35,13 +37,13 @@ export const about = {
       title: "It keeps itself current",
       body: "New projects, talks and roles are found for you. You approve them with one click.",
     },
-    { title: "A person replies", body: "Support is answered by the people who build the product." },
+    { title: "A person replies", body: "Messages are answered by the person who builds the product: me." },
   ],
   timeline: [
-    { year: "2025", text: "The first version, built for a handful of friends." },
+    { year: "Before", text: "Got my job with a portfolio I built by hand." },
     {
       year: "2026",
-      text: "Thirty-five templates for different professions, custom domains and automatic updates.",
+      text: "Fuccura launches: 50+ designs drawn for different jobs, AI helpers, and your own domain.",
     },
   ],
 } as const;
