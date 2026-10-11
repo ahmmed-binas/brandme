@@ -43,7 +43,6 @@ function useConsoleLinks(enabled: boolean) {
 /** Links in the account menu, in the order they appear. */
 const ACCOUNT_LINKS = [
   { href: "/account", label: "Your portfolios" },
-  { href: "/account/investigator", label: "Inspector Iqbal" },
   { href: "/account/domains", label: "Your domains" },
 ];
 
