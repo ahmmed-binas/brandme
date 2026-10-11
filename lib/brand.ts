@@ -16,7 +16,6 @@ export const toolsNavigation = [
 
 export const primaryNavigation = [
   { href: "/templatechooser", label: "Templates" },
-  { href: "/agents", label: "Agents" },
   { href: "/tools", label: "Tools", children: toolsNavigation },
   { href: "/blog", label: "Journal" },
   { href: "/about", label: "About" },
