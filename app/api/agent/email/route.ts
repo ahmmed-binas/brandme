@@ -1,4 +1,5 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
+import { renderEmail, textToHtml } from "@/lib/email/layout";
 import { sendMail, supportInbox, type Mail } from "@/lib/email/mailer";
 import { bearerMatches } from "@/lib/security/bearer";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -46,6 +47,16 @@ export const POST = route(async (request: Request) => {
     to,
     subject: `[Ahmed Agent] ${subject.trim().slice(0, 150)}`,
     text: text.slice(0, 30_000),
+    html: renderEmail({
+      // The inbox preview: the first real line, skipping the "Hi Ahmed," greeting.
+      preheader:
+        text
+          .trim()
+          .split("\n")
+          .find((line) => line.trim() && !/^hi\b/i.test(line.trim())) ?? subject,
+      body: textToHtml(text.slice(0, 30_000)),
+      footer: "Sent by Ahmed Agent, Fuccura's AI assistant, to Fuccura's owner only.",
+    }),
     attachments: files,
   });
   return Response.json({ ok: true });

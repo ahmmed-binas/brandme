@@ -2,6 +2,7 @@ import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
+import { escape, renderEmail } from "@/lib/email/layout";
 import { sendOnce, supportInbox } from "@/lib/email/mailer";
 
 /**
@@ -78,8 +79,8 @@ export async function loadDailyReport(): Promise<DailyReport> {
   };
 }
 
-/** The report as a plain-text email. */
-export function reportEmail(report: DailyReport): { subject: string; text: string } {
+/** The report as an email: plain text, plus the branded HTML version. */
+export function reportEmail(report: DailyReport): { subject: string; text: string; html: string } {
   const change = report.visitors - report.visitorsBefore;
   const trend =
     change === 0
@@ -88,7 +89,7 @@ export function reportEmail(report: DailyReport): { subject: string; text: strin
   const list = (rows: string[]) =>
     rows.length ? rows.map((row) => `  • ${row}`).join("\n") : "  • none yet";
   const engine = report.voiceEngineSeenAt
-    ? `last seen ${new Date(report.voiceEngineSeenAt).toUTCString()}`
+    ? `last seen ${new Date(report.voiceEngineSeenAt).toLocaleString("en-GB", { timeZone: "Asia/Dubai", dateStyle: "medium", timeStyle: "short" })} Dubai time`
     : "never connected";
   const text = [
     `${brand.name}, the last 24 hours (${report.date})`,
@@ -112,7 +113,46 @@ export function reportEmail(report: DailyReport): { subject: string; text: strin
   return {
     subject: `${brand.name} daily: ${report.visitors} visitors, ${report.newAccounts} new accounts`,
     text,
+    html: reportHtml(report, trend, engine),
   };
+}
+
+/** The same report as a branded email: number tiles, then the top pages and sources. */
+function reportHtml(report: DailyReport, trend: string, engine: string): string {
+  const tile = (value: number, label: string, note?: string) =>
+    `<td width="50%" style="padding:6px"><div style="background:#f4f0e8;border-radius:12px;padding:14px 16px">
+<div style="font-family:Georgia,serif;font-size:30px;line-height:1.1">${value}</div>
+<div style="font-size:13px;color:#15140f;margin-top:4px">${escape(label)}</div>
+<div style="font-size:12px;color:#6b665a;margin-top:2px">${note ? escape(note) : "&nbsp;"}</div></div></td>`; // Every tile has a note line, so they line up.
+  const rows = (items: Array<[string, number]>) =>
+    items.length
+      ? items
+          .map(
+            ([name, count]) =>
+              `<tr><td style="padding:7px 0;border-bottom:1px solid #e3ddd0;font-size:14px">${escape(name)}</td><td align="right" style="padding:7px 0;border-bottom:1px solid #e3ddd0;font-size:14px;color:#6b665a">${count}</td></tr>`,
+          )
+          .join("")
+      : `<tr><td style="padding:7px 0;font-size:14px;color:#6b665a">None yet</td></tr>`;
+  const heading = (text: string) =>
+    `<p style="margin:26px 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">${escape(text)}</p>`;
+  const body = `<p style="margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">Daily report · ${escape(report.date)}</p>
+<p style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;line-height:1.25">The last 24 hours on ${escape(brand.name)}</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 -6px">
+<tr>${tile(report.visitors, "Visitors", trend)}${tile(report.pageViews, "Page views")}</tr>
+<tr>${tile(report.newAccounts, "New accounts", `${report.totalAccounts} in total`)}${tile(report.portfoliosPublished, "Portfolios published")}</tr>
+<tr>${tile(report.voiceClips, "Voice clips made")}${tile(report.voicesMade, "New voices made")}</tr>
+</table>
+${heading("Most visited pages")}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows(report.topPages.map((page) => [page.path, page.views]))}</table>
+${heading("Where visitors came from")}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows(report.topReferrers.map((source) => [source.referrer, source.visits]))}</table>
+<p style="margin:22px 0 0;font-size:13px;color:#6b665a">Voice engine: ${escape(engine)}.</p>
+<p style="margin:18px 0 0;color:#6b665a">— Ahmed Agent</p>`;
+  return renderEmail({
+    preheader: `${report.visitors} visitors (${trend}), ${report.newAccounts} new accounts, ${report.voiceClips} voice clips.`,
+    body,
+    footer: `Your daily ${brand.name} report, sent after 9:00 Dubai time.`,
+  });
 }
 
 function dubaiDate(at = new Date()): string {

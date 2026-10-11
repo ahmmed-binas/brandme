@@ -1,5 +1,6 @@
 import { siteUrl } from "@/lib/site";
 import { brand } from "@/lib/brand";
+import { button, escape, paragraph, renderEmail } from "@/lib/email/layout";
 
 /**
  * Lifecycle emails. Short, warm and specific: what's happening, what it means
@@ -13,12 +14,6 @@ interface Built {
   html: string;
 }
 
-const escape = (value: string) =>
-  value.replace(
-    /[&<>"']/g,
-    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!,
-  );
-
 function layout(
   subject: string,
   paragraphs: string[],
@@ -29,15 +24,16 @@ function layout(
     .filter((line, index, all) => line || all[index - 1])
     .join("\n\n")
     .trim();
-  const html = `<!doctype html><html><body style="margin:0;background:#f4f0e8;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#15140f">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center">
-<table role="presentation" width="100%" style="max-width:520px;background:#fffdf8;border:1px solid #e3ddd0;border-radius:14px" cellspacing="0" cellpadding="0"><tr><td style="padding:32px 32px 28px">
-<p style="margin:0 0 24px;font-family:Georgia,serif;font-size:20px">${escape(brand.name)}</p>
-${paragraphs.map((paragraph) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.6">${escape(paragraph)}</p>`).join("")}
-${cta ? `<p style="margin:24px 0 8px"><a href="${escape(cta.url)}" style="display:inline-block;background:#15140f;color:#f4f0e8;text-decoration:none;padding:12px 20px;border-radius:999px;font-size:14px">${escape(cta.label)}</a></p>` : ""}
-</td></tr></table>
-<p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.5;color:#7a766c">${escape(footer ?? `You’re receiving this because you have a ${brand.name} account.`)} <a href="${siteUrl}/account#emails" style="color:#7a766c">Email preferences</a></p>
-</td></tr></table></body></html>`;
+  const html = renderEmail({
+    preheader: paragraphs[1] ?? paragraphs[0] ?? subject,
+    body: [
+      ...paragraphs.map(paragraph),
+      cta ? button(cta.label, cta.url) : "",
+      `<p style="margin:22px 0 0;color:#6b665a">— ${escape(brand.name)}</p>`,
+    ].join("\n"),
+    footer: footer ?? `You’re receiving this because you have a ${brand.name} account.`,
+    footerLink: { label: "Email preferences", url: `${siteUrl}/account#emails` },
+  });
   return { subject, text, html };
 }
 
