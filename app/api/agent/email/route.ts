@@ -1,6 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { renderEmail, textToHtml } from "@/lib/email/layout";
 import { sendMail, supportInbox, type Mail } from "@/lib/email/mailer";
+import { loadDailyReport, reportNumbersHtml } from "@/lib/owner/daily-report";
+import { db } from "@/utils/db";
 import { bearerMatches } from "@/lib/security/bearer";
 import { rateLimit } from "@/lib/security/rate-limit";
 
@@ -19,7 +22,10 @@ const ATTACHMENT_TYPES: Record<string, string> = {
 
 /**
  * The owner's agent emails the owner: suggestions, decisions it needs, reports.
- * Body: { subject, text, attachments?: [{ filename, contentBase64 }] }.
+ * Body: { subject, text, includeReport?, attachments?: [{ filename, contentBase64 }] }.
+ * includeReport adds the live numbers (tiles, goal progress, top pages) under
+ * the text: that's the two-day report, and while it arrives the server
+ * doesn't send its own (lib/owner/daily-report.ts).
  * It can only ever write to the owner's own inbox (SMTP_TO), never to anyone
  * else, and at most EMAILS_PER_DAY times a day.
  */
@@ -31,10 +37,11 @@ export const POST = route(async (request: Request) => {
   // Base64 adds a third, so allow a little over the attachment limit.
   const body = await readJson(request, 7_000_000);
   if (body instanceof Response) return body;
-  const { subject, text, attachments } = body as {
+  const { subject, text, attachments, includeReport } = body as {
     subject?: unknown;
     text?: unknown;
     attachments?: unknown;
+    includeReport?: unknown;
   };
   if (typeof subject !== "string" || !subject.trim() || typeof text !== "string" || !text.trim())
     return jsonError(422, "Send { subject, text }.");
@@ -54,11 +61,18 @@ export const POST = route(async (request: Request) => {
           .trim()
           .split("\n")
           .find((line) => line.trim() && !/^hi\b/i.test(line.trim())) ?? subject,
-      body: textToHtml(text.slice(0, 30_000)),
+      body:
+        textToHtml(text.slice(0, 30_000)) +
+        (includeReport === true ? reportNumbersHtml(await loadDailyReport()) : ""),
       footer: "Sent by Ahmed Agent, Fuccura's AI assistant, to Fuccura's owner only.",
     }),
     attachments: files,
   });
+  // Logged so the server knows the owner has heard from the agent (see sendDailyReport).
+  await db.query("INSERT INTO email_log (owner_id, kind, dedupe_key, status) VALUES (NULL, $1, $2, 'sent')", [
+    includeReport === true ? "agent-report" : "agent",
+    `agent:${randomUUID()}`,
+  ]);
   return Response.json({ ok: true });
 });
 

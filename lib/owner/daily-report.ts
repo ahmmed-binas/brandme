@@ -105,18 +105,24 @@ function scorecard(report: DailyReport): Array<[string, number, number]> {
   ];
 }
 
-/** The report as an email: plain text, plus the branded HTML version. */
-export function reportEmail(report: DailyReport): { subject: string; text: string; html: string } {
+/** The visitors trend and the voice engine's status, in words. */
+function describe(report: DailyReport): { trend: string; engine: string } {
   const change = report.visitors - report.visitorsBefore;
   const trend =
     change === 0
       ? "same as the day before"
       : `${change > 0 ? "up" : "down"} ${Math.abs(change)} on the day before`;
-  const list = (rows: string[]) =>
-    rows.length ? rows.map((row) => `  • ${row}`).join("\n") : "  • none yet";
   const engine = report.voiceEngineSeenAt
     ? `last seen ${new Date(report.voiceEngineSeenAt).toLocaleString("en-GB", { timeZone: "Asia/Dubai", dateStyle: "medium", timeStyle: "short" })} Dubai time`
     : "never connected";
+  return { trend, engine };
+}
+
+/** The report as an email: plain text, plus the branded HTML version. */
+export function reportEmail(report: DailyReport): { subject: string; text: string; html: string } {
+  const { trend, engine } = describe(report);
+  const list = (rows: string[]) =>
+    rows.length ? rows.map((row) => `  • ${row}`).join("\n") : "  • none yet";
   const { leads } = report;
   const leadNote = `${leads.whatsapp} WhatsApp · ${leads.email} email · ${leads.contact} form · ${leads.calls} calls`;
   const text = [
@@ -145,12 +151,26 @@ export function reportEmail(report: DailyReport): { subject: string; text: strin
   return {
     subject: `${brand.name} daily: ${leads.total} leads, ${report.visitors} visitors, ${report.newAccounts} new accounts`,
     text,
-    html: reportHtml(report, trend, engine),
+    html: reportHtml(report, trend),
   };
 }
 
 /** The same report as a branded email: number tiles, then the top pages and sources. */
-function reportHtml(report: DailyReport, trend: string, engine: string): string {
+function reportHtml(report: DailyReport, trend: string): string {
+  const body = `<p style="margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">Report · ${escape(report.date)}</p>
+<p style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;line-height:1.25">The last 24 hours on ${escape(brand.name)}</p>
+${reportNumbersHtml(report)}
+<p style="margin:18px 0 0;color:#6b665a">— Ahmed Agent</p>`;
+  return renderEmail({
+    preheader: `${report.leads.total} leads, ${report.visitors} visitors (${trend}), ${report.newAccounts} new accounts.`,
+    body,
+    footer: `Your ${brand.name} numbers, sent when Ahmed Agent hasn’t reported for two days.`,
+  });
+}
+
+/** Tiles, goal progress and top lists, as email HTML. Also used by the agent’s two-day email. */
+export function reportNumbersHtml(report: DailyReport): string {
+  const { trend, engine } = describe(report);
   const tile = (value: number, label: string, note?: string) =>
     `<td width="50%" style="padding:6px"><div style="background:#f4f0e8;border-radius:12px;padding:14px 16px">
 <div style="font-family:Georgia,serif;font-size:30px;line-height:1.1">${value}</div>
@@ -175,9 +195,7 @@ function reportHtml(report: DailyReport, trend: string, engine: string): string 
   };
   const heading = (text: string) =>
     `<p style="margin:26px 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">${escape(text)}</p>`;
-  const body = `<p style="margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">Daily report · ${escape(report.date)}</p>
-<p style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;line-height:1.25">The last 24 hours on ${escape(brand.name)}</p>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 -6px">
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 -6px">
 <tr>${tile(report.leads.total, "Leads", `${report.leads.whatsapp} WhatsApp · ${report.leads.contact + report.leads.email} email · ${report.leads.calls} calls`)}${tile(report.visitors, "Visitors", trend)}</tr>
 <tr>${tile(report.newAccounts, "New accounts", `${report.totalAccounts} in total`)}${tile(report.portfoliosPublished, "Portfolios published")}</tr>
 <tr>${tile(report.voiceClips, "Voice clips made", `${report.voicesMade} new voices`)}${tile(report.pageViews, "Page views")}</tr>
@@ -191,25 +209,31 @@ ${heading("Most visited pages")}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows(report.topPages.map((page) => [page.path, page.views]))}</table>
 ${heading("Where visitors came from")}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows(report.topReferrers.map((source) => [source.referrer, source.visits]))}</table>
-<p style="margin:22px 0 0;font-size:13px;color:#6b665a">Voice engine: ${escape(engine)}.</p>
-<p style="margin:18px 0 0;color:#6b665a">— Ahmed Agent</p>`;
-  return renderEmail({
-    preheader: `${report.visitors} visitors (${trend}), ${report.newAccounts} new accounts, ${report.voiceClips} voice clips.`,
-    body,
-    footer: `Your daily ${brand.name} report, sent after 9:00 Dubai time.`,
-  });
+<p style="margin:22px 0 0;font-size:13px;color:#6b665a">Voice engine: ${escape(engine)}.</p>`;
 }
 
 function dubaiDate(at = new Date()): string {
   return new Date(at.getTime() + DUBAI_OFFSET_HOURS * 3_600_000).toISOString().slice(0, 10);
 }
 
-/** Run by the hourly job: sends today's report once, after 9:00 Dubai time. Returns true if sent. */
+/**
+ * Run by the hourly job. The owner wants email only every two days, and the
+ * agent's two-day report already includes these numbers. So the server sends
+ * them itself only as a fallback: when the agent hasn't sent a report for
+ * about two and a half days (e.g. the owner's PC was off), at most once per
+ * two-day period, after 9:00 Dubai time. Returns true if sent.
+ */
 export async function sendDailyReport(): Promise<boolean> {
   const to = supportInbox();
   if (!to) return false;
   const dubaiHour = (new Date().getUTCHours() + DUBAI_OFFSET_HOURS) % 24;
   if (dubaiHour < SEND_AFTER_HOUR) return false;
+  await ensureSchema();
+  const agentReported = await db.query(
+    "SELECT 1 FROM email_log WHERE kind = 'agent-report' AND created_at > NOW() - INTERVAL '60 hours' LIMIT 1",
+  );
+  if (agentReported.rowCount) return false;
   const report = await loadDailyReport();
-  return sendOnce(`owner-report:${report.date}`, null, "owner-report", { to, ...reportEmail(report) });
+  const period = Math.floor(Date.parse(report.date) / (2 * 86_400_000));
+  return sendOnce(`owner-report:${period}`, null, "owner-report", { to, ...reportEmail(report) });
 }
