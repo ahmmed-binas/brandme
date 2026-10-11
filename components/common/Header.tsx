@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
+import { AccountMenu, Avatar } from "@/components/common/AccountMenu";
 import { Logo } from "@/components/common/Logo";
 import { brand, primaryNavigation } from "@/lib/brand";
 
@@ -79,12 +80,9 @@ export default function Header() {
           </button>
           {status !== "loading" &&
             (session?.user ? (
-              <Link
-                href="/account"
-                className="hidden rounded-full border border-rule px-4 py-2 text-sm text-ink transition hover:border-ink sm:inline-flex"
-              >
-                Your portfolios
-              </Link>
+              <div className="hidden sm:block">
+                <AccountMenu user={session.user} />
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -133,6 +131,17 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
+          {session?.user && (
+            <div className="mt-5 flex items-center gap-3">
+              <Avatar user={session.user} size={40} />
+              <div className="min-w-0">
+                {session.user.name && <p className="truncate font-medium text-ink">{session.user.name}</p>}
+                {session.user.email && (
+                  <p className="truncate text-[0.85rem] text-ink-soft">{session.user.email}</p>
+                )}
+              </div>
+            </div>
+          )}
           <div className="mt-5 flex gap-2">
             <Link
               href="/templatechooser"
