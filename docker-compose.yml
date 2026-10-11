@@ -35,6 +35,9 @@ services:
     environment:
       DATABASE_URL: postgres://formora:${POSTGRES_PASSWORD}@db:5432/formora
       DATABASE_SSL: disable
+      # The public address for sign-in. Behind Caddy the app only sees its internal
+      # address (0.0.0.0:3000), so Google and GitHub would be sent back there.
+      AUTH_URL: ${APP_URL}
       # The Investigator reads customers' own pages in this headless browser (JavaScript runs).
       # Remove this line (and the obscura service) to read pages with a plain fetch instead.
       OBSCURA_URL: ws://obscura:9222/devtools/browser
