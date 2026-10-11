@@ -2,13 +2,42 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, ShieldCheck } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 export interface SignedInUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  /** True for a superadmin signed in through the console. */
+  console?: boolean;
+}
+
+interface ConsoleLink {
+  href: string;
+  label: string;
+}
+
+/**
+ * The console's links, fetched only for a console session. The server answers
+ * only the superadmin, so the secret console address never reaches anyone else.
+ */
+function useConsoleLinks(enabled: boolean) {
+  const [links, setLinks] = useState<ConsoleLink[]>([]);
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    fetch("/api/console/links")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: { links?: ConsoleLink[] } | null) => {
+        if (active && body?.links) setLinks(body.links);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [enabled]);
+  return links;
 }
 
 /** Links in the account menu, in the order they appear. */
@@ -67,6 +96,7 @@ export function AccountMenu({ user }: { user: SignedInUser }) {
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement | null>(null);
   const firstName = user.name?.split(/\s+/)[0] || user.email?.split("@")[0] || "Account";
+  const consoleLinks = useConsoleLinks(Boolean(user.console));
 
   // Close when clicking outside the menu or pressing Escape.
   useEffect(() => {
@@ -112,6 +142,24 @@ export function AccountMenu({ user }: { user: SignedInUser }) {
               {user.email && <p className="truncate text-[0.85rem] text-ink-soft">{user.email}</p>}
             </div>
           </div>
+
+          {consoleLinks.length > 0 && (
+            <div className="border-b border-rule py-1">
+              <p className="flex items-center gap-1.5 px-4 pb-1 pt-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-signal">
+                <ShieldCheck size={13} /> Superadmin
+              </p>
+              {consoleLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  role="menuitem"
+                  className="block px-4 py-2.5 text-sm text-ink transition hover:bg-ink/5"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )}
 
           <div className="py-1">
             {ACCOUNT_LINKS.map((link) => (
