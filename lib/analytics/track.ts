@@ -14,7 +14,7 @@ import { consoleBase } from "@/lib/console/path";
  * deleted by the hourly job.
  */
 
-const BOT =
+export const BOT =
   /bot|crawl|spider|slurp|bing|preview|facebookexternalhit|embedly|whatsapp|telegram|discord|curl|wget|python|node-fetch|axios|go-http|headless|lighthouse|pingdom|uptime|monitor/i;
 const SKIP = ["/api", "/admin", "/console", "/_next", "/__not-found"];
 
@@ -33,7 +33,7 @@ function device(ua: string): "mobile" | "tablet" | "desktop" {
   return /mobi|iphone|android/i.test(ua) ? "mobile" : "desktop";
 }
 
-function visitorId(ip: string, ua: string, now = new Date()): string {
+export function visitorId(ip: string, ua: string, now = new Date()): string {
   const day = now.toISOString().slice(0, 10);
   const salt = createHash("sha256")
     .update(`${process.env.AUTH_SECRET ?? "formora"}:${day}`)

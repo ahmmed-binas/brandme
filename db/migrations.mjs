@@ -621,6 +621,27 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "023_leads",
+  statements: [
+    // People who reached out (lib/analytics/leads.ts): WhatsApp and email clicks on Fuccura's
+    // own buttons, and contact-form messages. Contact messages keep the name and email the
+    // person typed, so the owner can follow up; clicks only keep the page and a daily visitor code.
+    `CREATE TABLE IF NOT EXISTS leads (
+      id BIGSERIAL PRIMARY KEY,
+      at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      kind TEXT NOT NULL CHECK (kind IN ('whatsapp', 'email', 'contact')),
+      page TEXT NOT NULL,
+      visitor TEXT,
+      user_id UUID REFERENCES app_users(id) ON DELETE SET NULL,
+      name TEXT,
+      email TEXT,
+      note TEXT
+    )`,
+    `CREATE INDEX IF NOT EXISTS leads_at ON leads (at)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

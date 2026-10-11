@@ -1,8 +1,12 @@
+import { isLeadKind, recordLead } from "@/lib/analytics/leads";
 import { recordView } from "@/lib/analytics/track";
 import { tooManyAttempts } from "@/lib/accounts/passwords";
 import { getCurrentUser } from "@/utils/user-account";
 
-/** Page-view beacon (components/common/VisitBeacon.tsx). Always answers 204; counting never breaks a page. */
+/**
+ * Page-view and lead-click beacon (components/common/VisitBeacon.tsx).
+ * Always answers 204; counting never breaks a page.
+ */
 export async function POST(request: Request) {
   try {
     const ip =
@@ -13,8 +17,24 @@ export async function POST(request: Request) {
     if (tooManyAttempts(`view:${ip}`, 300, 60 * 60_000)) return new Response(null, { status: 204 });
     const raw = await request.text();
     if (raw.length > 2_000) return new Response(null, { status: 204 });
-    const body = JSON.parse(raw) as { path?: unknown; referrer?: unknown; timeZone?: unknown };
-    if (typeof body.path === "string") {
+    const body = JSON.parse(raw) as {
+      path?: unknown;
+      referrer?: unknown;
+      timeZone?: unknown;
+      lead?: unknown;
+    };
+    // A click on one of Fuccura's own WhatsApp or email buttons (VisitBeacon), not a page view.
+    if (typeof body.path === "string" && isLeadKind(body.lead) && body.lead !== "contact") {
+      const user = await getCurrentUser().catch(() => null);
+      if (!user?.isSuperadmin)
+        await recordLead({
+          kind: body.lead,
+          page: body.path,
+          ip,
+          userAgent: request.headers.get("user-agent") ?? "",
+          userId: user?.id ?? null,
+        });
+    } else if (typeof body.path === "string") {
       // Signed-in visitors are linked to their account so the owner can see their journey.
       const user = await getCurrentUser().catch(() => null);
       await recordView({

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordLead } from "@/lib/analytics/leads";
 import { sendContactEmail } from "@/lib/contact/smtp";
 import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 import { databaseConfigured } from "@/utils/db-schema";
@@ -26,6 +27,18 @@ export async function POST(request: Request) {
         { error: "Enter a name, valid email, subject, and message." },
         { status: 400 },
       );
+    // Saved as a lead first, so the person's name and email survive even if the email fails.
+    // A saving problem never blocks the message.
+    if (databaseConfigured())
+      await recordLead({
+        kind: "contact",
+        page: new URL(request.headers.get("referer") ?? "/contact", "http://x").pathname,
+        ip: clientIp(request),
+        userAgent: request.headers.get("user-agent") ?? "",
+        name,
+        email,
+        note: subject,
+      }).catch((error) => console.error("Lead not recorded", (error as Error).message));
     await sendContactEmail({ name, email, subject, message });
     return NextResponse.json({ ok: true });
   } catch (error) {

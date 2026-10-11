@@ -4,6 +4,7 @@ import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 import { escape, renderEmail } from "@/lib/email/layout";
 import { sendOnce, supportInbox } from "@/lib/email/mailer";
+import { countLeads, leadPages, type LeadCounts } from "@/lib/analytics/leads";
 
 /**
  * The owner's daily email: what happened on the site in the last 24 hours.
@@ -32,6 +33,12 @@ export interface DailyReport {
   voiceClips: number;
   /** When the voice engine on the owner's PC last asked for work; null if never. */
   voiceEngineSeenAt: string | null;
+  /** People who reached out: last 24 hours, and since launch (the month's main goal). */
+  leads: LeadCounts;
+  leadsAllTime: LeadCounts;
+  leadPages: Array<{ page: string; leads: number }>;
+  /** Portfolios live right now (published at least once). */
+  publishedTotal: number;
 }
 
 const count = async (sql: string): Promise<number> =>
@@ -76,7 +83,26 @@ export async function loadDailyReport(): Promise<DailyReport> {
       "SELECT COUNT(*) AS n FROM voice_clips WHERE status = 'done' AND finished_at > NOW() - INTERVAL '24 hours'",
     ),
     voiceEngineSeenAt: engine.rows[0]?.seen_at?.toISOString() ?? null,
+    leads: await countLeads(24),
+    leadsAllTime: await countLeads(null),
+    leadPages: await leadPages(24),
+    publishedTotal: await count("SELECT COUNT(*) AS n FROM portfolios WHERE published_at IS NOT NULL"),
   };
+}
+
+/**
+ * The month's goal: Ahmed Agent's first month running Fuccura (set 11 October 2026).
+ * The owner judges it mainly on leads. Change the numbers here.
+ */
+const GOAL = { deadline: "11 November 2026", leads: 25, accounts: 100, published: 15 };
+
+/** Progress towards GOAL: [label, done so far, target]. */
+function scorecard(report: DailyReport): Array<[string, number, number]> {
+  return [
+    ["Leads", report.leadsAllTime.total, GOAL.leads],
+    ["Accounts", report.totalAccounts, GOAL.accounts],
+    ["Websites published", report.publishedTotal, GOAL.published],
+  ];
 }
 
 /** The report as an email: plain text, plus the branded HTML version. */
@@ -91,9 +117,12 @@ export function reportEmail(report: DailyReport): { subject: string; text: strin
   const engine = report.voiceEngineSeenAt
     ? `last seen ${new Date(report.voiceEngineSeenAt).toLocaleString("en-GB", { timeZone: "Asia/Dubai", dateStyle: "medium", timeStyle: "short" })} Dubai time`
     : "never connected";
+  const { leads } = report;
+  const leadNote = `${leads.whatsapp} WhatsApp · ${leads.email} email · ${leads.contact} form · ${leads.calls} calls`;
   const text = [
     `${brand.name}, the last 24 hours (${report.date})`,
     "",
+    `Leads: ${leads.total} (${leadNote})`,
     `Visitors: ${report.visitors} (${trend})`,
     `Page views: ${report.pageViews}`,
     `New accounts: ${report.newAccounts} (total ${report.totalAccounts})`,
@@ -106,12 +135,15 @@ export function reportEmail(report: DailyReport): { subject: string; text: strin
     "Where visitors came from:",
     list(report.topReferrers.map((source) => `${source.referrer} (${source.visits})`)),
     "",
+    `Goal by ${GOAL.deadline}:`,
+    ...scorecard(report).map(([label, done, target]) => `  • ${label}: ${done} of ${target}`),
+    "",
     `Visitor activity: ${siteUrl} → your console → Activity`,
     "",
     "— Ahmed Agent",
   ].join("\n");
   return {
-    subject: `${brand.name} daily: ${report.visitors} visitors, ${report.newAccounts} new accounts`,
+    subject: `${brand.name} daily: ${leads.total} leads, ${report.visitors} visitors, ${report.newAccounts} new accounts`,
     text,
     html: reportHtml(report, trend, engine),
   };
@@ -133,15 +165,28 @@ function reportHtml(report: DailyReport, trend: string, engine: string): string 
           )
           .join("")
       : `<tr><td style="padding:7px 0;font-size:14px;color:#6b665a">None yet</td></tr>`;
+  // A labelled progress bar (email-safe: two table cells, no CSS gradients).
+  const progress = (label: string, done: number, target: number) => {
+    const percent = Math.min(100, Math.round((done / target) * 100));
+    return `<p style="margin:10px 0 4px;font-size:14px">${escape(label)} <span style="color:#6b665a">${done} of ${target}</span></p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="height:8px"><tr>
+<td width="${Math.max(percent, 1)}%" style="background:#10b981;height:8px;border-radius:4px 0 0 4px;font-size:0;line-height:0">&nbsp;</td>
+<td style="background:#e3ddd0;height:8px;border-radius:0 4px 4px 0;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
+  };
   const heading = (text: string) =>
     `<p style="margin:26px 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">${escape(text)}</p>`;
   const body = `<p style="margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6b665a;font-weight:600">Daily report · ${escape(report.date)}</p>
 <p style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;line-height:1.25">The last 24 hours on ${escape(brand.name)}</p>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 -6px">
-<tr>${tile(report.visitors, "Visitors", trend)}${tile(report.pageViews, "Page views")}</tr>
+<tr>${tile(report.leads.total, "Leads", `${report.leads.whatsapp} WhatsApp · ${report.leads.contact + report.leads.email} email · ${report.leads.calls} calls`)}${tile(report.visitors, "Visitors", trend)}</tr>
 <tr>${tile(report.newAccounts, "New accounts", `${report.totalAccounts} in total`)}${tile(report.portfoliosPublished, "Portfolios published")}</tr>
-<tr>${tile(report.voiceClips, "Voice clips made")}${tile(report.voicesMade, "New voices made")}</tr>
+<tr>${tile(report.voiceClips, "Voice clips made", `${report.voicesMade} new voices`)}${tile(report.pageViews, "Page views")}</tr>
 </table>
+${heading(`Goal by ${GOAL.deadline}`)}
+${scorecard(report)
+  .map(([label, done, target]) => progress(label, done, target))
+  .join("")}
+${report.leadPages.length ? `${heading("Pages that brought leads")}<table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows(report.leadPages.map((page) => [page.page, page.leads]))}</table>` : ""}
 ${heading("Most visited pages")}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows(report.topPages.map((page) => [page.path, page.views]))}</table>
 ${heading("Where visitors came from")}
