@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
+import { isTemplateAvailable } from "@/lib/templates/approval";
+import { templatePageHref } from "@/lib/templates/links";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import { getTemplate, DEFAULT_TEMPLATE_ID } from "@/lib/templates/catalog";
 import { ROLES, roleById } from "@/lib/templates/roles";
@@ -27,6 +30,11 @@ export default async function TemplatePreviewPage({
 }) {
   const { template, role: roleId } = await searchParams;
   const selected = getTemplate(template ?? "") ?? getTemplate(DEFAULT_TEMPLATE_ID)!;
+  // Approved studio templates have one indexed page, their gallery article: send visitors (and
+  // search engines, with a permanent redirect) there. Pending ones still preview here for the owner.
+  if (selected.collection === "studio" && (await isTemplateAvailable(selected))) {
+    permanentRedirect(templatePageHref(selected.id, { role: roleId }));
+  }
   const role = selected.collection === "studio" ? roleById(roleId) : undefined;
   const withRole = role ? `&role=${role.id}` : "";
   // Job titles this design suits, so a visitor can see it with content like theirs.

@@ -7,6 +7,7 @@ import { ArrowRight, ArrowUpRight, Search, X } from "lucide-react";
 import { FIELDS, PROFESSIONS, STYLES, type ProfessionId, type StyleTag } from "@/lib/templates/types";
 import { rankRoles, type RoleSummary } from "@/lib/templates/roles/search";
 import { RatingBadge, type RatingSummary } from "./Rating";
+import { templatePageHref } from "@/lib/templates/links";
 
 export interface GalleryTemplate {
   id: string;
@@ -346,7 +347,10 @@ export default function Gallery({
             {pageItems.map((template) => (
               <li key={template.id} className="flex flex-col">
                 <Link
-                  href={withRole(`/templatepreview?template=${template.id}`)}
+                  href={templatePageHref(template.id, {
+                    role: selectedRole?.id,
+                    approved: template.status === undefined || template.status === "approved",
+                  })}
                   className="group relative block aspect-[3/2] overflow-hidden rounded-xl border border-rule bg-ink/5"
                   aria-label={`Preview ${template.name}`}
                 >
@@ -405,7 +409,10 @@ export default function Gallery({
                     <ArrowRight size={15} className="transition-transform group-hover/cta:translate-x-0.5" />
                   </Link>
                   <Link
-                    href={withRole(`/templatepreview?template=${template.id}`)}
+                    href={templatePageHref(template.id, {
+                      role: selectedRole?.id,
+                      approved: template.status === undefined || template.status === "approved",
+                    })}
                     className="text-[0.92rem] text-ink underline decoration-rule underline-offset-[5px] hover:decoration-ink"
                   >
                     Preview

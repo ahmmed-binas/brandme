@@ -10,10 +10,12 @@ import { galleryArticle, galleryItems, noticeFor } from "@/lib/gallery/items";
 import { LICENSES } from "@/lib/gallery/submissions";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
+import { breadcrumbSchema, faqSchema, jobsFor, professionOf, templateFaq } from "@/lib/gallery/seo";
+import { roleById } from "@/lib/templates/roles";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ role?: string }> };
 const load = cache((slug: string) => galleryArticle(slug));
 const date = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {
@@ -26,7 +28,11 @@ const date = (iso: string) =>
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const item = await load((await params).slug);
   if (!item) return { title: "Template not found", robots: { index: false } };
-  const title = `${item.title}: free ${item.kind === "original" ? "portfolio" : "website"} template`;
+  // "Mirage: free real estate website template" reads like what people search for.
+  const profession = item.kind === "original" ? professionOf(item.slug) : null;
+  const title = profession
+    ? `${item.title}: free ${profession.toLowerCase()} website template`
+    : `${item.title}: free ${item.kind === "original" ? "portfolio" : "website"} template`;
   return {
     title,
     description: item.summary,
@@ -53,16 +59,33 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 /** A design's page in the gallery: the story behind it, the free download and setup, and customising without code. */
-export default async function GalleryArticlePage({ params }: Props) {
+export default async function GalleryArticlePage({ params, searchParams }: Props) {
   const item = await load((await params).slug);
   if (!item) notFound();
+  const original = item.kind === "original";
+  // A job title chosen on /for/<role> or the Templates page fills the preview and editor with matching content.
+  const role = original ? roleById((await searchParams).role) : undefined;
+  const roleQuery = role ? `role=${role.id}` : "";
+  const previewSrc = item.preview && roleQuery ? `${item.preview}&${roleQuery}` : item.preview;
+  const editorHref = `/editor/${item.slug}${roleQuery ? `?${roleQuery}` : ""}`;
+  const jobs = original ? jobsFor(item.slug) : [];
+  const profession = original ? professionOf(item.slug) : null;
+  const faq = templateFaq({
+    title: item.title,
+    audience: item.audience,
+    fonts: item.fonts,
+    palettes: item.palettes,
+    editable: item.editable,
+  });
   const notice = item.kind === "original" ? noticeFor(item.slug) : null;
+  // Related designs: the same profession first (e.g. other real estate templates), then similar ones.
+  const sameJob = (slug: string) => profession !== null && professionOf(slug) === profession;
   const more = (await galleryItems())
     .filter((entry) => entry.slug !== item.slug && (entry.motion === item.motion || entry.kind === item.kind))
+    .sort((a, b) => Number(sameJob(b.slug)) - Number(sameJob(a.slug)))
     .slice(0, 3);
   const license = LICENSES[item.license as keyof typeof LICENSES] ?? item.license;
-  const schema = {
-    "@context": "https://schema.org",
+  const creativeWork = {
     "@type": "CreativeWork",
     name: item.title,
     description: item.summary,
@@ -84,6 +107,10 @@ export default async function GalleryArticlePage({ params }: Props) {
         }
       : {}),
   };
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [creativeWork, breadcrumbSchema(item.title, item.slug), faqSchema(faq)],
+  };
   const ratingEndpoint =
     item.kind === "original" ? `/api/templates/${item.slug}/rating` : `/api/gallery/${item.slug}/rating`;
 
@@ -94,12 +121,22 @@ export default async function GalleryArticlePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}
       />
       <div className="mx-auto max-w-[1240px] px-5 pt-10 sm:px-8 lg:pt-14">
-        <Link
-          href="/gallery"
-          className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft hover:text-ink"
+        <nav
+          aria-label="Breadcrumb"
+          className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft"
         >
-          <ArrowLeft size={13} /> Gallery
-        </Link>
+          <Link href="/templatechooser" className="inline-flex items-center gap-2 hover:text-ink">
+            <ArrowLeft size={13} /> Templates
+          </Link>
+          {profession && (
+            <>
+              <span aria-hidden>/</span>
+              <span>{profession}</span>
+            </>
+          )}
+          <span aria-hidden>/</span>
+          <span className="text-ink">{item.title}</span>
+        </nav>
 
         <header className="mt-8 grid gap-10 lg:grid-cols-[1.35fr_1fr] lg:items-end">
           <div>
@@ -128,7 +165,7 @@ export default async function GalleryArticlePage({ params }: Props) {
               <DownloadButton href={item.download} />
               {item.editable && (
                 <Link
-                  href={`/editor/${item.slug}`}
+                  href={editorHref}
                   className="inline-flex items-center gap-2 rounded-full border border-ink px-5 py-3 text-[0.98rem] text-ink hover:bg-ink hover:text-paper"
                 >
                   Customise without code <ArrowRight size={16} />
@@ -267,7 +304,7 @@ export default async function GalleryArticlePage({ params }: Props) {
           </h2>
           <p className="mt-3 text-ink-soft">The real template, running live with sample content.</p>
           <div className="mt-8 h-[78vh] overflow-hidden rounded-2xl border border-rule">
-            <PreviewFrame src={item.preview} title={`${item.title} live preview`} />
+            <PreviewFrame src={previewSrc!} title={`${item.title} live preview`} />
           </div>
         </section>
       )}
@@ -356,7 +393,7 @@ export default async function GalleryArticlePage({ params }: Props) {
             <div className="mt-7 flex flex-wrap gap-3">
               {item.editable ? (
                 <Link
-                  href={`/editor/${item.slug}`}
+                  href={editorHref}
                   className="inline-flex items-center gap-2 rounded-full bg-paper px-5 py-3 text-[0.98rem] font-medium text-ink hover:bg-signal hover:text-signal-ink"
                 >
                   Customise {item.title} <ArrowRight size={16} />
@@ -378,6 +415,49 @@ export default async function GalleryArticlePage({ params }: Props) {
             </div>
           </div>
         </div>
+      </section>
+
+      {jobs.length > 0 && (
+        <section className="mx-auto mt-24 max-w-[1240px] px-5 sm:px-8" aria-labelledby="jobs">
+          <h2
+            id="jobs"
+            className="font-display text-[clamp(2rem,4vw,3rem)] leading-none tracking-[-0.02em] text-ink"
+          >
+            Made for these jobs
+          </h2>
+          <p className="mt-3 text-ink-soft">
+            Open {item.title} with sample content written for your job title.
+          </p>
+          <ul className="mt-8 flex flex-wrap gap-2">
+            {jobs.map((job) => (
+              <li key={job.id}>
+                <Link
+                  href={`/for/${job.id}`}
+                  className="inline-block rounded-full border border-rule px-4 py-2 text-[0.95rem] text-ink hover:border-ink"
+                >
+                  {item.title} for {job.plural}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mx-auto mt-24 max-w-[52rem] px-5 sm:px-8" aria-labelledby="faq">
+        <h2
+          id="faq"
+          className="font-display text-[clamp(2rem,4vw,3rem)] leading-none tracking-[-0.02em] text-ink"
+        >
+          Questions about {item.title}
+        </h2>
+        <dl className="mt-8 divide-y divide-rule border-y border-rule">
+          {faq.map((entry) => (
+            <div key={entry.question} className="py-6">
+              <dt className="font-medium text-ink">{entry.question}</dt>
+              <dd className="mt-2 leading-relaxed text-ink-soft">{entry.answer}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       {more.length > 0 && (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { templatePageHref } from "@/lib/templates/links";
 
 export interface RatingSummary {
   average: number | null;
@@ -30,7 +31,7 @@ export function RateTemplate({
   templateId,
   initial,
   endpoint = `/api/templates/${templateId}/rating`,
-  returnTo = `/templatepreview?template=${templateId}`,
+  returnTo = templatePageHref(templateId),
 }: {
   templateId: string;
   initial: RatingSummary;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { templatePageHref } from "@/lib/templates/links";
 import { notFound } from "next/navigation";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { availableTemplates } from "@/lib/templates/approval";
@@ -112,7 +113,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
             {designs.map((template) => (
               <li key={template.id}>
                 <Link
-                  href={`/templatepreview?template=${template.id}&role=${role.id}`}
+                  href={templatePageHref(template.id, { role: role.id })}
                   className="group block overflow-hidden rounded-xl border border-rule"
                   aria-label={`Preview ${template.name} for ${role.plural}`}
                 >
@@ -127,7 +128,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
                 <div className="mt-4 flex items-baseline justify-between gap-4">
                   <h3 className="font-display text-[1.6rem] leading-none text-ink">{template.name}</h3>
                   <Link
-                    href={`/templatepreview?template=${template.id}&role=${role.id}`}
+                    href={templatePageHref(template.id, { role: role.id })}
                     className="inline-flex items-center gap-1 text-[0.9rem] text-ink underline decoration-rule underline-offset-4 hover:decoration-ink"
                   >
                     Preview <ArrowUpRight size={13} />
