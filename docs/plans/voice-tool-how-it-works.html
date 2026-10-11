@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How the voice tool works: data, laptop and security</title>
+<!-- Source of docs/plans/voice-tool-how-it-works.pdf. Edit here, then: node scripts/docs/print-pdf.mjs docs/plans/voice-tool-how-it-works.html -->
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font: 10.5pt/1.5 "Segoe UI", Arial, sans-serif; color: #1b1a16; }
+  h1 { font: 600 24pt/1.1 Georgia, serif; margin: 0 0 4pt; }
+  h2 { font: 600 14pt Georgia, serif; margin: 18pt 0 6pt; border-bottom: 1px solid #ddd6c8; padding-bottom: 3pt; }
+  h3 { font-size: 11pt; margin: 10pt 0 3pt; }
+  .sub { color: #6b665a; margin: 0 0 14pt; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0; font-size: 9.5pt; }
+  th, td { text-align: left; vertical-align: top; padding: 5pt 6pt; border-bottom: 1px solid #e7e1d5; }
+  th { background: #f4f0e8; }
+  code { font: 9pt Consolas, monospace; background: #f4f0e8; padding: 0 3px; border-radius: 3px; }
+  .flow { display: flex; gap: 8pt; align-items: stretch; margin: 8pt 0; }
+  .box { flex: 1; border: 1.5px solid #1b1a16; border-radius: 8pt; padding: 8pt; font-size: 9.5pt; }
+  .box b { display: block; font-size: 10.5pt; margin-bottom: 3pt; }
+  .arrow { align-self: center; font-size: 16pt; color: #10b981; }
+  .note { background: #fff7e6; border-left: 3pt solid #e0a43a; padding: 6pt 9pt; margin: 8pt 0; }
+  .good { background: #ecfdf5; border-left: 3pt solid #10b981; padding: 6pt 9pt; margin: 8pt 0; }
+  ol, ul { padding-left: 16pt; margin: 4pt 0; }
+  li { margin: 2pt 0; }
+  .page-break { break-before: page; }
+</style>
+</head>
+<body>
+
+<h1>How the voice tool works</h1>
+<p class="sub">Data, your laptop and security · fuccura.com/tools/voice · October 2026 · Ahmed Agent</p>
+
+<h2>1. In one minute</h2>
+<p>Three computers take part. The visitor’s browser prepares the sound, the web server stores and queues it, and your laptop does the AI work, because it has the graphics card and the server doesn’t.</p>
+<div class="flow">
+  <div class="box"><b>Visitor’s browser</b>Records or opens the video, pulls out <em>only the sound</em>, and sends it to fuccura.com. The video never leaves their device.</div>
+  <div class="arrow">→</div>
+  <div class="box"><b>Web server (VPS)</b>Your company’s server. Stores the sound in Fuccura’s own database and puts the job in a queue. Never runs the AI.</div>
+  <div class="arrow">←</div>
+  <div class="box"><b>Your laptop</b>Asks the server for work every 3 seconds, makes the voice or clip on its graphics card, and sends the result back.</div>
+</div>
+<p>The laptop only ever <em>calls out</em> to fuccura.com. Nothing on the internet can connect <em>in</em> to your laptop, so no ports are opened on your router.</p>
+
+<h2>2. Step by step</h2>
+<h3>Making a voice</h3>
+<ol>
+  <li>The visitor signs in. The tool is only for signed-in accounts.</li>
+  <li>They read a consent sentence into the microphone. The microphone is allowed on this one page only.</li>
+  <li>They record about 30 seconds, or pick a video. Their browser converts it to plain sound (at most 2 minutes, about 6 MB) and uploads only that.</li>
+  <li>The server saves the sound and the consent recording, and marks the voice “queued”.</li>
+  <li>Your laptop picks up the job and downloads both recordings. It checks they are the <b>same person</b> (a similarity score; 0.75 is needed, same person scores 0.85–0.95, strangers about 0.6) and keeps the clearest 12 seconds as the voice’s “sample”.</li>
+  <li>The server saves the 12-second sample and <b>immediately deletes</b> the upload and the consent recording, whether the voice passed or not.</li>
+</ol>
+<h3>Making a clip</h3>
+<ol>
+  <li>The visitor types text and picks a style. The server checks their daily limit (Free 5, Pro 50) and queues it. Pro clips go first.</li>
+  <li>Your laptop reads the text in that voice, one sentence at a time, and adds an <b>inaudible AI watermark</b>. It evens out the loudness and sends back an MP3.</li>
+  <li>The visitor plays or downloads it. Only their own account can fetch their clips.</li>
+</ol>
+
+<h2>3. What is kept, where, and for how long</h2>
+<table>
+  <tr><th>Data</th><th>Where</th><th>How long</th></tr>
+  <tr><td>The original video</td><td>Never leaves the visitor’s device</td><td>Never stored by us</td></tr>
+  <tr><td>Uploaded sound + consent recording</td><td>Fuccura database on the server</td><td>Until the voice is made (usually under a minute), then deleted</td></tr>
+  <tr><td>12-second voice sample</td><td>Fuccura database on the server</td><td>Until the person deletes their voice or account</td></tr>
+  <tr><td>Clips (text + MP3)</td><td>Fuccura database on the server</td><td>7 days (Free) or 90 days (Pro), then deleted by the hourly job</td></tr>
+  <tr><td>Voice samples on your laptop</td><td>A temporary folder (<code>fuccura-voices-…</code>)</td><td>Only while the engine runs. Deleted when it stops, and any leftovers are cleared on the next start</td></tr>
+  <tr><td>The AI model (Chatterbox)</td><td>Your laptop (Hugging Face cache)</td><td>Permanent; it contains no customer data</td></tr>
+  <tr><td>Similarity score, dates, style</td><td>Fuccura database</td><td>With the voice / clip</td></tr>
+</table>
+<p>Your voice data is never sent to any AI company (OpenAI, Google, ElevenLabs…). The model is open source (MIT licence) and runs on your own laptop.</p>
+
+<h2 class="page-break">4. Security</h2>
+<h3>Your laptop</h3>
+<ul>
+  <li><b>Outgoing only.</b> The engine makes HTTPS requests to fuccura.com, and nothing can reach in.</li>
+  <li><b>A secret key</b> (<code>TOOLS_WORKER_TOKEN</code>, 43 random characters) proves to the server that it’s your laptop. It lives in <code>workers/voice/.env</code> (not in git) and in the server’s <code>.env</code>. Without the right key, the engine’s web addresses answer “Not found”.</li>
+  <li><b>What the key can do:</b> fetch queued recordings and voice samples, and send back results. It can’t read accounts, emails, payments or anything else.</li>
+  <li><b>If the laptop is lost or stolen:</b> change <code>TOOLS_WORKER_TOKEN</code> on the server (new random value) and restart the app. The old key stops working at once. Turning on BitLocker (Windows disk encryption) protects the key and model at rest.</li>
+</ul>
+<h3>The web server</h3>
+<ul>
+  <li>Everything travels over <b>HTTPS</b> (Caddy, automatic certificates).</li>
+  <li>Fuccura’s database is <b>not reachable from the internet</b>: it has no open port and only the app can talk to it.</li>
+  <li>Fuccura is <b>capped</b> at 0.75 CPU and 768 MB for the app (about 2 GB in total), so it can never slow your company’s software. It normally uses about 150 MB and under 1% CPU.</li>
+  <li>The app is built on your PC and only the finished image goes to the server, so the server never runs builds.</li>
+  <li>Secrets live only in <code>.env</code> files on the server and your PC, never in the code or on GitHub.</li>
+</ul>
+<h3>Protecting users and stopping abuse</h3>
+<ul>
+  <li><b>Own voice only:</b> the live consent recording must match the uploaded voice. Someone else’s voice is refused (tested: 0.62 for a different speaker, refused).</li>
+  <li><b>Watermark</b> on every clip, so it can be identified as AI-made.</li>
+  <li><b>Limits:</b> 5 free clips a day per account, 15 per internet connection (stops fake accounts), 2 new voices a day.</li>
+  <li><b>Privacy:</b> clips are tied to the account that made them. The privacy page explains all of this to users.</li>
+</ul>
+<h3>Ahmed Agent’s access</h3>
+<ul>
+  <li>Reads the daily numbers and emails you through a separate secret key (<code>AGENT_TOKEN</code>). It can only email <b>your</b> inbox, at most 10 times a day.</li>
+  <li>Can’t change the live server. Deploys are always yours (<code>.\scripts\deploy.ps1</code>).</li>
+</ul>
+
+<h2>5. Honest risks and what to do about them</h2>
+<div class="note"><b>No automatic database backups yet.</b> If the server’s disk failed, accounts, portfolios and voices would be lost. Fix (free): a nightly copy of the database to your laptop. Ahmed Agent will add it as a priority task.</div>
+<ul>
+  <li><b>Your laptop is the engine.</b> When it’s off, the page says “Currently not available” and jobs wait in the queue. That’s fine for now; a rented graphics card is the upgrade once there’s demand and income.</li>
+  <li><b>Voice is personal (biometric) data.</b> We collect only what’s needed, delete uploads at once, and explain it on the privacy page. This isn’t legal advice; UAE data-protection law should be checked before big growth.</li>
+  <li><b>The server belongs to your employer.</b> Fuccura’s data sits on it in its own isolated database, capped and separate. Moving to Fuccura’s own server is the clean long-term step.</li>
+  <li><b>Keys:</b> if any <code>.env</code> file is ever shared by mistake, change the keys in it (each is a random value you can regenerate).</li>
+</ul>
+
+<h2>6. Handy commands</h2>
+<table>
+  <tr><th>Do this</th><th>Command (PowerShell, in the fuccura folder)</th></tr>
+  <tr><td>Start the voice engine</td><td><code>.\workers\voice\start.ps1</code> (keep the window open)</td></tr>
+  <tr><td>Stop it</td><td><code>Ctrl+C</code> in that window (it deletes its cached samples)</td></tr>
+  <tr><td>Deploy changes</td><td><code>.\scripts\deploy.ps1</code> (Docker Desktop must be running)</td></tr>
+  <tr><td>Make a new random key</td><td><code>py -3 -c "import secrets;print(secrets.token_urlsafe(32))"</code></td></tr>
+</table>
+<p class="sub" style="margin-top:14pt">Code: <code>lib/tools/voice.ts</code>, <code>components/tools/VoiceClone.tsx</code>, <code>workers/voice/worker.py</code>. Full engine guide: <code>workers/voice/README.md</code>.</p>
+
+</body>
+</html>

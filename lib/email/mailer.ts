@@ -79,6 +79,8 @@ export interface Mail {
   text: string;
   html?: string;
   replyTo?: string;
+  /** Files sent with the email, e.g. a PDF report (passed straight to nodemailer). */
+  attachments?: Array<{ filename: string; content: Buffer; contentType?: string }>;
 }
 
 export async function sendMail(mail: Mail): Promise<void> {
