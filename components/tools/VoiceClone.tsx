@@ -480,7 +480,7 @@ function VoiceReady({ onRemake, onDelete }: { onRemake: () => void; onDelete: ()
         <Check size={18} /> Your voice is ready.
       </p>
       <p className="text-[0.9rem] text-ink-soft">
-        Type anything on the right and pick a style. Not quite you? Make it again with a clearer or longer
+        Type anything in step 2 and pick a style. Not quite you? Make it again with a clearer or longer
         recording.
       </p>
       <div className="flex flex-wrap gap-2">
