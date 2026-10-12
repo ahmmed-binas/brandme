@@ -113,6 +113,10 @@ export default function PrivacyPage() {
           <li>Stripe, for payments;</li>
           <li>our domain registrar, when you buy a domain;</li>
           <li>Anthropic, for AI features, and OpenAI if you connect your own OpenAI key;</li>
+          <li>
+            Groq, to read an uploaded CV into your portfolio when our own AI is off (it doesn’t train on it or
+            keep it);
+          </li>
           <li>Google, if you choose to sign in with Google;</li>
           <li>our email provider, to send account emails and receipts;</li>
           <li>Cal.com, if you book a call.</li>

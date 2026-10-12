@@ -1,6 +1,6 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { extractProfile } from "@/lib/ai/portfolio-assistant";
-import { openAi, releaseRequest, settleAi, sumUsage } from "@/lib/ai/metering";
+import { openImportAi, releaseRequest, settleAi, sumUsage } from "@/lib/ai/metering";
 import { compactProfile } from "@/lib/import/profile";
 import { groundProfile } from "@/lib/import/grounding";
 import { standardContentSchema } from "@/lib/portfolio/schema";
@@ -9,7 +9,11 @@ import { getCurrentUser } from "@/utils/user-account";
 
 const MAX_TEXT = 40_000;
 
-/** Free text (CV, LinkedIn About, bio) → structured portfolio content. Paid with credits or the user's own key. */
+/**
+ * Free text (CV, LinkedIn About, bio) → structured portfolio content. Paid with
+ * credits or the user's own key, or free through the free API when the site
+ * has no paid AI (lib/ai/metering.ts openImportAi).
+ */
 export const POST = route(async (request: Request) => {
   if (!databaseConfigured()) return jsonError(503, "The AI assistant is not configured on this server.");
   const user = await getCurrentUser();
@@ -21,7 +25,7 @@ export const POST = route(async (request: Request) => {
     return jsonError(422, "Paste a bit more text — at least a few sentences about yourself.");
   if (text.length > MAX_TEXT) return jsonError(422, "That text is too long. Paste up to about 6,000 words.");
 
-  const gate = await openAi(user);
+  const gate = await openImportAi(user);
   if (!gate.ok) return jsonError(gate.status, gate.error);
   try {
     const result = await extractProfile(gate.access.client, text);

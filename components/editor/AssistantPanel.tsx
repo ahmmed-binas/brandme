@@ -35,6 +35,7 @@ export function AssistantPanel<T>({
   signedIn: boolean;
 }) {
   const [available, setAvailable] = useState(false);
+  const [importAvailable, setImportAvailable] = useState(false);
   const [messages, setMessages] = useState<Message[]>([{ role: "assistant", text: intro }]);
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
@@ -47,12 +48,20 @@ export function AssistantPanel<T>({
     let cancelled = false;
     fetch("/api/ai/assist")
       .then((response) => response.json())
-      .then((body: { available?: boolean; credits?: number | null; ownKey?: boolean }) => {
-        if (cancelled) return;
-        setAvailable(Boolean(body.available));
-        if (typeof body.credits === "number") setCredits(body.credits);
-        setOwnKey(Boolean(body.ownKey));
-      })
+      .then(
+        (body: {
+          available?: boolean;
+          importAvailable?: boolean;
+          credits?: number | null;
+          ownKey?: boolean;
+        }) => {
+          if (cancelled) return;
+          setAvailable(Boolean(body.available));
+          setImportAvailable(Boolean(body.importAvailable));
+          if (typeof body.credits === "number") setCredits(body.credits);
+          setOwnKey(Boolean(body.ownKey));
+        },
+      )
       .catch(() => undefined);
     return () => {
       cancelled = true;
@@ -140,7 +149,7 @@ export function AssistantPanel<T>({
       </div>
       <div ref={log} className="min-h-0 flex-1 overflow-y-auto p-4">
         <ImportSources
-          aiReady={available && signedIn}
+          aiReady={(available || importAvailable) && signedIn}
           signInHref={signInHref}
           busy={busy}
           setBusy={setBusy}

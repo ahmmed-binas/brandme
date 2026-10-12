@@ -197,6 +197,75 @@ export function openAiClient(apiKey: string, model: string): AiClient {
   };
 }
 
+/**
+ * A free, OpenAI-compatible chat API, used only to read CVs into portfolios when
+ * the site has no paid AI key (owner's choice, October 2026). Groq by default:
+ * free without a card, doesn't train on or keep what we send (by default).
+ * Set FREE_AI_API_KEY (and optionally FREE_AI_BASE_URL / FREE_AI_MODEL).
+ */
+const FREE_AI_URL = process.env.FREE_AI_BASE_URL || "https://api.groq.com/openai/v1";
+const FREE_AI_MODEL = process.env.FREE_AI_MODEL || "llama-3.3-70b-versatile";
+
+export const freeAiConfigured = () => Boolean(process.env.FREE_AI_API_KEY);
+
+interface ChatCompletion {
+  choices?: Array<{ finish_reason?: string; message?: { content?: string | null; refusal?: string | null } }>;
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
+  error?: { message?: string } | null;
+}
+
+export function freeAiClient(): AiClient {
+  return {
+    provider: "openai",
+    model: FREE_AI_MODEL,
+    async ask({ system, user, schema, maxTokens = 8000 }) {
+      // Open models follow a schema best when it's spelled out; JSON mode keeps the answer parseable.
+      const instructions = schema
+        ? `${system}\n\nAnswer with one JSON object only, no other text, following this JSON schema exactly:\n${JSON.stringify(schema)}`
+        : system;
+      let response: Response;
+      try {
+        response = await fetch(`${FREE_AI_URL}/chat/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.FREE_AI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: FREE_AI_MODEL,
+            messages: [
+              { role: "system", content: instructions },
+              { role: "user", content: user },
+            ],
+            max_tokens: maxTokens,
+            temperature: 0.1,
+            ...(schema ? { response_format: { type: "json_object" } } : {}),
+          }),
+          signal: AbortSignal.timeout(120_000),
+        });
+      } catch {
+        throw new AiProviderError("busy", "busy");
+      }
+      if (response.status === 429 || response.status >= 500)
+        throw new AiProviderError("busy", "busy", response.status);
+      if (response.status === 401 || response.status === 403)
+        throw new AiProviderError("auth", "auth", response.status);
+      const data = (await response.json().catch(() => null)) as ChatCompletion | null;
+      if (!response.ok || !data) {
+        console.error("Free AI request failed", response.status, data?.error?.message);
+        throw new AiProviderError("failed", "failed", response.status);
+      }
+      const choice = data.choices?.[0];
+      const usage: AiUsage[] = [
+        { input_tokens: data.usage?.prompt_tokens, output_tokens: data.usage?.completion_tokens },
+      ];
+      if (choice?.message?.refusal) return { text: "", stop: "refusal", usage };
+      const text = choice?.message?.content ?? "";
+      return { text, stop: choice?.finish_reason === "length" ? "max_tokens" : "done", usage };
+    },
+  };
+}
+
 /** The newest general GPT model this key can use (“gpt-5.2” over “gpt-5”), skipping mini, nano and special-purpose ones. */
 function newestModel(ids: string[]): string | null {
   const ranked = ids

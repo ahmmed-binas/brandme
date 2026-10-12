@@ -2,8 +2,11 @@ import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import { chargeCredits } from "@/lib/billing/credits";
 import { decryptSecret } from "@/lib/security/secrets";
+import { rateLimit } from "@/lib/security/rate-limit";
 import {
   claudeClient,
+  freeAiClient,
+  freeAiConfigured,
   openAiClient,
   PROVIDER_NAMES,
   type AiClient,
@@ -36,7 +39,8 @@ const dailyBudgetMicros = () => Math.round(Number(process.env.AI_DAILY_BUDGET_US
 export interface AiAccess {
   client: AiClient;
   ownerId: string;
-  billing: "own-key" | "credits" | "free";
+  /** "free-tier": the free CV-import API (freeAiClient); costs nothing and is never charged. */
+  billing: "own-key" | "credits" | "free" | "free-tier";
 }
 export type AiGate = { ok: true; access: AiAccess } | { ok: false; status: 402 | 429 | 503; error: string };
 
@@ -106,6 +110,32 @@ export async function openAi(user: CurrentUser): Promise<AiGate> {
       error: `You’ve reached today’s ${user.plan.aiEditsPerDay} AI requests on the ${user.plan.name} plan. They reset at midnight UTC.`,
     };
   return { ok: true, access: { client: claudeClient(), ownerId: user.id, billing: "credits" } };
+}
+
+/** CV imports a person may run a day on the free API, and in total across the site (Groq's free tier allows about 1,000). */
+const FREE_IMPORTS_PER_USER = 5;
+const FREE_IMPORTS_PER_DAY = 800;
+
+/**
+ * AI for importing a CV or pasted text. The paid route (own key or platform
+ * credits) when there is one; otherwise the free API, so CV import still
+ * fills every section.
+ */
+export async function openImportAi(user: CurrentUser): Promise<AiGate> {
+  if (user.hasOwnKey || platformAiConfigured() || !freeAiConfigured()) return openAi(user);
+  if (!(await rateLimit(`free-import:${user.id}`, FREE_IMPORTS_PER_USER, 86_400)))
+    return {
+      ok: false,
+      status: 429,
+      error: `That’s ${FREE_IMPORTS_PER_USER} imports today. You can still edit everything by hand, and import again tomorrow.`,
+    };
+  if (!(await rateLimit("free-import:all", FREE_IMPORTS_PER_DAY, 86_400)))
+    return {
+      ok: false,
+      status: 503,
+      error: "CV import is resting until tomorrow. You can fill your portfolio by hand meanwhile.",
+    };
+  return { ok: true, access: { client: freeAiClient(), ownerId: user.id, billing: "free-tier" } };
 }
 
 /** A request we pay for (each account's first Investigator check). Still counted against the daily caps. */
@@ -182,7 +212,7 @@ export async function settleAi(
   usage: Usage | null | undefined,
   reason: string,
 ): Promise<{ charged: number; balance: number | null }> {
-  if (access.billing === "own-key") return { charged: 0, balance: null };
+  if (access.billing === "own-key" || access.billing === "free-tier") return { charged: 0, balance: null };
   const micros = costMicros(usage);
   await db.query(
     `INSERT INTO ai_spend (day, micro_usd, requests) VALUES (CURRENT_DATE, $1, 1) ON CONFLICT (day) DO UPDATE SET micro_usd = ai_spend.micro_usd + $1, requests = ai_spend.requests + 1`,

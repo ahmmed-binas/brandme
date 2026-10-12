@@ -1,6 +1,7 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { assistWithContent } from "@/lib/ai/portfolio-assistant";
 import { openAi, platformAiConfigured, releaseRequest, settleAi, sumUsage } from "@/lib/ai/metering";
+import { freeAiConfigured } from "@/lib/ai/provider";
 import { MAX_CONTENT_BYTES, validateContent } from "@/lib/portfolio/schema";
 import { isTemplateId } from "@/lib/templates/catalog";
 import { databaseConfigured } from "@/utils/db-schema";
@@ -12,6 +13,8 @@ export const GET = route(async () => {
   const user = await getCurrentUser().catch(() => null);
   return Response.json({
     available: platformAiConfigured() || Boolean(user?.hasOwnKey),
+    // CV import also works on the free API, even when the rest of the assistant is off.
+    importAvailable: platformAiConfigured() || Boolean(user?.hasOwnKey) || freeAiConfigured(),
     credits: user?.credits ?? null,
     ownKey: user?.hasOwnKey ?? false,
   });
