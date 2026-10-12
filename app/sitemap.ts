@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { bookingUrl } from "@/lib/booking";
 import { siteUrl } from "@/lib/site";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES } from "@/lib/templates/roles";
@@ -25,7 +26,6 @@ const STATIC: Array<[path: string, priority: number]> = [
   ["/agents/custom", 0.8],
   ["/community", 0.6],
   ["/blog", 0.6],
-  ["/book", 0.5],
   ["/about", 0.4],
   ["/contact", 0.4],
   ["/domains", 0.4],
@@ -73,6 +73,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
   const entries: Entry[] = [
     ...STATIC.map(([path, priority]) => at(path, { priority })),
+    // /book redirects to /contact until Cal.com is set up, and redirects don't belong in a sitemap.
+    ...(bookingUrl() ? [at("/book", { priority: 0.5 })] : []),
     ...laterPages(templates.length, 18, (page) => `/templatechooser?page=${page}`, 0.6),
     ...laterPages(gallery.length, 12, (page) => `/gallery?page=${page}`, 0.6),
     ...laterPages(journal.length, POSTS_PER_PAGE, (page) => `/blog/page/${page}`, 0.4),
