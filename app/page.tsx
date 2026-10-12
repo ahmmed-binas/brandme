@@ -10,7 +10,7 @@ import Faq from "@/components/landing/Faq";
 import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
-import { PLANS, formatUsd } from "@/lib/plans";
+import { PRICES, aed } from "@/lib/offers";
 import { siteDescription, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -205,17 +205,15 @@ export default async function Home() {
             <Reveal delay={0.08} className="flex flex-col bg-card p-8">
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Pro</p>
               <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">
-                {formatUsd(PLANS.pro.prices.year!)}
-                <span className="ml-1 font-sans text-base tracking-normal text-ink-soft">
-                  / year, one payment
-                </span>
+                {aed(PRICES.proMonth)}
+                <span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ month</span>
               </p>
               <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">
                 {[
-                  "Up to 10 changes done for you",
-                  "A free call with a developer",
                   "Your own domain, set up and secured for you",
-                  "No automatic renewal",
+                  "No Fuccura link on your site",
+                  `Or ${aed(PRICES.proYear)} a year`,
+                  `Agents: ${aed(PRICES.agentMonth)} a month, with listings and changes done for you`,
                 ].map((line) => (
                   <li key={line} className="flex gap-3">
                     <span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />

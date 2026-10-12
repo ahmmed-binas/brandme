@@ -27,7 +27,7 @@ export const about = {
   principles: [
     {
       title: "Free to start, fair after",
-      body: "Every template is free to download, and a basic site is free. Pro is one small payment for a year.",
+      body: "Every template is free to download, and a basic site is free. Paid plans start at AED 35 a month.",
     },
     {
       title: "Your work, your address",

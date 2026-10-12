@@ -71,7 +71,7 @@ export async function startPlanCheckout(
   await ensureSchema();
   if (!isPaidPlan(plan)) throw new BillingError("Choose Pro.", 422);
   if (!isInterval(interval) || !OFFERED_INTERVALS.includes(interval))
-    throw new BillingError("Pro is one payment for a year.", 422);
+    throw new BillingError("Choose monthly or yearly.", 422);
   const amount = priceFor(plan, interval);
   const months = interval === "year" ? 12 : 1;
   const order = await db.query<{ id: string }>(

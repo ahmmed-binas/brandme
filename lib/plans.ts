@@ -6,8 +6,9 @@
  * The model (free-first launch, see docs/plans/free-first-launch-plan.md):
  * - Basic is free for ever: every template, one live portfolio, a blog and the
  *   Investigator. Nothing is ever paused.
- * - Pro is one payment for a year (it renews only if the owner turns renewal on): up to three live portfolios, the owner's own
- *   domain and no branding. When Pro ends there are 14 days of grace, then the
+ * - Pro is AED 35 a month or AED 299 a year (set 12 October 2026; customer-facing prices
+ *   and the Agent and Done-for-you offers live in lib/offers.ts): up to three live
+ *   portfolios, the owner's own domain and no branding. When Pro ends there are 14 days of grace, then the
  *   account is back on Basic (extra portfolios rest; nothing is deleted).
  * - AI is paid separately at cost (credits or the owner's own API key) and
  *   costs the same on every plan, so no plan can run at a loss because of AI.
@@ -62,8 +63,9 @@ export const PLANS: Record<PlanId, PlanLimits> = {
   pro: {
     id: "pro",
     name: "Pro",
-    summary: "A year of your site on your own domain, with up to 10 changes done for you.",
-    prices: { year: 1000, month: 900 },
+    summary: "Your site on your own domain, with no Fuccura link.",
+    // US cents at the dirham peg: AED 35 a month, AED 299 a year (lib/offers.ts).
+    prices: { year: 8142, month: 953 },
     portfolios: 3,
     publishedPortfolios: 3,
     aiEditsPerDay: 80,
@@ -75,14 +77,8 @@ export const PLANS: Record<PlanId, PlanLimits> = {
   },
 };
 
-/**
- * Billing periods customers can choose at checkout. Since 10 October 2026 Pro is one
- * payment for a year (owner's decision); the monthly price stays so any monthly
- * plan already running keeps renewing.
- */
-export const OFFERED_INTERVALS: readonly BillingInterval[] = ["year"];
-/** Changes the team makes for a Pro customer during their year, on request. */
-export const PRO_CUSTOM_EDITS = 10;
+/** Billing periods customers can choose at checkout: monthly or yearly (since 12 October 2026). */
+export const OFFERED_INTERVALS: readonly BillingInterval[] = ["month", "year"];
 
 export const isPaidPlan = (value: unknown): value is PaidPlanId => value === "pro";
 export const isInterval = (value: unknown): value is BillingInterval => value === "year" || value === "month";

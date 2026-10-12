@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AgentProfile } from "@/components/agents/AgentProfile";
 import { EllisAvatar } from "@/components/agents/AgentAvatars";
 import { ratingSummary } from "@/lib/templates/ratings";
-import { PRO_CUSTOM_EDITS } from "@/lib/plans";
+import { AGENT_EDITS_PER_MONTH } from "@/lib/offers";
 import { brand } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -73,7 +73,7 @@ export default async function EditorPage() {
         ],
         [
           "Can Ellis change my design?",
-          `Not by itself: the template controls the layout, and you change colours and fonts in the Design panel. For a new section or layout, Pro includes up to ${PRO_CUSTOM_EDITS} changes made for you by our team.`,
+          `Not by itself: the template controls the layout, and you change colours and fonts in the Design panel. For a new section or layout, the Agent plan includes ${AGENT_EDITS_PER_MONTH} changes a month made for you by our team.`,
         ],
         [
           "Which model does it use?",

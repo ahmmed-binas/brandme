@@ -1,5 +1,5 @@
 import { brand } from "@/lib/brand";
-import { PLANS, formatUsd } from "@/lib/plans";
+import { PRICES, aed } from "@/lib/offers";
 import { siteUrl } from "@/lib/site";
 import { getTemplate } from "@/lib/templates/catalog";
 import { ROLES } from "@/lib/templates/roles";
@@ -42,12 +42,12 @@ export function templateFaq(input: {
   editable: boolean;
 }): FaqEntry[] {
   const { title, audience, fonts, palettes, editable } = input;
-  const proPrice = formatUsd(PLANS.pro.prices.year ?? 0);
+  const proPrice = `${aed(PRICES.proMonth)} a month`;
   const faq: FaqEntry[] = [
     {
       question: `Is the ${title} template free?`,
       answer: editable
-        ? `Yes. You can download ${title} free (MIT licence) and host it yourself, or customise it in ${brand.name} and publish it free at a ${brand.name} address. Your own domain comes with Pro, ${proPrice} for a year.`
+        ? `Yes. You can download ${title} free (MIT licence) and host it yourself, or customise it in ${brand.name} and publish it free at a ${brand.name} address. Your own domain comes with Pro, from ${proPrice}.`
         : `Yes. ${title} is free to download and use under its licence.`,
     },
     { question: `Who is ${title} for?`, answer: audience },

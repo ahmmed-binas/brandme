@@ -3,7 +3,8 @@ import Link from "next/link";
 import LegalPage, { type LegalSection } from "@/components/common/LegalPage";
 import { brand } from "@/lib/brand";
 import { governingCountry, legal, operator } from "@/lib/legal";
-import { GRACE_DAYS, PLANS, formatUsd } from "@/lib/plans";
+import { GRACE_DAYS } from "@/lib/plans";
+import { PRICES, aed } from "@/lib/offers";
 import { MIN_AGE } from "@/lib/accounts/passwords";
 
 export const metadata: Metadata = {
@@ -68,9 +69,10 @@ export default function TermsPage() {
       body: [
         <>
           <b className="font-medium text-ink">Basic</b> is free. <b className="font-medium text-ink">Pro</b>{" "}
-          costs {formatUsd(PLANS.pro.prices.year!)} for one year, paid in advance. It doesn’t renew unless you
-          turn renewal on. Prices are in US dollars and shown before you pay; your bank may add its own
-          currency fees.
+          costs {aed(PRICES.proMonth)} a month or {aed(PRICES.proYear)} a year, and{" "}
+          <b className="font-medium text-ink">Agent</b> {aed(PRICES.agentMonth)} a month, paid in advance. A
+          website built for you costs {aed(PRICES.doneForYou)}, once. Prices are shown before you pay; your
+          bank may add its own currency fees.
         </>,
         <>
           Pro renews automatically with the card you paid with, each year or month, until you switch renewal
