@@ -97,12 +97,16 @@ const FAQ: Array<[string, string]> = [
 ];
 
 export default function PricingPage() {
+  // A Service, not a Product: Product snippets expect star ratings and reviews, which we
+  // don't have yet and never invent. Add real ones only when real customers leave them.
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    name: `${brand.name} portfolio hosting`,
+    "@type": "Service",
+    name: `${brand.name} websites for professionals`,
+    serviceType: "Website builder and website design",
     description: brand.description,
-    brand: { "@type": "Brand", name: brand.name },
+    provider: { "@type": "Organization", name: brand.name, url: siteUrl },
+    areaServed: { "@type": "Country", name: "United Arab Emirates" },
     offers: [
       ...[
         ["Free plan", 0],

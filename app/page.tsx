@@ -71,19 +71,28 @@ export default async function Home() {
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
+      // Organization and WebSite rather than SoftwareApplication, whose rich result needs
+      // ratings and reviews we don't have yet (and never invent).
       {
-        "@type": "SoftwareApplication",
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
         name: brand.name,
         url: siteUrl,
-        applicationCategory: "DesignApplication",
-        operatingSystem: "Web",
+        logo: `${siteUrl}/brand/fuccura-logo-1024.png`,
         description: siteDescription,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-          description: "Free to build and publish",
+        areaServed: { "@type": "Country", name: "United Arab Emirates" },
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "customer service",
+          url: `https://wa.me/${brand.whatsapp}`,
+          availableLanguage: ["English"],
         },
+      },
+      {
+        "@type": "WebSite",
+        name: brand.name,
+        url: siteUrl,
+        publisher: { "@id": `${siteUrl}/#organization` },
       },
       {
         "@type": "FAQPage",
