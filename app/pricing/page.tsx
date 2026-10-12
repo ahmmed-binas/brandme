@@ -8,6 +8,7 @@ import {
   COMPETITORS,
   COMPETITORS_CHECKED,
   FOUNDING_SPOTS,
+  FREE_DOMAIN_UP_TO,
   OFFERS,
   PRICES,
   aed,
@@ -91,7 +92,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "Do I need a domain?",
-    "No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee. The domain is paid separately from your plan; most .com names cost about AED 45 a year.",
+    `No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee. With yearly Pro your first year’s domain is free (any normal .com, .ae or similar up to ${aed(FREE_DOMAIN_UP_TO)}); after that it renews at the registrar’s price, usually about AED 45 a year for a .com. On monthly Pro the domain is paid separately.`,
   ],
 ];
 
@@ -241,8 +242,8 @@ export default function PricingPage() {
                 </a>
               </span>
             ))}
-            , converted at AED 3.67 per US dollar, checked {COMPETITORS_CHECKED}. Domain costs aren’t
-            included (some builders give the first year free).
+            , converted at AED 3.67 per US dollar, checked {COMPETITORS_CHECKED}. Like them, yearly Pro
+            includes your domain free for the first year.
           </p>
         </div>
         <div>

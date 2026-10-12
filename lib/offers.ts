@@ -25,6 +25,13 @@ export const PRICES = {
   foundingYear: 99,
 } as const;
 
+/**
+ * Yearly Pro (and founding members) get their first year's domain free, up to this
+ * value, to match Wix and Squarespace. Never on monthly plans. We buy it only after
+ * the customer has paid; renewals after the first year are the customer's.
+ */
+export const FREE_DOMAIN_UP_TO = 60;
+
 /** How many customers get the founding price. */
 export const FOUNDING_SPOTS = 20;
 /** Changes the team makes each month for an Agent customer, on request. */
@@ -86,12 +93,12 @@ export const OFFERS: Offer[] = [
     name: "Pro",
     price: aed(PRICES.proMonth),
     per: "a month",
-    alternative: `or ${aed(PRICES.proYear)} a year (save ${aed(PRICES.proMonth * 12 - PRICES.proYear)})`,
+    alternative: `or ${aed(PRICES.proYear)} a year, with a free domain for the first year`,
     pitch: "Your own domain and a site that looks fully yours.",
     features: [
       "Everything in Free",
       // The domain itself is the customer's (about AED 45 a year from any registrar, or through us at cost).
-      "Connect your own domain, with HTTPS (domain bought separately)",
+      "Your own domain with HTTPS (free for the first year on yearly Pro)",
       "No Fuccura link on your site",
       "Up to three websites, all live",
       "AI voice clone: 50 clips a day, first in the queue",
