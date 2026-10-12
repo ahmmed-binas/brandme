@@ -179,7 +179,10 @@ function MakeVoice({
   // Counting speech walks every sample, so only redo it when the sound changes.
   const speech = useMemo(() => Math.min(speechSeconds(voice), MAX_SECONDS), [voice]);
   const consentSpeech = useMemo(() => speechSeconds(consent), [consent]);
-  const consentOk = consentSpeech >= 3;
+  // Recording live, the script starts with the consent sentence, so that one recording is the
+  // consent too. Only an upload (which could be anyone's voice) needs the separate spoken line.
+  const consentNeeded = mode === "upload";
+  const consentOk = !consentNeeded || consentSpeech >= 3;
   const canTrain = consentOk && speech >= MIN_SPEECH && agreed && !sending;
 
   const readFile = async (file: File) => {
@@ -192,12 +195,16 @@ function MakeVoice({
   };
 
   const train = async () => {
-    if (!voice || !consent) return;
+    // Live: the first 30 seconds (where the consent sentence is) stand in for the separate line,
+    // which also keeps it under the server's size limit for consent recordings.
+    const consentSound =
+      consentNeeded || !voice ? consent : { ...voice, samples: voice.samples.slice(0, voice.rate * 30) };
+    if (!voice || !consentSound) return;
     setSending(true);
     const form = new FormData();
     form.set("agree", "yes");
     form.set("source", toWav(voice), "voice.wav");
-    form.set("consent", toWav(consent), "consent.wav");
+    form.set("consent", toWav(consentSound), "consent.wav");
     await onSubmit(form);
     setSending(false);
   };
@@ -211,31 +218,7 @@ function MakeVoice({
       )}
 
       <section>
-        <h3 className="font-medium text-ink">a. Read this line aloud</h3>
-        <p className="mt-1 text-[0.88rem] text-ink-soft">
-          It confirms the voice is yours. We check it matches the voice you give below.
-        </p>
-        <blockquote className="mt-3 rounded-xl bg-ink/5 px-4 py-3 font-display text-[1.05rem] leading-snug text-ink">
-          “{CONSENT_SENTENCE}”
-        </blockquote>
-        <div className="mt-3">
-          <Recorder
-            label={consent ? "Record again" : "Record the line"}
-            maxSeconds={40}
-            onDone={(sound) => setConsent(sound)}
-          />
-          {consent && (
-            <p className={`mt-2 text-[0.88rem] ${consentOk ? "text-emerald-700" : "text-amber-800"}`}>
-              {consentOk
-                ? `Got it (${durationOf(consent).toFixed(0)} s).`
-                : "We could hardly hear you. Try again a little closer to the microphone."}
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section>
-        <h3 className="font-medium text-ink">b. Give it your voice</h3>
+        <h3 className="font-medium text-ink">Give it your voice</h3>
         <div className="mt-3 inline-flex rounded-full border border-rule p-1 text-[0.88rem]" role="tablist">
           {(
             [
@@ -259,10 +242,11 @@ function MakeVoice({
         {mode === "record" ? (
           <div className="mt-4">
             <p className="text-[0.88rem] text-ink-soft">
-              Read this naturally, as if talking to a friend. Record it in one go or in parts.
+              Read this naturally, as if talking to a friend. The first line confirms it’s your voice; record
+              it all in one go or in parts.
             </p>
             <p className="mt-3 rounded-xl bg-ink/5 px-4 py-3 text-[0.98rem] leading-relaxed text-ink">
-              {READING_SCRIPT}
+              <b className="font-medium">{CONSENT_SENTENCE}</b> {READING_SCRIPT}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <Recorder
@@ -301,6 +285,33 @@ function MakeVoice({
               />
             </label>
             {problem && <p className="mt-2 text-[0.88rem] text-red-800">{problem}</p>}
+
+            {/* Uploads could be anyone's voice, so the person also reads one line live; we check it matches. */}
+            <div className="mt-5">
+              <p className="text-[0.92rem] font-medium text-ink">Then read this line aloud</p>
+              <p className="mt-1 text-[0.85rem] text-ink-soft">
+                It confirms the voice in your file is yours. Takes about ten seconds.
+              </p>
+              <blockquote className="mt-3 rounded-xl bg-ink/5 px-4 py-3 font-display text-[1.05rem] leading-snug text-ink">
+                “{CONSENT_SENTENCE}”
+              </blockquote>
+              <div className="mt-3">
+                <Recorder
+                  label={consent ? "Record again" : "Record the line"}
+                  maxSeconds={40}
+                  onDone={(sound) => setConsent(sound)}
+                />
+                {consent && (
+                  <p
+                    className={`mt-2 text-[0.88rem] ${consentSpeech >= 3 ? "text-emerald-700" : "text-amber-800"}`}
+                  >
+                    {consentSpeech >= 3
+                      ? `Got it (${durationOf(consent).toFixed(0)} s).`
+                      : "We could hardly hear you. Try again a little closer to the microphone."}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -331,10 +342,10 @@ function MakeVoice({
         </button>
         {!canTrain && !sending && (
           <p className="mt-2 text-[0.85rem] text-ink-soft">
-            {!consentOk
-              ? "First record the line in a."
-              : speech < MIN_SPEECH
-                ? `Then give at least ${MIN_SPEECH} seconds of your voice in b.`
+            {speech < MIN_SPEECH
+              ? `Give at least ${MIN_SPEECH} seconds of your voice first.`
+              : !consentOk
+                ? "Now read the short line under your upload."
                 : "Tick the box to confirm it’s your voice."}
           </p>
         )}
