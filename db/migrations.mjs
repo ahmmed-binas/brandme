@@ -677,6 +677,16 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "027_internal_accounts",
+  statements: [
+    // The owner's and the team's own accounts (lib/accounts/internal.ts): never counted as
+    // users, visitors or leads. The superadmin is always internal; INTERNAL_EMAILS adds more.
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS internal BOOLEAN NOT NULL DEFAULT false`,
+    `UPDATE app_users SET internal = true WHERE is_superadmin`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

@@ -1,3 +1,4 @@
+import { hasInternalCookie, internalCookieHeader } from "@/lib/accounts/internal";
 import { isLeadKind, recordLead } from "@/lib/analytics/leads";
 import { recordView } from "@/lib/analytics/track";
 import { tooManyAttempts } from "@/lib/accounts/passwords";
@@ -23,9 +24,14 @@ export async function POST(request: Request) {
       timeZone?: unknown;
       lead?: unknown;
     };
+    // The owner's and team's own visits aren't counted (lib/accounts/internal.ts).
+    if (hasInternalCookie(request)) return new Response(null, { status: 204 });
+    const viewer = await getCurrentUser().catch(() => null);
+    if (viewer?.internal)
+      return new Response(null, { status: 204, headers: { "Set-Cookie": internalCookieHeader() } });
     // A click on one of Fuccura's own WhatsApp or email buttons (VisitBeacon), not a page view.
     if (typeof body.path === "string" && isLeadKind(body.lead) && body.lead !== "contact") {
-      const user = await getCurrentUser().catch(() => null);
+      const user = viewer;
       if (!user?.isSuperadmin)
         await recordLead({
           kind: body.lead,
@@ -36,7 +42,7 @@ export async function POST(request: Request) {
         });
     } else if (typeof body.path === "string") {
       // Signed-in visitors are linked to their account so the owner can see their journey.
-      const user = await getCurrentUser().catch(() => null);
+      const user = viewer;
       await recordView({
         host: request.headers.get("host") ?? "",
         path: body.path,

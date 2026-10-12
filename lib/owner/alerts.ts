@@ -1,3 +1,4 @@
+import { isInternalEmail } from "@/lib/accounts/internal";
 import { brand } from "@/lib/brand";
 import { escape, renderEmail } from "@/lib/email/layout";
 import { sendMail, supportInbox } from "@/lib/email/mailer";
@@ -49,6 +50,7 @@ export async function alertOwner(subject: string, lines: string[], link?: { labe
 
 /** A new account: the start of a customer. */
 export async function alertNewSignUp(name: string | null, email: string | null, method: string) {
+  if (isInternalEmail(email)) return;
   await alertOwner(
     `New sign-up: ${name || email || "a new customer"}`,
     [

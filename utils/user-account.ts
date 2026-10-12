@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { isModeratorEmail } from "@/lib/community/rules";
 import { WELCOME_CREDITS, standingOf, type AccountStanding, type PlanLimits } from "@/lib/plans";
 import { alertNewSignUp } from "@/lib/owner/alerts";
+import { isInternalEmail } from "@/lib/accounts/internal";
 
 /** Creates or refreshes the account row on sign-in. New accounts get welcome credits, once. */
 export async function saveGoogleUser(input: {
@@ -50,6 +51,8 @@ export interface CurrentUser {
   isSuperadmin: boolean;
   /** Can use the admin pages: the superadmin, or a confirmed email listed in ADMIN_EMAILS. */
   isAdmin: boolean;
+  /** The owner's or team's own account: never counted in stats (lib/accounts/internal.ts). */
+  internal: boolean;
 }
 
 interface UserRow {
@@ -64,10 +67,11 @@ interface UserRow {
   username: string | null;
   verified: boolean;
   is_superadmin: boolean;
+  internal: boolean;
 }
 
 export const USER_COLUMNS =
-  "id, email, name, plan, plan_interval, plan_expires_at, credits, ai_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified, is_superadmin";
+  "id, email, name, plan, plan_interval, plan_expires_at, credits, ai_key_enc IS NOT NULL AS has_key, username, (provider <> 'password' OR email_verified_at IS NOT NULL) AS verified, is_superadmin, internal";
 
 export function toCurrentUser(row: UserRow, consoleSession = false): CurrentUser {
   const standing = standingOf(row);
@@ -83,6 +87,7 @@ export function toCurrentUser(row: UserRow, consoleSession = false): CurrentUser
     username: row.username,
     emailVerified: row.verified,
     isSuperadmin: consoleSession && row.is_superadmin && row.verified,
+    internal: row.internal || row.is_superadmin || isInternalEmail(row.email),
     isAdmin: row.verified && ((consoleSession && row.is_superadmin) || isModeratorEmail(row.email)),
   };
 }

@@ -70,9 +70,11 @@ export async function loadDailyReport(): Promise<DailyReport> {
     topPages: topPages.rows.map((row) => ({ path: row.path, views: Number(row.views) })),
     topReferrers: topReferrers.rows.map((row) => ({ referrer: row.referrer, visits: Number(row.visits) })),
     newAccounts: await count(
-      "SELECT COUNT(*) AS n FROM app_users WHERE created_at > NOW() - INTERVAL '24 hours'",
+      "SELECT COUNT(*) AS n FROM app_users WHERE NOT internal AND NOT is_superadmin AND created_at > NOW() - INTERVAL '24 hours'",
     ),
-    totalAccounts: await count("SELECT COUNT(*) AS n FROM app_users"),
+    totalAccounts: await count(
+      "SELECT COUNT(*) AS n FROM app_users WHERE NOT internal AND NOT is_superadmin",
+    ),
     portfoliosPublished: await count(
       "SELECT COUNT(*) AS n FROM portfolios WHERE published_at > NOW() - INTERVAL '24 hours'",
     ),

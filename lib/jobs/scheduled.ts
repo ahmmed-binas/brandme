@@ -13,6 +13,7 @@ import { pruneViews } from "@/lib/analytics/track";
 import { pruneVoiceClips } from "@/lib/tools/voice";
 import { sendDailyReport } from "@/lib/owner/daily-report";
 import { pruneErrors } from "@/lib/owner/alerts";
+import { syncInternalAccounts } from "@/lib/accounts/internal";
 
 /**
  * Everything that happens on a schedule. Run hourly (see docker-compose's
@@ -156,6 +157,7 @@ export async function runScheduledJobs(): Promise<Record<string, unknown>> {
     await step("rateLimits", pruneRateLimits);
     await step("oldVisits", pruneViews);
     await step("oldVoiceClips", pruneVoiceClips);
+    await step("internalAccounts", syncInternalAccounts);
     await step("ownerReport", sendDailyReport);
     await step("oldErrors", pruneErrors);
     return summary;

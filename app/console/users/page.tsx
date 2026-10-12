@@ -63,14 +63,14 @@ export default async function ConsoleUsers({
         (SELECT COUNT(*) FROM portfolios p WHERE p.owner_id = u.id AND p.published_at IS NOT NULL)::int AS published,
         ((SELECT COALESCE(SUM(amount_cents), 0) FROM billing_orders o WHERE o.owner_id = u.id AND o.status = 'paid')
           + (SELECT COALESCE(SUM(charged_cents), 0) FROM domain_orders d WHERE d.owner_id = u.id AND d.status IN ('purchasing', 'registering', 'configuring', 'completed', 'renewal_manual', 'refund_failed')))::int AS paid_cents
-      FROM app_users u WHERE NOT u.is_superadmin AND ${WHERE[filter].replace(/\b(plan|plan_expires_at)\b/g, "u.$1")} ${search}
+      FROM app_users u WHERE NOT u.is_superadmin AND NOT u.internal AND ${WHERE[filter].replace(/\b(plan|plan_expires_at)\b/g, "u.$1")} ${search}
       ORDER BY u.created_at DESC LIMIT ${PAGE} OFFSET ${(page - 1) * PAGE}`,
         [like],
       )
       .then((result) => result.rows),
     db
       .query<{ count: string }>(
-        `SELECT COUNT(*) AS count FROM app_users u WHERE NOT u.is_superadmin AND ${WHERE[filter].replace(/\b(plan|plan_expires_at)\b/g, "u.$1")} ${search}`,
+        `SELECT COUNT(*) AS count FROM app_users u WHERE NOT u.is_superadmin AND NOT u.internal AND ${WHERE[filter].replace(/\b(plan|plan_expires_at)\b/g, "u.$1")} ${search}`,
         [like],
       )
       .then((result) => Number(result.rows[0]?.count ?? 0)),

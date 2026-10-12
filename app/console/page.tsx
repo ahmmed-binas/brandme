@@ -7,6 +7,14 @@ import { consoleHref } from "@/lib/console/path";
 import { isRange, loadDashboard, RANGES, type RangeId } from "@/lib/console/metrics";
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
+import { countLeads } from "@/lib/analytics/leads";
+
+/**
+ * Money panels (revenue, paying subscribers, revenue mix, domain margin, AI cost) are
+ * hidden until the first sale: there's no money yet, so they're just noise (owner's
+ * request, October 2026). Set to true to bring them all back.
+ */
+const SHOW_MONEY = false;
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +78,7 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
       </Shell>
     );
   const d = await loadDashboard(range);
+  const leads = await countLeads(RANGES[range] * 24);
   const labels = d.buckets.map((bucket) => bucket.label);
   const vs = `vs the previous ${RANGE_LABEL[range]}`;
 
@@ -119,20 +128,42 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
       )}
 
       <section aria-label="Headline figures" className="mt-6 grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-        <div className="rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)] p-5">
-          <p className="text-[12.5px] text-[var(--c-muted)]">Revenue, last {RANGE_LABEL[range]}</p>
-          <p className="mt-2 text-[3rem] font-semibold leading-none tracking-tight tabular-nums">
-            {usd(d.revenue.total, d.revenue.total % 1 ? 2 : 0)}
-          </p>
-          <Delta now={d.revenue.total} before={d.revenue.previous} label={vs} />
-          <p className="mt-3 text-[12px] text-[var(--c-muted)]">
-            Yearly run rate from active plans:{" "}
-            <span className="text-[var(--c-text2)]">{usd(d.revenue.runRate)}</span>
-          </p>
-        </div>
-        <Tile label="Paying subscribers" value={count(d.subscribers.paying)}>
-          <p className="mt-1 text-[12px] text-[var(--c-text2)]">{count(d.subscribers.free)} on free Basic</p>
-        </Tile>
+        {!SHOW_MONEY && (
+          <div className="rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)] p-5">
+            <p className="text-[12.5px] text-[var(--c-muted)]">Leads, last {RANGE_LABEL[range]}</p>
+            <p className="mt-2 text-[3rem] font-semibold leading-none tracking-tight tabular-nums">
+              {count(leads.total)}
+            </p>
+            <p className="mt-3 text-[12px] text-[var(--c-muted)]">
+              {count(leads.whatsapp)} WhatsApp · {count(leads.contact + leads.email)} email ·{" "}
+              {count(leads.calls)} calls
+            </p>
+          </div>
+        )}
+        {SHOW_MONEY && (
+          <div className="rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)] p-5">
+            <p className="text-[12.5px] text-[var(--c-muted)]">Revenue, last {RANGE_LABEL[range]}</p>
+            <p className="mt-2 text-[3rem] font-semibold leading-none tracking-tight tabular-nums">
+              {usd(d.revenue.total, d.revenue.total % 1 ? 2 : 0)}
+            </p>
+            <Delta now={d.revenue.total} before={d.revenue.previous} label={vs} />
+            <p className="mt-3 text-[12px] text-[var(--c-muted)]">
+              Yearly run rate from active plans:{" "}
+              <span className="text-[var(--c-text2)]">{usd(d.revenue.runRate)}</span>
+            </p>
+          </div>
+        )}
+        {SHOW_MONEY ? (
+          <Tile label="Paying subscribers" value={count(d.subscribers.paying)}>
+            <p className="mt-1 text-[12px] text-[var(--c-text2)]">
+              {count(d.subscribers.free)} on free Basic
+            </p>
+          </Tile>
+        ) : (
+          <Tile label="Websites published" value={count(d.product.published)}>
+            <p className="mt-1 text-[12px] text-[var(--c-text2)]">{count(d.product.portfolios)} started</p>
+          </Tile>
+        )}
         <Tile label="Users" value={count(d.users.total)}>
           <Delta now={d.users.added} before={d.users.previousAdded} label={`new users ${vs}`} />
         </Tile>
@@ -142,17 +173,19 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
       </section>
 
       <section className="mt-4 grid gap-4 xl:grid-cols-2">
-        <StackedColumns
-          title="Revenue by source"
-          subtitle={`Per ${d.bucket}, US dollars`}
-          labels={labels}
-          format="usd"
-          series={[
-            { name: "Plans", values: d.series.plans },
-            { name: "AI credits", values: d.series.credits },
-            { name: "Domains", values: d.series.domains },
-          ]}
-        />
+        {SHOW_MONEY && (
+          <StackedColumns
+            title="Revenue by source"
+            subtitle={`Per ${d.bucket}, US dollars`}
+            labels={labels}
+            format="usd"
+            series={[
+              { name: "Plans", values: d.series.plans },
+              { name: "AI credits", values: d.series.credits },
+              { name: "Domains", values: d.series.domains },
+            ]}
+          />
+        )}
         <LineChart
           title="Visitors and page views"
           subtitle={`Per ${d.bucket}, the marketing site (not customers’ portfolios)`}
@@ -180,27 +213,32 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
       </section>
 
       <section aria-label="More figures" className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Tile
-          label="Sign-up to paid"
-          value={d.subscribers.conversion === null ? "–" : percent(d.subscribers.conversion)}
-        >
-          <p className="mt-1 text-[12px] text-[var(--c-text2)]">Of people who joined in this range</p>
-        </Tile>
-        <Tile label="Revenue mix" value={compactUsd(d.revenue.plans)}>
-          <p className="mt-1 text-[12px] text-[var(--c-text2)]">
-            plans · {compactUsd(d.revenue.credits)} credits · {compactUsd(d.revenue.domains)} domains
-          </p>
-        </Tile>
-        <Tile label="Domain margin" value={compactUsd(d.revenue.domains - d.revenue.domainCost)}>
-          <p className="mt-1 text-[12px] text-[var(--c-text2)]">
-            {compactUsd(d.revenue.domains)} charged, {compactUsd(d.revenue.domainCost)} to the registrar
-          </p>
-        </Tile>
-        <Tile label="AI cost to you" value={usd(d.product.aiCost, 2)}>
-          <p className="mt-1 text-[12px] text-[var(--c-text2)]">
-            {count(d.product.aiRequests)} requests on your key · {compactUsd(d.revenue.credits)} credits sold
-          </p>
-        </Tile>
+        {SHOW_MONEY && (
+          <>
+            <Tile
+              label="Sign-up to paid"
+              value={d.subscribers.conversion === null ? "–" : percent(d.subscribers.conversion)}
+            >
+              <p className="mt-1 text-[12px] text-[var(--c-text2)]">Of people who joined in this range</p>
+            </Tile>
+            <Tile label="Revenue mix" value={compactUsd(d.revenue.plans)}>
+              <p className="mt-1 text-[12px] text-[var(--c-text2)]">
+                plans · {compactUsd(d.revenue.credits)} credits · {compactUsd(d.revenue.domains)} domains
+              </p>
+            </Tile>
+            <Tile label="Domain margin" value={compactUsd(d.revenue.domains - d.revenue.domainCost)}>
+              <p className="mt-1 text-[12px] text-[var(--c-text2)]">
+                {compactUsd(d.revenue.domains)} charged, {compactUsd(d.revenue.domainCost)} to the registrar
+              </p>
+            </Tile>
+            <Tile label="AI cost to you" value={usd(d.product.aiCost, 2)}>
+              <p className="mt-1 text-[12px] text-[var(--c-text2)]">
+                {count(d.product.aiRequests)} requests on your key · {compactUsd(d.revenue.credits)} credits
+                sold
+              </p>
+            </Tile>
+          </>
+        )}
         <Tile label="Portfolios" value={count(d.product.portfolios)}>
           <p className="mt-1 text-[12px] text-[var(--c-text2)]">
             {count(d.product.published)} published · {count(d.product.domains)} on own domains
@@ -241,27 +279,29 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
       </section>
 
       <section className="mt-4 grid gap-4 xl:grid-cols-2">
-        <div className="rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)] p-5">
-          <p className="text-[14px] font-medium">Latest payments</p>
-          {d.recentPayments.length === 0 ? (
-            <p className="py-6 text-[13px] text-[var(--c-muted)]">No payments yet.</p>
-          ) : (
-            <table className="mt-3 w-full text-left text-[12.5px]">
-              <tbody>
-                {d.recentPayments.map((payment, i) => (
-                  <tr key={i} className="border-t border-[var(--c-line)]">
-                    <td className="py-2 pr-3 text-[var(--c-muted)]">{when(payment.at)}</td>
-                    <td className="max-w-[12rem] truncate py-2 pr-3 text-[var(--c-text2)]">
-                      {payment.email}
-                    </td>
-                    <td className="py-2 pr-3">{payment.what}</td>
-                    <td className="py-2 text-right tabular-nums">{usd(payment.cents / 100, 2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+        {SHOW_MONEY && (
+          <div className="rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)] p-5">
+            <p className="text-[14px] font-medium">Latest payments</p>
+            {d.recentPayments.length === 0 ? (
+              <p className="py-6 text-[13px] text-[var(--c-muted)]">No payments yet.</p>
+            ) : (
+              <table className="mt-3 w-full text-left text-[12.5px]">
+                <tbody>
+                  {d.recentPayments.map((payment, i) => (
+                    <tr key={i} className="border-t border-[var(--c-line)]">
+                      <td className="py-2 pr-3 text-[var(--c-muted)]">{when(payment.at)}</td>
+                      <td className="max-w-[12rem] truncate py-2 pr-3 text-[var(--c-text2)]">
+                        {payment.email}
+                      </td>
+                      <td className="py-2 pr-3">{payment.what}</td>
+                      <td className="py-2 text-right tabular-nums">{usd(payment.cents / 100, 2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
         <div className="rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)] p-5">
           <div className="flex items-baseline justify-between">
             <p className="text-[14px] font-medium">Newest users</p>

@@ -16,7 +16,8 @@ export const isRange = (value: unknown): value is RangeId => typeof value === "s
 /** Paid domain orders: money taken and not refunded. */
 const PAID_DOMAIN =
   "status IN ('purchasing', 'registering', 'configuring', 'completed', 'renewal_manual', 'refund_failed')";
-const CUSTOMER = "NOT is_superadmin";
+/** Real customers only: not the superadmin, not internal (owner and team) accounts. */
+const CUSTOMER = "NOT is_superadmin AND NOT internal";
 
 export interface Bucket {
   start: string;
