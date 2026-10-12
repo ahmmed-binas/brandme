@@ -40,10 +40,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f0e8" },
-    { media: "(prefers-color-scheme: dark)", color: "#13120f" },
-  ],
+  // The site is light by default for everyone (components/common/ThemeProvider.tsx),
+  // so the phone's browser bar matches it whatever the device's own setting.
+  themeColor: "#f4f0e8",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
