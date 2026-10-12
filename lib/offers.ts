@@ -76,7 +76,8 @@ export const OFFERS: Offer[] = [
     pitch: "Your own domain and a site that looks fully yours.",
     features: [
       "Everything in Free",
-      "Your own domain, connected with HTTPS",
+      // The domain itself is the customer's (about AED 45 a year from any registrar, or through us at cost).
+      "Connect your own domain, with HTTPS (domain bought separately)",
       "No Fuccura link on your site",
       "Up to three websites, all live",
       "AI voice clone: 50 clips a day, first in the queue",

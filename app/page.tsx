@@ -210,7 +210,7 @@ export default async function Home() {
               </p>
               <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">
                 {[
-                  "Your own domain, set up and secured for you",
+                  "Connect your own domain, set up and secured",
                   "No Fuccura link on your site",
                   `Or ${aed(PRICES.proYear)} a year`,
                   `Agents: ${aed(PRICES.agentMonth)} a month, with listings and changes done for you`,

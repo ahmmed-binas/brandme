@@ -70,7 +70,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "Do I need a domain?",
-    "No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee.",
+    "No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee. The domain is paid separately from your plan; most .com names cost about AED 45 a year.",
   ],
 ];
 
