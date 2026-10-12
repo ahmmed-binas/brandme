@@ -74,6 +74,20 @@ export default async function ArticlePage({ params }: Props) {
           {post.title}
         </h1>
         <p className="mt-6 text-[1.2rem] leading-[1.6] text-ink-soft">{post.description}</p>
+        {/* Posts written by members credit the writer, with their website when they have one. */}
+        {post.author && (
+          <p className="mt-6 text-[0.95rem] text-ink-soft">
+            Written by <span className="font-medium text-ink">{post.author.name}</span>
+            {post.author.url && (
+              <>
+                {" · "}
+                <Link href={post.author.url} className="underline underline-offset-4 hover:text-ink">
+                  See their website
+                </Link>
+              </>
+            )}
+          </p>
+        )}
       </header>
       {post.media ? (
         <PostMediaView media={post.media} className="mx-auto mt-12 max-w-[56rem]" />

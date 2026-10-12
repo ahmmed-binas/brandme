@@ -658,6 +658,15 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "025_journal_submissions",
+  statements: [
+    // Posts written by members at /blog/write (lib/content/journal.ts submitJournalPost).
+    // They wait as drafts until an admin publishes them; author_id credits the writer.
+    `ALTER TABLE journal_posts ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

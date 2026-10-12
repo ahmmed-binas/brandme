@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, ArrowLeft, Rss } from "lucide-react";
+import { ArrowRight, ArrowLeft, PenLine, Rss } from "lucide-react";
 import { listJournal, POSTS_PER_PAGE, type JournalPost } from "@/lib/content/journal";
 import { NO_RATINGS, ratingSummaries } from "@/lib/templates/ratings";
 import { CardStars } from "./CardStars";
@@ -48,12 +48,21 @@ export default async function BlogListing({ page }: { page: number }) {
             getting online.
           </p>
         </div>
-        <a
-          href="/blog/rss.xml"
-          className="inline-flex items-center gap-2 text-[0.92rem] text-ink-soft hover:text-ink"
-        >
-          <Rss size={15} /> RSS feed
-        </a>
+        <div className="flex flex-wrap items-center gap-5">
+          {/* Members write posts for review (app/blog/write); signed-out visitors are sent to sign in first. */}
+          <Link
+            href="/blog/write"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[0.92rem] font-medium text-paper transition hover:bg-signal hover:text-signal-ink"
+          >
+            <PenLine size={15} /> Write for the Journal
+          </Link>
+          <a
+            href="/blog/rss.xml"
+            className="inline-flex items-center gap-2 text-[0.92rem] text-ink-soft hover:text-ink"
+          >
+            <Rss size={15} /> RSS feed
+          </a>
+        </div>
       </header>
 
       {posts.length === 0 && <p className="mt-16 text-center text-ink-soft">No posts yet.</p>}

@@ -159,7 +159,7 @@ export default function JournalEditor({
                   <span className={post.publishedAt ? "text-emerald-700" : "text-amber-700"}>
                     {post.publishedAt ? "Published" : "Draft"}
                   </span>
-                  · {ORIGIN[post.origin]}
+                  · {post.submittedAt ? `Sent by ${post.author?.name ?? "a member"}` : ORIGIN[post.origin]}
                 </span>
               </button>
             </li>

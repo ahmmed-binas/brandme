@@ -1,4 +1,5 @@
 import { jsonError, route } from "@/lib/api/http";
+import { pendingSubmissions } from "@/lib/content/journal";
 import { recentErrors } from "@/lib/owner/alerts";
 import { loadDailyReport } from "@/lib/owner/daily-report";
 import { bearerMatches } from "@/lib/security/bearer";
@@ -13,5 +14,9 @@ export const dynamic = "force-dynamic";
 export const GET = route(async (request: Request) => {
   if (!bearerMatches(request, "AGENT_TOKEN")) return jsonError(404, "Not found.");
   // Recent server errors too, so the agent can fix real bugs at its next run.
-  return Response.json({ ...(await loadDailyReport()), errors: await recentErrors() });
+  return Response.json({
+    ...(await loadDailyReport()),
+    errors: await recentErrors(),
+    journalPending: await pendingSubmissions(),
+  });
 });
