@@ -502,7 +502,7 @@ function Speak({
 }) {
   // Your own voice once it's made; until then a built-in one, so anyone can start at once.
   const [chosen, setChosen] = useState<ClipVoice | null>(null);
-  const voice: ClipVoice = chosen ?? (ownReady ? "mine" : "aria");
+  const voice: ClipVoice = chosen ?? (ownReady ? "mine" : "ahmed");
   const ready = voice !== "mine" || ownReady;
   const [text, setText] = useState("");
   const [style, setStyle] = useState<VoiceStyle>("natural");

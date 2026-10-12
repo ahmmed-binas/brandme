@@ -34,6 +34,9 @@ export const FREE_CLIPS_PER_IP = 15;
  * workers/voice/make_builtin_voices.py. "mine" means the person's own cloned voice.
  */
 export const BUILTIN_VOICES = [
+  // A real human voice: the founder, Ahmed Binas, who agreed on 12 October 2026 that
+  // Fuccura may offer it (workers/voice/make_owner_voice.py). The most natural of the set.
+  { id: "ahmed", name: "Ahmed", description: "Warm and natural, Dubai (real voice)" },
   { id: "aria", name: "Aria", description: "Warm storyteller, American" },
   { id: "bella", name: "Bella", description: "Bright and friendly, American" },
   { id: "emma", name: "Emma", description: "Calm and clear, British" },

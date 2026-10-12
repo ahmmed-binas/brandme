@@ -6,7 +6,7 @@ import { VoiceDemo, type DemoSample } from "@/components/tools/VoiceDemo";
 import { about } from "@/lib/about";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
-import { VOICE_PLANS, VOICE_STYLES } from "@/lib/tools/voice-config";
+import { BUILTIN_VOICES, VOICE_PLANS, VOICE_STYLES } from "@/lib/tools/voice-config";
 
 /**
  * The free AI voice clone: Fuccura's main way in from search and social.
@@ -69,7 +69,7 @@ const DEMO: DemoSample[] = [
 const PROMISES = [
   "Free with a Fuccura account",
   "30 seconds of your voice is enough",
-  "6 natural voices built in",
+  `${BUILTIN_VOICES.length} ready-made voices, one a real human voice`,
   "Download as MP3",
 ];
 
@@ -98,7 +98,7 @@ const USES: Array<[string, string]> = [
 ];
 
 const STEPS: Array<[string, string]> = [
-  ["Pick a voice", "Use one of six natural voices straight away, or clone your own."],
+  ["Pick a voice", `Use one of ${BUILTIN_VOICES.length} ready-made voices straight away, or clone your own.`],
   [
     "Give it your voice",
     "Record about 30 seconds, or upload a video or voice note of you talking. The meter tells you when it’s enough.",
@@ -165,8 +165,7 @@ const FAQ: Array<{ question: string; answer: string }> = [
   },
   {
     question: "Can I use it without cloning my voice?",
-    answer:
-      "Yes. Pick one of six built-in voices (warm storytellers, calm narrators, confident presenters, British and American) and type. They’re free to use in your videos, ads and reels.",
+    answer: `Yes. Pick one of ${BUILTIN_VOICES.length} ready-made voices, including Ahmed, a real human voice from Dubai, plus storytellers, narrators and presenters with British and American accents. They’re free to use in your videos, ads and reels.`,
   },
   {
     question: "Can I use the clips in ads and paid work?",
@@ -271,8 +270,8 @@ export default function VoiceToolPage() {
           </h1>
           <p className="mt-5 max-w-[36rem] text-[1.1rem] leading-relaxed text-ink-soft">
             Give it 30 seconds of your voice, live or from a video, and get a realistic AI copy that reads
-            your property tours, reels, ads and voiceovers for you. Or pick one of six natural voices and
-            start straight away. Free and private.
+            your property tours, reels, ads and voiceovers for you. Or pick a ready-made voice and start
+            straight away. Free and private.
           </p>
           <ul className="mt-6 grid gap-2 sm:grid-cols-2">
             {PROMISES.map((promise) => (
