@@ -3,7 +3,28 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { CREDIT_PACKS } from "@/lib/billing/credits";
 import { GRACE_DAYS, cardFeeCents, formatUsd } from "@/lib/plans";
-import { AGENT_EDITS_PER_MONTH, FOUNDING_SPOTS, OFFERS, PRICES, aed, whatsappLink } from "@/lib/offers";
+import {
+  AGENT_EDITS_PER_MONTH,
+  COMPETITORS,
+  COMPETITORS_CHECKED,
+  FOUNDING_SPOTS,
+  OFFERS,
+  PRICES,
+  aed,
+  usdToAed,
+  whatsappLink,
+} from "@/lib/offers";
+
+/** Pro billed yearly, per month, for comparing with competitors' yearly prices. */
+const PRO_YEARLY_PER_MONTH = Math.round(PRICES.proYear / 12);
+
+/** What only Fuccura does (true facts about our product; competitors' columns are price only). */
+const ONLY_HERE = [
+  ["Designs drawn for real estate agents in the UAE", "Not a generic template you have to bend"],
+  ["An AI copy of your own voice", "Narrates your listing videos and reels"],
+  ["UAE mortgage calculator for your clients", "With the Central Bank’s real loan limits"],
+  ["A real person in Dubai on WhatsApp", "Not a ticket queue in another time zone"],
+] as const;
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 
@@ -126,6 +147,7 @@ export default function PricingPage() {
       <div className="mx-auto mt-12 flex max-w-[52rem] flex-wrap items-center justify-between gap-4 rounded-2xl border border-signal/40 bg-signal/10 px-6 py-5">
         <p className="text-[0.98rem] text-ink">
           <b className="font-medium">Founding members:</b> the first {FOUNDING_SPOTS} customers get Pro for{" "}
+          <s className="text-ink-soft">{aed(PRICES.proYear)}</s>{" "}
           <b className="font-medium">{aed(PRICES.foundingYear)} a year</b>, locked in for good.
         </p>
         <a
@@ -186,6 +208,58 @@ export default function PricingPage() {
           </article>
         ))}
       </div>
+
+      {/* Why Fuccura: an honest price comparison, then what only we do. Data in lib/offers.ts. */}
+      <section className="mt-24 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+        <div>
+          <h2 className="font-display text-[2.4rem] leading-tight">Why Fuccura?</h2>
+          <p className="mt-4 text-ink-soft">
+            The big website builders are good, but they’re built for everyone, priced in dollars, and you do
+            all the work. Here’s what a year of a simple website costs, per month.
+          </p>
+          <ul className="mt-6 divide-y divide-rule rounded-2xl border border-rule">
+            <li className="flex items-baseline justify-between gap-4 bg-ink px-5 py-4 text-paper first:rounded-t-2xl">
+              <span className="font-medium">Fuccura Pro</span>
+              <span className="font-display text-2xl">{aed(PRO_YEARLY_PER_MONTH)}</span>
+            </li>
+            {COMPETITORS.map((competitor) => (
+              <li key={competitor.name} className="flex items-baseline justify-between gap-4 px-5 py-4">
+                <span>{competitor.name}</span>
+                <span className="font-display text-2xl text-ink-soft">
+                  about {aed(usdToAed(competitor.usdPerMonth))}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[0.8rem] leading-relaxed text-ink-soft">
+            Monthly cost of each plan billed yearly, before tax. Competitors’ prices from{" "}
+            {COMPETITORS.map((competitor, index) => (
+              <span key={competitor.name}>
+                {index > 0 && " and "}
+                <a href={competitor.source} className="underline underline-offset-4" rel="noopener">
+                  {new URL(competitor.source).hostname.replace("www.", "")}
+                </a>
+              </span>
+            ))}
+            , converted at AED 3.67 per US dollar, checked {COMPETITORS_CHECKED}. Domain costs aren’t
+            included (some builders give the first year free).
+          </p>
+        </div>
+        <div>
+          <h3 className="font-display text-2xl">What you only get here</h3>
+          <ul className="mt-5 space-y-4">
+            {ONLY_HERE.map(([title, detail]) => (
+              <li key={title} className="flex gap-3">
+                <Check size={18} className="mt-1 shrink-0 text-emerald-600" />
+                <span>
+                  <span className="block font-medium text-ink">{title}</span>
+                  <span className="block text-[0.92rem] text-ink-soft">{detail}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       <section className="mt-24 grid gap-10 rounded-2xl border border-rule p-8 lg:grid-cols-[1fr_1.2fr] lg:p-12">
         <div>

@@ -30,6 +30,21 @@ export const FOUNDING_SPOTS = 20;
 /** Changes the team makes each month for an Agent customer, on request. */
 export const AGENT_EDITS_PER_MONTH = 2;
 
+/**
+ * Competitors' cheapest paid plans, for the "Why Fuccura" comparison on /pricing.
+ * From their own pricing pages (yearly billing, before tax), converted at the
+ * dirham peg. Re-check before changing, and update COMPETITORS_CHECKED.
+ *   wix.com/plans: Light $17/month · squarespace.com/pricing: Basic $12/month
+ */
+export const COMPETITORS_CHECKED = "12 October 2026";
+export const COMPETITORS = [
+  { name: "Wix Light", usdPerMonth: 17, source: "https://www.wix.com/plans" },
+  { name: "Squarespace Basic", usdPerMonth: 12, source: "https://www.squarespace.com/pricing" },
+] as const;
+
+/** A USD monthly price in whole dirhams, e.g. 17 → 62. */
+export const usdToAed = (usd: number) => Math.round(usd * AED_PER_USD);
+
 /** "AED 299" */
 export const aed = (amount: number) => `AED ${amount.toLocaleString("en-GB")}`;
 
@@ -60,7 +75,6 @@ export const OFFERS: Offer[] = [
     features: [
       "Every template, colour and font",
       "One live website with a blog",
-      "Upload your CV and we fill your site",
       "AI voice clone: 5 clips a day",
       "UAE mortgage calculator and free tools",
       "A small “Made with Fuccura” link",
