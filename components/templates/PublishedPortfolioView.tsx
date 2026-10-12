@@ -33,6 +33,33 @@ function Resting({ name }: { name: string | null }) {
   );
 }
 
+/**
+ * The owner's “Open to work” switch (lib/portfolio/schema.ts). Sits outside the
+ * template, bottom left, so it works with every design. Emails the owner when
+ * their address is on the page.
+ */
+function OpenToWork({ job, email }: { job?: string; email?: string }) {
+  const label = job ? `Open to work · ${job}` : "Open to work";
+  const className =
+    "fixed bottom-4 left-4 z-[60] flex max-w-[calc(100%-11rem)] items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-lg ring-1 ring-black/10 backdrop-blur";
+  const dot = <span aria-hidden className="size-2 shrink-0 rounded-full bg-emerald-500" />;
+  const text = <span className="truncate">{label}</span>;
+  if (!email) {
+    return (
+      <p className={className}>
+        {dot}
+        {text}
+      </p>
+    );
+  }
+  return (
+    <a href={`mailto:${email}`} className={`${className} transition hover:bg-white`}>
+      {dot}
+      {text}
+    </a>
+  );
+}
+
 export default function PublishedPortfolioView({
   templateId,
   content,
@@ -54,6 +81,7 @@ export default function PublishedPortfolioView({
 }) {
   if (resting) return <Resting name={ownerName} />;
   const isEditorial = templateId === "editorial-developer";
+  const standard = content as StandardContent;
   return (
     <>
       <TemplateRenderer
@@ -68,6 +96,12 @@ export default function PublishedPortfolioView({
         home={home}
         posts={posts}
       />
+      {!isEditorial && standard.open_to_work === true && (
+        <OpenToWork
+          job={standard.professional_title?.trim() || undefined}
+          email={standard.email?.trim() || undefined}
+        />
+      )}
       {showsBranding && (
         <Link
           href="/"

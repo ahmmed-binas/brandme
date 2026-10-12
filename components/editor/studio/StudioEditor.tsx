@@ -831,6 +831,19 @@ export default function StudioEditor({
                       placeholder="Open to new work"
                     />
                   </div>
+                  <label className="flex items-start gap-2 text-[12px] leading-relaxed text-ink-soft">
+                    <input
+                      type="checkbox"
+                      checked={data.open_to_work === true}
+                      onChange={(event) => set({ open_to_work: event.target.checked }, true)}
+                      className="mt-0.5 accent-[color:var(--ink,#15140f)]"
+                    />
+                    <span>
+                      <strong className="font-medium text-ink">Open to work.</strong> Shows a badge on your
+                      published page and adds “Open to work” to its Google title, so recruiters searching for
+                      your job can find you.
+                    </span>
+                  </label>
                   <div className="grid grid-cols-2 gap-3">
                     <ImageField
                       label="Portrait"

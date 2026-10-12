@@ -7,6 +7,13 @@ import { portfolioForHost } from "@/lib/domains/service";
 import { getPublishedFor } from "@/lib/portfolio/repository";
 import { databaseConfigured } from "@/utils/db-schema";
 import { siteForHost, sitePosts } from "@/lib/portfolio/site";
+import {
+  describePortfolio,
+  jsonLd,
+  portfolioDescription,
+  portfolioSchema,
+  portfolioTitle,
+} from "@/lib/portfolio/seo";
 
 /** A published portfolio served on its owner's custom domain (reached via the rewrite in proxy.ts). */
 const load = cache(async (rawHost: string) => {
@@ -21,16 +28,9 @@ export async function generateMetadata({ params }: { params: Promise<{ host: str
   const portfolio = await load(host);
   if (!portfolio) return { title: "Portfolio not found", robots: { index: false } };
   if (portfolio.resting) return { title: portfolio.ownerName ?? "Portfolio", robots: { index: false } };
-  const content = portfolio.content as {
-    name?: string;
-    professional_title?: string;
-    tagline?: string;
-    personal?: { name?: string; title?: string; positioning?: string };
-  };
-  const name = content.personal?.name ?? content.name;
-  const title = content.personal?.title ?? content.professional_title;
-  const description = (content.personal?.positioning ?? content.tagline)?.slice(0, 160);
-  const heading = [name, title].filter(Boolean).join(" — ") || "Portfolio";
+  const person = describePortfolio(portfolio.content);
+  const heading = portfolioTitle(person);
+  const description = portfolioDescription(person);
   const url = `https://${decodeURIComponent(host)}`;
   return {
     metadataBase: new URL(url),
@@ -46,16 +46,22 @@ export default async function CustomDomainPage({ params }: { params: Promise<{ h
   const portfolio = await load(host);
   const site = await siteForHost(host);
   if (!portfolio || !site) notFound();
+  const schema = portfolioSchema(describePortfolio(portfolio.content), site.canonical);
   return (
-    <PublishedPortfolioView
-      templateId={portfolio.templateId}
-      content={portfolio.content}
-      theme={portfolio.theme}
-      showsBranding={portfolio.showsBranding}
-      resting={portfolio.resting}
-      ownerName={portfolio.ownerName}
-      posts={await sitePosts(site, 3)}
-      home={site.home}
-    />
+    <>
+      {!portfolio.resting && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }} />
+      )}
+      <PublishedPortfolioView
+        templateId={portfolio.templateId}
+        content={portfolio.content}
+        theme={portfolio.theme}
+        showsBranding={portfolio.showsBranding}
+        resting={portfolio.resting}
+        ownerName={portfolio.ownerName}
+        posts={await sitePosts(site, 3)}
+        home={site.home}
+      />
+    </>
   );
 }

@@ -138,6 +138,12 @@ export const standardContentSchema = z.object({
   experience: z.array(standardExperienceSchema).max(30).optional(),
   location: text(120),
   availability: text(160),
+  /**
+   * Off by default. When on, the published page shows an “Open to work” badge
+   * and says so in its title and description, so recruiters searching Google
+   * for “open to work” find it.
+   */
+  open_to_work: z.boolean().optional(),
   avatar: image,
   cover: image,
   website: link,

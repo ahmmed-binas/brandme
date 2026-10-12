@@ -6,37 +6,35 @@ import { getPublished } from "@/lib/portfolio/repository";
 import { SLUG_PATTERN } from "@/lib/portfolio/schema";
 import { databaseConfigured } from "@/utils/db-schema";
 import { sitePathFor, sitePosts } from "@/lib/portfolio/site";
+import {
+  describePortfolio,
+  jsonLd,
+  portfolioDescription,
+  portfolioSchema,
+  portfolioTitle,
+} from "@/lib/portfolio/seo";
+import { siteUrl } from "@/lib/site";
 
 const load = cache(async (slug: string) => {
   if (!databaseConfigured() || !SLUG_PATTERN.test(slug)) return null;
   return getPublished(slug);
 });
 
-function describe(content: Record<string, unknown>): { name?: string; title?: string; summary?: string } {
-  const personal = content.personal as { name?: string; title?: string; positioning?: string } | undefined;
-  if (personal) return { name: personal.name, title: personal.title, summary: personal.positioning };
-  const summary = Array.isArray(content.summary) ? String(content.summary[0] ?? "") : undefined;
-  return {
-    name: content.name as string | undefined,
-    title: content.professional_title as string | undefined,
-    summary: (content.tagline as string | undefined) || summary,
-  };
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const portfolio = await load(slug);
   if (!portfolio) return { title: "Portfolio not found", robots: { index: false } };
   if (portfolio.resting) return { title: portfolio.ownerName ?? "Portfolio", robots: { index: false } };
-  const { name, title, summary } = describe(portfolio.content);
-  const heading = [name, title].filter(Boolean).join(" — ") || "Portfolio";
+  const person = describePortfolio(portfolio.content);
+  const heading = portfolioTitle(person);
+  const description = portfolioDescription(person);
   const canonical = (await sitePathFor(slug))?.canonical ?? `/p/${slug}`;
   return {
     title: { absolute: heading },
-    description: summary?.slice(0, 160),
+    description,
     // The owner's own domain, when they have one, is the address to index.
     alternates: { canonical: canonical },
-    openGraph: { type: "profile", title: heading, description: summary?.slice(0, 160), url: canonical },
+    openGraph: { type: "profile", title: heading, description, url: canonical },
   };
 }
 
@@ -45,16 +43,23 @@ export default async function PublishedPortfolioPage({ params }: { params: Promi
   const portfolio = await load(slug);
   const site = await sitePathFor(slug);
   if (!portfolio || !site) notFound();
+  const url = site.canonical.startsWith("/") ? `${siteUrl}${site.canonical}` : site.canonical;
+  const schema = portfolioSchema(describePortfolio(portfolio.content), url);
   return (
-    <PublishedPortfolioView
-      templateId={portfolio.templateId}
-      content={portfolio.content}
-      theme={portfolio.theme}
-      showsBranding={portfolio.showsBranding}
-      resting={portfolio.resting}
-      ownerName={portfolio.ownerName}
-      posts={await sitePosts(site, 3)}
-      home={site.home}
-    />
+    <>
+      {!portfolio.resting && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }} />
+      )}
+      <PublishedPortfolioView
+        templateId={portfolio.templateId}
+        content={portfolio.content}
+        theme={portfolio.theme}
+        showsBranding={portfolio.showsBranding}
+        resting={portfolio.resting}
+        ownerName={portfolio.ownerName}
+        posts={await sitePosts(site, 3)}
+        home={site.home}
+      />
+    </>
   );
 }
