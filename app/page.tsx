@@ -71,29 +71,8 @@ export default async function Home() {
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
-      // Organization and WebSite rather than SoftwareApplication, whose rich result needs
-      // ratings and reviews we don't have yet (and never invent).
-      {
-        "@type": "Organization",
-        "@id": `${siteUrl}/#organization`,
-        name: brand.name,
-        url: siteUrl,
-        logo: `${siteUrl}/brand/fuccura-logo-1024.png`,
-        description: siteDescription,
-        areaServed: { "@type": "Country", name: "United Arab Emirates" },
-        contactPoint: {
-          "@type": "ContactPoint",
-          contactType: "customer service",
-          url: `https://wa.me/${brand.whatsapp}`,
-          availableLanguage: ["English"],
-        },
-      },
-      {
-        "@type": "WebSite",
-        name: brand.name,
-        url: siteUrl,
-        publisher: { "@id": `${siteUrl}/#organization` },
-      },
+      // Only the FAQ here: the Organization and WebSite are in app/layout.tsx on every page.
+      // (No SoftwareApplication: its rich result needs ratings and reviews we don't have yet.)
       {
         "@type": "FAQPage",
         mainEntity: FAQ.map((item) => ({
