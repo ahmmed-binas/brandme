@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Check, Download, Loader2, Mic, Square, Trash2, Upload } from "lucide-react";
+import { Check, Download, Loader2, Mic, Pause, Play, Square, Trash2, Upload } from "lucide-react";
 import {
   decodeToMono,
-  durationOf,
   joinSounds,
   speechSeconds,
   startRecording,
@@ -14,10 +13,12 @@ import {
   type Sound,
 } from "@/lib/tools/browser-audio";
 import {
-  CONSENT_SENTENCE,
+  BUILTIN_VOICES,
   READING_SCRIPT,
   VOICE_PLANS,
   VOICE_STYLES,
+  voiceName,
+  type ClipVoice,
   type VoiceClip,
   type VoicePlan,
   type VoiceState,
@@ -104,7 +105,10 @@ export function VoiceClone() {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Panel>
-        <StepTitle number={1}>Make your voice</StepTitle>
+        <StepTitle number={1}>Clone your own voice</StepTitle>
+        <p className="mt-2 text-[0.88rem] text-ink-soft">
+          Optional: or pick one of our natural voices on the right and start straight away.
+        </p>
         {state.voice?.status === "ready" ? (
           <VoiceReady
             onRemake={() => void send(fetch("/api/tools/voice", { method: "DELETE" }))}
@@ -121,18 +125,18 @@ export function VoiceClone() {
       </Panel>
 
       <Panel>
-        <StepTitle number={2}>Type what your voice says</StepTitle>
+        <StepTitle number={2}>Pick a voice and type</StepTitle>
         <Speak
-          ready={state.voice?.status === "ready"}
+          ownReady={state.voice?.status === "ready"}
           engineOnline={state.engineOnline}
           plan={state.plan}
           clipsToday={state.clipsToday}
-          onSpeak={(text, style) =>
+          onSpeak={(text, style, voice) =>
             send(
               fetch("/api/tools/voice/clips", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text, style }),
+                body: JSON.stringify({ text, style, voice }),
               }),
             )
           }
@@ -164,7 +168,6 @@ function MakeVoice({
   failure: string | null;
   onSubmit: (form: FormData) => Promise<true | void>;
 }) {
-  const [consent, setConsent] = useState<Sound | null>(null);
   const [takes, setTakes] = useState<Sound[]>([]);
   const [upload, setUpload] = useState<{ name: string; sound: Sound } | null>(null);
   const [mode, setMode] = useState<"record" | "upload">("record");
@@ -178,12 +181,8 @@ function MakeVoice({
   );
   // Counting speech walks every sample, so only redo it when the sound changes.
   const speech = useMemo(() => Math.min(speechSeconds(voice), MAX_SECONDS), [voice]);
-  const consentSpeech = useMemo(() => speechSeconds(consent), [consent]);
-  // Recording live, the script starts with the consent sentence, so that one recording is the
-  // consent too. Only an upload (which could be anyone's voice) needs the separate spoken line.
-  const consentNeeded = mode === "upload";
-  const consentOk = !consentNeeded || consentSpeech >= 3;
-  const canTrain = consentOk && speech >= MIN_SPEECH && agreed && !sending;
+  // The tick box is the person's confirmation that it's their own voice (no spoken consent line).
+  const canTrain = speech >= MIN_SPEECH && agreed && !sending;
 
   const readFile = async (file: File) => {
     setProblem(null);
@@ -195,16 +194,11 @@ function MakeVoice({
   };
 
   const train = async () => {
-    // Live: the first 30 seconds (where the consent sentence is) stand in for the separate line,
-    // which also keeps it under the server's size limit for consent recordings.
-    const consentSound =
-      consentNeeded || !voice ? consent : { ...voice, samples: voice.samples.slice(0, voice.rate * 30) };
-    if (!voice || !consentSound) return;
+    if (!voice) return;
     setSending(true);
     const form = new FormData();
     form.set("agree", "yes");
     form.set("source", toWav(voice), "voice.wav");
-    form.set("consent", toWav(consentSound), "consent.wav");
     await onSubmit(form);
     setSending(false);
   };
@@ -242,11 +236,10 @@ function MakeVoice({
         {mode === "record" ? (
           <div className="mt-4">
             <p className="text-[0.88rem] text-ink-soft">
-              Read this naturally, as if talking to a friend. The first line confirms it’s your voice; record
-              it all in one go or in parts.
+              Read this naturally, as if talking to a friend. Record it in one go or in parts.
             </p>
             <p className="mt-3 rounded-xl bg-ink/5 px-4 py-3 text-[0.98rem] leading-relaxed text-ink">
-              <b className="font-medium">{CONSENT_SENTENCE}</b> {READING_SCRIPT}
+              {READING_SCRIPT}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <Recorder
@@ -285,33 +278,6 @@ function MakeVoice({
               />
             </label>
             {problem && <p className="mt-2 text-[0.88rem] text-red-800">{problem}</p>}
-
-            {/* Uploads could be anyone's voice, so the person also reads one line live; we check it matches. */}
-            <div className="mt-5">
-              <p className="text-[0.92rem] font-medium text-ink">Then read this line aloud</p>
-              <p className="mt-1 text-[0.85rem] text-ink-soft">
-                It confirms the voice in your file is yours. Takes about ten seconds.
-              </p>
-              <blockquote className="mt-3 rounded-xl bg-ink/5 px-4 py-3 font-display text-[1.05rem] leading-snug text-ink">
-                “{CONSENT_SENTENCE}”
-              </blockquote>
-              <div className="mt-3">
-                <Recorder
-                  label={consent ? "Record again" : "Record the line"}
-                  maxSeconds={40}
-                  onDone={(sound) => setConsent(sound)}
-                />
-                {consent && (
-                  <p
-                    className={`mt-2 text-[0.88rem] ${consentSpeech >= 3 ? "text-emerald-700" : "text-amber-800"}`}
-                  >
-                    {consentSpeech >= 3
-                      ? `Got it (${durationOf(consent).toFixed(0)} s).`
-                      : "We could hardly hear you. Try again a little closer to the microphone."}
-                  </p>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
@@ -344,9 +310,7 @@ function MakeVoice({
           <p className="mt-2 text-[0.85rem] text-ink-soft">
             {speech < MIN_SPEECH
               ? `Give at least ${MIN_SPEECH} seconds of your voice first.`
-              : !consentOk
-                ? "Now read the short line under your upload."
-                : "Tick the box to confirm it’s your voice."}
+              : "Tick the box to confirm it’s your voice."}
           </p>
         )}
       </section>
@@ -524,18 +488,22 @@ function VoiceReady({ onRemake, onDelete }: { onRemake: () => void; onDelete: ()
 // ---------------------------------------------------------------------------
 
 function Speak({
-  ready,
+  ownReady,
   engineOnline,
   plan,
   clipsToday,
   onSpeak,
 }: {
-  ready: boolean;
+  ownReady: boolean;
   engineOnline: boolean;
   plan: VoicePlan;
   clipsToday: number;
-  onSpeak: (text: string, style: VoiceStyle) => Promise<true | void>;
+  onSpeak: (text: string, style: VoiceStyle, voice: ClipVoice) => Promise<true | void>;
 }) {
+  // Your own voice once it's made; until then a built-in one, so anyone can start at once.
+  const [chosen, setChosen] = useState<ClipVoice | null>(null);
+  const voice: ClipVoice = chosen ?? (ownReady ? "mine" : "aria");
+  const ready = voice !== "mine" || ownReady;
   const [text, setText] = useState("");
   const [style, setStyle] = useState<VoiceStyle>("natural");
   const [sending, setSending] = useState(false);
@@ -545,7 +513,7 @@ function Speak({
 
   const speak = async () => {
     setSending(true);
-    if (await onSpeak(text.trim(), style)) {
+    if (await onSpeak(text.trim(), style, voice)) {
       setText("");
       setQueuedOffline(!engineOnline);
     }
@@ -553,12 +521,8 @@ function Speak({
   };
 
   return (
-    <div className={`mt-5 ${ready ? "" : "opacity-60"}`}>
-      {!ready && (
-        <p className="mb-4 rounded-xl bg-ink/5 px-4 py-3 text-[0.9rem] text-ink-soft">
-          Make your voice first (step 1). Then type here and it reads it aloud in your voice.
-        </p>
-      )}
+    <div className="mt-5">
+      <VoicePicker value={voice} ownReady={ownReady} onChange={setChosen} />
       <label htmlFor="voice-text" className="sr-only">
         Text to read aloud
       </label>
@@ -609,11 +573,84 @@ function Speak({
         className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-paper transition hover:bg-signal hover:text-signal-ink disabled:cursor-not-allowed disabled:opacity-40"
       >
         {sending && <Loader2 size={16} className="animate-spin" />}
-        Read it in my voice
+        Read it aloud
       </button>
       {queuedOffline && <NotAvailable what="Your clip is made" />}
       <Allowance plan={plan} left={left} />
     </div>
+  );
+}
+
+/**
+ * Choose who reads the text: the person's own cloned voice (once it's made) or one of
+ * the built-in voices (BUILTIN_VOICES), each with a short preview to listen to.
+ */
+function VoicePicker({
+  value,
+  ownReady,
+  onChange,
+}: {
+  value: ClipVoice;
+  ownReady: boolean;
+  onChange: (voice: ClipVoice) => void;
+}) {
+  const player = useRef<HTMLAudioElement | null>(null);
+  const [playing, setPlaying] = useState<string | null>(null);
+
+  const preview = (id: string) => {
+    const audio = player.current;
+    if (!audio) return;
+    if (playing === id) {
+      audio.pause();
+      return;
+    }
+    audio.src = `/tools/voice/builtin/${id}.mp3`;
+    void audio.play().catch(() => undefined);
+    setPlaying(id);
+  };
+
+  const option = (id: ClipVoice, title: string, hint: string, disabled = false) => (
+    <div
+      key={id}
+      className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 transition ${value === id ? "border-ink bg-ink/5" : "border-rule"} ${disabled ? "opacity-50" : "hover:border-ink/50"}`}
+    >
+      <button
+        type="button"
+        disabled={disabled}
+        aria-pressed={value === id}
+        onClick={() => onChange(id)}
+        className="min-w-0 flex-1 text-left disabled:cursor-not-allowed"
+      >
+        <span className="block text-[0.92rem] font-medium text-ink">{title}</span>
+        <span className="block truncate text-[0.78rem] text-ink-soft">{hint}</span>
+      </button>
+      {id !== "mine" && (
+        <button
+          type="button"
+          onClick={() => preview(id)}
+          aria-label={playing === id ? `Stop ${title}` : `Listen to ${title}`}
+          className="grid size-8 shrink-0 place-items-center rounded-full bg-ink text-paper"
+        >
+          {playing === id ? <Pause size={13} /> : <Play size={13} className="translate-x-px" />}
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <fieldset className="mb-5">
+      <legend className="text-[0.9rem] font-medium text-ink">Voice</legend>
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        {option(
+          "mine",
+          "Your voice",
+          ownReady ? "Your own cloned voice" : "Clone it on the left first",
+          !ownReady,
+        )}
+        {BUILTIN_VOICES.map((voice) => option(voice.id, voice.name, voice.description))}
+      </div>
+      <audio ref={player} preload="none" onEnded={() => setPlaying(null)} onPause={() => setPlaying(null)} />
+    </fieldset>
   );
 }
 
@@ -672,7 +709,7 @@ function ClipList({ clips, engineOnline }: { clips: VoiceClip[]; engineOnline: b
         <li key={clip.id} className="rounded-xl border border-rule px-4 py-3">
           <p className="line-clamp-2 text-[0.92rem] text-ink">{clip.text}</p>
           <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
-            {VOICE_STYLES[clip.style]?.label ?? "Natural"}
+            {voiceName(clip.voice)} · {VOICE_STYLES[clip.style]?.label ?? "Natural"}
           </p>
           <div className="mt-2">
             {clip.status === "done" ? (

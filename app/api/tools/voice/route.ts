@@ -29,7 +29,7 @@ export const GET = route(async () => {
 /**
  * Starts making a voice. A form with:
  *   source  – the sound of the uploaded video or recording, as WAV (made in the browser)
- *   consent – the consent sentence read into the microphone, as WAV
+ *   consent – optional: a spoken consent recording, as WAV
  *   agree   – "yes": the person confirmed it is their own voice
  */
 export const POST = route(async (request: Request) => {
@@ -49,8 +49,9 @@ export const POST = route(async (request: Request) => {
   const consent = await fileBytes(form.get("consent"));
   if (!source || !isWav(source) || source.length > MAX_SOURCE_BYTES)
     return jsonError(422, "We couldn’t read the sound of your video. Try another file.");
-  if (!consent || !isWav(consent) || consent.length > MAX_CONSENT_BYTES)
-    return jsonError(422, "Please record the consent sentence first.");
+  // Optional since the spoken consent line was dropped; the tick box ("agree") is required.
+  if (consent && (!isWav(consent) || consent.length > MAX_CONSENT_BYTES))
+    return jsonError(422, "That consent recording couldn’t be read. Please try again.");
 
   await saveVoice(user.id, source, consent);
   return Response.json(await voiceState(user.id, voicePlanOf(user)), { status: 201 });

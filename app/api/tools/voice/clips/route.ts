@@ -5,6 +5,7 @@ import {
   VOICE_PLANS,
   cleanClipText,
   clipsToday,
+  isBuiltinVoice,
   isVoiceStyle,
   queueClip,
   voicePlanOf,
@@ -13,7 +14,7 @@ import {
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 
-/** Queues text to be read aloud in the account's voice. Body: { text, style }. */
+/** Queues text to be read aloud. Body: { text, style, voice: "mine" or a built-in voice id }. */
 export const POST = route(async (request: Request) => {
   if (!databaseConfigured()) return jsonError(503, "The voice tool isn’t set up on this server.");
   const user = await getCurrentUser();
@@ -23,7 +24,7 @@ export const POST = route(async (request: Request) => {
 
   const body = await readJson(request, 8_000);
   if (body instanceof Response) return body;
-  const { text: raw, style } = body as { text?: unknown; style?: unknown };
+  const { text: raw, style, voice } = body as { text?: unknown; style?: unknown; voice?: unknown };
   const text = typeof raw === "string" ? cleanClipText(raw) : "";
   if (!text) return jsonError(422, "Type something for your voice to say.");
   if (text.length > limits.maxChars)
@@ -45,7 +46,13 @@ export const POST = route(async (request: Request) => {
   if (plan === "free" && !(await rateLimit(`voice-clip-ip:${clientIp(request)}`, FREE_CLIPS_PER_IP, 86_400)))
     return jsonError(429, "Too many free clips from this connection today. Please try again tomorrow.");
 
-  const queued = await queueClip(user.id, text, isVoiceStyle(style) ? style : "natural", plan);
+  const queued = await queueClip(
+    user.id,
+    text,
+    isVoiceStyle(style) ? style : "natural",
+    plan,
+    isBuiltinVoice(voice) ? voice : "mine",
+  );
   if ("error" in queued) return jsonError(409, queued.error);
   return Response.json(await voiceState(user.id, plan), { status: 201 });
 });

@@ -249,24 +249,50 @@ for leftover in Path(tempfile.gettempdir()).glob("fuccura-voices-*"):
         shutil.rmtree(leftover, ignore_errors=True)
 
 
+def optional_voice_part(voice_id, part):
+    """A voice's audio, or None when the website has none (e.g. no consent recording was sent)."""
+    try:
+        return download_voice(voice_id, part)
+    except requests.HTTPError as error:
+        if error.response is not None and error.response.status_code == 404:
+            return None
+        raise
+
+
 def make_voice(model, job):
     source = download_voice(job["id"], "source")
-    consent = download_voice(job["id"], "consent")
-    if speech_seconds(consent, RATE) < MIN_CONSENT_SPEECH:
-        return report(job, error="We couldn’t hear the consent sentence. Please record it again, a little closer to the microphone.")
     if speech_seconds(source, RATE) < MIN_SOURCE_SPEECH:
         return report(job, error="We need more of your voice: at least 10 seconds of clear speech, without music.")
-
     sample = normalise(best_window(source, RATE, SAMPLE_SECONDS))
-    similarity = speaker_similarity(model, sample, consent)
-    print(f"  voice {job['id'][:8]}: similarity {similarity:.3f}", flush=True)
-    if similarity < SAME_SPEAKER:
-        return report(
-            job,
-            similarity=similarity,
-            error="The voice in your upload doesn’t sound like your consent recording. You can only copy your own voice.",
-        )
+
+    # People confirm with a tick box that it's their own voice. The spoken consent line was
+    # dropped (October 2026); if a consent recording is ever sent, it's still checked.
+    consent = optional_voice_part(job["id"], "consent")
+    similarity = None
+    if consent is not None and speech_seconds(consent, RATE) >= MIN_CONSENT_SPEECH:
+        similarity = speaker_similarity(model, sample, consent)
+        print(f"  voice {job['id'][:8]}: similarity {similarity:.3f}", flush=True)
+        if similarity < SAME_SPEAKER:
+            return report(
+                job,
+                similarity=similarity,
+                error="The voice in your upload doesn’t sound like your consent recording. You can only copy your own voice.",
+            )
     report(job, audio=wav_bytes(sample, RATE), filename="sample.wav", similarity=similarity)
+
+
+BUILTIN = HERE / "builtin"
+
+
+def reference_for(job):
+    """The clip the voice is copied from: a built-in voice's file here, or the person's own sample."""
+    builtin = job.get("builtinVoice")
+    if builtin:
+        path = BUILTIN / f"{builtin}.wav"
+        if not path.exists():
+            raise FileNotFoundError(f"Built-in voice {builtin} is missing: run make_builtin_voices.py")
+        return str(path)
+    return voice_sample_path(job["voiceId"])
 
 
 def voice_sample_path(voice_id):
@@ -317,7 +343,7 @@ def speak(model, text, settings, attempts=3):
 
 def make_clip(model, job):
     settings = job["settings"]
-    model.prepare_conditionals(voice_sample_path(job["voiceId"]), exaggeration=settings["exaggeration"])
+    model.prepare_conditionals(reference_for(job), exaggeration=settings["exaggeration"])
     pause = np.zeros(int(RATE * 0.3), dtype=np.float32)
     pieces = []
     for piece in sentences(job["text"]):

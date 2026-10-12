@@ -667,6 +667,16 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "026_builtin_voices",
+  statements: [
+    // Clips can be read in a built-in voice (BUILTIN_VOICES in lib/tools/voice-config.ts)
+    // instead of the person's own cloned voice, so profile_id becomes optional.
+    `ALTER TABLE voice_clips ALTER COLUMN profile_id DROP NOT NULL`,
+    `ALTER TABLE voice_clips ADD COLUMN IF NOT EXISTS builtin_voice TEXT`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

@@ -1,10 +1,12 @@
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
 import {
-  CONSENT_SENTENCE,
   VOICE_PLANS,
   VOICE_STYLES,
+  isBuiltinVoice,
   isVoiceStyle,
+  type BuiltinVoiceId,
+  type ClipVoice,
   type ClipStatus,
   type VoicePlan,
   type VoiceState,
@@ -86,8 +88,9 @@ export async function voiceState(userId: string, plan: VoicePlan): Promise<Voice
     error: string | null;
     created_at: Date;
     ahead: string;
+    builtin_voice: string | null;
   }>(
-    `SELECT c.id, c.text, c.style, c.status, c.error, c.created_at,
+    `SELECT c.id, c.text, c.style, c.status, c.error, c.created_at, c.builtin_voice,
        (SELECT COUNT(*) FROM voice_clips q
          WHERE q.status = 'queued'
            AND (q.priority > c.priority OR (q.priority = c.priority AND q.created_at < c.created_at))) AS ahead
@@ -105,6 +108,7 @@ export async function voiceState(userId: string, plan: VoicePlan): Promise<Voice
     voice: row ? { status: row.status, error: row.error, createdAt: row.created_at.toISOString() } : null,
     clips: clips.rows.map((clip) => ({
       id: clip.id,
+      voice: isBuiltinVoice(clip.builtin_voice) ? clip.builtin_voice : "mine",
       text: clip.text,
       style: isVoiceStyle(clip.style) ? clip.style : "natural",
       status: clip.status,
@@ -115,8 +119,16 @@ export async function voiceState(userId: string, plan: VoicePlan): Promise<Voice
   };
 }
 
-/** Starts (or restarts) making a voice. Replaces any earlier voice and its clips. */
-export async function saveVoice(userId: string, source: Buffer, consent: Buffer): Promise<void> {
+/**
+ * Starts (or restarts) making a voice. Replaces any earlier voice and its clips.
+ * The person confirms with a tick box that it's their own voice; the old spoken
+ * consent line was dropped at the owner's request (October 2026), so consent is optional.
+ */
+export async function saveVoice(
+  userId: string,
+  source: Buffer,
+  consent: Buffer | null = null,
+): Promise<void> {
   await ensureSchema();
   await db.query("DELETE FROM voice_profiles WHERE user_id = $1", [userId]);
   await db.query(
@@ -132,26 +144,35 @@ export async function deleteVoice(userId: string): Promise<void> {
   await db.query("DELETE FROM voice_profiles WHERE user_id = $1", [userId]);
 }
 
-/** Queues text to be read in the account's voice. Returns an error message when it can't. */
+/**
+ * Queues text to be read in the account's own voice ("mine") or a built-in one.
+ * Returns an error message when it can't.
+ */
 export async function queueClip(
   userId: string,
   text: string,
   style: VoiceStyle,
   plan: VoicePlan,
+  voice: ClipVoice = "mine",
 ): Promise<{ id: string } | { error: string }> {
   await ensureSchema();
-  const voice = await db.query<{ id: string; status: VoiceStatus }>(
-    "SELECT id, status FROM voice_profiles WHERE user_id = $1",
-    [userId],
-  );
-  const profile = voice.rows[0];
-  if (!profile || profile.status !== "ready") return { error: "Your voice isn’t ready yet." };
+  let profileId: string | null = null;
+  if (voice === "mine") {
+    const own = await db.query<{ id: string; status: VoiceStatus }>(
+      "SELECT id, status FROM voice_profiles WHERE user_id = $1",
+      [userId],
+    );
+    const profile = own.rows[0];
+    if (!profile || profile.status !== "ready")
+      return { error: "Your voice isn’t ready yet. Pick a built-in voice, or make yours first." };
+    profileId = profile.id;
+  }
   const { priority, keepDays } = VOICE_PLANS[plan];
   const result = await db.query<{ id: string }>(
-    `INSERT INTO voice_clips (user_id, profile_id, text, style, priority, expires_at)
-     VALUES ($1, $2, $3, $4, $5, NOW() + make_interval(days => $6))
+    `INSERT INTO voice_clips (user_id, profile_id, builtin_voice, text, style, priority, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, NOW() + make_interval(days => $7))
      RETURNING id`,
-    [userId, profile.id, text, style, priority, keepDays],
+    [userId, profileId, voice === "mine" ? null : voice, text, style, priority, keepDays],
   );
   return { id: result.rows[0]!.id };
 }
@@ -175,11 +196,14 @@ export async function clipAudio(
 // ---------------------------------------------------------------------------
 
 export type WorkerJob =
-  | { type: "voice"; id: string; consentSentence: string }
+  | { type: "voice"; id: string }
   | {
       type: "clip";
       id: string;
-      voiceId: string;
+      /** The person's own voice to read in, or null when builtinVoice is set. */
+      voiceId: string | null;
+      /** A built-in voice (the worker has its reference clip locally). */
+      builtinVoice: BuiltinVoiceId | null;
       text: string;
       settings: (typeof VOICE_STYLES)[VoiceStyle]["settings"];
     };
@@ -207,15 +231,21 @@ export async function claimJob(): Promise<WorkerJob | null> {
      )
      RETURNING id`,
   );
-  if (voice.rows[0]) return { type: "voice", id: voice.rows[0].id, consentSentence: CONSENT_SENTENCE };
+  if (voice.rows[0]) return { type: "voice", id: voice.rows[0].id };
 
-  const clip = await db.query<{ id: string; profile_id: string; text: string; style: string }>(
+  const clip = await db.query<{
+    id: string;
+    profile_id: string | null;
+    builtin_voice: string | null;
+    text: string;
+    style: string;
+  }>(
     `UPDATE voice_clips SET status = 'working', claimed_at = NOW()
      WHERE id = (
        SELECT id FROM voice_clips WHERE ${claimable}
        ORDER BY priority DESC, created_at LIMIT 1 FOR UPDATE SKIP LOCKED
      )
-     RETURNING id, profile_id, text, style`,
+     RETURNING id, profile_id, builtin_voice, text, style`,
   );
   const row = clip.rows[0];
   if (!row) return null;
@@ -224,6 +254,7 @@ export async function claimJob(): Promise<WorkerJob | null> {
     type: "clip",
     id: row.id,
     voiceId: row.profile_id,
+    builtinVoice: isBuiltinVoice(row.builtin_voice) ? row.builtin_voice : null,
     text: row.text,
     settings: VOICE_STYLES[style].settings,
   };
@@ -248,7 +279,7 @@ export async function voiceAudio(voiceId: string, part: VoicePart): Promise<Buff
  */
 export async function finishVoice(
   voiceId: string,
-  result: { sample: Buffer; similarity: number } | { error: string; similarity?: number },
+  result: { sample: Buffer; similarity?: number } | { error: string; similarity?: number },
 ): Promise<void> {
   await ensureSchema();
   const ok = "sample" in result;

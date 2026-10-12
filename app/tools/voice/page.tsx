@@ -69,7 +69,7 @@ const DEMO: DemoSample[] = [
 const PROMISES = [
   "Free with a Fuccura account",
   "30 seconds of your voice is enough",
-  "Your own voice only, checked",
+  "6 natural voices built in",
   "Download as MP3",
 ];
 
@@ -98,7 +98,7 @@ const USES: Array<[string, string]> = [
 ];
 
 const STEPS: Array<[string, string]> = [
-  ["Read one line", "A short sentence into your microphone confirms the voice is yours."],
+  ["Pick a voice", "Use one of six natural voices straight away, or clone your own."],
   [
     "Give it your voice",
     "Record about 30 seconds, or upload a video or voice note of you talking. The meter tells you when it’s enough.",
@@ -112,8 +112,8 @@ const STEPS: Array<[string, string]> = [
 
 const SAFE: Array<[string, string]> = [
   [
-    "Only your own voice",
-    "The voice in your upload must match the consent line you read live. Someone else’s voice is refused.",
+    "Your own voice, by your word",
+    "You confirm a cloned voice is your own. Copying someone else’s voice without their permission breaks our terms, and we remove it.",
   ],
   [
     "Watermarked",
@@ -161,7 +161,12 @@ const FAQ: Array<{ question: string; answer: string }> = [
   {
     question: "Can I clone someone else’s voice?",
     answer:
-      "No. You read a consent line into your microphone, and we check it matches the voice you give. If they don’t sound like the same person, the voice isn’t made. Every clip also carries an inaudible watermark that marks it as AI-made.",
+      "No. Before cloning, you confirm it’s your own voice, and copying anyone else’s voice without their permission breaks our terms; we remove those voices and close the account. Every clip also carries an inaudible watermark that marks it as AI-made.",
+  },
+  {
+    question: "Can I use it without cloning my voice?",
+    answer:
+      "Yes. Pick one of six built-in voices (warm storytellers, calm narrators, confident presenters, British and American) and type. They’re free to use in your videos, ads and reels.",
   },
   {
     question: "Can I use the clips in ads and paid work?",
@@ -181,7 +186,7 @@ const FAQ: Array<{ question: string; answer: string }> = [
   },
   {
     question: "What happens to my recordings?",
-    answer: `Only the sound leaves your device, never the video. Once your voice is made, we delete your upload and consent recording and keep a 12-second sample to speak from. Clips are deleted after ${free.keepDays} days (${pro.keepDays} on Pro), and you can delete your voice at any time.`,
+    answer: `Only the sound leaves your device, never the video. Once your voice is made, we delete your upload and keep a 12-second sample to speak from. Clips are deleted after ${free.keepDays} days (${pro.keepDays} on Pro), and you can delete your voice at any time.`,
   },
   {
     question: "What powers it?",
@@ -266,8 +271,8 @@ export default function VoiceToolPage() {
           </h1>
           <p className="mt-5 max-w-[36rem] text-[1.1rem] leading-relaxed text-ink-soft">
             Give it 30 seconds of your voice, live or from a video, and get a realistic AI copy that reads
-            your property tours, reels, ads and voiceovers for you. Free, private, and only ever your own
-            voice.
+            your property tours, reels, ads and voiceovers for you. Or pick one of six natural voices and
+            start straight away. Free and private.
           </p>
           <ul className="mt-6 grid gap-2 sm:grid-cols-2">
             {PROMISES.map((promise) => (

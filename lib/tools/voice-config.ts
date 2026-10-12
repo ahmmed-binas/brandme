@@ -27,9 +27,30 @@ export type VoicePlan = keyof typeof VOICE_PLANS;
 /** Free clips from one internet connection a day, whatever the account (stops sign-up farming). */
 export const FREE_CLIPS_PER_IP = 15;
 
-/** Read into the microphone; the worker checks it is the same voice as the upload. */
-export const CONSENT_SENTENCE =
-  "This is my own voice, recorded today. I agree to Fuccura making a copy of my voice for my own use, and I will not use it to pretend to be anyone else.";
+/**
+ * Ready-made voices anyone can use without cloning their own. Each is a Kokoro voice
+ * (Apache-2.0) whose reference clip lives in workers/voice/builtin/<id>.wav, with a
+ * preview at /tools/voice/builtin/<id>.mp3. Remake them with
+ * workers/voice/make_builtin_voices.py. "mine" means the person's own cloned voice.
+ */
+export const BUILTIN_VOICES = [
+  { id: "aria", name: "Aria", description: "Warm storyteller, American" },
+  { id: "bella", name: "Bella", description: "Bright and friendly, American" },
+  { id: "emma", name: "Emma", description: "Calm and clear, British" },
+  { id: "michael", name: "Michael", description: "Steady narrator, American" },
+  { id: "jordan", name: "Jordan", description: "Deep and confident, American" },
+  { id: "george", name: "George", description: "Polished presenter, British" },
+] as const;
+
+export type BuiltinVoiceId = (typeof BUILTIN_VOICES)[number]["id"];
+/** Which voice reads a clip: the person's own ("mine") or a built-in one. */
+export type ClipVoice = "mine" | BuiltinVoiceId;
+
+export const isBuiltinVoice = (value: unknown): value is BuiltinVoiceId =>
+  BUILTIN_VOICES.some((voice) => voice.id === value);
+
+export const voiceName = (voice: ClipVoice) =>
+  voice === "mine" ? "Your voice" : (BUILTIN_VOICES.find((item) => item.id === voice)?.name ?? "Voice");
 
 /**
  * Ways a clip can be read. The numbers are Chatterbox's settings, passed to the worker:
@@ -83,6 +104,7 @@ export type ClipStatus = "queued" | "working" | "done" | "failed";
 
 export interface VoiceClip {
   id: string;
+  voice: ClipVoice;
   text: string;
   style: VoiceStyle;
   status: ClipStatus;

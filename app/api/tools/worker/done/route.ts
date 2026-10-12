@@ -31,9 +31,9 @@ export const POST = route(async (request: Request) => {
 
   if (type === "voice") {
     if (error) await finishVoice(id, { error, similarity: score });
-    else if (audio && isWav(audio) && score !== undefined)
-      await finishVoice(id, { sample: audio, similarity: score });
-    else return jsonError(422, "Send a WAV sample and a similarity, or an error.");
+    // The similarity check only runs when a consent recording was sent, so it's optional.
+    else if (audio && isWav(audio)) await finishVoice(id, { sample: audio, similarity: score });
+    else return jsonError(422, "Send a WAV sample, or an error.");
   } else {
     if (error) await finishClip(id, { error });
     else if (audio) await finishClip(id, { audio, type: isWav(audio) ? "audio/wav" : "audio/mpeg" });

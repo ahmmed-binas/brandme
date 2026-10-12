@@ -80,11 +80,10 @@ export default function PrivacyPage() {
         <>
           <b className="font-medium text-ink">Your voice (only if you use the voice tool).</b> Your browser
           turns your recording or video into sound only; the video never leaves your device. We receive that
-          sound and a short consent recording, check that they are the same voice, keep a 12-second sample to
-          speak from, and delete the rest straight away. The work is done on our own computer with an
-          open-source model; your voice isn’t sent to any AI company. Clips you make are deleted after 7 days
-          (90 on Pro), and you can delete your voice and clips at any time on the tool’s page. We never use
-          your voice for anything you didn’t ask for, and never to train AI models.
+          sound, keep a 12-second sample to speak from, and delete the rest straight away. The work is done on
+          our own computer with an open-source model; your voice isn’t sent to any AI company. Clips you make
+          are deleted after 7 days (90 on Pro), and you can delete your voice and clips at any time on the
+          tool’s page. We never use your voice for anything you didn’t ask for, and never to train AI models.
         </>,
         <>
           <b className="font-medium text-ink">Messages.</b> Support requests, community posts and template
