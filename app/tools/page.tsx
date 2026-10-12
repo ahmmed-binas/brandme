@@ -6,7 +6,6 @@ import {
   FileOutput,
   FilePlus2,
   FileSearch,
-  FileText,
   ImageIcon,
   KeyRound,
   LockKeyhole,
@@ -31,25 +30,11 @@ const plannedTools = [
     href: "/tools/voice",
   },
   {
-    icon: FileText,
-    title: "PDF to text",
-    description: "Pull editable text from digital PDFs and scanned documents.",
-    state: "Available in CV extractor",
-    href: "/DetailExtractorPage",
-  },
-  {
     icon: FileSearch,
-    title: "CV detail extractor",
-    description: "Turn your CV into structured details ready for a portfolio.",
-    state: "Open workspace",
-    href: "/DetailExtractorPage",
-  },
-  {
-    icon: ImageIcon,
-    title: "Image to text",
-    description: "Read text from screenshots and scans with OCR.",
-    state: "Available in CV extractor",
-    href: "/DetailExtractorPage",
+    title: "CV to website",
+    description: "Upload your CV (PDF, Word or a photo) and we fill your portfolio from it.",
+    state: "Pick a design",
+    href: "/templatechooser",
   },
   {
     icon: WandSparkles,
@@ -179,10 +164,10 @@ export default function ToolsPage() {
                   Try PDF to PNG
                 </a>
                 <Link
-                  href="/DetailExtractorPage"
+                  href="/templatechooser"
                   className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-bold text-slate-800 transition hover:border-violet-400 dark:border-white/15 dark:text-white"
                 >
-                  Extract CV details
+                  Turn your CV into a website
                 </Link>
               </div>
             </div>

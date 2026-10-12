@@ -41,7 +41,7 @@ export const toolGroups: Array<{ title: string; items: NavLink[] }> = [
       { href: "/tools/merge-pdf", label: "Merge PDF", hint: "Combine PDFs into one file" },
       { href: "/tools/extract-pdf-pages", label: "Extract PDF pages", hint: "Keep only the pages you need" },
       { href: "/tools/image-tools", label: "Image tools", hint: "Remove backgrounds, enlarge images" },
-      { href: "/DetailExtractorPage", label: "CV extractor", hint: "Pull details out of a CV" },
+      { href: "/templatechooser", label: "CV to website", hint: "Upload your CV, we fill your site" },
       { href: "/tools/everyday-toolbox", label: "Everyday toolbox", hint: "Counters, passwords, dates" },
       { href: "/tools/developer-tools", label: "Developer tools", hint: "JSON, JWT, Base64, regex" },
     ],

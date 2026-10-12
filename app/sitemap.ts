@@ -38,7 +38,6 @@ const STATIC: Array<[path: string, priority: number]> = [
   ["/tools/image-tools", 0.4],
   ["/tools/merge-pdf", 0.4],
   ["/tools/pdf-editor", 0.4],
-  ["/DetailExtractorPage", 0.4],
   ["/privacy", 0.2],
   ["/terms", 0.2],
 ];

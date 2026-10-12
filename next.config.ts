@@ -15,6 +15,10 @@ const nextConfig = {
       "./public/samples/**/*",
     ],
   },
+  // The old standalone CV extractor was removed (October 2026); CV import lives in the editor.
+  async redirects() {
+    return [{ source: "/DetailExtractorPage", destination: "/templatechooser", permanent: true }];
+  },
   // Security headers on every response. Script-level CSP needs per-request nonces and is
   // left for later; these block framing, MIME sniffing, plugins and cross-site form posts.
   async headers() {
