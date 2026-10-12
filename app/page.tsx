@@ -11,7 +11,7 @@ import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
 import { PRICES, aed } from "@/lib/offers";
-import { siteDescription, siteUrl } from "@/lib/site";
+import { siteDescription } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: { absolute: `${brand.name} — Portfolio builder with your own domain` },
