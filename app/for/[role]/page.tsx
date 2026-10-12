@@ -6,12 +6,14 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
+import { faqSchema, roleBreadcrumbs, roleFaq } from "@/lib/gallery/role-seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ role: string }> }): Promise<Metadata> {
   const role = roleById((await params).role);
   if (!role) return {};
   return {
-    title: `Portfolio website for ${role.plural}`,
+    // Words people search: "portfolio website for nurses", "nurse portfolio examples", "free template".
+    title: `Portfolio Website for ${role.plural.charAt(0).toUpperCase()}${role.plural.slice(1)}: Free Templates and Examples`,
     description: `A personal website for ${role.plural}: ${role.starter.services
       .map((service) => service[0].toLowerCase())
       .slice(0, 3)
@@ -40,6 +42,11 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
     )
     .slice(0, 6);
   const profession = PROFESSIONS.find((item) => item.id === role.profession);
+  const faq = roleFaq(role);
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [roleBreadcrumbs(role), faqSchema(faq)],
+  };
   const related = ROLES.filter((item) => item.profession === role.profession && item.id !== role.id).slice(
     0,
     12,
@@ -47,6 +54,10 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
 
   return (
     <div className="mx-auto max-w-[1320px] px-5 pb-24 pt-10 sm:px-8 lg:pt-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}
+      />
       <nav className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
         <Link href="/for" className="hover:text-ink">
           Job titles
@@ -140,6 +151,20 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
           </ul>
         </section>
       )}
+
+      <section className="mt-20 max-w-[52rem]" aria-labelledby="questions">
+        <h2 id="questions" className="font-display text-[2.2rem] tracking-[-0.02em] text-ink">
+          Questions {role.plural} ask
+        </h2>
+        <div className="mt-6 divide-y divide-rule border-y border-rule">
+          {faq.map((entry) => (
+            <details key={entry.question} className="py-4">
+              <summary className="cursor-pointer list-none font-medium text-ink">{entry.question}</summary>
+              <p className="mt-2 leading-relaxed text-ink-soft">{entry.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
 
       {related.length > 0 && (
         <section className="mt-20 border-t border-rule pt-8">
