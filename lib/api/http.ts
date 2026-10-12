@@ -1,3 +1,4 @@
+import { recordServerError } from "@/lib/owner/alerts";
 import { isTemplateId } from "@/lib/templates/catalog";
 import type { TemplateId } from "@/lib/templates/types";
 import { databaseConfigured } from "@/utils/db-schema";
@@ -83,7 +84,10 @@ export function route<C = unknown>(handler: Handler<C>): Handler<C> {
           "We can’t reach our database right now. Your changes are still saved on this device; try again in a minute.",
         );
       }
-      console.error(`[api] ${request.method} ${new URL(request.url).pathname} failed`, error);
+      const path = new URL(request.url).pathname;
+      console.error(`[api] ${request.method} ${path} failed`, error);
+      // Saved for the agent's report, and an alert if errors pile up. Never throws.
+      await recordServerError(request.method, path, (error as Error)?.message ?? String(error));
       return jsonError(500, "Something went wrong on our side. Please try again.");
     }
   };

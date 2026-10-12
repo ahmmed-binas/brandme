@@ -6,6 +6,7 @@ import { WELCOME_CREDITS } from "@/lib/plans";
 import { sendMail } from "@/lib/email/mailer";
 import { siteUrl } from "@/lib/site";
 import { brand } from "@/lib/brand";
+import { alertNewSignUp } from "@/lib/owner/alerts";
 
 /**
  * Email and password accounts, alongside Google sign-in.
@@ -160,6 +161,7 @@ export async function signUp(input: SignUpInput): Promise<{ userId: string }> {
     [userId, WELCOME_CREDITS, `welcome:${userId}`],
   );
   await sendVerification(userId).catch((error) => console.error("Verification email failed", error));
+  await alertNewSignUp(name, email, "email and password");
   return { userId };
 }
 

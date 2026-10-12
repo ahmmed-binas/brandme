@@ -3,6 +3,7 @@ import { ensureSchema } from "@/utils/db-schema";
 import { auth } from "@/auth";
 import { isModeratorEmail } from "@/lib/community/rules";
 import { WELCOME_CREDITS, standingOf, type AccountStanding, type PlanLimits } from "@/lib/plans";
+import { alertNewSignUp } from "@/lib/owner/alerts";
 
 /** Creates or refreshes the account row on sign-in. New accounts get welcome credits, once. */
 export async function saveGoogleUser(input: {
@@ -26,6 +27,7 @@ export async function saveGoogleUser(input: {
       `INSERT INTO credit_ledger (owner_id, delta, balance_after, reason, reference) VALUES ($1, $2, $2, 'Welcome credits', $3) ON CONFLICT (reference) DO NOTHING`,
       [row.id, WELCOME_CREDITS, `welcome:${row.id}`],
     );
+    await alertNewSignUp(input.name ?? null, input.email ?? null, "Google or GitHub");
   }
   return row;
 }

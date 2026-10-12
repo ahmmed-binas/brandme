@@ -642,6 +642,22 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "024_app_errors",
+  statements: [
+    // Server errors caught by route() (lib/owner/alerts.ts): method, path and the error's
+    // first line only, no personal data. Read by the agent's report; kept 30 days.
+    `CREATE TABLE IF NOT EXISTS app_errors (
+      id BIGSERIAL PRIMARY KEY,
+      at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      method TEXT NOT NULL,
+      path TEXT NOT NULL,
+      message TEXT NOT NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS app_errors_at ON app_errors (at)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

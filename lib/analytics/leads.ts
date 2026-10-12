@@ -1,6 +1,7 @@
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 import { BOT, visitorId } from "@/lib/analytics/track";
+import { alertOwner } from "@/lib/owner/alerts";
 
 /**
  * Leads: people who reached out to Fuccura. Counted in the owner's daily
@@ -54,7 +55,31 @@ export async function recordLead(input: LeadInput): Promise<boolean> {
       input.note?.slice(0, 180) ?? null,
     ],
   );
+  await alertForLead(input, page);
   return true;
+}
+
+/** Tells the owner straight away (lib/owner/alerts.ts caps these at a few a day). */
+async function alertForLead(input: LeadInput, page: string) {
+  if (input.kind === "contact")
+    return alertOwner(
+      `New lead: ${input.name ?? "someone"} sent a message`,
+      [
+        `${input.name ?? "Someone"} (${input.email ?? "no email"}) wrote from ${page}.`,
+        `Subject: ${input.note ?? "(none)"}`,
+        "The full message is in your inbox. Replying within the hour wins most deals.",
+      ],
+      input.email ? { label: `Reply to ${input.name ?? "them"}`, url: `mailto:${input.email}` } : undefined,
+    );
+  return alertOwner(
+    input.kind === "whatsapp" ? "Someone tapped WhatsApp" : "Someone tapped your email address",
+    [
+      `A visitor on ${page} just tapped ${input.kind === "whatsapp" ? "the WhatsApp button" : "your email address"}.`,
+      input.kind === "whatsapp"
+        ? "If a message arrives, reply quickly, then tell Ahmed Agent how it went."
+        : "Watch your inbox, and tell Ahmed Agent how it went.",
+    ],
+  );
 }
 
 export interface LeadCounts {

@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { db } from "@/utils/db";
 import { ensureSchema } from "@/utils/db-schema";
+import { alertOwner } from "@/lib/owner/alerts";
 
 /**
  * "Book a free call" with the owner, through Cal.com (free plan).
@@ -77,6 +78,11 @@ export async function recordBooking(trigger: string, payload: CalPayload): Promi
       notes?.slice(0, 2000) ?? null,
     ],
   );
+  if (status === "booked")
+    await alertOwner(`New call booked: ${clip(attendee?.name, 80) ?? "a visitor"}`, [
+      `${clip(attendee?.name, 80) ?? "Someone"}${attendee?.email ? ` (${clip(attendee.email, 120)})` : ""} booked a call for ${start.toLocaleString("en-GB", { timeZone: "Asia/Dubai", dateStyle: "full", timeStyle: "short" })} Dubai time.`,
+      notes ? `Their note: ${notes.slice(0, 300)}` : "They didn’t leave a note.",
+    ]);
   return true;
 }
 
