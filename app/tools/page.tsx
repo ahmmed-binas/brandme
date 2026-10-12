@@ -16,9 +16,10 @@ import {
 import PdfToImageStudio from "@/components/tools/PdfToImageStudio";
 
 export const metadata: Metadata = {
-  title: "Free document tools",
+  title: "Free tools: AI voice clone, UAE mortgage calculator and PDF tools",
   description:
-    "Convert PDF pages to PNG locally, extract CV details, and explore privacy-first document tools from Fuccura.",
+    "Free tools from Fuccura: clone your voice for videos, work out a UAE mortgage with every upfront cost, and convert, merge or edit PDFs in your browser.",
+  alternates: { canonical: "/tools" },
 };
 
 const plannedTools = [

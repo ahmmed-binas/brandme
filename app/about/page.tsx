@@ -5,8 +5,8 @@ import { brand } from "@/lib/brand";
 import { getViewer } from "@/lib/community/viewer";
 
 export const metadata: Metadata = {
-  title: `About ${brand.name}`,
-  description: about.headline,
+  title: { absolute: `About ${brand.name}: who builds it and why` },
+  description: `${brand.name} is built in Dubai by ${about.founder.name}, a software lead whose career started with a portfolio built by hand. Why it exists, and what stays free.`,
   alternates: { canonical: "/about" },
 };
 

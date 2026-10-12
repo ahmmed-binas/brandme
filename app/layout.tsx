@@ -22,11 +22,11 @@ export const metadata: Metadata = {
     "LinkedIn to portfolio",
     "GitHub portfolio",
   ],
-  alternates: { canonical: "/" },
+  // No site-wide canonical or og:url: pages inherit these, so a default of "/"
+  // told Google that every page without its own was a copy of the home page.
   openGraph: {
     type: "website",
     siteName: brand.name,
-    url: "/",
     title: `${brand.name} — Portfolios at your own address`,
     description: siteDescription,
     locale: "en_GB",

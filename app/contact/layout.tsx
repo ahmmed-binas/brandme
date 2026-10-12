@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact Fuccura for portfolio and document-tool support.",
+  description:
+    "Contact Fuccura on WhatsApp or by email about your website, a plan, or help with a free tool.",
   alternates: { canonical: "/contact" },
 };
 
