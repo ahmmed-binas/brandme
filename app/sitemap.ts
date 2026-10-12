@@ -31,6 +31,7 @@ const STATIC: Array<[path: string, priority: number]> = [
   ["/domains", 0.4],
   ["/tools", 0.6],
   ["/tools/voice", 0.9],
+  ["/tools/uae-mortgage-calculator", 0.8],
   ["/tools/developer-tools", 0.4],
   ["/tools/everyday-toolbox", 0.4],
   ["/tools/extract-pdf-pages", 0.4],

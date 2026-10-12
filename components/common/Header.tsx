@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
 import { AccountMenu, Avatar } from "@/components/common/AccountMenu";
 import { Logo } from "@/components/common/Logo";
-import { brand, primaryNavigation } from "@/lib/brand";
+import { brand, primaryNavigation, type NavLink } from "@/lib/brand";
 
 export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -68,8 +68,8 @@ export default function Header() {
                 {item.label}
               </Link>
             );
-            if (!("children" in item)) return link;
-            return <NavDropdown key={item.href} trigger={link} items={item.children} />;
+            if (!("groups" in item)) return link;
+            return <NavDropdown key={item.href} trigger={link} groups={item.groups} />;
           })}
         </nav>
 
@@ -134,16 +134,23 @@ export default function Header() {
               >
                 {item.label}
               </Link>
-              {"children" in item &&
-                item.children.map((child) => (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="-mt-2 block pb-4 pl-4 text-ink-soft"
-                  >
-                    {child.label}
-                  </Link>
+              {"groups" in item &&
+                item.groups.map((group) => (
+                  <div key={group.title} className="-mt-1 pb-4 pl-4">
+                    <p className="pb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft/70">
+                      {group.title}
+                    </p>
+                    {group.items.map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="block py-1.5 text-ink-soft"
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
             </div>
           ))}
@@ -200,30 +207,40 @@ export default function Header() {
 }
 
 /**
- * A menu item with a small panel underneath (e.g. Tools). The panel opens on
- * hover and on keyboard focus; the item itself still links to its own page.
+ * A menu item with a panel underneath (e.g. Tools), in titled groups side by
+ * side. The panel opens on hover and on keyboard focus; the item itself still
+ * links to its own page.
  */
 function NavDropdown({
   trigger,
-  items,
+  groups,
 }: {
   trigger: ReactNode;
-  items: ReadonlyArray<{ href: string; label: string; hint: string }>;
+  groups: ReadonlyArray<{ title: string; items: ReadonlyArray<NavLink> }>;
 }) {
   return (
     <div className="group relative">
       {trigger}
-      <div className="invisible absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 pt-4 opacity-0 transition duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-        <ul className="rounded-2xl border border-rule bg-paper p-2 shadow-xl">
-          {items.map((item) => (
-            <li key={item.href}>
-              <Link href={item.href} className="block rounded-xl px-3 py-2.5 transition hover:bg-ink/5">
-                <span className="block text-[0.94rem] font-medium text-ink">{item.label}</span>
-                <span className="block text-[0.82rem] text-ink-soft">{item.hint}</span>
-              </Link>
-            </li>
+      <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 pt-4 opacity-0 transition duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+        <div className="flex w-max max-w-[min(44rem,calc(100vw-2rem))] gap-2 rounded-2xl border border-rule bg-paper p-2 shadow-xl">
+          {groups.map((group, index) => (
+            <div key={group.title} className={`w-64 p-1 ${index > 0 ? "border-l border-rule pl-3" : ""}`}>
+              <p className="px-3 pb-1 pt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
+                {group.title}
+              </p>
+              <ul>
+                {group.items.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="block rounded-xl px-3 py-2 transition hover:bg-ink/5">
+                      <span className="block text-[0.92rem] font-medium text-ink">{item.label}</span>
+                      <span className="block text-[0.8rem] text-ink-soft">{item.hint}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
