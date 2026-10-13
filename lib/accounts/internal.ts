@@ -1,6 +1,8 @@
 import { db } from "@/utils/db";
 import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 
+export { INTERNAL_COOKIE, hasInternalCookie, internalCookieHeader } from "./internal-cookie";
+
 /**
  * Internal accounts: the owner's and the team's own. They're never counted as
  * users, visitors, leads or sign-ups, so the numbers show real people only
@@ -12,8 +14,6 @@ import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
  * aren't counted afterwards either, even when signed out.
  */
 
-export const INTERNAL_COOKIE = "fuccura_internal";
-
 const internalEmails = () =>
   (process.env.INTERNAL_EMAILS ?? "")
     .split(",")
@@ -22,14 +22,6 @@ const internalEmails = () =>
 
 export const isInternalEmail = (email: string | null | undefined) =>
   Boolean(email) && internalEmails().includes(email!.toLowerCase());
-
-/** True when the request comes from a browser marked as the team's. */
-export const hasInternalCookie = (request: Request) =>
-  (request.headers.get("cookie") ?? "").split(/;\s*/).includes(`${INTERNAL_COOKIE}=1`);
-
-/** The header that marks this browser as the team's, for a year. */
-export const internalCookieHeader = () =>
-  `${INTERNAL_COOKIE}=1; Path=/; Max-Age=31536000; SameSite=Lax; HttpOnly; Secure`;
 
 /**
  * Hourly: marks accounts in INTERNAL_EMAILS as internal, and removes internal

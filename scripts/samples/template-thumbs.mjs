@@ -1,6 +1,7 @@
 // Captures gallery thumbnails of every template with its sample person into
 // public/templates/<id>.webp (desktop) and <id>-phone.webp (phone).
 //   BASE=http://localhost:3000 node scripts/samples/template-thumbs.mjs [id,id]
+// Captured at 2x so cards stay sharp on phones and Retina screens.
 // Needs the app running, Playwright's Chromium (or CHROMIUM_PATH) and sharp.
 import { chromium } from "playwright";
 import sharp from "sharp";
@@ -16,7 +17,7 @@ const all = [
   "editorial-developer",
   "template-one",
   "kinetic-portfolio",
-  ...[...source.matchAll(/\{ id: "([a-z-]+)"/g)].map((match) => match[1]),
+  ...[...source.matchAll(/^\s*id: "([a-z-]+)",$/gm)].map((match) => match[1]),
 ];
 const only = process.argv[2]?.split(",");
 await mkdir(out, { recursive: true });
@@ -24,10 +25,10 @@ await mkdir(out, { recursive: true });
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
 for (const id of only ?? all) {
   for (const [suffix, width, height, outWidth] of [
-    ["", 1440, 960, 960],
-    ["-phone", 390, 780, 390],
+    ["", 1440, 960, 1440],
+    ["-phone", 390, 780, 780],
   ]) {
-    const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
+    const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 2 });
     await page.addInitScript(() => {
       const mark = () => {
         if (document.documentElement) document.documentElement.dataset.static = "";
@@ -58,7 +59,7 @@ for (const id of only ?? all) {
     const png = await page.screenshot({ clip: { x: 0, y: 0, width, height } });
     await sharp(png)
       .resize({ width: outWidth })
-      .webp({ quality: 72 })
+      .webp({ quality: 82 })
       .toFile(path.join(out, `${id}${suffix}.webp`));
     await page.close();
   }

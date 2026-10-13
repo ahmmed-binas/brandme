@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { INTERNAL_CONSOLE, consoleBase } from "@/lib/console/path";
+import { internalCookieHeader } from "@/lib/accounts/internal-cookie";
 
 /**
  * Serves custom domains. A request for any host that isn't the app's own is
@@ -52,7 +53,10 @@ function consoleRoute(request: NextRequest): NextResponse | null {
   }
   if (under(path, base)) {
     url.pathname = `${INTERNAL_CONSOLE}${path.slice(base.length)}`;
-    return NextResponse.rewrite(url, { headers: { "X-Robots-Tag": "noindex, nofollow" } });
+    const response = NextResponse.rewrite(url, { headers: { "X-Robots-Tag": "noindex, nofollow" } });
+    // Only the owner knows this address: mark the browser so its visits to the site aren't counted.
+    response.headers.append("Set-Cookie", internalCookieHeader());
+    return response;
   }
   return null;
 }
