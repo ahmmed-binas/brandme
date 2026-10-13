@@ -242,7 +242,16 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
             </span>
           </div>
           <div className="aspect-square w-full">
-            <ClipPlayer clips={item.clips} poster={item.poster} title={item.title} />
+            {/* On a job's page, the live design with that job's content (the clip shows another person). */}
+            {role && previewSrc ? (
+              <PreviewFrame
+                src={previewSrc}
+                title={`${item.title} for ${role.plural}, live preview`}
+                className="h-full"
+              />
+            ) : (
+              <ClipPlayer clips={item.clips} poster={item.poster} title={item.title} />
+            )}
           </div>
         </figure>
       </div>
@@ -333,7 +342,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
         </aside>
       </div>
 
-      {item.preview && item.kind === "original" && (
+      {item.preview && item.kind === "original" && !role && (
         <section className="mx-auto mt-24 max-w-[1240px] px-5 sm:px-8" aria-labelledby="try">
           <h2
             id="try"

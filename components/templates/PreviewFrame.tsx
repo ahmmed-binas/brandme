@@ -3,11 +3,20 @@
 import { useState } from "react";
 
 /** The live preview in an iframe, with a loading state until the page inside has painted. */
-export default function PreviewFrame({ src, title }: { src: string; title: string }) {
+export default function PreviewFrame({
+  src,
+  title,
+  className = "h-[70vh] min-h-[480px]",
+}: {
+  src: string;
+  title: string;
+  /** Height of the frame; defaults to most of the screen. */
+  className?: string;
+}) {
   const [loaded, setLoaded] = useState<string | null>(null);
   const ready = loaded === src;
   return (
-    <div className="relative h-[70vh] min-h-[480px] bg-white">
+    <div className={`relative bg-white ${className}`}>
       {!ready && (
         <div role="status" className="absolute inset-0 z-10 grid place-items-center bg-paper">
           <div className="flex flex-col items-center gap-4 text-ink-soft">

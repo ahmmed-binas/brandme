@@ -83,6 +83,13 @@ export default async function TemplateChooser({
             </Link>
             , including ones made by the community.
           </p>
+          <p className="mt-2 text-[0.95rem] text-ink-soft">
+            Designed one yourself?{" "}
+            <Link href="/gallery/submit" className="text-ink underline underline-offset-4">
+              Send us your template
+            </Link>{" "}
+            and we’ll review it for the gallery, with your name on it.
+          </p>
         </div>
       </header>
       {moderator && (

@@ -84,17 +84,20 @@ const SPECS: StudioSpec[] = [
     persona: "developer",
     professions: ["developer", "data"],
     styles: ["Technical", "Minimal"],
-    mood: "dark",
+    mood: "light",
     description:
-      "Your career as a shell session: a prompt, a man-page bio, projects as processes and a git log of jobs.",
+      "Your career as a real terminal window on a sunlit desktop: tabs, a file explorer, a neofetch card, projects and a git log of jobs.",
     idealFor: ["Backend engineers", "DevOps & SRE", "Systems programmers"],
     sections: ["about", "projects", "experience", "skills", "highlights", "contact"],
     palettes: [
+      p("daylight", "Daylight", "#e9ecf1", "#1c2128", "#2563eb", "#68717d", "#fbfcfd"),
+      p("studio", "Studio", "#efe9df", "#2a241d", "#c2410c", "#857a6c", "#fffdf8"),
       p("phosphor", "Phosphor", "#0c0f0c", "#c8f7c5", "#7dff7a", "#5d7a5c", "#141a14"),
       p("amber", "Amber CRT", "#120d05", "#ffd9a0", "#ffb000", "#8a6a3d", "#1c150a"),
       p("solar", "Solarised", "#002b36", "#93a1a1", "#b58900", "#586e75", "#073642"),
     ],
     fonts: [
+      f("inter", "Inter Tight + JetBrains", F.interTight, F.interTight, F.jetbrains),
       f("jetbrains", "JetBrains Mono", F.jetbrains, F.jetbrains, F.jetbrains),
       f("vt323", "VT323 + Plex", F.vt323, F.plexMono, F.plexMono),
     ],

@@ -1,6 +1,8 @@
 // Records the short square clips the gallery plays: each template with its
 // sample person, holding on the first screen and then scrolling slowly down.
 // Writes public/gallery/<id>.webm (VP9), <id>.mp4 (H.264 fallback), both silent, and <id>.webp (poster).
+// Each frame is a sharp screenshot (not a screen recording, which came out blurry at 640 px),
+// so text stays crisp when the clip fills the article page on a Retina screen.
 //   BASE=http://localhost:3000 node scripts/samples/template-clips.mjs [id,id]
 // Needs the app running (with TEMPLATES_REQUIRE_APPROVAL=false to include
 // unapproved designs), Playwright's Chromium (or CHROMIUM_PATH) and ffmpeg.
@@ -15,24 +17,41 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const out = path.join(root, "public/gallery");
 const base = process.env.BASE ?? "http://localhost:3000";
 const source = await readFile(path.join(root, "lib/templates/studio-catalog.ts"), "utf8");
-const all = [...source.matchAll(/\{ id: "([a-z-]+)"/g)].map((match) => match[1]);
+const all = [...source.matchAll(/^\s*id: "([a-z-]+)",$/gm)].map((match) => match[1]);
 const only = process.argv[2]?.split(",");
 const SIZE = 1200; // viewport, square
-const VIDEO = 640; // recorded size
-const HOLD = 1400; // ms on the first screen
-const SCROLL = 6200; // ms of scrolling
+const SCALE = 1.5; // screenshots at 1800 px, sharp after scaling to VIDEO
+const VIDEO = 1440; // clip size
+const FPS = 30;
+const HOLD = 1.4; // seconds on the first screen
+const SCROLL = 6.2; // seconds of scrolling
+const TAIL = 0.7; // seconds held at the end
 await mkdir(out, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
+/** Scroll position at time t: hold, one eased scroll of about two screens, then hold. */
+function scrollAt(t, distance) {
+  const x = Math.min(1, Math.max(0, (t - HOLD) / SCROLL));
+  const eased = x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+  return Math.round(distance * eased);
+}
+
 for (const id of only ?? all) {
   const tmp = path.join(os.tmpdir(), `clip-${id}`);
   await rm(tmp, { recursive: true, force: true });
-  const context = await browser.newContext({
+  await mkdir(tmp, { recursive: true });
+  const page = await browser.newPage({
     viewport: { width: SIZE, height: SIZE },
-    recordVideo: { dir: tmp, size: { width: VIDEO, height: VIDEO } },
+    deviceScaleFactor: SCALE,
   });
-  const page = await context.newPage();
-  const started = Date.now();
+  // Static mode: entrance animations would otherwise replay or leave blanks between frames.
+  await page.addInitScript(() => {
+    const mark = () => {
+      if (document.documentElement) document.documentElement.dataset.static = "";
+    };
+    mark();
+    document.addEventListener("readystatechange", mark);
+  });
   await page.goto(`${base}/templates/${id}?sample=1`, { waitUntil: "networkidle", timeout: 120000 });
   await page.addStyleTag({
     content: "nextjs-portal{display:none!important} ::-webkit-scrollbar{display:none}",
@@ -44,49 +63,40 @@ for (const id of only ?? all) {
   );
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(900);
-  const begin = (Date.now() - started) / 1000;
-  await page.waitForTimeout(HOLD);
-  // One smooth, eased scroll down about two screens, like someone browsing.
-  await page.evaluate(
-    (duration) =>
-      new Promise((resolve) => {
-        const distance = Math.min(document.documentElement.scrollHeight - innerHeight, innerHeight * 2.2);
-        const start = performance.now();
-        const step = (now) => {
-          const t = Math.min(1, (now - start) / duration);
-          const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-          window.scrollTo({ top: distance * eased, behavior: "instant" });
-          if (t < 1) requestAnimationFrame(step);
-          else resolve();
-        };
-        requestAnimationFrame(step);
-      }),
-    SCROLL,
+  const distance = await page.evaluate(() =>
+    Math.min(document.documentElement.scrollHeight - innerHeight, innerHeight * 2.2),
   );
-  await page.waitForTimeout(700);
-  await context.close();
-  const webm = path.join(
-    tmp,
-    (await readdir(tmp)).find((name) => name.endsWith(".webm")),
-  );
-  const length = (HOLD + SCROLL + 700) / 1000;
+  const frames = Math.round((HOLD + SCROLL + TAIL) * FPS);
+  let last = null;
+  for (let frame = 0; frame < frames; frame++) {
+    const top = scrollAt(frame / FPS, distance);
+    if (top !== last) {
+      await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), top);
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+    }
+    last = top;
+    await page.screenshot({ path: path.join(tmp, `${String(frame).padStart(4, "0")}.png`) });
+  }
+  await page.close();
   execFileSync("ffmpeg", [
     "-y",
     "-loglevel",
     "error",
-    "-ss",
-    String(begin),
+    "-framerate",
+    String(FPS),
     "-i",
-    webm,
-    "-t",
-    String(length),
+    path.join(tmp, "%04d.png"),
+    "-vf",
+    `scale=${VIDEO}:${VIDEO}:flags=lanczos`,
     "-an",
     "-c:v",
     "libx264",
     "-preset",
     "slow",
     "-crf",
-    "30",
+    "23",
+    "-tune",
+    "stillimage",
     "-pix_fmt",
     "yuv420p",
     "-movflags",
@@ -105,7 +115,7 @@ for (const id of only ?? all) {
     "-b:v",
     "0",
     "-crf",
-    "40",
+    "36",
     "-row-mt",
     "1",
     "-deadline",
@@ -116,16 +126,16 @@ for (const id of only ?? all) {
     "-y",
     "-loglevel",
     "error",
-    "-ss",
-    "0.2",
     "-i",
-    path.join(out, `${id}.mp4`),
+    path.join(tmp, "0000.png"),
+    "-vf",
+    `scale=${VIDEO}:${VIDEO}:flags=lanczos`,
     "-frames:v",
     "1",
     "-c:v",
     "libwebp",
     "-quality",
-    "72",
+    "82",
     path.join(out, `${id}.webp`),
   ]);
   await rm(tmp, { recursive: true, force: true });

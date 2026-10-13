@@ -36,6 +36,46 @@ function activity(seed: number, busy: number) {
   });
 }
 
+const CARD =
+  "rounded-xl bg-[var(--t-bg)] shadow-[0_0_0_1px_var(--t-rule),0_1px_2px_rgb(0_0_0/0.04),0_10px_30px_-16px_rgb(0_0_0/0.25)]";
+
+/** Extrudes a cell upwards in the isometric view: one shadow per pixel of height. */
+const extrude = (height: number) =>
+  height
+    ? Array.from(
+        { length: height },
+        (_, i) => `${i + 1}px ${i + 1}px 0 color-mix(in oklab, var(--t-accent) 70%, black)`,
+      ).join(", ")
+    : undefined;
+
+/**
+ * The hero art: the last 26 weeks of the graph as a small isometric city,
+ * each day a block whose height is how busy it was.
+ */
+function ContributionCity({ cells, level }: { cells: number[]; level: (n: number) => string }) {
+  const recent = cells.slice(-26 * 7);
+  return (
+    <div aria-hidden className="pointer-events-none grid h-full place-items-center overflow-hidden">
+      <div
+        className="grid grid-flow-col grid-rows-7 gap-[5px]"
+        style={{ transform: "rotateX(58deg) rotateZ(-42deg)", transformStyle: "preserve-3d" }}
+      >
+        {recent.map((value, index) => (
+          <span
+            key={index}
+            className="size-[14px] rounded-[3px]"
+            style={{
+              background: level(value),
+              boxShadow: extrude(value * 5),
+              transform: value ? `translate(${-value * 5}px, ${-value * 5}px)` : undefined,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Contributions({ content, template, embedded }: StudioProps) {
   const studio = useStudio(content, template, embedded);
   const { c, has, label } = studio;
@@ -61,7 +101,7 @@ export default function Contributions({ content, template, embedded }: StudioPro
 
   return (
     <StudioRoot studio={studio} className="text-[15px] leading-relaxed">
-      <header className="border-b rule bs">
+      <header className="sticky top-0 z-20 border-b rule bg-[color-mix(in_oklab,var(--t-surface)_85%,transparent)] backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-[80rem] items-center gap-6 px-5 text-[14px]">
           <span className="font-semibold">{c.name}</span>
           <nav className="flex gap-5 overflow-x-auto tm">
@@ -85,13 +125,32 @@ export default function Contributions({ content, template, embedded }: StudioPro
         </div>
       </header>
 
+      {/* Banner: a soft wash of the accent and the year's work as a little city. */}
+      <div className="relative h-56 overflow-hidden border-b rule @3xl:h-72">
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(60% 120% at 85% 10%, color-mix(in oklab, var(--t-accent) 26%, transparent), transparent 70%), radial-gradient(50% 90% at 10% 100%, color-mix(in oklab, var(--t-accent) 12%, transparent), transparent 70%), linear-gradient(180deg, var(--t-surface), var(--t-bg))",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 opacity-60 [background-image:radial-gradient(var(--t-rule)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:linear-gradient(90deg,black,transparent_70%)]"
+        />
+        <div className="absolute inset-y-0 right-0 w-full @3xl:w-[62%]">
+          <ContributionCity cells={cells} level={level} />
+        </div>
+      </div>
+
       <div
         id="overview"
-        className="mx-auto grid max-w-[80rem] gap-10 px-5 py-10 @4xl:grid-cols-[17rem_minmax(0,1fr)]"
+        className="mx-auto grid max-w-[80rem] gap-10 px-5 pb-16 @4xl:grid-cols-[17rem_minmax(0,1fr)]"
       >
         <aside className="min-w-0">
           <div
-            className="grid aspect-square w-40 place-items-center overflow-hidden rounded-full border rule bs text-[3.2rem] font-semibold tracking-tight @4xl:w-full"
+            className="relative z-10 -mt-20 grid aspect-square w-40 place-items-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--t-surface),color-mix(in_oklab,var(--t-accent)_18%,var(--t-surface)))] text-[3.2rem] font-semibold tracking-tight shadow-[0_0_0_5px_var(--t-bg),0_0_0_6px_var(--t-rule),0_18px_40px_-14px_rgb(0_0_0/0.35)] @4xl:-mt-28 @4xl:w-full"
             {...ed("avatar")}
           >
             {c.avatar ? (
@@ -100,7 +159,7 @@ export default function Contributions({ content, template, embedded }: StudioPro
               initials(c.name)
             )}
           </div>
-          <h1 className="fd mt-5 text-[1.7rem] font-semibold leading-tight tracking-tight" {...ed("name")}>
+          <h1 className="fd mt-6 text-[2rem] font-semibold leading-tight tracking-[-0.02em]" {...ed("name")}>
             {c.name}
           </h1>
           <p className="text-[1.1rem] tm" {...ed("professional_title")}>
@@ -158,9 +217,29 @@ export default function Contributions({ content, template, embedded }: StudioPro
           )}
         </aside>
 
-        <main className="min-w-0 space-y-10">
+        <main className="min-w-0 space-y-10 pt-8">
+          {/* At a glance */}
+          <dl className="grid grid-cols-2 gap-3 @3xl:grid-cols-4">
+            {[
+              [total.toLocaleString("en"), `contributions in ${selected}`],
+              [String(Math.max(now - firstYear, 1)), "years shipping"],
+              [String((c.projects ?? []).length), "pinned projects"],
+              [String(roles.length), "roles"],
+            ].map(([value, text]) => (
+              <div key={text} className={`${CARD} px-4 py-3`}>
+                <dt className="sr-only">{text}</dt>
+                <dd>
+                  <span className="fd block text-[1.6rem] font-semibold leading-none tracking-tight">
+                    {value}
+                  </span>
+                  <span className="mt-1 block text-[12px] tm">{text}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+
           {has("about") && (
-            <section className="rounded-lg border rule p-6">
+            <section className={`${CARD} p-6`}>
               <p className="fm text-[12px] tm">{c.name?.split(" ")[0]?.toLowerCase()} / README.md</p>
               <div className="mt-3 space-y-3 text-[1.02rem]">
                 {paragraphs(c).map(({ text, index }) => (
@@ -192,7 +271,7 @@ export default function Contributions({ content, template, embedded }: StudioPro
                   <Reveal
                     key={index}
                     as="article"
-                    className="flex min-w-0 flex-col overflow-hidden rounded-lg border rule"
+                    className={`flex min-w-0 flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-1 ${CARD}`}
                   >
                     <div {...ed(`projects.${index}`)} className="flex flex-1 flex-col">
                       <Picture
@@ -251,7 +330,7 @@ export default function Contributions({ content, template, embedded }: StudioPro
                 )}
               </div>
               <div className="mt-3 grid gap-4 @3xl:grid-cols-[minmax(0,1fr)_6rem]">
-                <div className="min-w-0 self-start overflow-x-auto rounded-lg border rule p-4">
+                <div className={`min-w-0 self-start overflow-x-auto p-4 ${CARD}`}>
                   <div
                     className="grid w-max grid-flow-col grid-rows-7 gap-[3px]"
                     onMouseLeave={() => setHover(null)}
@@ -319,7 +398,7 @@ export default function Contributions({ content, template, embedded }: StudioPro
           )}
 
           {has("education") && (
-            <section className="rounded-lg border rule p-5">
+            <section className={`${CARD} p-5`}>
               <h2 className="text-[14px] font-semibold">Education</h2>
               <ul className="mt-2 space-y-2 text-[14px]">
                 {(c.education ?? []).map((item, index) => (
