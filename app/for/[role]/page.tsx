@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { templatePageHref } from "@/lib/templates/links";
+import { designsForRole, templatePageHref } from "@/lib/templates/links";
 import { notFound } from "next/navigation";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { availableTemplates } from "@/lib/templates/approval";
@@ -28,19 +28,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
   if (!role) notFound();
   const s = role.starter;
   const available = await availableTemplates();
-  const preferred = role.templates ?? [];
-  const designs = available
-    .filter(
-      (template) =>
-        template.collection === "studio" &&
-        (preferred.includes(template.id) || template.professions?.includes(role.profession)),
-    )
-    .sort(
-      (a, b) =>
-        (preferred.indexOf(a.id) < 0 ? 99 : preferred.indexOf(a.id)) -
-        (preferred.indexOf(b.id) < 0 ? 99 : preferred.indexOf(b.id)),
-    )
-    .slice(0, 6);
+  const designs = designsForRole(role, available);
   const profession = PROFESSIONS.find((item) => item.id === role.profession);
   const faq = roleFaq(role);
   const schema = {

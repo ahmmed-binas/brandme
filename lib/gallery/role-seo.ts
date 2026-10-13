@@ -69,3 +69,17 @@ export const roleBreadcrumbs = (role?: Role) => ({
       : []),
   ],
 });
+
+/** Home › Portfolio websites by job › <job> › <template>, for /for/<job>/<template>. */
+export const roleTemplateBreadcrumbs = (role: Role, templateTitle: string, templateSlug: string) => ({
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    ...roleBreadcrumbs(role).itemListElement,
+    {
+      "@type": "ListItem",
+      position: 4,
+      name: `${templateTitle} for ${role.plural}`,
+      item: `${siteUrl}/for/${role.id}/${templateSlug}`,
+    },
+  ],
+});

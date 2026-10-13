@@ -3,6 +3,7 @@ import { bookingUrl } from "@/lib/booking";
 import { siteUrl } from "@/lib/site";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES } from "@/lib/templates/roles";
+import { designsForRole } from "@/lib/templates/links";
 import { listJournal, POSTS_PER_PAGE } from "@/lib/content/journal";
 import { galleryItems } from "@/lib/gallery/items";
 import { db } from "@/utils/db";
@@ -82,6 +83,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       at(`/templates/${template.id}`, { lastModified: new Date(template.createdAt), priority: 0.7 }),
     ),
     ...ROLES.map((role) => at(`/for/${role.id}`, { priority: 0.7 })),
+    // The top designs for each job, at the address people search (“project manager portfolio”).
+    ...ROLES.flatMap((role) =>
+      designsForRole(role, templates, 3).map((template) =>
+        at(`/for/${role.id}/${template.id}`, { priority: 0.6 }),
+      ),
+    ),
     ...gallery.map((item) =>
       at(`/gallery/${item.slug}`, { lastModified: new Date(item.createdAt), priority: 0.6 }),
     ),
