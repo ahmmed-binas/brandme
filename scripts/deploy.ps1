@@ -32,6 +32,31 @@ if ($uncommitted) {
   Write-Host $uncommitted
 }
 
+# Never put an older version live (13 October 2026: a second agent deployed from an
+# out-of-date copy and rolled the site back). Two checks, both must pass:
+# 1. This copy has everything already pushed to the live branch on GitHub.
+# 2. It contains the commit that is live now (recorded on the server by each deploy).
+$liveBranch = "improve-editor-and-business"
+git fetch origin $liveBranch --quiet
+Step-Done "Couldn't reach GitHub to check this copy is up to date; nothing was changed."
+git merge-base --is-ancestor "origin/$liveBranch" HEAD
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "This copy is missing commits that are on GitHub ($liveBranch)." -ForegroundColor Red
+  Write-Host "Run 'git pull' (and commit your work on top) before deploying. Nothing was changed." -ForegroundColor Red
+  exit 1
+}
+$liveCommit = (ssh fuccura "cat /opt/fuccura/DEPLOYED_COMMIT 2>/dev/null").Trim()
+if ($liveCommit) {
+  git cat-file -e "$liveCommit^{commit}" 2>$null
+  $known = $LASTEXITCODE -eq 0
+  if ($known) { git merge-base --is-ancestor $liveCommit HEAD }
+  if (-not $known -or $LASTEXITCODE -ne 0) {
+    Write-Host "The live site runs $liveCommit, which this copy doesn't include." -ForegroundColor Red
+    Write-Host "Deploying would roll the site back. Pull the latest code first. Nothing was changed." -ForegroundColor Red
+    exit 1
+  }
+}
+
 # The public settings baked into pre-rendered pages come from the server's .env,
 # so the live site always matches it. (These three are public, not secrets.)
 Write-Host "Reading the site's public settings from the server..."
@@ -75,6 +100,10 @@ Step-Done "Sending the config files failed; the live site is unchanged."
 Write-Host "Restarting the app..."
 ssh fuccura "cd /opt/fuccura && docker compose up -d --no-build && docker compose ps"
 Step-Done 'Restarting failed. Check with: ssh fuccura "cd /opt/fuccura && docker compose ps"'
+
+# Remember what is live, so a later deploy from an older copy is refused (see the checks above).
+$commit = git rev-parse HEAD
+ssh fuccura "echo $commit > /opt/fuccura/DEPLOYED_COMMIT"
 
 Write-Host "Clearing old images and build cache on the server..."
 ssh fuccura "docker image prune -f && docker builder prune -af | tail -1"
