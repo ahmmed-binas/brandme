@@ -12,7 +12,7 @@ import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 import { breadcrumbSchema, faqSchema, jobsFor, professionOf, templateFaq } from "@/lib/gallery/seo";
 import { roleById } from "@/lib/templates/roles";
-import { roleTemplateBreadcrumbs } from "@/lib/gallery/role-seo";
+import { RoleTemplateArticle } from "@/components/gallery/RoleTemplateArticle";
 
 /**
  * A template's article page, shared by two addresses:
@@ -42,15 +42,17 @@ export async function galleryMetadata(slug: string, roleId?: string): Promise<Me
   const role = item.kind === "original" ? roleById(roleId) : undefined;
   // "Mirage: free real estate website template" reads like what people search for.
   const title = role
-    ? `${item.title}: Free ${role.label} Portfolio Website Template`
+    ? `${role.label} Portfolio Template: ${item.title} (Free)`
     : profession
       ? `${item.title}: free ${profession.toLowerCase()} website template`
       : `${item.title}: free ${item.kind === "original" ? "portfolio" : "website"} template`;
   // Plain words first (what it is, that it's free and needs no code), then the design notes.
   const lead = role
-    ? `A free portfolio website for ${role.plural}, shown with ${role.label.toLowerCase()} sample content.`
+    ? `A free ${role.label.toLowerCase()} portfolio website: what it should include, a live example with sample content written for ${role.plural}, and no code to publish.`
     : `A free ${profession ? profession.toLowerCase() : "portfolio"} website template.`;
-  const description = `${lead} Edit it without code and publish in minutes. ${item.summary}`.slice(0, 300);
+  const description = (
+    role ? lead : `${lead} Edit it without code and publish in minutes. ${item.summary}`
+  ).slice(0, 300);
   return {
     title,
     description,
@@ -86,6 +88,11 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
   const roleQuery = role ? `role=${role.id}` : "";
   const previewSrc = item.preview && roleQuery ? `${item.preview}&${roleQuery}` : item.preview;
   const editorHref = `/editor/${item.slug}${roleQuery ? `?${roleQuery}` : ""}`;
+  // A job's version of the page is about the job (search: “content marketer portfolio”).
+  if (role)
+    return (
+      <RoleTemplateArticle item={item} role={role} previewSrc={previewSrc ?? null} editorHref={editorHref} />
+    );
   const jobs = original ? jobsFor(item.slug) : [];
   const profession = original ? professionOf(item.slug) : null;
   const faq = templateFaq({
@@ -107,7 +114,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
     "@type": "CreativeWork",
     name: item.title,
     description: item.summary,
-    url: `${siteUrl}${articlePath(item.slug, role?.id)}`,
+    url: `${siteUrl}${articlePath(item.slug)}`,
     image: item.poster.startsWith("/") ? `${siteUrl}${item.poster}` : item.poster,
     license: `https://spdx.org/licenses/${item.license}.html`,
     isAccessibleForFree: true,
@@ -127,11 +134,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
   };
   const schema = {
     "@context": "https://schema.org",
-    "@graph": [
-      creativeWork,
-      role ? roleTemplateBreadcrumbs(role, item.title, item.slug) : breadcrumbSchema(item.title, item.slug),
-      faqSchema(faq),
-    ],
+    "@graph": [creativeWork, breadcrumbSchema(item.title, item.slug), faqSchema(faq)],
   };
   const ratingEndpoint =
     item.kind === "original" ? `/api/templates/${item.slug}/rating` : `/api/gallery/${item.slug}/rating`;
@@ -147,22 +150,10 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
           aria-label="Breadcrumb"
           className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft"
         >
-          {role ? (
-            <>
-              <Link href="/for" className="inline-flex items-center gap-2 hover:text-ink">
-                <ArrowLeft size={13} /> By job
-              </Link>
-              <span aria-hidden>/</span>
-              <Link href={`/for/${role.id}`} className="hover:text-ink">
-                {role.label}
-              </Link>
-            </>
-          ) : (
-            <Link href="/templatechooser" className="inline-flex items-center gap-2 hover:text-ink">
-              <ArrowLeft size={13} /> Templates
-            </Link>
-          )}
-          {!role && profession && (
+          <Link href="/templatechooser" className="inline-flex items-center gap-2 hover:text-ink">
+            <ArrowLeft size={13} /> Templates
+          </Link>
+          {profession && (
             <>
               <span aria-hidden>/</span>
               <span>{profession}</span>
@@ -181,11 +172,6 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
             <h1 className="mt-4 font-display text-[clamp(3.2rem,8vw,6.6rem)] font-[400] leading-[0.9] tracking-[-0.04em] text-ink [font-variation-settings:'opsz'_72]">
               {item.title}
             </h1>
-            {role && (
-              <p className="mt-3 font-mono text-[12px] uppercase tracking-[0.18em] text-ink-soft">
-                Shown as a portfolio for {role.plural}
-              </p>
-            )}
             <p className="mt-6 max-w-[40rem] text-[1.25rem] leading-[1.55] text-ink-soft">{item.summary}</p>
           </div>
           <div className="space-y-5 lg:pb-2">
@@ -242,16 +228,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
             </span>
           </div>
           <div className="aspect-square w-full">
-            {/* On a job's page, the live design with that job's content (the clip shows another person). */}
-            {role && previewSrc ? (
-              <PreviewFrame
-                src={previewSrc}
-                title={`${item.title} for ${role.plural}, live preview`}
-                className="h-full"
-              />
-            ) : (
-              <ClipPlayer clips={item.clips} poster={item.poster} title={item.title} />
-            )}
+            <ClipPlayer clips={item.clips} poster={item.poster} title={item.title} />
           </div>
         </figure>
       </div>
@@ -342,7 +319,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
         </aside>
       </div>
 
-      {item.preview && item.kind === "original" && !role && (
+      {item.preview && item.kind === "original" && (
         <section className="mx-auto mt-24 max-w-[1240px] px-5 sm:px-8" aria-labelledby="try">
           <h2
             id="try"
