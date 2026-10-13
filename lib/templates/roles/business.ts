@@ -533,6 +533,60 @@ export const BUSINESS_ROLES = [
     ["prospectus", "counsel", "signal"],
   ),
 
+  // ——— Languages (Abu Dhabi, AED) ———
+  role(
+    "translator",
+    "Translator",
+    "translators",
+    "language",
+    [
+      "legal translator",
+      "sworn translator",
+      "certified translator",
+      "interpreter",
+      "Arabic translator",
+      "translation services",
+    ],
+    {
+      base: "pro-language",
+      keepWork: true,
+      title: "Legal Translator · Arabic ⇄ English",
+      tagline:
+        "Every word carries weight in a contract. I make sure it carries the same weight in both languages.",
+      bio: [
+        "I’m a sworn legal translator registered with the UAE Ministry of Justice, translating contracts, court papers and corporate documents between Arabic and English.",
+        "I translate, a second sworn translator reviews, and you get the stamped copy the courts accept.",
+      ],
+      skills:
+        "Arabic → English · English → Arabic · Contracts · Court documents · Corporate · Immigration · Certificates",
+      services: [
+        ["Sworn legal translation", "MOJ-stamped, accepted by UAE courts and ministries.", "AED 120 / page"],
+        [
+          "Certificates & personal documents",
+          "Birth, marriage, degree certificates, licences.",
+          "AED 90 / page",
+        ],
+        ["Urgent same-day", "Up to 15 pages, received before 11 am.", "+50%"],
+      ],
+      stats: [
+        ["14", "years translating"],
+        ["38,000+", "pages delivered"],
+        ["24 hrs", "court documents"],
+      ],
+      quote: [
+        "Nour found a clause our original Arabic version got wrong. That one catch saved us a dispute.",
+        "Partner",
+        "International law firm",
+      ],
+      experience: [
+        ["Sworn Legal Translator", "Independent", "2016", "Present"],
+        ["Legal Translator", "Translation house", "2012", "2016"],
+      ],
+      education: [["MA Legal Translation", "Université Saint-Joseph, Beirut", "2012"]],
+    },
+    ["duet", "brief", "counsel"],
+  ),
+
   // ——— People & recruiting (Berlin, €) ———
   role(
     "recruiter",
@@ -570,7 +624,7 @@ export const BUSINESS_ROLES = [
       ],
       education: [["MA Sociology", "Freie Universität Berlin", "2015"]],
     },
-    ["quota"],
+    ["radar", "quota"],
   ),
   role(
     "hr-business-partner",
@@ -608,7 +662,7 @@ export const BUSINESS_ROLES = [
       ],
       education: [["CIPD Level 7", "CIPD", "2020"]],
     },
-    ["practice"],
+    ["radar", "practice"],
   ),
   role(
     "learning-development",
@@ -646,7 +700,7 @@ export const BUSINESS_ROLES = [
       ],
       education: [["Certified Professional Coach", "ICF", "2020"]],
     },
-    ["syllabus"],
+    ["radar", "syllabus"],
   ),
 
   // ——— Property (Portland, $) ———

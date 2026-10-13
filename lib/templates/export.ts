@@ -123,11 +123,11 @@ SOFTWARE.
 `;
 
 /**
- * Sample photos licensed from Unsplash (public/samples/re) may be shown on our
+ * Sample photos licensed from Unsplash (public/samples/re and /pro) may be shown on our
  * site but not handed out as a collection, so downloads get empty image slots
  * (the template shows a tonal placeholder) and the README says where to add photos.
  */
-const LICENSED = /^\/samples\/re\//;
+const LICENSED = /^\/samples\/(re|pro)\//;
 function withoutLicensedPhotos<T>(value: T): T {
   if (typeof value === "string") return (LICENSED.test(value) ? "" : value) as T;
   if (Array.isArray(value)) return value.map(withoutLicensedPhotos) as T;

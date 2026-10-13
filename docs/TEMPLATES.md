@@ -63,6 +63,10 @@ Sample agents are in `lib/templates/personas-realestate.ts`. Their photos are fr
 
 Mirage (prime Dubai), Yield (off-plan investors), Majlis (bilingual English/Arabic, right to left), Keys (rentals, paid in cheques) and Debut (new agents, short-video style) are built for UAE agents. Sample agents are in `lib/templates/personas-uae.ts`. They start **pending**: approve them at `/templates/review`.
 
+### Profession templates with live shaders (October 2026)
+
+Dispatch (trades and AC engineers), Atelier (beauty), Roadmap (product managers), Radar (recruiters) and Duet (translators, English and Arabic) fill the jobs that had the fewest designs. Each draws a WebGL background with `components/templates/studio/shader.tsx`: pass a fragment shader and three hex colours (usually the palette's bg, the accent and fg). It draws one still frame for captures and reduced motion, pauses off screen, and falls back to the plain background without WebGL. Sample people are in `lib/templates/personas-pro.ts`; their photos are Unsplash (`public/samples/pro/CREDITS.md`, fetched by `scripts/samples/pro-photos.py`) and, like the real estate set, are left out of free downloads. They start **pending**.
+
 Their moving backgrounds use the [`shaders`](https://www.npmjs.com/package/shaders) package (WebGPU), through `ShaderStage` in `realestate/re-shader.tsx`:
 
 - **Licence:** version 4 and later is MIT. Version 3 and earlier needed a paid commercial licence, so don't downgrade. It's pinned to an exact version in `package.json`. Presets copied from shaders.com are under that site's own terms, so compose effects from the package's components instead.

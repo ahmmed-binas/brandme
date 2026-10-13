@@ -551,7 +551,7 @@ export const WORK_ROLES = [
           [TRADE_INS, "Fully insured", ""],
         ],
       },
-      ["site-board", "practice"],
+      ["dispatch", "site-board", "practice"],
     ),
   ),
 
@@ -593,7 +593,7 @@ export const WORK_ROLES = [
       education: [["Master Colourist", "L’Oréal Professionnel Academy", "2015"]],
       keepWork: true,
     },
-    ["lookbook", "practice"],
+    ["atelier", "lookbook", "practice"],
   ),
   role(
     "barber",
@@ -629,7 +629,7 @@ export const WORK_ROLES = [
       name: "Chloé Martin",
       keepWork: true,
     },
-    ["lookbook", "site-board"],
+    ["atelier", "lookbook", "site-board"],
   ),
   role(
     "makeup-artist",
@@ -663,7 +663,7 @@ export const WORK_ROLES = [
       education: [["Diploma in Makeup Artistry", "London College of Fashion", "2014"]],
       keepWork: true,
     },
-    ["lookbook", "monograph"],
+    ["atelier", "lookbook", "monograph"],
   ),
   role(
     "nail-technician",
@@ -697,7 +697,7 @@ export const WORK_ROLES = [
       education: [["VTCT Level 3 Nail Technology", "London College of Beauty Therapy", "2017"]],
       name: "Chloé Martin",
     },
-    ["lookbook", "practice"],
+    ["atelier", "lookbook", "practice"],
   ),
   role(
     "beauty-therapist",
@@ -731,7 +731,7 @@ export const WORK_ROLES = [
       education: [["Level 4 Laser & Skin Therapy", "VTCT", "2019"]],
       name: "Chloé Martin",
     },
-    ["lookbook", "sanctuary"],
+    ["atelier", "lookbook", "sanctuary"],
   ),
   role(
     "lash-brow-technician",
@@ -765,7 +765,7 @@ export const WORK_ROLES = [
       education: [["Accredited Lash & Brow Courses", "Industry training academy", "2018"]],
       name: "Chloé Martin",
     },
-    ["lookbook", "practice"],
+    ["atelier", "lookbook", "practice"],
   ),
   role(
     "tattoo-artist",
@@ -800,7 +800,7 @@ export const WORK_ROLES = [
       name: "Chloé Martin",
       keepWork: true,
     },
-    ["lookbook", "sketchbook"],
+    ["atelier", "lookbook", "sketchbook"],
   ),
 
   // ——— Food (London, £) ———

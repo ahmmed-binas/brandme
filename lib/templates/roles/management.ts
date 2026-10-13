@@ -9,6 +9,49 @@ const CMI: [string, string, string] = [
 
 export const MANAGEMENT_ROLES = [
   role(
+    "product-manager",
+    "Product Manager",
+    "product managers",
+    "product",
+    ["PM", "product owner", "senior product manager", "group product manager", "APM", "head of product"],
+    {
+      base: "pro-product",
+      keepWork: true,
+      title: "Senior Product Manager",
+      tagline: "I find the problem worth solving, then get a team to ship it on a steady rhythm.",
+      bio: [
+        "I’ve been a product manager for nine years, mostly in payments and digital banking. I’m strongest at the start of a problem: research, sizing and saying no.",
+        "I lead squads of engineers and designers, write short specs people read, and measure everything against one number agreed before we start.",
+      ],
+      skills:
+        "Discovery · Roadmapping · A/B testing · SQL · OKRs · Stakeholder management · Mobile apps · Payments",
+      services: [
+        ["Product discovery sprint", "Two weeks of research and a ranked opportunity list.", "AED 22,000"],
+        [
+          "Fractional head of product",
+          "Two days a week for seed and Series A teams.",
+          "From AED 28,000 / month",
+        ],
+      ],
+      stats: [
+        ["9", "years in product"],
+        ["4.2M", "users of what I shipped"],
+        ["31%", "best single lift"],
+      ],
+      quote: [
+        "The PM engineers ask to work with: clear problems, short specs, and she protects the team’s focus.",
+        "Engineering Manager",
+        "Regional payments app",
+      ],
+      experience: [
+        ["Senior Product Manager", "Regional payments app", "2022", "Present"],
+        ["Product Manager", "Digital bank", "2019", "2022"],
+      ],
+      education: [["BSc Computer Engineering", "American University of Sharjah", "2017"]],
+    },
+    ["roadmap", "contributions", "keynote"],
+  ),
+  role(
     "project-manager",
     "Project Manager",
     "project managers",

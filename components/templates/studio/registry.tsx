@@ -29,6 +29,11 @@ const load = (loader: () => Promise<{ default: ComponentType<StudioProps> }>) =>
 
 export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   terminal: load(() => import("./developer/Terminal")),
+  dispatch: load(() => import("./trades/Dispatch")),
+  atelier: load(() => import("./beauty/Atelier")),
+  roadmap: load(() => import("./product/Roadmap")),
+  radar: load(() => import("./people/Radar")),
+  duet: load(() => import("./language/Duet")),
   blueprint: load(() => import("./developer/Blueprint")),
   contributions: load(() => import("./developer/Contributions")),
   swiss: load(() => import("./design/Swiss")),
