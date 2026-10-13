@@ -707,6 +707,16 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "029_feedback_on_site",
+  statements: [
+    // share_ok: the person ticked “show my note, name and photo on Fuccura” in the rating card.
+    // featured: the owner chose it for the home page (console > Feedback). Both are needed to show it.
+    `ALTER TABLE template_feedback ADD COLUMN IF NOT EXISTS share_ok BOOLEAN NOT NULL DEFAULT false`,
+    `ALTER TABLE template_feedback ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT false`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

@@ -1,4 +1,5 @@
 import ConsoleLogin from "@/components/console/ConsoleLogin";
+import FeatureToggle from "@/components/console/FeatureToggle";
 import Shell from "@/components/console/Shell";
 import { getTemplate } from "@/lib/templates/catalog";
 import { feedbackOverview, tagLabel } from "@/lib/templates/feedback";
@@ -37,7 +38,8 @@ export default async function ConsoleFeedback() {
         <h1 className="mt-1 text-[1.5rem] font-semibold tracking-tight">Template ratings from the editor</h1>
         <p className="mt-1 text-[13px] text-[var(--c-text2)]">
           Signed-in people are asked once per template after 90 seconds of editing. Numbers count real people
-          only; your own answers are listed below, marked “you/team”.
+          only; your own answers are listed below, marked “you/team”. A note can go on the home page only when
+          the person ticked the box agreeing to it.
         </p>
       </header>
 
@@ -113,17 +115,19 @@ export default async function ConsoleFeedback() {
         <table className="w-full min-w-[820px] text-left text-[12.5px]">
           <thead className="text-[var(--c-muted)]">
             <tr>
-              {["When (Dubai)", "Who", "Template", "Rating", "Picked", "Note", "Editing"].map((head) => (
-                <th key={head} className="px-4 py-3 font-medium">
-                  {head}
-                </th>
-              ))}
+              {["When (Dubai)", "Who", "Template", "Rating", "Picked", "Note", "Editing", "Home page"].map(
+                (head) => (
+                  <th key={head} className="px-4 py-3 font-medium">
+                    {head}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody>
             {recent.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-[var(--c-muted)]">
+                <td colSpan={8} className="px-4 py-8 text-center text-[var(--c-muted)]">
                   No answers yet. Open the editor with ?rate=now to see the pop-up yourself.
                 </td>
               </tr>
@@ -152,6 +156,15 @@ export default async function ConsoleFeedback() {
                   </td>
                   <td className="max-w-[20rem] px-4 py-2.5">{row.comment ?? ""}</td>
                   <td className="px-4 py-2.5 text-[var(--c-text2)]">{minutes(row.secondsEditing)}</td>
+                  <td className="px-4 py-2.5">
+                    {row.shareOk && row.comment ? (
+                      <FeatureToggle userId={row.userId} templateId={row.templateId} initial={row.featured} />
+                    ) : (
+                      <span className="text-[11.5px] text-[var(--c-muted)]">
+                        {row.comment ? "Not agreed" : "–"}
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

@@ -34,6 +34,7 @@ export function RatePrompt({
   const [hover, setHover] = useState(0);
   const [tags, setTags] = useState<string[]>([]);
   const [comment, setComment] = useState("");
+  const [shareOk, setShareOk] = useState(false);
   const [state, setState] = useState<"asking" | "sending" | "done" | "error">("asking");
   const seconds = useRef(0);
   const lastInput = useRef(0);
@@ -84,7 +85,7 @@ export function RatePrompt({
         body: JSON.stringify(
           skipped
             ? { skipped: true, secondsEditing: seconds.current }
-            : { stars, tags, comment, secondsEditing: seconds.current },
+            : { stars, tags, comment, shareOk, secondsEditing: seconds.current },
         ),
       });
       if (!response.ok) throw new Error();
@@ -197,6 +198,17 @@ export function RatePrompt({
                 placeholder="Anything we should change? (optional)"
                 className="mt-3 w-full resize-none rounded-xl border border-rule bg-white px-3 py-2 text-[13px] outline-none focus:border-ink"
               />
+              {comment.trim() && (
+                <label className="mt-2 flex cursor-pointer items-start gap-2 text-[12px] leading-snug text-ink-soft">
+                  <input
+                    type="checkbox"
+                    checked={shareOk}
+                    onChange={(event) => setShareOk(event.target.checked)}
+                    className="mt-0.5 size-3.5 accent-[var(--color-ink)]"
+                  />
+                  Fuccura may show my note with my name and profile photo on its website.
+                </label>
+              )}
             </div>
           )}
 

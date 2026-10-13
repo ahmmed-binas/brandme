@@ -7,6 +7,8 @@ import { personaFor } from "@/lib/templates/personas";
 import HowItWorks from "@/components/landing/HowItWorks";
 import TemplateShowcase, { CollectionStrip } from "@/components/landing/TemplateShowcase";
 import Faq from "@/components/landing/Faq";
+import Testimonials from "@/components/landing/Testimonials";
+import { featuredFeedback } from "@/lib/templates/feedback";
 import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
@@ -67,7 +69,7 @@ function SectionHeading({ kicker, children, id }: { kicker: string; children: Re
 }
 
 export default async function Home() {
-  const showcase = await heroShowcase();
+  const [showcase, voices] = await Promise.all([heroShowcase(), featuredFeedback()]);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -116,6 +118,8 @@ export default async function Home() {
           <CollectionStrip />
         </div>
       </section>
+
+      <Testimonials items={voices} />
 
       <section
         aria-labelledby="yours-title"

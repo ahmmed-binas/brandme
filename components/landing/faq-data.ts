@@ -1,10 +1,10 @@
-import { PLANS, formatUsd } from "@/lib/plans";
+import { FREE_DOMAIN_UP_TO, PRICES, aed } from "@/lib/offers";
 
 /** Shared by the FAQ section and its FAQPage structured data, so they never drift apart. */
 export const FAQ = [
   {
     q: "How much does it cost?",
-    a: `One portfolio with a blog is free for as long as you like, with no card needed. Pro is ${formatUsd(PLANS.pro.prices.year!)} for a whole year, with up to 10 changes done for you, for up to three sites on your own domain without our link. AI is sold at what it costs us plus 5%, or you can use your own Claude key.`,
+    a: `One portfolio with a blog is free for as long as you like, with no card needed. Pro is ${aed(PRICES.proMonth)} a month, or ${aed(PRICES.proYear)} a year with the first year’s domain free (up to ${aed(FREE_DOMAIN_UP_TO)}), for up to three sites on your own domain without our link. AI is sold at what it costs us plus 5%, or you can use your own Claude key.`,
   },
   {
     q: "Will my portfolio stay up to date?",

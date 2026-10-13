@@ -20,6 +20,8 @@ export interface FeedbackInput {
   comment: string | null;
   skipped: boolean;
   secondsEditing: number | null;
+  /** They agreed to show the note with their name and photo on the site. */
+  shareOk: boolean;
 }
 
 /** Cleans what the browser sent; returns an error message when it can't be used. */
@@ -42,6 +44,7 @@ export function parseFeedback(body: unknown): FeedbackInput | string {
     comment: skipped ? null : comment,
     skipped,
     secondsEditing: Number.isFinite(seconds) && seconds >= 0 ? Math.min(Math.round(seconds), 86_400) : null,
+    shareOk: !skipped && comment !== null && value.shareOk === true,
   };
 }
 
@@ -69,12 +72,22 @@ export async function feedbackDue(userId: string, templateId: string): Promise<b
 export async function saveFeedback(userId: string, templateId: string, input: FeedbackInput): Promise<void> {
   await ensureSchema();
   await db.query(
-    `INSERT INTO template_feedback (user_id, template_id, stars, tags, comment, skipped, seconds_editing)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `INSERT INTO template_feedback (user_id, template_id, stars, tags, comment, skipped, seconds_editing, share_ok)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT (user_id, template_id) DO UPDATE SET
        stars = EXCLUDED.stars, tags = EXCLUDED.tags, comment = EXCLUDED.comment,
-       skipped = EXCLUDED.skipped, seconds_editing = EXCLUDED.seconds_editing, at = NOW()`,
-    [userId, templateId, input.stars, input.tags, input.comment, input.skipped, input.secondsEditing],
+       skipped = EXCLUDED.skipped, seconds_editing = EXCLUDED.seconds_editing,
+       share_ok = EXCLUDED.share_ok, featured = false, at = NOW()`,
+    [
+      userId,
+      templateId,
+      input.stars,
+      input.tags,
+      input.comment,
+      input.skipped,
+      input.secondsEditing,
+      input.shareOk,
+    ],
   );
   if (input.stars) await rateTemplate(userId, templateId, input.stars);
 }
@@ -91,6 +104,8 @@ export interface FeedbackRow {
   name: string | null;
   email: string | null;
   internal: boolean;
+  shareOk: boolean;
+  featured: boolean;
 }
 
 export interface TemplateFeedbackSummary {
@@ -121,9 +136,11 @@ export async function feedbackOverview(limit = 100): Promise<{
       name: string | null;
       email: string | null;
       internal: boolean;
+      share_ok: boolean;
+      featured: boolean;
     }>(
       `SELECT f.at, f.template_id, f.stars, f.tags, f.comment, f.skipped, f.seconds_editing,
-              f.user_id, u.name, u.email, u.internal
+              f.user_id, u.name, u.email, u.internal, f.share_ok, f.featured
        FROM template_feedback f JOIN app_users u ON u.id = f.user_id
        ORDER BY f.at DESC LIMIT $1`,
       [limit],
@@ -158,6 +175,8 @@ export async function feedbackOverview(limit = 100): Promise<{
       name: row.name,
       email: row.email,
       internal: row.internal,
+      shareOk: row.share_ok,
+      featured: row.featured,
     })),
     byTemplate: byTemplate.rows.map((row) => ({
       templateId: row.template_id,
@@ -167,4 +186,59 @@ export async function feedbackOverview(limit = 100): Promise<{
     })),
     tagCounts: tags.rows.map((row) => ({ tag: row.tag, count: Number(row.count) })),
   };
+}
+
+/** The owner puts an answer on the home page, or takes it off. Only shared answers can go on. */
+export async function setFeatured(userId: string, templateId: string, featured: boolean): Promise<boolean> {
+  await ensureSchema();
+  const result = await db.query(
+    `UPDATE template_feedback SET featured = $3
+     WHERE user_id = $1 AND template_id = $2 AND share_ok AND comment IS NOT NULL AND NOT skipped`,
+    [userId, templateId, featured],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
+
+export interface PublicFeedback {
+  name: string;
+  image: string | null;
+  stars: number;
+  comment: string;
+  templateId: string;
+  at: Date;
+}
+
+/**
+ * Answers for the home page: only those the person agreed to share AND the owner
+ * chose. Name and photo come from their account (Google, for most people).
+ */
+export async function featuredFeedback(limit = 9): Promise<PublicFeedback[]> {
+  if (!databaseConfigured()) return [];
+  try {
+    await ensureSchema();
+    const result = await db.query<{
+      name: string | null;
+      image: string | null;
+      stars: number;
+      comment: string;
+      template_id: string;
+      at: Date;
+    }>(
+      `SELECT u.name, u.image, f.stars, f.comment, f.template_id, f.at
+       FROM template_feedback f JOIN app_users u ON u.id = f.user_id
+       WHERE f.featured AND f.share_ok AND f.comment IS NOT NULL AND NOT f.skipped AND f.stars IS NOT NULL
+       ORDER BY f.at DESC LIMIT $1`,
+      [limit],
+    );
+    return result.rows.map((row) => ({
+      name: row.name?.trim() || "A Fuccura user",
+      image: row.image,
+      stars: row.stars,
+      comment: row.comment,
+      templateId: row.template_id,
+      at: row.at,
+    }));
+  } catch {
+    return []; // The home page never breaks over this.
+  }
 }
