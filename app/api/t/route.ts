@@ -40,6 +40,10 @@ export async function POST(request: Request) {
           userAgent: request.headers.get("user-agent") ?? "",
           userId: user?.id ?? null,
         });
+    } else if (typeof body.path === "string" && body.timeZone === "UTC") {
+      // Real phones and laptops report a place ("Asia/Dubai"); a bare "UTC" comes from
+      // crawlers rendering the page and link previews (WhatsApp, Facebook), seen in pairs
+      // of one-page visits. Not counted, so the console shows people.
     } else if (typeof body.path === "string") {
       // Signed-in visitors are linked to their account so the owner can see their journey.
       const user = viewer;
