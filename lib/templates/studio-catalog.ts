@@ -704,9 +704,18 @@ const SPECS: StudioSpec[] = [
     styles: ["Bold", "Editorial"],
     mood: "dark",
     description:
-      "A stage under lights: one big quote, a talks list with venues and a booking panel for organisers.",
+      "A stage under lights: spotlights over your name, talks as event tickets, the best quotes and a booking panel for organisers.",
     idealFor: ["Speakers", "Authors", "Thought leaders"],
-    sections: ["about", "highlights", "projects", "testimonials", "services", "stats", "contact"],
+    sections: [
+      "about",
+      "highlights",
+      "experience",
+      "projects",
+      "testimonials",
+      "services",
+      "stats",
+      "contact",
+    ],
     palettes: [
       p("stage", "Stage", "#0a0a0c", "#f2efe8", "#ff5b2e", "#7f7c76", "#141417"),
       p("spotlight", "Spotlight", "#101820", "#f4f1ea", "#f2c14e", "#7d8894", "#18222c"),
