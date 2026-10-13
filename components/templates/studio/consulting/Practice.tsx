@@ -15,6 +15,9 @@ import {
   type StudioProps,
 } from "../kit";
 
+const CARD =
+  "rounded-2xl bg-[color-mix(in_oklab,var(--t-bg)_55%,white)] shadow-[0_0_0_1px_var(--t-rule),0_2px_4px_-2px_rgb(0_0_0/0.06),0_22px_44px_-26px_rgb(0_0_0/0.35)]";
+
 export default function Practice({ content, template, embedded }: StudioProps) {
   const studio = useStudio(content, template, embedded);
   const { c, has, label } = studio;
@@ -27,9 +30,7 @@ export default function Practice({ content, template, embedded }: StudioProps) {
           <span className="grid size-9 place-items-center rounded-full ba text-[13px] font-semibold text-[var(--t-bg)]">
             {initials(c.name)}
           </span>
-          <span className="font-semibold" {...ed("name")}>
-            {c.name}
-          </span>
+          <span className="font-semibold">{c.name}</span>
         </span>
         <nav className="flex items-center gap-6 text-[14px]">
           <a href="#services" className="hidden tm hover-a @2xl:inline">
@@ -47,42 +48,76 @@ export default function Practice({ content, template, embedded }: StudioProps) {
         </nav>
       </header>
 
-      <section className="mx-auto grid max-w-[72rem] gap-12 px-5 pb-20 pt-16 @4xl:grid-cols-[1.4fr_1fr] @4xl:pt-24">
-        <div>
-          <p className="text-[14px] font-medium ta" {...ed("professional_title")}>
-            {c.professional_title}
-          </p>
-          <h1
-            className="fd mt-5 text-[clamp(2.6rem,6.4cqw,4.8rem)] leading-[1.04] tracking-[-0.015em] balance"
-            {...ed("tagline")}
-          >
-            {c.tagline}
-          </h1>
-          <div className="mt-9 flex flex-wrap items-center gap-4">
-            <a
-              href={book}
-              className="rounded-full ba px-6 py-3 font-semibold text-[var(--t-bg)] shadow-[0_8px_24px_-12px_var(--t-accent)] transition-transform hover:-translate-y-0.5"
-            >
-              Book a free 20-minute call
-            </a>
-            {c.availability && (
-              <span className="flex items-center gap-2 text-[14px] tm" {...ed("availability")}>
-                <span className="size-2 rounded-full bg-[#3fb27f]" />
-                {c.availability}
-              </span>
-            )}
-          </div>
+      <section className="relative isolate">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 overflow-hidden [mask-image:linear-gradient(black_60%,transparent)]"
+        >
+          <div className="absolute -right-32 -top-40 size-[34rem] rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--t-accent)_22%,transparent),transparent)]" />
+          <div className="absolute -left-40 top-40 size-[28rem] rounded-full bg-[radial-gradient(closest-side,color-mix(in_oklab,var(--t-accent)_12%,transparent),transparent)]" />
+          <div className="absolute inset-0 opacity-50 [background-image:radial-gradient(var(--t-rule)_1px,transparent_1px)] [background-size:22px_22px]" />
         </div>
-        {has("stats") && (
-          <dl className="grid content-end gap-6 border-l rule pl-8">
-            {(c.stats ?? []).map((stat, index) => (
-              <div key={index} {...ed(`stats.${index}`)}>
-                <dd className="fd text-[2.8rem] leading-none">{stat.value}</dd>
-                <dt className="mt-1 text-[14px] tm">{stat.label}</dt>
-              </div>
-            ))}
-          </dl>
-        )}
+        <div className="mx-auto grid max-w-[72rem] items-center gap-12 px-5 pb-20 pt-16 @4xl:grid-cols-[1.4fr_1fr] @4xl:pt-24">
+          <div>
+            <h1 className="flex flex-wrap items-center gap-x-2 text-[14px] font-medium">
+              <span {...ed("name")}>{c.name}</span>
+              <span className="tm">·</span>
+              <span className="ta" {...ed("professional_title")}>
+                {c.professional_title}
+              </span>
+            </h1>
+            <p
+              className="fd mt-5 text-[clamp(2.6rem,6.4cqw,4.8rem)] leading-[1.04] tracking-[-0.015em] balance"
+              {...ed("tagline")}
+            >
+              {c.tagline}
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-4">
+              <a
+                href={book}
+                className="rounded-full ba px-6 py-3 font-semibold text-[var(--t-bg)] shadow-[0_8px_24px_-12px_var(--t-accent)] transition-transform hover:-translate-y-0.5"
+              >
+                Book a free 20-minute call
+              </a>
+              {c.availability && (
+                <span className="flex items-center gap-2 text-[14px] tm" {...ed("availability")}>
+                  <span className="size-2 rounded-full bg-[#3fb27f]" />
+                  {c.availability}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* A profile card: who, results, and one line from a client */}
+          <aside className={`${CARD} relative p-7`}>
+            <div className="flex items-center gap-4">
+              <span className="grid size-14 place-items-center rounded-full bg-[linear-gradient(135deg,var(--t-accent),color-mix(in_oklab,var(--t-accent)_55%,black))] text-[1.1rem] font-semibold text-[var(--t-bg)] shadow-[inset_0_1px_0_rgb(255_255_255/0.3),0_8px_18px_-8px_var(--t-accent)]">
+                {initials(c.name)}
+              </span>
+              <span>
+                <span className="fd block text-[1.3rem] leading-tight">{c.name}</span>
+                <span className="text-[14px] tm">{c.location}</span>
+              </span>
+            </div>
+            {has("stats") && (
+              <dl className="mt-6 grid grid-cols-3 gap-3 border-t rule pt-6">
+                {(c.stats ?? []).slice(0, 3).map((stat, index) => (
+                  <div key={index} {...ed(`stats.${index}`)}>
+                    <dd className="fd text-[1.9rem] leading-none">{stat.value}</dd>
+                    <dt className="mt-1 text-[12.5px] leading-snug tm">{stat.label}</dt>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {c.testimonials?.[1] && (
+              <figure className="mt-6 rounded-xl bs p-4" {...ed("testimonials.1")}>
+                <blockquote className="text-[14.5px] italic leading-snug">
+                  “{c.testimonials[1].quote}”
+                </blockquote>
+                <figcaption className="mt-2 text-[12.5px] tm">— {c.testimonials[1].name}</figcaption>
+              </figure>
+            )}
+          </aside>
+        </div>
       </section>
 
       {has("services") && (
@@ -94,9 +129,12 @@ export default function Practice({ content, template, embedded }: StudioProps) {
                 <Reveal
                   key={index}
                   delay={(index % 2) * 90}
-                  className="flex flex-col rounded-2xl bg-[var(--t-bg)] p-7 shadow-[0_1px_0_var(--t-rule)]"
+                  className={`${CARD} flex flex-col p-7 transition-transform duration-300 hover:-translate-y-1`}
                 >
                   <div {...ed(`services.${index}`)} className="flex flex-1 flex-col">
+                    <span className="mb-5 grid size-10 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--t-accent)_14%,transparent)] text-[14px] font-semibold ta">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                     <div className="flex items-start justify-between gap-6">
                       <h3 className="fd text-[1.5rem] leading-tight">{service.title}</h3>
                       {service.price && (
@@ -158,11 +196,7 @@ export default function Practice({ content, template, embedded }: StudioProps) {
         <section className="bs py-20">
           <div className="mx-auto grid max-w-[72rem] gap-6 px-5 @3xl:grid-cols-2">
             {(c.testimonials ?? []).map((item, index) => (
-              <figure
-                key={index}
-                className="rounded-2xl bg-[var(--t-bg)] p-8"
-                {...ed(`testimonials.${index}`)}
-              >
+              <figure key={index} className={`${CARD} p-8`} {...ed(`testimonials.${index}`)}>
                 <p className="fd text-[3rem] leading-none ta">“</p>
                 <blockquote className="fd -mt-3 text-[1.35rem] leading-snug">{item.quote}</blockquote>
                 <figcaption className="mt-6 flex items-center gap-3 text-[14px]">
@@ -185,15 +219,20 @@ export default function Practice({ content, template, embedded }: StudioProps) {
           {has("experience") && (
             <div>
               <h2 className="fd text-[1.6rem]">{label("experience", "Background")}</h2>
-              <ul className="mt-5 space-y-3">
+              <ul className="mt-6 space-y-5 border-l-2 border-[var(--t-rule-strong)] pl-6">
                 {(c.experience ?? []).map((role, index) => (
                   <li
                     key={index}
-                    className="flex justify-between gap-4 border-b rule pb-3"
+                    className="relative flex justify-between gap-4"
                     {...ed(`experience.${index}`)}
                   >
+                    <span
+                      aria-hidden
+                      className="absolute -left-[31px] top-1.5 size-3 rounded-full ba shadow-[0_0_0_4px_var(--t-bg)]"
+                    />
                     <span>
-                      <b className="font-semibold">{role.job_title}</b> · {role.company}
+                      <b className="font-semibold">{role.job_title}</b>
+                      <span className="block text-[14px] tm">{role.company}</span>
                     </span>
                     <span className="shrink-0 text-[14px] tm">
                       {[role.start_date, role.end_date].filter(Boolean).join("–")}
@@ -225,13 +264,17 @@ export default function Practice({ content, template, embedded }: StudioProps) {
 
       {has("contact") && (
         <footer id="contact" className="px-5 pb-10">
-          <div className="mx-auto max-w-[72rem] rounded-3xl bg-[var(--t-fg)] px-8 py-16 text-center text-[var(--t-bg)] @3xl:py-20">
+          <div className="relative isolate mx-auto max-w-[72rem] overflow-hidden rounded-3xl bg-[var(--t-fg)] px-8 py-16 text-center text-[var(--t-bg)] shadow-[0_40px_80px_-40px_rgb(0_0_0/0.6)] @3xl:py-20">
+            <div
+              aria-hidden
+              className="absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_50%_0%,color-mix(in_oklab,var(--t-accent)_45%,transparent),transparent_70%)]"
+            />
             <h2 className="fd mx-auto max-w-[30rem] text-[clamp(2rem,4.6cqw,3.2rem)] leading-tight balance">
               Not sure where to start? Let’s talk it through.
             </h2>
             <a
               href={book}
-              className="mt-8 inline-block rounded-full ba px-7 py-3.5 font-semibold text-[var(--t-bg)]"
+              className="mt-8 inline-block rounded-full ba px-7 py-3.5 font-semibold text-[var(--t-bg)] shadow-[0_10px_30px_-10px_var(--t-accent)] transition-transform hover:-translate-y-0.5"
             >
               Book a free call
             </a>

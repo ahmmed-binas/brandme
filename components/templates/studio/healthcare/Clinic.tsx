@@ -9,6 +9,7 @@ import {
   contactLinks,
   ed,
   external,
+  initials,
   paragraphs,
   useStudio,
   type StudioProps,
@@ -67,14 +68,25 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
         </nav>
       </header>
 
-      <section className="mx-auto grid max-w-[74rem] gap-12 px-5 pb-6 pt-10 @3xl:px-8 @4xl:grid-cols-[1.5fr_1fr] @4xl:pt-16">
+      <section className="relative isolate mx-auto grid max-w-[74rem] gap-12 px-5 pb-6 pt-10 @3xl:px-8 @4xl:grid-cols-[1.5fr_1fr] @4xl:pt-16">
+        <div
+          aria-hidden
+          className="absolute -top-24 left-1/2 -z-10 h-[30rem] w-[60rem] -translate-x-1/2 [mask-image:radial-gradient(closest-side,black_55%,transparent)] bg-[radial-gradient(40%_60%_at_25%_40%,color-mix(in_oklab,var(--t-accent)_14%,transparent),transparent),radial-gradient(35%_55%_at_80%_30%,color-mix(in_oklab,var(--t-accent)_10%,transparent),transparent)]"
+        />
         <div>
           {c.availability && (
             <p
-              className="inline-flex items-center gap-2 rounded-full border rule px-3 py-1 text-[13px] font-medium"
+              className="inline-flex items-center gap-2 rounded-full bg-[color-mix(in_oklab,var(--t-bg)_60%,white)] px-3 py-1 text-[13px] font-medium shadow-[0_0_0_1px_var(--t-rule),0_6px_16px_-10px_rgb(0_0_0/0.3)]"
               {...ed("availability")}
             >
-              <span className={`size-2 rounded-full ${accepting ? "bg-[#22a06b]" : "bg-[#d97706]"}`} />
+              <span className="relative flex size-2">
+                <span
+                  className={`absolute inset-0 animate-ping rounded-full opacity-60 ${accepting ? "bg-[#22a06b]" : "bg-[#d97706]"}`}
+                />
+                <span
+                  className={`relative size-2 rounded-full ${accepting ? "bg-[#22a06b]" : "bg-[#d97706]"}`}
+                />
+              </span>
               {c.availability}
             </p>
           )}
@@ -93,7 +105,7 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
           <div className="mt-8 flex flex-wrap gap-3">
             <a
               href={book}
-              className="rounded-[10px] ba px-6 py-3 font-semibold text-[var(--t-bg)] transition-transform hover:-translate-y-0.5"
+              className="rounded-[10px] ba px-6 py-3 font-semibold text-[var(--t-bg)] shadow-[0_10px_24px_-10px_var(--t-accent)] transition-transform hover:-translate-y-0.5"
             >
               Request an appointment
             </a>
@@ -108,9 +120,19 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
             )}
           </div>
         </div>
-        <aside className="self-end rounded-[14px] bs p-6 text-[15px]">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] tm">The practice</p>
-          <dl className="mt-4 grid grid-cols-[6.5rem_1fr] gap-y-3">
+        <aside className="self-end overflow-hidden rounded-[16px] bg-[color-mix(in_oklab,var(--t-bg)_50%,white)] text-[15px] shadow-[0_0_0_1px_var(--t-rule),0_2px_4px_-2px_rgb(0_0_0/0.06),0_24px_48px_-28px_rgb(0_0_0/0.35)]">
+          <div className="flex items-center gap-4 bg-[linear-gradient(135deg,var(--t-accent),color-mix(in_oklab,var(--t-accent)_60%,black))] px-6 py-5 text-[var(--t-bg)]">
+            <span className="grid size-12 place-items-center rounded-full bg-[rgb(255_255_255/0.18)] text-[15px] font-semibold shadow-[inset_0_0_0_1px_rgb(255_255_255/0.35)]">
+              {initials(c.name)}
+            </span>
+            <span>
+              <span className="block text-[12px] font-semibold uppercase tracking-[0.18em] opacity-80">
+                The practice
+              </span>
+              <span className="fd block text-[1.15rem] leading-tight">{c.name}</span>
+            </span>
+          </div>
+          <dl className="grid grid-cols-[6.5rem_1fr] gap-y-3 p-6">
             {c.location && (
               <>
                 <dt className="tm">Where</dt>
@@ -154,8 +176,14 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
       {has("stats") && (
         <dl className="mx-auto grid max-w-[74rem] grid-cols-3 gap-4 px-5 pt-4 @3xl:px-8">
           {(c.stats ?? []).map((stat, index) => (
-            <div key={index} {...ed(`stats.${index}`)}>
-              <dd className="fd text-[clamp(1.8rem,4cqw,2.6rem)] leading-none tabular-nums">{stat.value}</dd>
+            <div
+              key={index}
+              className="rounded-[14px] bg-[color-mix(in_oklab,var(--t-bg)_50%,white)] px-5 py-4 shadow-[0_0_0_1px_var(--t-rule),0_2px_4px_-2px_rgb(0_0_0/0.06),0_24px_48px_-28px_rgb(0_0_0/0.35)]"
+              {...ed(`stats.${index}`)}
+            >
+              <dd className="fd text-[clamp(1.8rem,4cqw,2.6rem)] leading-none tabular-nums ta">
+                {stat.value}
+              </dd>
               <dt className="mt-1 text-[14px] tm">{stat.label}</dt>
             </div>
           ))}
@@ -204,7 +232,7 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
               {(c.services ?? []).map((service, index) => (
                 <Reveal key={index} delay={(index % 2) * 70}>
                   <div
-                    className="flex h-full gap-5 rounded-[12px] bg-[var(--t-bg)] p-6"
+                    className="flex h-full gap-5 rounded-[14px] bg-[color-mix(in_oklab,var(--t-bg)_50%,white)] p-6 transition-transform duration-300 hover:-translate-y-1 shadow-[0_0_0_1px_var(--t-rule),0_2px_4px_-2px_rgb(0_0_0/0.06),0_24px_48px_-28px_rgb(0_0_0/0.35)]"
                     {...ed(`services.${index}`)}
                   >
                     <div className="flex-1">
@@ -300,7 +328,14 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
       {has("testimonials") && (
         <section className="mx-auto grid max-w-[74rem] gap-6 px-5 pb-20 @3xl:grid-cols-2 @3xl:px-8">
           {(c.testimonials ?? []).map((item, index) => (
-            <figure key={index} className="rounded-[12px] border rule p-7" {...ed(`testimonials.${index}`)}>
+            <figure
+              key={index}
+              className="relative rounded-[16px] bg-[color-mix(in_oklab,var(--t-bg)_50%,white)] p-7 pt-10 shadow-[0_0_0_1px_var(--t-rule),0_2px_4px_-2px_rgb(0_0_0/0.06),0_24px_48px_-28px_rgb(0_0_0/0.35)]"
+              {...ed(`testimonials.${index}`)}
+            >
+              <span aria-hidden className="fd absolute left-6 top-1 text-[4rem] leading-none ta">
+                “
+              </span>
               <blockquote className="fd text-[1.2rem] leading-snug">“{item.quote}”</blockquote>
               <figcaption className="mt-4 text-[14px] tm">
                 {item.name}, {item.role}
@@ -311,7 +346,11 @@ export default function Clinic({ content, template, embedded }: StudioProps) {
       )}
 
       {has("contact") && (
-        <footer id="contact" className="bg-[var(--t-fg)] text-[var(--t-bg)]">
+        <footer id="contact" className="relative isolate overflow-hidden bg-[var(--t-fg)] text-[var(--t-bg)]">
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-[radial-gradient(50%_90%_at_85%_0%,color-mix(in_oklab,var(--t-accent)_40%,transparent),transparent_70%)]"
+          />
           <div className="mx-auto grid max-w-[74rem] gap-10 px-5 py-16 @3xl:px-8 @4xl:grid-cols-2">
             <div>
               <h2 className="fd text-[clamp(1.9rem,4cqw,2.8rem)] leading-tight">Book an appointment</h2>

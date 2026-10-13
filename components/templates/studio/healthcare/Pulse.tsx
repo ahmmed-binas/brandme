@@ -73,6 +73,10 @@ export default function Pulse({ content, template, embedded }: StudioProps) {
           aria-hidden
           className="absolute -right-[15%] top-[10%] -z-10 aspect-square w-[60%] rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--t-surface)_90%,transparent),transparent_60%)] blur-2xl [animation:pulse-breathe_18s_ease-in-out_-6s_infinite_reverse] motion-reduce:animate-none"
         />
+        <div
+          aria-hidden
+          className="absolute bottom-[-30%] left-[35%] -z-10 aspect-square w-[55%] rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--t-accent)_22%,transparent),transparent_62%)] blur-3xl"
+        />
         <header className="mx-auto flex max-w-[76rem] items-center justify-between px-5 py-6 @3xl:px-10">
           <span className="text-[15px] font-semibold">{c.name}</span>
           <nav className="flex items-center gap-6 text-[14px]">
@@ -87,52 +91,84 @@ export default function Pulse({ content, template, embedded }: StudioProps) {
             </a>
           </nav>
         </header>
-        <div className="mx-auto max-w-[76rem] px-5 pb-6 pt-16 @3xl:px-10 @3xl:pt-24">
-          {c.availability && (
-            <p
-              className="inline-flex items-center gap-2.5 rounded-full bg-[var(--t-bg)]/70 px-3.5 py-1.5 text-[13px] font-medium shadow-[0_0_0_1px_var(--t-rule)] backdrop-blur"
-              {...ed("availability")}
+        <div className="mx-auto grid max-w-[76rem] items-end gap-12 px-5 pb-6 pt-16 @3xl:px-10 @3xl:pt-24 @5xl:grid-cols-[1.4fr_1fr]">
+          <div>
+            {c.availability && (
+              <p
+                className="inline-flex items-center gap-2.5 rounded-full bg-[var(--t-bg)]/70 px-3.5 py-1.5 text-[13px] font-medium shadow-[0_0_0_1px_var(--t-rule)] backdrop-blur"
+                {...ed("availability")}
+              >
+                <span
+                  className={`size-2 rounded-full ${accepting ? "bg-[#22a06b] [animation:pulse-dot_1.6s_ease-out_infinite]" : "bg-[#d97706]"}`}
+                />
+                {c.availability}
+              </p>
+            )}
+            <h1
+              className="fd mt-8 text-[clamp(3.2rem,9.4cqw,7.6rem)] leading-[0.92] tracking-[-0.025em]"
+              {...ed("name")}
             >
-              <span
-                className={`size-2 rounded-full ${accepting ? "bg-[#22a06b] [animation:pulse-dot_1.6s_ease-out_infinite]" : "bg-[#d97706]"}`}
-              />
-              {c.availability}
+              <Words text={c.name} step={90} />
+            </h1>
+            <p className="mt-5 text-[1.2rem] ta" {...ed("professional_title")}>
+              {c.professional_title}
             </p>
-          )}
-          <h1
-            className="fd mt-8 text-[clamp(3.2rem,9.4cqw,7.6rem)] leading-[0.92] tracking-[-0.025em]"
-            {...ed("name")}
-          >
-            <Words text={c.name} step={90} />
-          </h1>
-          <p className="mt-5 text-[1.2rem] ta" {...ed("professional_title")}>
-            {c.professional_title}
-          </p>
-          <p
-            className="fd mt-8 max-w-[36rem] text-[clamp(1.5rem,3cqw,2.1rem)] italic leading-snug"
-            {...ed("tagline")}
-          >
-            {c.tagline}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Magnetic>
+            <p
+              className="fd mt-8 max-w-[36rem] text-[clamp(1.5rem,3cqw,2.1rem)] italic leading-snug"
+              {...ed("tagline")}
+            >
+              {c.tagline}
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Magnetic>
+                <a
+                  href={book}
+                  className="inline-block rounded-full ba px-7 py-3.5 font-semibold text-[var(--t-bg)] shadow-[0_14px_30px_-14px_var(--t-accent)]"
+                >
+                  Request an appointment
+                </a>
+              </Magnetic>
+              {c.phone && (
+                <a
+                  href={tel(c.phone)}
+                  className="rounded-full px-5 py-3.5 font-semibold tabular-nums shadow-[inset_0_0_0_1.5px_var(--t-fg)]"
+                  {...ed("phone")}
+                >
+                  {c.phone}
+                </a>
+              )}
+            </div>
+          </div>
+          {has("services") && (
+            <aside
+              className={`${"rounded-[22px] bg-[color-mix(in_oklab,var(--t-bg)_55%,transparent)] shadow-[0_0_0_1px_color-mix(in_oklab,white_60%,transparent)_inset,0_0_0_1px_var(--t-rule),0_30px_60px_-30px_rgb(0_0_0/0.35)] backdrop-blur-xl"} p-6`}
+            >
+              <p className="text-[12px] font-semibold uppercase tracking-[0.2em] tm">
+                {label("services", "Appointments & fees")}
+              </p>
+              <ul className="mt-4 space-y-2">
+                {(c.services ?? []).slice(0, 3).map((service, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between gap-4 rounded-[14px] bg-[color-mix(in_oklab,var(--t-bg)_70%,transparent)] px-4 py-3 shadow-[0_0_0_1px_var(--t-rule)]"
+                    {...ed(`services.${index}`)}
+                  >
+                    <span className="min-w-0">
+                      <b className="block truncate text-[15px] font-semibold">{service.title}</b>
+                      <span className="block truncate text-[13px] tm">{service.description}</span>
+                    </span>
+                    <span className="fd shrink-0 text-[1.4rem] leading-none ta">{service.price}</span>
+                  </li>
+                ))}
+              </ul>
               <a
                 href={book}
-                className="inline-block rounded-full ba px-7 py-3.5 font-semibold text-[var(--t-bg)] shadow-[0_14px_30px_-14px_var(--t-accent)]"
+                className="mt-4 block rounded-full bg-[var(--t-fg)] px-5 py-3 text-center text-[14px] font-semibold text-[var(--t-bg)]"
               >
                 Request an appointment
               </a>
-            </Magnetic>
-            {c.phone && (
-              <a
-                href={tel(c.phone)}
-                className="rounded-full px-5 py-3.5 font-semibold tabular-nums shadow-[inset_0_0_0_1.5px_var(--t-fg)]"
-                {...ed("phone")}
-              >
-                {c.phone}
-              </a>
-            )}
-          </div>
+            </aside>
+          )}
         </div>
         <Heartbeat />
       </section>
@@ -140,8 +176,12 @@ export default function Pulse({ content, template, embedded }: StudioProps) {
       {has("stats") && (
         <section className="mx-auto grid max-w-[76rem] grid-cols-3 gap-4 px-5 py-14 @3xl:px-10">
           {(c.stats ?? []).map((stat, index) => (
-            <div key={index} {...ed(`stats.${index}`)}>
-              <p className="fd text-[clamp(2.4rem,6cqw,4.6rem)] leading-none">
+            <div
+              key={index}
+              className="rounded-[22px] bg-[color-mix(in_oklab,var(--t-bg)_55%,transparent)] shadow-[0_0_0_1px_color-mix(in_oklab,white_60%,transparent)_inset,0_0_0_1px_var(--t-rule),0_30px_60px_-30px_rgb(0_0_0/0.35)] backdrop-blur-xl px-6 py-6"
+              {...ed(`stats.${index}`)}
+            >
+              <p className="fd text-[clamp(2.4rem,6cqw,4.6rem)] leading-none ta">
                 <CountUp value={stat.value} />
               </p>
               <p className="mt-2 text-[14px] tm">{stat.label}</p>
@@ -203,7 +243,7 @@ export default function Pulse({ content, template, embedded }: StudioProps) {
                 <a
                   key={index}
                   href={book}
-                  className="group flex items-start justify-between gap-6 rounded-[20px] bg-[var(--t-bg)] p-7 transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(.2,.7,.1,1)] hover:-translate-y-1 hover:shadow-[0_24px_40px_-24px_rgba(0,0,0,.35)]"
+                  className="group flex items-start justify-between gap-6 rounded-[20px] bg-[var(--t-bg)] p-7 shadow-[0_0_0_1px_var(--t-rule),0_16px_32px_-24px_rgba(0,0,0,.3)] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(.2,.7,.1,1)] hover:-translate-y-1 hover:shadow-[0_0_0_1px_var(--t-rule),0_28px_48px_-24px_rgba(0,0,0,.4)]"
                   {...ed(`services.${index}`)}
                 >
                   <span>
