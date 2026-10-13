@@ -5,6 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import VisitBeacon from "./VisitBeacon";
 import WhatsAppButton from "./WhatsAppButton";
+import { SignInNudge } from "./SignInNudge";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   // The route segment (not the browser path) is used because custom domains are served via a rewrite:
@@ -34,6 +35,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <WhatsAppButton />
+      <SignInNudge />
     </>
   );
 }

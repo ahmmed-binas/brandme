@@ -31,6 +31,7 @@ import { AssistantPanel } from "../AssistantPanel";
 import { ConflictBanner, SwitchDesignBanner, PublishDialog, SaveStatus } from "../EditorControls";
 import { Field, ImageField, ListEditor, Section, TagsField, TextArea, type ListSpec } from "./fields";
 import { TrialBanner } from "./TrialBanner";
+import { EditorGuestBar } from "@/components/common/SignInNudge";
 import { SuggestionsPanel } from "./SuggestionsPanel";
 import { BlogPanel } from "./BlogPanel";
 import { RatePrompt } from "./RatePrompt";
@@ -677,6 +678,7 @@ export default function StudioEditor({
         </div>
       </header>
       <TrialBanner signedIn={persistence.signedIn} />
+      <EditorGuestBar signedIn={persistence.signedIn} />
       {persistence.save.kind === "error" && (
         <p className="shrink-0 bg-amber-50 px-4 py-2 text-[12px] text-amber-900" role="alert">
           {persistence.save.message}
