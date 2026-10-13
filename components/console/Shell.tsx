@@ -10,6 +10,7 @@ import {
   LayoutTemplate,
   Mail,
   MessagesSquare,
+  MessageSquareHeart,
   Settings2,
   Users,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/activity", label: "Activity", icon: Activity },
   { href: "/users", label: "Users", icon: Users },
   { href: "/calls", label: "Calls", icon: CalendarDays },
+  { href: "/feedback", label: "Feedback", icon: MessageSquareHeart },
 ] as const;
 
 const TOOLS = [

@@ -33,6 +33,7 @@ import { Field, ImageField, ListEditor, Section, TagsField, TextArea, type ListS
 import { TrialBanner } from "./TrialBanner";
 import { SuggestionsPanel } from "./SuggestionsPanel";
 import { BlogPanel } from "./BlogPanel";
+import { RatePrompt } from "./RatePrompt";
 
 type Content = StandardContent;
 type Item<K extends keyof Content> = NonNullable<Content[K]> extends Array<infer T> ? T : never;
@@ -1053,6 +1054,8 @@ export default function StudioEditor({
           </div>
         </main>
       </div>
+
+      <RatePrompt templateId={template.id} templateName={template.name} signedIn={persistence.signedIn} />
 
       {publishOpen && (
         <PublishDialog

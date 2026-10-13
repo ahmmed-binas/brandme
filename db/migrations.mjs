@@ -687,6 +687,26 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "028_template_feedback",
+  statements: [
+    // The rating pop-up in the editor (components/editor/studio/RatePrompt.tsx): one answer per
+    // person and template, either stars, quick tags and a note, or a skip. Read in the console.
+    `CREATE TABLE IF NOT EXISTS template_feedback (
+      user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      template_id TEXT NOT NULL,
+      stars SMALLINT CHECK (stars BETWEEN 1 AND 5),
+      tags TEXT[] NOT NULL DEFAULT '{}',
+      comment TEXT,
+      skipped BOOLEAN NOT NULL DEFAULT false,
+      seconds_editing INTEGER,
+      at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (user_id, template_id)
+    )`,
+    `CREATE INDEX IF NOT EXISTS template_feedback_at ON template_feedback (at)`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**
