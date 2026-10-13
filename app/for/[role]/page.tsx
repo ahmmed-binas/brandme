@@ -7,17 +7,16 @@ import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
 import { faqSchema, roleBreadcrumbs, roleFaq } from "@/lib/gallery/role-seo";
+import { RoleEssentials } from "@/components/gallery/RoleEssentials";
+import PreviewFrame from "@/components/templates/PreviewFrame";
 
 export async function generateMetadata({ params }: { params: Promise<{ role: string }> }): Promise<Metadata> {
   const role = roleById((await params).role);
   if (!role) return {};
   return {
     // Words people search: "portfolio website for nurses", "nurse portfolio examples", "free template".
-    title: `Portfolio Website for ${role.plural.charAt(0).toUpperCase()}${role.plural.slice(1)}: Free Templates and Examples`,
-    description: `A personal website for ${role.plural}: ${role.starter.services
-      .map((service) => service[0].toLowerCase())
-      .slice(0, 3)
-      .join(", ")}, credentials and reviews in one place. Your own domain, kept up to date for you.`,
+    title: `${role.label} Portfolio Website: Free Templates & a Live Example`,
+    description: `How to make a ${role.label.toLowerCase()} portfolio: what to include, a live example with sample content written for ${role.plural}, and free designs you can edit without code.`,
     alternates: { canonical: `/for/${role.id}` },
   };
 }
@@ -26,7 +25,6 @@ export async function generateMetadata({ params }: { params: Promise<{ role: str
 export default async function RolePage({ params }: { params: Promise<{ role: string }> }) {
   const role = roleById((await params).role);
   if (!role) notFound();
-  const s = role.starter;
   const available = await availableTemplates();
   const designs = designsForRole(role, available);
   const profession = PROFESSIONS.find((item) => item.id === role.profession);
@@ -54,13 +52,14 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
       </nav>
       <header className="mt-8 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-end">
         <h1 className="font-display text-[clamp(2.6rem,6vw,4.8rem)] font-[400] leading-[0.95] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">
-          A portfolio website <em className="font-[300] text-signal">for {role.plural}.</em>
+          {role.label} portfolio{" "}
+          <em className="block font-[300] text-signal">templates and a live example</em>
         </h1>
         <div>
           <p className="text-[1.08rem] leading-[1.7] text-ink-soft">
-            One place for your services, fees, credentials and reviews, on your own domain. Every design below
-            previews with a {role.label.toLowerCase()}’s sample portfolio, so you can see exactly how yours
-            will read.
+            A free personal website for {role.plural}: your services, fees, results and reviews in one place.
+            Below is a real example written for the job, what to include, and the designs that suit it. Edit
+            without code and publish in minutes.
           </p>
           {designs[0] && (
             <Link
@@ -73,42 +72,37 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
         </div>
       </header>
 
-      <section
-        className="mt-16 grid gap-px overflow-hidden rounded-xl border border-rule bg-rule md:grid-cols-3"
-        aria-label="What the sample portfolio includes"
-      >
-        <div className="bg-card p-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">The headline</p>
-          <p className="mt-3 font-display text-[1.5rem] leading-snug text-ink">“{s.tagline}”</p>
-        </div>
-        <div className="bg-card p-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">Services & fees</p>
-          <ul className="mt-3 space-y-2 text-[0.98rem] text-ink">
-            {s.services.map(([title, , price]) => (
-              <li key={title} className="flex justify-between gap-4">
-                <span>{title}</span>
-                <span className="shrink-0 text-ink-soft">{price}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="bg-card p-7">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-soft">
-            Skills & credentials
-          </p>
-          <p className="mt-3 text-[0.98rem] leading-relaxed text-ink">
-            {s.skills.split(" · ").slice(0, 6).join(" · ")}
-          </p>
-          <p className="mt-3 text-[0.9rem] text-ink-soft">{s.education.map((item) => item[0]).join(" · ")}</p>
-        </div>
-      </section>
+      {designs[0] && (
+        <section className="mt-16" aria-labelledby="example">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2 id="example" className="font-display text-[2.2rem] tracking-[-0.02em] text-ink">
+              Example: a {role.label.toLowerCase()} portfolio
+            </h2>
+            <p className="text-[0.95rem] text-ink-soft">
+              {designs[0].name} design · sample content for {role.plural} · scroll inside it
+            </p>
+          </div>
+          <div className="mt-6 h-[78vh] max-h-[860px] overflow-hidden rounded-2xl border border-rule shadow-[0_40px_100px_-60px_rgba(0,0,0,.6)]">
+            <PreviewFrame
+              src={`/templates/${designs[0].id}?sample=1&role=${role.id}`}
+              title={`${designs[0].name} as a ${role.label.toLowerCase()} portfolio, live preview`}
+              className="h-full"
+            />
+          </div>
+        </section>
+      )}
+
+      <RoleEssentials role={role} className="mt-24" />
 
       {designs.length > 0 && (
         <section className="mt-20" aria-labelledby="designs">
           <h2 id="designs" className="font-display text-[2.2rem] tracking-[-0.02em] text-ink">
-            Designs that suit {role.plural}
+            {designs.length} free {role.label.toLowerCase()} portfolio designs
           </h2>
-          <ul className="mt-10 grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
+          <p className="mt-2 text-ink-soft">
+            Each one opens with sample content written for {role.plural}. The pictures show the design.
+          </p>
+          <ul className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12 md:grid-cols-2 xl:grid-cols-3">
             {designs.map((template) => (
               <li key={template.id}>
                 <Link
@@ -146,7 +140,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
         </h2>
         <div className="mt-6 divide-y divide-rule border-y border-rule">
           {faq.map((entry) => (
-            <details key={entry.question} className="py-4">
+            <details key={entry.question} className="py-4" open>
               <summary className="cursor-pointer list-none font-medium text-ink">{entry.question}</summary>
               <p className="mt-2 leading-relaxed text-ink-soft">{entry.answer}</p>
             </details>
