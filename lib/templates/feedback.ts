@@ -45,15 +45,25 @@ export function parseFeedback(body: unknown): FeedbackInput | string {
   };
 }
 
-/** True when this person hasn't answered (or skipped) for this template yet. */
+/**
+ * True when it's fine to ask this person about this template. Kept gentle so it
+ * never nags: not if they already answered or skipped this template, not more
+ * than once a day, and never again once they've skipped twice.
+ */
 export async function feedbackDue(userId: string, templateId: string): Promise<boolean> {
   if (!databaseConfigured()) return false;
   await ensureSchema();
-  const result = await db.query("SELECT 1 FROM template_feedback WHERE user_id = $1 AND template_id = $2", [
-    userId,
-    templateId,
-  ]);
-  return result.rowCount === 0;
+  const result = await db.query<{ this_one: boolean; recent: boolean; skips: string }>(
+    `SELECT
+       bool_or(template_id = $2) AS this_one,
+       bool_or(at > NOW() - INTERVAL '1 day') AS recent,
+       count(*) FILTER (WHERE skipped) AS skips
+     FROM template_feedback WHERE user_id = $1`,
+    [userId, templateId],
+  );
+  const row = result.rows[0];
+  if (!row) return true;
+  return !row.this_one && !row.recent && Number(row.skips) < 2;
 }
 
 export async function saveFeedback(userId: string, templateId: string, input: FeedbackInput): Promise<void> {
