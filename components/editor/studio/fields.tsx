@@ -21,7 +21,7 @@ import {
  */
 
 const inputClass =
-  "w-full rounded-lg border border-rule bg-white/70 px-3 py-2 text-[14px] text-ink outline-none transition placeholder:text-ink-faint focus:border-ink focus:bg-white";
+  "w-full rounded-lg border border-rule bg-card px-3 py-2 text-[14px] text-ink outline-none transition placeholder:text-ink-faint focus:border-ink focus:bg-card";
 
 export function Field({
   label,
@@ -171,7 +171,7 @@ export function ImageField({
         <button
           type="button"
           onClick={() => input.current?.click()}
-          className="relative grid h-16 w-24 shrink-0 place-items-center overflow-hidden rounded-lg border border-dashed border-ink/30 bg-white/60 text-ink-soft transition hover:border-ink"
+          className="relative grid h-16 w-24 shrink-0 place-items-center overflow-hidden rounded-lg border border-dashed border-ink/30 bg-card/60 text-ink-soft transition hover:border-ink"
           aria-label={value ? `Replace ${label.toLowerCase()}` : `Add ${label.toLowerCase()}`}
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
@@ -188,7 +188,7 @@ export function ImageField({
             <ImagePlus size={16} />
           )}
           {busy && value && (
-            <span className="absolute inset-0 grid place-items-center bg-white/70">
+            <span className="absolute inset-0 grid place-items-center bg-card">
               <Loader2 size={16} className="animate-spin" />
             </span>
           )}
@@ -346,7 +346,7 @@ export function ListEditor<T>({
           <div
             key={index}
             data-field={key}
-            className={`rounded-xl border bg-white/60 transition ${open ? "border-ink/40 shadow-[0_8px_24px_-16px_rgba(0,0,0,.35)]" : "border-rule"}`}
+            className={`rounded-xl border bg-card/60 transition ${open ? "border-ink/40 shadow-[0_8px_24px_-16px_rgba(0,0,0,.35)]" : "border-rule"}`}
           >
             <div className="flex items-center gap-1 py-1 pl-3 pr-1">
               <button

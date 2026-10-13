@@ -196,7 +196,7 @@ export function RatePrompt({
                 maxLength={600}
                 rows={2}
                 placeholder="Anything we should change? (optional)"
-                className="mt-3 w-full resize-none rounded-xl border border-rule bg-white px-3 py-2 text-[13px] outline-none focus:border-ink"
+                className="mt-3 w-full resize-none rounded-xl border border-rule bg-card px-3 py-2 text-[13px] outline-none focus:border-ink"
               />
               {comment.trim() && (
                 <label className="mt-2 flex cursor-pointer items-start gap-2 text-[12px] leading-snug text-ink-soft">

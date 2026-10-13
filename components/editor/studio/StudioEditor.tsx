@@ -497,7 +497,7 @@ export default function StudioEditor({
         return (
           <Section key={section} {...sectionProps("about")}>
             {(data.summary ?? []).map((paragraph, index) => (
-              <div key={index} className="relative">
+              <div key={index}>
                 <TextArea
                   label={`Paragraph ${index + 1}`}
                   value={paragraph}
@@ -511,9 +511,9 @@ export default function StudioEditor({
                   <button
                     type="button"
                     onClick={() => set({ summary: data.summary?.filter((_, i) => i !== index) }, true)}
-                    className="absolute right-0 top-0 text-[11px] text-ink-faint hover:text-[color:var(--destructive)]"
+                    className="ml-auto mt-1 block text-[12px] text-ink-faint hover:text-[color:var(--destructive)]"
                   >
-                    Remove
+                    Remove this paragraph
                   </button>
                 )}
               </div>
@@ -740,7 +740,7 @@ export default function StudioEditor({
             {tab === "content" && (
               <>
                 {isSample && (
-                  <div className="m-4 rounded-xl border border-dashed border-ink/30 bg-white/60 p-4 text-[13px] leading-relaxed">
+                  <div className="m-4 rounded-xl border border-dashed border-ink/30 bg-card/60 p-4 text-[13px] leading-relaxed">
                     <p>
                       <b className="font-semibold">This is sample content</b> so you can see the design.
                       Import your details in the{" "}
@@ -756,7 +756,7 @@ export default function StudioEditor({
                         disabled={switching}
                         onChange={(event) => void switchRole(event.target.value)}
                         aria-label="Job title for the sample content"
-                        className="mt-1 w-full rounded-lg border border-rule bg-white px-2.5 py-2 text-[13px] outline-none focus:border-ink disabled:opacity-60"
+                        className="mt-1 w-full rounded-lg border border-rule bg-card px-2.5 py-2 text-[13px] outline-none focus:border-ink disabled:opacity-60"
                       >
                         <option value="">This design’s own sample</option>
                         <optgroup label="Suits this design">
@@ -883,7 +883,7 @@ export default function StudioEditor({
                             type="button"
                             onClick={() => setDesign({ palette: palette.id })}
                             aria-pressed={active}
-                            className={`flex items-center gap-3 rounded-xl border p-2.5 text-left transition ${active ? "border-ink bg-white" : "border-rule hover:border-ink/40"}`}
+                            className={`flex items-center gap-3 rounded-xl border p-2.5 text-left transition ${active ? "border-ink bg-card" : "border-rule hover:border-ink/40"}`}
                           >
                             <span className="flex overflow-hidden rounded-md border border-black/10">
                               {[palette.bg, palette.surface, palette.fg, palette.accent].map((colour, k) => (
@@ -913,7 +913,7 @@ export default function StudioEditor({
                             type="button"
                             onClick={() => setDesign({ font: font.id })}
                             aria-pressed={active}
-                            className={`block w-full rounded-xl border p-3 text-left transition ${active ? "border-ink bg-white" : "border-rule hover:border-ink/40"}`}
+                            className={`block w-full rounded-xl border p-3 text-left transition ${active ? "border-ink bg-card" : "border-rule hover:border-ink/40"}`}
                           >
                             <span
                               className="block truncate text-[1.5rem] leading-tight"
@@ -973,7 +973,7 @@ export default function StudioEditor({
                   <p className="mt-1 text-[12px] text-ink-soft">
                     Hide sections you don’t need. Empty sections are hidden automatically.
                   </p>
-                  <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule bg-white/60">
+                  <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule bg-card/60">
                     {sections.map((section) => (
                       <li key={section} className="flex items-center justify-between px-3 py-2 text-[13px]">
                         <span className={hidden.has(section) ? "text-ink-faint line-through" : ""}>

@@ -62,7 +62,7 @@ export function SuggestionsPanel({
 
   if (!signedIn)
     return (
-      <div className="m-4 rounded-xl border border-rule bg-white/60 p-4 text-[13px] leading-relaxed text-ink-soft">
+      <div className="m-4 rounded-xl border border-rule bg-card/60 p-4 text-[13px] leading-relaxed text-ink-soft">
         Sign in and your portfolio can keep itself up to date: new GitHub projects, talks, awards and roles
         appear here for you to add with one click.
       </div>
@@ -168,7 +168,7 @@ export function SuggestionsPanel({
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               placeholder="GitHub username"
-              className="w-full rounded-lg border border-rule bg-white/70 py-2 pl-8 pr-2 text-[13px] outline-none focus:border-ink"
+              className="w-full rounded-lg border border-rule bg-card py-2 pl-8 pr-2 text-[13px] outline-none focus:border-ink"
             />
           </label>
           <button
@@ -233,7 +233,7 @@ export function SuggestionsPanel({
       {state.suggestions.length > 0 && (
         <ul className="mt-4 space-y-2">
           {state.suggestions.map((suggestion) => (
-            <li key={suggestion.id} className="rounded-xl border border-rule bg-white/70 p-3">
+            <li key={suggestion.id} className="rounded-xl border border-rule bg-card p-3">
               <p className="text-[11px] uppercase tracking-[0.12em] text-ink-faint">
                 {suggestion.source === "github"
                   ? "From GitHub"

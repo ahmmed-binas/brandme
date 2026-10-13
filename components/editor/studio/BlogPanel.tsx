@@ -234,7 +234,7 @@ export function BlogPanel({
           upload={(file) => prepareImage(file, true)}
         />
         <PostBodyEditor value={open.body} onChange={(body) => edit({ body })} rows={14} />
-        <details className="rounded-xl border border-rule bg-white/60 p-3 text-[13px]">
+        <details className="rounded-xl border border-rule bg-card/60 p-3 text-[13px]">
           <summary className="cursor-pointer font-medium">Cover image, summary and address</summary>
           <div className="mt-3 space-y-3">
             <ImageField
@@ -357,7 +357,7 @@ export function BlogPanel({
         </div>
       )}
       {posts && posts.length > 0 && (
-        <ul className="mt-5 divide-y divide-rule rounded-xl border border-rule bg-white/60">
+        <ul className="mt-5 divide-y divide-rule rounded-xl border border-rule bg-card/60">
           {posts.map((post) => (
             <li key={post.id}>
               <button
@@ -366,7 +366,7 @@ export function BlogPanel({
                   setOpen(post);
                   setStatus({ kind: "idle" });
                 }}
-                className="block w-full px-4 py-3 text-left hover:bg-white"
+                className="block w-full px-4 py-3 text-left hover:bg-card"
               >
                 <span className="block text-[14px] text-ink">{post.title}</span>
                 <span
