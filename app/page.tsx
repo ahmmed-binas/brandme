@@ -10,7 +10,7 @@ import Faq from "@/components/landing/Faq";
 import Testimonials, { type Review } from "@/components/landing/Testimonials";
 import InShort from "@/components/landing/InShort";
 import { featuredFeedback } from "@/lib/templates/feedback";
-import { publicReviews, ratingSummary, SITE_RATING_KEY } from "@/lib/templates/ratings";
+import { approvedSiteReviews, ratingSummary, SITE_RATING_KEY } from "@/lib/templates/ratings";
 import { getTemplate } from "@/lib/templates/catalog";
 import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq-data";
@@ -63,10 +63,11 @@ async function heroShowcase(): Promise<HeroShowcase[]> {
 
 /**
  * Every real review for the home page: notes the owner featured from the
- * editor's rating card, then ratings of Kitefolio left on the home page.
+ * editor's rating card, then reviews of Kitefolio the owner switched on
+ * (both in Console > Feedback).
  */
 async function homeReviews(): Promise<Review[]> {
-  const [featured, site] = await Promise.all([featuredFeedback(), publicReviews(SITE_RATING_KEY, 9)]);
+  const [featured, site] = await Promise.all([featuredFeedback(), approvedSiteReviews(9)]);
   return [
     ...featured.map((item) => ({
       name: item.name,

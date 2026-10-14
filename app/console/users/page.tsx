@@ -88,7 +88,7 @@ export default async function ConsoleUsers({
     value ? value.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "–";
 
   return (
-    <Shell active="Users" email={user.email}>
+    <Shell active="Users" userId={user.id} email={user.email}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[12px] uppercase tracking-[0.16em] text-[var(--c-muted)]">Users</p>

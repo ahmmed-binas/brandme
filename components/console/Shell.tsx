@@ -14,6 +14,7 @@ import {
   Settings2,
   Users,
 } from "lucide-react";
+import { CRITICAL_TABS, loadBadges, markSeen, type BadgeTab } from "@/lib/console/badges";
 import { consoleHref } from "@/lib/console/path";
 import SignOut from "./SignOut";
 
@@ -35,16 +36,36 @@ const TOOLS = [
   { href: "/admin", label: "Go-live checklist", icon: Settings2 },
 ] as const;
 
-/** The console frame: a sidebar and the page. */
-export default function Shell({
+/** A small count on a tab: red for something wrong, blue for something new. */
+function Badge({ count, critical }: { count: number; critical: boolean }) {
+  return (
+    <span
+      className={`ml-auto min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none tabular-nums text-white ${critical ? "bg-red-500" : "bg-[var(--c-accent)]"}`}
+      title={critical ? "New server errors since you last looked" : "New since you last looked"}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+/**
+ * The console frame: a sidebar and the page. Each tab shows how much is new
+ * since you last opened it (lib/console/badges.ts); opening a tab clears it.
+ */
+export default async function Shell({
   active,
+  userId,
   email,
   children,
 }: {
   active: string;
+  userId: string;
   email: string | null;
   children: React.ReactNode;
 }) {
+  // Count first, then mark this tab as seen, so the other tabs keep their numbers.
+  const badges = await loadBadges(userId);
+  await markSeen(userId, active);
   const item = "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors";
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
@@ -66,6 +87,12 @@ export default function Shell({
               >
                 <Icon size={15} />
                 {label}
+                {active !== label && (badges[label as BadgeTab] ?? 0) > 0 && (
+                  <Badge
+                    count={badges[label as BadgeTab]!}
+                    critical={CRITICAL_TABS.includes(label as BadgeTab)}
+                  />
+                )}
               </Link>
             ))}
           </nav>

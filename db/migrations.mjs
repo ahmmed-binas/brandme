@@ -738,6 +738,22 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "032_console_badges_home_reviews",
+  statements: [
+    // When the superadmin last opened each console tab, so the sidebar can show
+    // what's new since then (lib/console/badges.ts).
+    `CREATE TABLE IF NOT EXISTS console_seen (
+      user_id UUID NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      tab TEXT NOT NULL,
+      seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (user_id, tab)
+    )`,
+    // Reviews of Kitefolio go on the home page only after the owner switches them on.
+    `ALTER TABLE template_ratings ADD COLUMN IF NOT EXISTS on_home BOOLEAN NOT NULL DEFAULT false`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { setFeatured } from "@/lib/templates/feedback";
 import { getCurrentUser } from "@/utils/user-account";
@@ -12,7 +13,7 @@ export const POST = route(async (request: Request) => {
   if (typeof userId !== "string" || typeof templateId !== "string" || typeof featured !== "boolean")
     return jsonError(422, "Send userId, templateId and featured.");
   const changed = await setFeatured(userId, templateId, featured);
-  return changed
-    ? Response.json({ featured })
-    : jsonError(409, "Only notes people agreed to share can go on.");
+  if (!changed) return jsonError(409, "Only notes people agreed to share can go on.");
+  revalidatePath("/"); // The home page is cached; show the change straight away.
+  return Response.json({ featured });
 });

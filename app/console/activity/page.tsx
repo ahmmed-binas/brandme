@@ -149,7 +149,7 @@ export default async function ConsoleActivity({
     `rounded-full px-3 py-1.5 text-[12px] transition-colors ${active ? "bg-white/15 text-[var(--c-text)]" : "text-[var(--c-text2)] hover:bg-white/5"}`;
 
   return (
-    <Shell active="Activity" email={user.email}>
+    <Shell active="Activity" userId={user.id} email={user.email}>
       <AutoRefresh seconds={20} />
       <div className="mx-auto max-w-[1100px] p-6 lg:p-10">
         <h1 className="text-[1.6rem] font-semibold">Activity</h1>

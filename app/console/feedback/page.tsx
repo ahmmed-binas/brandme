@@ -1,7 +1,8 @@
 import ConsoleLogin from "@/components/console/ConsoleLogin";
 import FeatureToggle from "@/components/console/FeatureToggle";
 import HideRatingToggle from "@/components/console/HideRatingToggle";
-import { allRatings } from "@/lib/templates/ratings";
+import HomeReviewToggle from "@/components/console/HomeReviewToggle";
+import { allRatings, SITE_RATING_KEY, type RatingRow } from "@/lib/templates/ratings";
 import Shell from "@/components/console/Shell";
 import { getTemplate } from "@/lib/templates/catalog";
 import { feedbackOverview, tagLabel } from "@/lib/templates/feedback";
@@ -37,6 +38,51 @@ const minutes = (seconds: number | null) =>
 const panel = "rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)]";
 
 /** Answers to the editor's rating pop-up: per template, the tags people pick, and every answer. */
+/**
+ * Reviews of Kitefolio left on the home page. None show there until switched
+ * on here; an edited review comes off until it's switched on again.
+ */
+function HomeReviews({ rows }: { rows: RatingRow[] }) {
+  const withComment = rows.filter((row) => row.comment);
+  return (
+    <section className="mt-6">
+      <h2 className="text-[14px] font-semibold">Home page reviews ({withComment.length})</h2>
+      <p className="mt-1 text-[12.5px] text-[var(--c-text2)]">
+        Reviews of Kitefolio from the home page. You choose which ones show there: nothing appears until you
+        switch it on. People who didn’t tick “show my name and photo” appear as “A Kitefolio member”. Editor
+        notes you feature (further down) show there too.
+      </p>
+      <ul className="mt-3 space-y-2">
+        {withComment.length === 0 ? (
+          <li className={`${panel} px-4 py-6 text-center text-[12.5px] text-[var(--c-muted)]`}>
+            No reviews with a comment yet.
+          </li>
+        ) : (
+          withComment.map((row) => (
+            <li
+              key={row.userId}
+              className={`${panel} flex flex-wrap items-start justify-between gap-4 px-4 py-3`}
+            >
+              <div className="min-w-0 max-w-[40rem] text-[13px]">
+                <p>
+                  <span className="text-amber-400">{stars(row.stars)}</span>{" "}
+                  <span className="text-[var(--c-text2)]">
+                    {row.name ?? row.email ?? "–"}
+                    {row.internal && " (you/team)"} · {when(row.at)} ·{" "}
+                    {row.public ? "with name and photo" : "anonymous"}
+                  </span>
+                </p>
+                <p className="mt-1">“{row.comment}”</p>
+              </div>
+              <HomeReviewToggle userId={row.userId} ratingKey={row.key} initial={row.onHome} />
+            </li>
+          ))
+        )}
+      </ul>
+    </section>
+  );
+}
+
 export default async function ConsoleFeedback() {
   const user = await getCurrentUser().catch(() => null);
   if (!user?.isSuperadmin) return <ConsoleLogin />;
@@ -45,7 +91,7 @@ export default async function ConsoleFeedback() {
   const answered = real.filter((row) => !row.skipped).length;
 
   return (
-    <Shell active="Feedback" email={user.email}>
+    <Shell active="Feedback" userId={user.id} email={user.email}>
       <header>
         <p className="text-[12px] uppercase tracking-[0.16em] text-[var(--c-muted)]">Feedback</p>
         <h1 className="mt-1 text-[1.5rem] font-semibold tracking-tight">Template ratings from the editor</h1>
@@ -55,6 +101,8 @@ export default async function ConsoleFeedback() {
           the person ticked the box agreeing to it.
         </p>
       </header>
+
+      <HomeReviews rows={ratings.filter((row) => row.key === SITE_RATING_KEY)} />
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {[

@@ -6,8 +6,9 @@ import { RateTemplate, type RatingSummary } from "@/components/templates/Rating"
  * The home page's reviews section (#reviews). Everything in it is real:
  * - notes from the editor's rating card that the person agreed to share and
  *   the owner chose (console > Feedback), and
- * - ratings of Kitefolio itself, left right here (key SITE_RATING_KEY), with a
- *   name and photo only when the person ticked “show my name and photo”.
+ * - reviews of Kitefolio itself, left right here (key SITE_RATING_KEY), once
+ *   the owner switched them on in Console > Feedback, with a name and photo
+ *   only when the person ticked “show my name and photo”.
  * Until there are any, it says so and asks people to be the first. Never add
  * made-up reviews: they mislead customers and break consumer law and Google's rules.
  */
@@ -103,7 +104,7 @@ export default function Testimonials({ items, summary }: { items: Review[]; summ
           <p className="mt-6 max-w-[38rem] text-[1.02rem] leading-[1.7] text-ink-soft">
             {items.length
               ? "Real reviews from people who built their site with Kitefolio. Built yours? Rate it below."
-              : "Kitefolio opened in October 2026, so there are no reviews yet. Built your site? Be the first to rate it. Your name and photo only appear if you tick the box."}
+              : "Kitefolio opened in October 2026, so there are no reviews yet. Built your site? Be the first to rate it. We read every review before it appears here, and your name and photo only show if you tick the box."}
           </p>
           <div className="mt-6">
             <RateTemplate

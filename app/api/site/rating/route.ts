@@ -10,7 +10,7 @@ import { ratingResponse } from "@/lib/templates/rating-route";
  */
 const handler = route(async (request: Request) => {
   const response = await ratingResponse(request, SITE_RATING_KEY);
-  // The home page is cached for a few minutes; show a new review straight away.
+  // The home page is cached; a changed or removed review (already on it) updates straight away.
   if (request.method === "POST" && response.ok) revalidatePath("/");
   return response;
 });

@@ -8,6 +8,7 @@ import { isRange, loadDashboard, RANGES, type RangeId } from "@/lib/console/metr
 import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 import { countLeads } from "@/lib/analytics/leads";
+import { recentErrors, type RecentError } from "@/lib/console/badges";
 
 /**
  * Money panels (revenue, paying subscribers, revenue mix, domain margin, AI cost) are
@@ -64,6 +65,42 @@ function Tile({ label, value, children }: { label: string; value: string; childr
   );
 }
 
+/**
+ * Critical: server errors in the last 24 hours. Shown only when there are any;
+ * the red number on the Dashboard tab counts the ones since you last looked.
+ */
+function CriticalPanel({ errors }: { errors: RecentError[] }) {
+  if (!errors.length) return null;
+  return (
+    <section className="mt-6 rounded-xl border border-red-500/40 bg-red-500/10 p-4">
+      <h2 className="flex items-center gap-2 text-[14px] font-semibold text-red-200">
+        <span className="size-2 rounded-full bg-red-400" />
+        {errors.length} server error{errors.length === 1 ? "" : "s"} in the last 24 hours
+      </h2>
+      <p className="mt-1 text-[12.5px] text-[var(--c-text2)]">
+        Pages or actions that failed for someone. The agent reads these on its next run and fixes real bugs.
+      </p>
+      <ul className="mt-3 space-y-1.5 font-mono text-[12px]">
+        {errors.map((error, index) => (
+          <li key={index} className="flex flex-wrap gap-x-3 text-[var(--c-text2)]">
+            <span className="text-[var(--c-muted)]">
+              {error.at.toLocaleTimeString("en-GB", {
+                timeZone: "Asia/Dubai",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+            <span className="text-[var(--c-text)]">
+              {error.method} {error.path}
+            </span>
+            <span className="break-all">{error.message}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default async function ConsoleHome({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
   const user = await getCurrentUser().catch(() => null);
   if (!user?.isSuperadmin) return <ConsoleLogin />;
@@ -73,17 +110,18 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
       : "30d";
   if (!databaseConfigured())
     return (
-      <Shell active="Dashboard" email={user.email}>
+      <Shell active="Dashboard" userId={user.id} email={user.email}>
         <p className="text-[var(--c-text2)]">The dashboard needs the database.</p>
       </Shell>
     );
   const d = await loadDashboard(range);
   const leads = await countLeads(RANGES[range] * 24);
+  const errors = await recentErrors();
   const labels = d.buckets.map((bucket) => bucket.label);
   const vs = `vs the previous ${RANGE_LABEL[range]}`;
 
   return (
-    <Shell active="Dashboard" email={user.email}>
+    <Shell active="Dashboard" userId={user.id} email={user.email}>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[12px] uppercase tracking-[0.16em] text-[var(--c-muted)]">Dashboard</p>
@@ -105,6 +143,7 @@ export default async function ConsoleHome({ searchParams }: { searchParams: Prom
           ))}
         </nav>
       </header>
+      <CriticalPanel errors={errors} />
 
       {(d.inbox.support > 0 || d.inbox.submissions > 0 || d.inbox.moderation > 0) && (
         <p className="mt-6 flex flex-wrap gap-x-5 gap-y-1 rounded-xl border border-[#5a4a1f] bg-[#241f12] px-4 py-3 text-[13px] text-[#f1dfae]">

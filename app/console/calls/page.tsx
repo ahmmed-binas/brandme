@@ -79,7 +79,7 @@ export default async function ConsoleCalls() {
   const ready = Boolean(bookingUrl());
 
   return (
-    <Shell active="Calls" email={user.email}>
+    <Shell active="Calls" userId={user.id} email={user.email}>
       <header>
         <p className="text-[12px] uppercase tracking-[0.16em] text-[var(--c-muted)]">Calls</p>
         <h1 className="mt-1 text-[1.5rem] font-semibold tracking-tight">Booked calls</h1>

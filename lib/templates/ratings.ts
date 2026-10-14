@@ -83,7 +83,9 @@ export async function rateTemplate(
   await db.query(
     `INSERT INTO template_ratings (user_id, template_id, stars, comment, public) VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (user_id, template_id) DO UPDATE SET
-       stars = EXCLUDED.stars, comment = EXCLUDED.comment, public = EXCLUDED.public, updated_at = NOW()`,
+       stars = EXCLUDED.stars, comment = EXCLUDED.comment, public = EXCLUDED.public, updated_at = NOW(),
+       -- A changed comment comes off the home page until the owner approves it again.
+       on_home = template_ratings.on_home AND template_ratings.comment IS NOT DISTINCT FROM EXCLUDED.comment`,
     [userId, templateId, stars, note.comment, note.public],
   );
 }
@@ -132,6 +134,40 @@ export async function publicReviews(templateId: string, limit = 12): Promise<Pub
   }
 }
 
+/**
+ * Reviews of Kitefolio for the home page: only ones the owner switched on in
+ * Console > Feedback (and hasn't hidden). Name and photo as in publicReviews.
+ */
+export async function approvedSiteReviews(limit = 9): Promise<PublicReview[]> {
+  if (!databaseConfigured()) return [];
+  try {
+    await ensureSchema();
+    const result = await db.query<{
+      stars: number;
+      comment: string;
+      updated_at: Date;
+      public: boolean;
+      name: string | null;
+      image: string | null;
+    }>(
+      `SELECT r.stars, r.comment, r.updated_at, r.public, u.name, u.image
+       FROM template_ratings r JOIN app_users u ON u.id = r.user_id
+       WHERE r.template_id = $1 AND r.on_home AND NOT r.hidden AND coalesce(trim(r.comment), '') <> ''
+       ORDER BY r.updated_at DESC LIMIT $2`,
+      [SITE_RATING_KEY, limit],
+    );
+    return result.rows.map((row) => ({
+      stars: row.stars,
+      comment: row.comment,
+      at: row.updated_at,
+      name: row.public ? row.name?.trim() || null : null,
+      image: row.public ? row.image : null,
+    }));
+  } catch {
+    return []; // The home page never breaks over its reviews.
+  }
+}
+
 export interface RatingRow {
   userId: string;
   key: string;
@@ -139,6 +175,8 @@ export interface RatingRow {
   comment: string | null;
   public: boolean;
   hidden: boolean;
+  /** Reviews of Kitefolio only: switched on for the home page. */
+  onHome: boolean;
   at: Date;
   name: string | null;
   email: string | null;
@@ -156,12 +194,13 @@ export async function allRatings(limit = 200): Promise<RatingRow[]> {
     comment: string | null;
     public: boolean;
     hidden: boolean;
+    on_home: boolean;
     updated_at: Date;
     name: string | null;
     email: string | null;
     internal: boolean;
   }>(
-    `SELECT r.user_id, r.template_id, r.stars, r.comment, r.public, r.hidden, r.updated_at,
+    `SELECT r.user_id, r.template_id, r.stars, r.comment, r.public, r.hidden, r.on_home, r.updated_at,
             u.name, u.email, u.internal
      FROM template_ratings r JOIN app_users u ON u.id = r.user_id
      ORDER BY r.updated_at DESC LIMIT $1`,
@@ -174,11 +213,23 @@ export async function allRatings(limit = 200): Promise<RatingRow[]> {
     comment: row.comment,
     public: row.public,
     hidden: row.hidden,
+    onHome: row.on_home,
     at: row.updated_at,
     name: row.name,
     email: row.email,
     internal: row.internal,
   }));
+}
+
+/** The owner puts a review of Kitefolio on the home page, or takes it off. Only reviews with a comment. */
+export async function setRatingOnHome(userId: string, key: string, onHome: boolean): Promise<boolean> {
+  await ensureSchema();
+  const result = await db.query(
+    `UPDATE template_ratings SET on_home = $3
+     WHERE user_id = $1 AND template_id = $2 AND coalesce(trim(comment), '') <> ''`,
+    [userId, key, onHome],
+  );
+  return (result.rowCount ?? 0) > 0;
 }
 
 /** The owner takes a comment off the page (or puts it back). */
