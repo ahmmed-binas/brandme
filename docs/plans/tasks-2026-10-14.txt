@@ -1,0 +1,119 @@
+FUCCURA – TASKS FOR 14 OCTOBER 2026
+(written 13 Oct night, from the owner's voice note)
+
+------------------------------------------------------------
+1. RATINGS NOT SHOWING IN CONSOLE > FEEDBACK  (bug, do first)
+------------------------------------------------------------
+What the owner sees: people rated templates, but the Feedback tab is empty.
+
+WHY (checked on the live database, 13 Oct):
+- There are TWO different rating systems:
+  a) Stars on each template's page (fuccura.com/gallery/<template>)
+     -> saved in the table "template_ratings".
+  b) The rating card inside the editor (pops up after 3 min of editing)
+     -> saved in "template_feedback".
+- The Feedback tab only reads (b).
+- The real ratings so far are all type (a): "Gun Crush" gave 5 stars to
+  18 templates (riso, darkroom, horizon, monograph, broadsheet,
+  quarterly, plan-section, material, seminar, notebook ...).
+  The editor card has 0 answers, so the tab looks empty.
+- There are no comments at all yet: the stars on template pages have no
+  comment box, so nobody could leave one.
+
+TO DO:
+- Feedback tab: also show the template-page star ratings (who, which
+  template, stars, when), not only the editor card answers.
+- Add an optional comment box to the template-page stars.
+
+------------------------------------------------------------
+2. "WHO RATED AND WHAT THEY SAID" UNDER EACH TEMPLATE PAGE
+------------------------------------------------------------
+- Under every template page: a section listing reviews: name, photo
+  (Google), stars, comment, date.
+- Only show name/photo/comment publicly if the person ticked
+  "show my review publicly" (same consent rule as the home page notes).
+  Everyone else counts in the average only, shown as "Anonymous".
+- Owner can hide any review from the console.
+
+------------------------------------------------------------
+3. TRACK VISITORS' IP ADDRESS?  (owner decision needed)
+------------------------------------------------------------
+- Technically yes: every request already arrives with an IP.
+- Today we deliberately do NOT store it: visitors are counted with a
+  daily-changing anonymous hash (lib/analytics/track.ts), and the
+  privacy page promises that.
+- Storing raw IPs = personal data under UAE PDPL / GDPR. If we do it:
+  update /privacy, keep them a short time (e.g. 30 days), and use them
+  for country/city lookup and spotting the owner's family/bots.
+- Safer middle option: store only the COUNTRY + CITY looked up from the
+  IP (no raw IP kept). Gives "where are visitors from" without the risk.
+- DECIDE: raw IP (with privacy update) or country/city only?
+
+------------------------------------------------------------
+4. NEW SERVICE: CUSTOM SOFTWARE & AI APP BUILDS  (+ maintenance)
+------------------------------------------------------------
+- New offer on the site: "We build your custom software / AI app"
+  (dashboards, internal tools, AI assistants, booking systems, apps)
+  and then maintain it for them on a monthly plan.
+- Pages: a "Custom software & AI apps" page under Services, with
+  examples, how it works (free call -> quote -> build -> maintain),
+  and Book a free call / WhatsApp.
+- Pricing: owner to set (build quoted per project; maintenance monthly).
+- Add to navigation and the home page, and an SEO page
+  ("custom AI app development Dubai").
+
+------------------------------------------------------------
+0. DEPLOY THE GROQ MODEL FIX  (first thing, 10 min)
+------------------------------------------------------------
+- The Groq key is on the server and works, but the model the site asks
+  for (llama-3.3-70b-versatile) no longer exists on Groq, so CV import
+  FAILS on the live site right now.
+- Fix is ready, not committed: lib/ai/provider.ts default model is now
+  openai/gpt-oss-120b (tested: read a sample CV correctly in 1.4 s).
+  Commit (no model names in the message), deploy, then test a real CV
+  import while signed in.
+
+------------------------------------------------------------
+5. USAGE LIMITS SO WE NEVER LOSE MONEY + PAYWALL TO GET USER #1
+   (owner's instruction 13 Oct night: "it's very easy to lose money")
+------------------------------------------------------------
+Goal: free users get a small, fixed amount of AI, the site can carry
+about 100 free users without cost, and running out pushes towards
+paying AED 35 (Pro) or contacting the owner.
+
+Today's limits (lib/ai/metering.ts, lib/plans.ts):
+- Free CV imports (Groq): 5 per user per day, 800 per day site-wide.
+- Welcome credits: 60 per account (Claude, paid by us).
+Plan:
+a) Check Groq's free-tier limits for the new model (console.groq.com
+   -> Settings -> Limits) and set the site-wide daily cap well under it.
+b) Free users: a LIFETIME allowance, not daily. E.g. 3 CV imports and
+   the 60 welcome credits, then AI stops. Show the remaining amount in
+   the editor ("2 free imports left").
+c) When it runs out, show a clear message in the editor:
+   "You've used your free AI. Upgrade to Pro (AED 35) to keep using it,
+   or WhatsApp us." with both buttons.
+d) Owner also asked: when the allowance is over, LOCK EDITING and
+   PUBLISHING until they pay AED 35 or contact him.
+   !! DECISION NEEDED: this contradicts the current promise "Basic is
+   free: one live portfolio" (home page, /pricing, FAQ, terms).
+   Options:
+     1. Lock only the AI when free AI is used up (keeps the free promise),
+        and require Pro to publish on their own domain (already so).
+     2. Owner's version: lock editing + publishing after the free AI is
+        used, unless they pay AED 35 or contact. Then update /pricing,
+        home page, FAQ and terms so we don't promise "free forever".
+   My recommendation: 1 now (safe, honest), revisit 2 after the first
+   paying user.
+e) Alerts: email the owner when the site-wide daily cap is 80% used.
+f) Test: a free account using up its allowance sees the message, can't
+   overspend, and paying/contacting works.
+
+------------------------------------------------------------
+NOTES
+- 13 Oct: owner bought marketing and will keep bringing people (also
+  people he hasn't contacted yet). Give him "human work" tasks too.
+- Ignore 13 Oct visitors from India: owner's family.
+- Groq / free CV import: dropped for now.
+- Still waiting: owner to approve 5 new templates at
+  fuccura.com/templates/review (Dispatch, Atelier, Roadmap, Radar, Duet).

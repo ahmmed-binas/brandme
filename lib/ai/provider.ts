@@ -204,7 +204,7 @@ export function openAiClient(apiKey: string, model: string): AiClient {
  * Set FREE_AI_API_KEY (and optionally FREE_AI_BASE_URL / FREE_AI_MODEL).
  */
 const FREE_AI_URL = process.env.FREE_AI_BASE_URL || "https://api.groq.com/openai/v1";
-const FREE_AI_MODEL = process.env.FREE_AI_MODEL || "llama-3.3-70b-versatile";
+const FREE_AI_MODEL = process.env.FREE_AI_MODEL || "openai/gpt-oss-120b";
 
 export const freeAiConfigured = () => Boolean(process.env.FREE_AI_API_KEY);
 
