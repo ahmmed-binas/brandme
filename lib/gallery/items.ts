@@ -112,7 +112,8 @@ export async function galleryItems(): Promise<GalleryItem[]> {
         { src: `/gallery/${template.id}.mp4`, type: "video/mp4" },
       ],
       poster: `/gallery/${template.id}.webp`,
-      download: `/api/templates/${template.id}/download`,
+      // 3D Pro templates are not given away as code.
+      download: template.proOnly ? "" : `/api/templates/${template.id}/download`,
       rating: ratings[template.id] ?? NONE,
       downloads: downloads[template.id] ?? 0,
       motion: Boolean(template.styles?.includes("Motion")),

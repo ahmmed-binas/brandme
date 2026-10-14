@@ -74,6 +74,7 @@ interface StudioSpec {
   fonts: FontPairing[];
   persona: string;
   idealFor: string[];
+  proOnly?: boolean;
 }
 
 const SPECS: StudioSpec[] = [
@@ -1163,6 +1164,72 @@ const SPECS: StudioSpec[] = [
     fonts: [
       f("intertight", "Inter Tight + JetBrains", F.interTight, F.interTight, F.jetbrains),
       f("grotesk", "Space Grotesk + Manrope", F.grotesk, F.manrope, F.jetbrains),
+    ],
+  },
+  {
+    id: "control-room",
+    name: "Control Room",
+    persona: "pro-ops",
+    professions: ["management", "consulting"],
+    styles: ["Bold", "Technical"],
+    mood: "dark",
+    proOnly: true,
+    description:
+      "A 3D Pro template for operations managers: your projects stand on a turntable of pedestals as objects (a parcel, gears, a truck), your numbers sit on a live operations board.",
+    idealFor: ["Operations managers", "Supply chain & logistics", "Facilities managers"],
+    sections: [
+      "stats",
+      "projects",
+      "services",
+      "experience",
+      "highlights",
+      "education",
+      "about",
+      "skills",
+      "testimonials",
+      "contact",
+    ],
+    palettes: [
+      p("graphite", "Graphite & amber", "#0e1013", "#e9ecf1", "#ffb020", "#8b93a1", "#171a1f"),
+      p("signal", "Signal green", "#0b1210", "#e6f0ec", "#35e08a", "#86a096", "#121b18"),
+      p("steel", "Steel blue", "#0c111a", "#e7edf6", "#4f9dff", "#8796ad", "#141b27"),
+    ],
+    fonts: [
+      f("grotesk", "Space Grotesk + Inter Tight", F.grotesk, F.interTight, F.jetbrains),
+      f("unbounded", "Unbounded + Inter Tight", F.unbounded, F.interTight, F.jetbrains),
+    ],
+  },
+  {
+    id: "studio-desk",
+    name: "Studio Desk",
+    persona: "pro-content",
+    professions: ["marketing", "writing"],
+    styles: ["Editorial", "Bold"],
+    mood: "light",
+    proOnly: true,
+    description:
+      "A 3D Pro template for content marketers: every piece of work is an object on your desk (a camera, a mic, a phone, a stack of books). Click one and its story and results open.",
+    idealFor: ["Content marketers", "Copywriters", "Social media managers"],
+    sections: [
+      "stats",
+      "projects",
+      "about",
+      "skills",
+      "services",
+      "testimonials",
+      "experience",
+      "highlights",
+      "education",
+      "contact",
+    ],
+    palettes: [
+      p("paper", "Paper & tangerine", "#f6f1ea", "#1d1a17", "#ff6a3d", "#7a716a", "#fffdf9"),
+      p("mint", "Mint studio", "#eef5f0", "#14211b", "#1f9d6b", "#65766d", "#fbfefc"),
+      p("ink", "Ink & lilac", "#16141c", "#f1edf7", "#b69cff", "#8f87a0", "#1f1c27"),
+    ],
+    fonts: [
+      f("fraunces", "Fraunces + Figtree", F.fraunces, F.figtree, F.jetbrains),
+      f("grotesk", "Space Grotesk + Figtree", F.grotesk, F.figtree, F.jetbrains),
     ],
   },
   {

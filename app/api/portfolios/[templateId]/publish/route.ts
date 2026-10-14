@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { jsonError, readJson, requireOwner, route } from "@/lib/api/http";
 import { getDraft, publish, unpublish } from "@/lib/portfolio/repository";
 import { normaliseSlug, slugError } from "@/lib/portfolio/schema";
+import { canUseTemplate, proTemplateRefusal } from "@/lib/templates/pro";
 
 type Context = { params: Promise<{ templateId: string }> };
 
@@ -9,6 +10,7 @@ type Context = { params: Promise<{ templateId: string }> };
 export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
+  if (!canUseTemplate(owner.templateId, owner.user)) return proTemplateRefusal();
   const body = await readJson(request, 2_000);
   if (body instanceof Response) return body;
   const slug = normaliseSlug(String((body as { slug?: unknown } | null)?.slug ?? ""));

@@ -185,6 +185,12 @@ export function usePortfolioPersistence<T>({
           full.current = true;
           setRoom((body as { room: Room }).room);
           setSave({ kind: "full" });
+        } else if (status === 402 && (body as { upgrade?: boolean } | undefined)?.upgrade) {
+          full.current = true;
+          setSave({
+            kind: "error",
+            message: `${(error as Error).message} Your changes are kept on this device.`,
+          });
         } else {
           const message = (error as Error).message;
           setSave({

@@ -7,6 +7,7 @@ import { isTemplateAvailable } from "@/lib/templates/approval";
 import { getCurrentUser } from "@/utils/user-account";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { sampleFor } from "@/lib/templates/samples";
+import { canUseTemplate } from "@/lib/templates/pro";
 
 export default async function EditorPage({
   params,
@@ -37,6 +38,7 @@ export default async function EditorPage({
         sample={sampleFor(template, role?.id)}
         role={role?.id ?? ""}
         roles={roles}
+        proLocked={!canUseTemplate(template.id, viewer)}
       />
     );
   }

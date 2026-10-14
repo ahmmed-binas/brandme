@@ -262,7 +262,9 @@ export async function RoleTemplateArticle({
           ))}
         </dl>
         <p className="mt-8 text-[0.92rem] text-ink-soft">
-          Developer? The {item.title} code is free to download from its{" "}
+          {item.download
+            ? `Developer? The ${item.title} code is free to download from its `
+            : `${item.title} is a 3D Pro design: try it free in the editor; saving and publishing need Pro. See its `}
           <Link href={`/gallery/${item.slug}`} className="underline underline-offset-4">
             gallery page
           </Link>

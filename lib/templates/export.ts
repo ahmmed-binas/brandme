@@ -152,7 +152,8 @@ function localImages(content: StandardContent): string[] {
 }
 
 export async function templateZip(template: TemplateDefinition): Promise<Uint8Array | null> {
-  if (template.collection !== "studio") return null;
+  // 3D Pro templates are not given away.
+  if (template.collection !== "studio" || template.proOnly) return null;
   const cached = cache.get(template.id);
   if (cached) return cached;
   const relative = await componentPath(template.id);

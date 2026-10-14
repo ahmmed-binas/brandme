@@ -166,7 +166,7 @@ export const MANAGEMENT_ROLES = [
       ],
       education: [["BSc Business & Management", "Aston University", "2013"], CMI],
     },
-    ["annual-report", "field-report", "practice"],
+    ["control-room", "annual-report", "field-report", "practice"],
   ),
   role(
     "general-manager",

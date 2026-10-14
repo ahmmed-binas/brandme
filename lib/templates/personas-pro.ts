@@ -894,4 +894,328 @@ export const PRO_PERSONAS: Record<string, StandardContent> = {
       { school: "Flight instructor course", degree: "FI rating", start_date: "2018" },
     ],
   },
+
+  "pro-ops": {
+    name: "Daniel Kovač",
+    professional_title: "Operations Manager · Logistics & Supply Chain",
+    location: "Dubai, UAE",
+    availability: "Open to Head of Operations roles from January",
+    tagline: "I make warehouses, fleets and teams run like clockwork, and I can prove it in numbers.",
+    summary: [
+      "I’ve run operations for twelve years across e-commerce fulfilment, cold chain and retail distribution in Dubai and Zagreb. Today I lead a 180-person operation at a Jebel Ali fulfilment centre.",
+      "My job is mostly invisible when it’s done well: orders that leave on time, trucks that come back full, costs that stay where they should. I like honest dashboards, short daily stand-ups and fixing the process before blaming the people.",
+    ],
+    email: "daniel@example.com",
+    phone: "+971 50 555 0147",
+    linkedin: "https://www.linkedin.com/",
+    avatar: p("ops-avatar"),
+    skills: [
+      "Lean & Six Sigma",
+      "Warehouse management (WMS)",
+      "Fleet & last mile",
+      "Budget ownership",
+      "S&OP",
+      "Supplier management",
+      "KPI dashboards",
+      "Team leadership",
+    ],
+    projects: [
+      {
+        title: "Same-day dispatch at Jebel Ali",
+        year: "2025",
+        category: "Warehouse",
+        client: "Fulfilment centre, 42,000 m²",
+        role: "Operations Manager",
+        description:
+          "Re-slotted 38,000 SKUs by pick frequency and moved packing next to dispatch. Same-day dispatch went from 71% to 96% in five months, with the same headcount.",
+        technologies: ["96% same-day", "−22% walking", "Same team"],
+      },
+      {
+        title: "Goods-in automation",
+        year: "2025",
+        category: "Automation",
+        client: "Inbound team",
+        role: "Project lead",
+        description:
+          "Barcode-first receiving with handheld scanners and auto put-away suggestions. Receiving time per pallet fell from 14 to 6 minutes.",
+        technologies: ["14 → 6 min", "AED 0.9m saved / yr"],
+      },
+      {
+        title: "Last-mile fleet rebuild",
+        year: "2024",
+        category: "Fleet",
+        client: "62 vans, UAE-wide",
+        role: "Owner",
+        description:
+          "Route optimisation, a new driver scorecard and a shift pattern built around traffic. Failed deliveries halved and fuel per drop fell by a fifth.",
+        technologies: ["−50% failed drops", "−19% fuel"],
+      },
+      {
+        title: "AED 4.2m cost programme",
+        year: "2024",
+        category: "Cost",
+        client: "Finance & procurement",
+        role: "Programme lead",
+        description:
+          "Renegotiated packaging and 3PL contracts, cut overtime with better rotas and stopped paying for empty racking.",
+        technologies: ["AED 4.2m / yr", "No redundancies"],
+      },
+      {
+        title: "One operations dashboard",
+        year: "2023",
+        category: "Dashboard",
+        client: "Leadership team",
+        role: "Designer & owner",
+        description:
+          "Twelve numbers on one screen, updated every hour, reviewed at a 10-minute stand-up. Problems are now spotted the same morning, not at month end.",
+        technologies: ["12 KPIs", "Hourly", "10-min stand-up"],
+      },
+      {
+        title: "Zero lost-time injuries",
+        year: "2023",
+        category: "Safety",
+        client: "All sites",
+        role: "Safety champion",
+        description:
+          "Daily walk-rounds, near-miss reporting in the team chat and forklift refreshers every quarter. 640 days without a lost-time injury.",
+        technologies: ["640 days", "ISO 45001"],
+      },
+    ],
+    services: [
+      {
+        title: "Operations review",
+        description: "Two weeks on site, then a written plan with costs and quick wins.",
+        price: "AED 28,000",
+      },
+      {
+        title: "Interim operations manager",
+        description: "Hands-on cover for three to nine months.",
+        price: "From AED 2,800 / day",
+      },
+      {
+        title: "Lean training for team leaders",
+        description: "Two practical days on the floor, not in a classroom.",
+        price: "AED 9,500",
+      },
+    ],
+    stats: [
+      { value: "96%", label: "same-day dispatch" },
+      { value: "AED 4.2m", label: "saved a year" },
+      { value: "180", label: "people led" },
+    ],
+    highlights: [
+      { title: "Lean Six Sigma Black Belt", detail: "", year: "2021" },
+      {
+        title: "Logistics Operation of the Year (finalist)",
+        detail: "Regional supply chain awards",
+        year: "2025",
+      },
+      { title: "640 days without a lost-time injury", detail: "All sites", year: "2026" },
+    ],
+    testimonials: [
+      {
+        quote: "Daniel made our hardest peak season feel calm. Every morning we knew exactly where we stood.",
+        name: "Head of E-commerce",
+        role: "Retail group, Dubai",
+      },
+      {
+        quote:
+          "He fixes the process, not the people. Our team leaders grew more in a year with him than in the five before.",
+        name: "HR Director",
+        role: "Logistics company",
+      },
+    ],
+    experience: [
+      {
+        job_title: "Operations Manager",
+        company: "Fulfilment centre, Jebel Ali",
+        location: "Dubai",
+        start_date: "2021",
+        end_date: "Present",
+      },
+      {
+        job_title: "Warehouse Operations Lead",
+        company: "Cold chain distributor",
+        location: "Dubai",
+        start_date: "2017",
+        end_date: "2021",
+      },
+      {
+        job_title: "Shift Manager",
+        company: "Retail distribution centre",
+        location: "Zagreb",
+        start_date: "2013",
+        end_date: "2017",
+      },
+    ],
+    education: [
+      {
+        school: "University of Zagreb",
+        degree: "BSc Logistics & Transport",
+        start_date: "2009",
+        end_date: "2013",
+      },
+      { school: "CIPS", degree: "Diploma in Procurement and Supply", start_date: "2020" },
+    ],
+  },
+
+  "pro-content": {
+    name: "Amara Okafor",
+    professional_title: "Content Marketing Lead · B2B & SaaS",
+    location: "Dubai · working with teams worldwide",
+    availability: "Taking two new retainers for Q1",
+    tagline:
+      "Content that people finish, share and buy from. I write it, film it and prove what it brought in.",
+    summary: [
+      "I’ve led content for B2B software companies for nine years: guides, case studies, newsletters, video and podcasts. My content has brought in more than AED 30m of pipeline that sales teams could trace back to a page.",
+      "I plan from what buyers search for and ask sales calls about, write like a person, and cut anything that doesn’t earn its place. Every piece has one job and one number.",
+    ],
+    email: "amara@example.com",
+    linkedin: "https://www.linkedin.com/",
+    instagram: "https://www.instagram.com/",
+    avatar: p("content-avatar"),
+    skills: [
+      "Content strategy",
+      "SEO & search intent",
+      "Long-form writing",
+      "Case studies",
+      "Newsletters",
+      "Video & podcasts",
+      "Editorial calendars",
+      "Content analytics",
+    ],
+    projects: [
+      {
+        title: "From 4k to 180k monthly readers",
+        year: "2025",
+        category: "SEO",
+        client: "Payroll software",
+        role: "Head of content",
+        description:
+          "A topic map built from sales calls and search data, 120 guides in 14 months and a ruthless refresh routine. Organic sign-ups grew 9×.",
+        technologies: ["180k readers / mo", "9× sign-ups"],
+      },
+      {
+        title: "The Friday Ledger newsletter",
+        year: "2025",
+        category: "Newsletter",
+        client: "Fintech, 40,000 subscribers",
+        role: "Writer & editor",
+        description:
+          "One useful idea a week for finance teams, no fluff. 46% open rate and the company’s biggest source of demo requests.",
+        technologies: ["46% opens", "40k subscribers"],
+      },
+      {
+        title: "Customer story video series",
+        year: "2024",
+        category: "Video",
+        client: "Logistics SaaS",
+        role: "Producer",
+        description:
+          "Six short films with real customers, shot in their warehouses. Sales now sends them in the first email; win rate rose 11 points.",
+        technologies: ["+11 pts win rate", "6 films"],
+      },
+      {
+        title: "The Operators podcast",
+        year: "2024",
+        category: "Podcast",
+        client: "B2B brand",
+        role: "Host & producer",
+        description:
+          "Forty interviews with heads of operations. A third of guests became leads; two became customers within a year.",
+        technologies: ["40 episodes", "1/3 guests → leads"],
+      },
+      {
+        title: "Product launch campaign",
+        year: "2023",
+        category: "Campaign",
+        client: "Expense app",
+        role: "Content lead",
+        description:
+          "Launch page, video, 30 social posts and a press kit, all from one message. 2,400 sign-ups in launch week.",
+        technologies: ["2,400 sign-ups", "1 message"],
+      },
+      {
+        title: "LinkedIn for the founders",
+        year: "2023",
+        category: "Social",
+        client: "Two founders",
+        role: "Ghostwriter",
+        description:
+          "Three posts a week in their own voice from 20-minute calls. From 3k to 41k followers, and inbound leads every week.",
+        technologies: ["3k → 41k", "Weekly inbound"],
+      },
+    ],
+    services: [
+      {
+        title: "Content strategy sprint",
+        description: "Two weeks: research, a topic map and a 90-day calendar.",
+        price: "AED 14,000",
+      },
+      {
+        title: "Content retainer",
+        description: "Four long-form pieces, a newsletter and repurposing every month.",
+        price: "From AED 12,500 / month",
+      },
+      {
+        title: "Customer case study",
+        description: "Interview, writing, quotes approved, design brief.",
+        price: "AED 3,800",
+      },
+    ],
+    stats: [
+      { value: "180k", label: "monthly readers built" },
+      { value: "46%", label: "newsletter open rate" },
+      { value: "AED 30m+", label: "pipeline from content" },
+    ],
+    highlights: [
+      { title: "Content Marketer of the Year (shortlist)", detail: "B2B marketing awards", year: "2025" },
+      { title: "Speaker, content marketing summit", detail: "“Write for the sales call”", year: "2024" },
+      { title: "HubSpot Content Marketing certification", detail: "", year: "2022" },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Amara’s case studies are the first thing our sales team sends. Nothing else we make gets forwarded as much.",
+        name: "VP Sales",
+        role: "Fintech, Dubai",
+      },
+      {
+        quote: "She writes like us, only better. Our LinkedIn finally sounds like a person.",
+        name: "Co-founder",
+        role: "Expense app",
+      },
+    ],
+    experience: [
+      {
+        job_title: "Content Marketing Lead",
+        company: "Payroll software company",
+        location: "Dubai",
+        start_date: "2022",
+        end_date: "Present",
+      },
+      {
+        job_title: "Senior Content Marketer",
+        company: "Fintech scale-up",
+        location: "London",
+        start_date: "2019",
+        end_date: "2022",
+      },
+      {
+        job_title: "Content Writer",
+        company: "B2B agency",
+        location: "Lagos",
+        start_date: "2016",
+        end_date: "2019",
+      },
+    ],
+    education: [
+      {
+        school: "University of Lagos",
+        degree: "BA Mass Communication",
+        start_date: "2012",
+        end_date: "2016",
+      },
+    ],
+  },
 };

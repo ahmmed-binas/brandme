@@ -74,3 +74,7 @@ Their moving backgrounds use the [`shaders`](https://www.npmjs.com/package/shade
 - **Fallback:** every stage paints a CSS background first. The shader only starts with WebGPU, with motion on (not in still captures or reduced motion) and near the screen.
 
 Calculators in these templates (DLD 4% fee, Golden Visa threshold of AED 2M, Ejari, DEWA deposits, rent cheques) are labelled as guides, with typical 2026 figures. Check them yearly.
+
+## 3D Pro templates (October 2026)
+
+Control Room (operations managers) and Studio Desk (content marketers) are drawn with three.js in `components/templates/studio/objects3d.tsx`. Every project becomes a 3D object chosen from its **category** (`objectFor`): typing “Video”, “Logistics” or an object's own name (“rocket”, “globe”…) swaps the object, and the editor shows the list. Objects only: no 3D people or faces (owner's rule). They are `proOnly` in the catalogue: anyone can try them in the editor, but saving and publishing need a paid plan (`lib/templates/pro.ts`, checked in the save and publish routes), and their code is not in the free downloads. The instructor templates Lane and Altitude use `vehicle3d.tsx` the same way.

@@ -965,7 +965,7 @@ export const BUSINESS_ROLES = [
       ],
       education: [["BA Journalism", "Universitat Pompeu Fabra", "2016"]],
     },
-    ["quarterly", "broadsheet"],
+    ["studio-desk", "quarterly", "broadsheet"],
   ),
   role(
     "pr-specialist",

@@ -1,6 +1,6 @@
 """
 Downloads the Unsplash photos used by the 2026 profession templates (Dispatch,
-Atelier, Roadmap, Radar, Duet, Lane, Altitude) into public/samples/pro as WebP, and writes
+Atelier, Roadmap, Radar, Duet, Lane, Altitude, Control Room, Studio Desk) into public/samples/pro as WebP, and writes
 CREDITS.md. Unsplash License: free to use, credited anyway. Like public/samples/re
 they are left out of free template downloads (lib/templates/export.ts).
 
@@ -57,6 +57,8 @@ PHOTOS = {
     "fly-preflight": ("photo-1775486788201-eda6230a6430", "willhaddock", 2000),
     "fly-headset": ("photo-1775486766610-18b17c5fd297", "willhaddock", 2000),
     "fly-field": ("photo-1755252626479-c17bc3cdf8c3", "alpenair", 2000),
+    "ops-avatar": ("photo-1676989880361-091e12efc056", "we_are_rising", 1400),
+    "content-avatar": ("photo-1611432579402-7037e3e2c1e4", "alexstarnes", 1400),
 }
 
 

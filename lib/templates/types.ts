@@ -108,4 +108,6 @@ export interface TemplateDefinition {
   fonts?: FontPairing[];
   /** Which sample persona fills the preview. */
   persona?: string;
+  /** 3D Pro templates: anyone can look, only paid plans can save and publish. */
+  proOnly?: boolean;
 }

@@ -43,7 +43,7 @@ export async function galleryMetadata(slug: string, roleId?: string): Promise<Me
   const role = item.kind === "original" ? roleById(roleId) : undefined;
   // "Mirage: free real estate website template" reads like what people search for.
   const title = role
-    ? `${role.label} Portfolio Template: ${item.title} (Free)`
+    ? `${role.label} Portfolio Template: ${item.title} (${item.download ? "Free" : "3D"})`
     : profession
       ? `${item.title}: free ${profession.toLowerCase()} website template`
       : `${item.title}: free ${item.kind === "original" ? "portfolio" : "website"} template`;
@@ -188,7 +188,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
               {item.downloads === 1 ? "download" : "downloads"}
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <DownloadButton href={item.download} />
+              {item.download && <DownloadButton href={item.download} />}
               {item.editable && (
                 <Link
                   href={editorHref}
@@ -393,9 +393,11 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
                 </>
               )}
             </ol>
-            <div className="mt-6">
-              <DownloadButton href={item.download} label="Download the ZIP" />
-            </div>
+            {item.download && (
+              <div className="mt-6">
+                <DownloadButton href={item.download} label="Download the ZIP" />
+              </div>
+            )}
           </div>
           <div className="rounded-2xl bg-ink p-7 text-paper">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-paper/60">

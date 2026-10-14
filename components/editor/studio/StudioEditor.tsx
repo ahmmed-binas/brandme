@@ -31,6 +31,7 @@ import { AssistantPanel } from "../AssistantPanel";
 import { ConflictBanner, SwitchDesignBanner, PublishDialog, SaveStatus } from "../EditorControls";
 import { Field, ImageField, ListEditor, Section, TagsField, TextArea, type ListSpec } from "./fields";
 import { TrialBanner } from "./TrialBanner";
+import { ProTemplateBanner } from "./ProTemplateBanner";
 import { EditorGuestBar } from "@/components/common/SignInNudge";
 import { SuggestionsPanel } from "./SuggestionsPanel";
 import { BlogPanel } from "./BlogPanel";
@@ -72,11 +73,14 @@ export default function StudioEditor({
   sample: initialSample,
   role: initialRole,
   roles,
+  proLocked = false,
 }: {
   template: TemplateDefinition;
   sample: Content;
   role: string;
   roles: RoleOption[];
+  /** A 3D Pro template opened on a free plan: try it, but saving and publishing need Pro. */
+  proLocked?: boolean;
 }) {
   const [sample, setSample] = useState(initialSample);
   const [role, setRole] = useState(initialRole);
@@ -678,6 +682,7 @@ export default function StudioEditor({
         </div>
       </header>
       <TrialBanner signedIn={persistence.signedIn} />
+      {proLocked && <ProTemplateBanner />}
       <EditorGuestBar signedIn={persistence.signedIn} />
       {persistence.save.kind === "error" && (
         <p className="shrink-0 bg-amber-50 px-4 py-2 text-[12px] text-amber-900" role="alert">

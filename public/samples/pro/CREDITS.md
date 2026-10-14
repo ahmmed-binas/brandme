@@ -43,3 +43,5 @@ From Unsplash under the Unsplash License (free for commercial use, no attributio
 | fly-preflight.webp | willhaddock | https://unsplash.com/@willhaddock |
 | fly-headset.webp | willhaddock | https://unsplash.com/@willhaddock |
 | fly-field.webp | alpenair | https://unsplash.com/@alpenair |
+| ops-avatar.webp | we_are_rising | https://unsplash.com/@we_are_rising |
+| content-avatar.webp | alexstarnes | https://unsplash.com/@alexstarnes |
