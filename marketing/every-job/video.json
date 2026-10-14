@@ -1,0 +1,16 @@
+{
+  "out": "marketing/every-job/out/every-job.mp4",
+  "lines": "marketing/every-job/clone",
+  "scenes": [
+    { "clips": ["keynote", "tour-poster", "lookbook", "riso"], "top": ["I designed a website", "for 150 different jobs"] },
+    { "clip": "clinic", "label": "Doctors" },
+    { "clip": "counsel", "label": "Lawyers" },
+    { "clip": "mise", "label": "Chefs" },
+    { "clip": "darkroom", "label": "Photographers" },
+    { "clip": "terminal", "label": "Developers" },
+    { "clip": "skyline", "label": "Estate agents" },
+    { "clip": "training-log", "label": "Personal trainers" },
+    { "clip": "syllabus", "label": "Students" },
+    { "clip": "sanctuary", "top": ["Pick yours. Add your CV.", "Live in minutes."], "label": "kitefolio.com", "sub": "Free · link in bio" }
+  ]
+}
