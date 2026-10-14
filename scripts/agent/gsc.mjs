@@ -16,14 +16,17 @@ const base64url = (value) => Buffer.from(value).toString("base64url");
 
 export const readKey = async () => JSON.parse(await readFile(KEY_FILE, "utf8"));
 
-/** An access token from the service account key (signed JWT, OAuth 2.0). */
-export async function accessToken(key) {
+/**
+ * An access token from the service account key (signed JWT, OAuth 2.0).
+ * Read-only by default; pass the full "webmasters" scope to submit sitemaps.
+ */
+export async function accessToken(key, scope = "https://www.googleapis.com/auth/webmasters.readonly") {
   const now = Math.floor(Date.now() / 1000);
   const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claims = base64url(
     JSON.stringify({
       iss: key.client_email,
-      scope: "https://www.googleapis.com/auth/webmasters.readonly",
+      scope,
       aud: "https://oauth2.googleapis.com/token",
       iat: now,
       exp: now + 3600,
