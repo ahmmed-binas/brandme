@@ -5,7 +5,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 const output = resolve("public/guides/formora-template-and-business-guide.pdf");
 const pages = [
   [
-    "Fuccura",
+    "Kitefolio",
     "Template & business guide",
     "A practical guide to adding templates, earning revenue, and safely launching accounts.",
   ],
@@ -30,7 +30,7 @@ const pages = [
   ],
   [
     "Make money",
-    "Free: one portfolio, a few templates, local editing, Fuccura branding.",
+    "Free: one portfolio, a few templates, local editing, Kitefolio branding.",
     "Pro subscription: premium templates, no branding, multiple portfolios, export, analytics.",
     "One-time template packs: profession-specific designs before subscription value is proven.",
     "Custom domains: sell only after publishing, SSL, and DNS support are dependable.",
@@ -72,7 +72,7 @@ for (const [title, ...lines] of pages) {
     }
     y -= 9;
   }
-  page.drawText("Fuccura template system", {
+  page.drawText("Kitefolio template system", {
     x: 48,
     y: 32,
     size: 9,

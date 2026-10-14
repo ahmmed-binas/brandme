@@ -276,7 +276,7 @@ export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
             className="rise mt-8 max-w-[34rem] text-[1.12rem] leading-[1.65] text-ink-soft"
             style={{ "--i": 4 } as React.CSSProperties}
           >
-            Fuccura turns your CV, GitHub or LinkedIn into a portfolio that’s carefully typeset, quick to
+            Kitefolio turns your CV, GitHub or LinkedIn into a portfolio that’s carefully typeset, quick to
             load, and published at a domain with your name on it.
           </p>
 

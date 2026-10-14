@@ -7,8 +7,8 @@
 # See docs/SELF_HOSTING.md.
 #
 # The server is shared with other work, so every service has a CPU and memory cap
-# (cpus = share of one core). Fuccura idles at about 150 MB and under 1% CPU.
-# On fuccura.com the app image is built on the owner's PC and loaded here by
+# (cpus = share of one core). Kitefolio idles at about 150 MB and under 1% CPU.
+# On kitefolio.com the app image is built on the owner's PC and loaded here by
 # scripts/deploy.ps1, so the server never runs a build.
 services:
   db:

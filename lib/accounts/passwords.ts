@@ -35,6 +35,7 @@ const RESERVED = new Set([
   "help",
   "formora",
   "fuccura",
+  "kitefolio",
   "staff",
   "moderator",
   "system",

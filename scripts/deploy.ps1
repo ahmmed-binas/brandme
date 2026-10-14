@@ -1,4 +1,4 @@
-# Deploys the latest COMMITTED code to the live server (fuccura.com).
+# Deploys the latest COMMITTED code to the live server (kitefolio.com).
 #
 #   .\scripts\deploy.ps1
 #
@@ -109,4 +109,4 @@ Write-Host "Clearing old images and build cache on the server..."
 ssh fuccura "docker image prune -f && docker builder prune -af | tail -1"
 
 Remove-Item -Recurse -Force $folder
-Write-Host "Done. Check https://fuccura.com" -ForegroundColor Green
+Write-Host "Done. Check https://kitefolio.com" -ForegroundColor Green

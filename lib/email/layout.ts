@@ -2,7 +2,7 @@ import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 
 /**
- * The look of every Fuccura email: a dark band with the logo, a light card,
+ * The look of every Kitefolio email: a dark band with the logo, a light card,
  * and a small footer. Email apps ignore most modern CSS, so this is plain
  * tables with inline styles (works in Gmail, Outlook, Apple Mail, and Gmail's
  * dark mode, because the logo sits on its own dark band).
@@ -53,7 +53,7 @@ export function renderEmail({ preheader, body, footer, footerLink }: EmailParts)
 ${body}
 </td></tr>
 <tr><td style="padding:18px 8px 0;font-size:12px;line-height:1.55;color:${soft};text-align:center">
-${escape(footer)}${link}<br><a href="${siteUrl}" style="color:${soft}">fuccura.com</a> · Dubai, UAE
+${escape(footer)}${link}<br><a href="${siteUrl}" style="color:${soft}">kitefolio.com</a> · Dubai, UAE
 </td></tr>
 </table></td></tr></table></body></html>`;
 }

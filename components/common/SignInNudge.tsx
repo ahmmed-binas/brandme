@@ -102,7 +102,7 @@ export function SignInNudge() {
       <div className="flex items-center gap-2.5 pr-6">
         <LogoMark size={26} />
         <p id="nudge-title" className="text-[15px] font-semibold leading-tight">
-          Sign in to Fuccura
+          Sign in to Kitefolio
         </p>
       </div>
       <p className="mt-2 hidden text-[13.5px] leading-snug text-ink-soft sm:block">

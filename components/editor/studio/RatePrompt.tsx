@@ -206,7 +206,7 @@ export function RatePrompt({
                     onChange={(event) => setShareOk(event.target.checked)}
                     className="mt-0.5 size-3.5 accent-[var(--color-ink)]"
                   />
-                  Fuccura may show my note with my name and profile photo on its website.
+                  Kitefolio may show my note with my name and profile photo on its website.
                 </label>
               )}
             </div>

@@ -20,7 +20,7 @@ export default function DomainsPage() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Fuccura Domain Setup Planner",
+    name: "Kitefolio Domain Setup Planner",
     description:
       "A guided domain name and hosting recommendation tool for portfolios, businesses, stores, and web apps.",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -33,7 +33,7 @@ export default function DomainsPage() {
           href="/"
           className="inline-flex items-center gap-2 text-sm font-bold text-violet-700 dark:text-violet-300"
         >
-          <ArrowLeft size={16} /> Back to Fuccura
+          <ArrowLeft size={16} /> Back to Kitefolio
         </Link>
         <p className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-violet-700 dark:text-violet-300">
           <Globe2 size={14} /> Domain setup planner
@@ -68,7 +68,7 @@ export default function DomainsPage() {
           ))}
         </section>
         <p className="mt-10 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100">
-          <LockKeyhole className="mt-0.5 shrink-0" size={17} /> Fuccura does not currently check availability,
+          <LockKeyhole className="mt-0.5 shrink-0" size={17} /> Kitefolio does not currently check availability,
           take payment, buy domains, or change DNS. Those actions will only appear after a registrar/reseller
           and payment system are securely connected.
         </p>

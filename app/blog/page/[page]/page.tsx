@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const number = Number((await params).page);
   return {
     title: `Journal, page ${number}`,
-    description: `Page ${number} of the Fuccura Journal: practical advice on portfolios for every kind of work.`,
+    description: `Page ${number} of the Kitefolio Journal: practical advice on portfolios for every kind of work.`,
     alternates: { canonical: `/blog/page/${number}` },
   };
 }

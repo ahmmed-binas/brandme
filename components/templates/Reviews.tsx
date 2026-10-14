@@ -4,7 +4,7 @@ import { publicReviews } from "@/lib/templates/ratings";
 /**
  * “What people said”: comments left with a star rating on this page.
  * Name and photo appear only for people who ticked “show my name and photo”;
- * everyone else is shown as a Fuccura member. Hidden reviews (console) and
+ * everyone else is shown as a Kitefolio member. Hidden reviews (console) and
  * ratings without a comment don't appear. Nothing renders until there's one.
  */
 
@@ -40,7 +40,7 @@ export async function Reviews({
       </h2>
       <ul className="mt-8 grid gap-4 sm:grid-cols-2">
         {reviews.map((review, index) => {
-          const name = review.name ?? "A Fuccura member";
+          const name = review.name ?? "A Kitefolio member";
           return (
             <li key={index} className="rounded-2xl border border-rule bg-card p-6">
               <div className="flex gap-0.5" aria-label={`${review.stars} out of 5 stars`}>

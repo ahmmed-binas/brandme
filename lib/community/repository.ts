@@ -276,7 +276,7 @@ export async function createPost(
         ok: false,
         status: 422,
         code: "already_reviewed",
-        error: "You’ve already reviewed Fuccura. Edit your existing review instead.",
+        error: "You’ve already reviewed Kitefolio. Edit your existing review instead.",
       };
     throw error;
   } finally {

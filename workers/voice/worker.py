@@ -1,4 +1,4 @@
-"""The voice engine for fuccura.com/tools/voice. Runs on a computer with an NVIDIA graphics card.
+"""The voice engine for kitefolio.com/tools/voice. Runs on a computer with an NVIDIA graphics card.
 
 It asks the website for work every few seconds (only outgoing connections, so
 no ports need opening), makes voices and reads text aloud with Chatterbox (MIT
@@ -8,7 +8,7 @@ counts the engine as online. Stop it with Ctrl+C; queued jobs wait for it.
 Start it with workers/voice/start.ps1 (see workers/voice/README.md).
 
 Settings (environment variables, or workers/voice/.env):
-    FUCCURA_URL         the website, e.g. https://fuccura.com (default http://localhost:3000)
+    KITEFOLIO_URL         the website, e.g. https://kitefolio.com (default http://localhost:3000)
     TOOLS_WORKER_TOKEN  the same secret as the website's TOOLS_WORKER_TOKEN
     WORKER_NAME         this computer's name in the website's records (default: "pc")
 """
@@ -48,7 +48,7 @@ def load_env_file():
 
 
 load_env_file()
-SITE = os.environ.get("FUCCURA_URL", "http://localhost:3000").rstrip("/")
+SITE = os.environ.get("KITEFOLIO_URL", "http://localhost:3000").rstrip("/")
 TOKEN = os.environ.get("TOOLS_WORKER_TOKEN", "")
 NAME = os.environ.get("WORKER_NAME", "pc")
 

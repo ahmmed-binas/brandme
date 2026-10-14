@@ -303,7 +303,7 @@ export function DomainPanel({
           {domain.records.length > 0 && (
             <p className="mt-2 text-[11px] leading-4 text-slate-500">
               If your provider adds your domain to names automatically, enter only the first part (for example{" "}
-              <span className="font-mono">_fuccura</span> or <span className="font-mono">@</span>).
+              <span className="font-mono">_kitefolio</span> or <span className="font-mono">@</span>).
             </p>
           )}
           <div className="mt-3 flex gap-2">
@@ -340,7 +340,7 @@ export function DomainPanel({
           Your own domain, like{" "}
           <b>{(personName || "yourname").toLowerCase().replace(/[^a-z0-9]+/g, "") || "yourname"}.com</b>,
           comes with <b>Pro</b> ({formatUsd(PLANS.pro.prices.year!)} for a year). On {capabilities.planName}{" "}
-          your site lives at your free Fuccura address.
+          your site lives at your free Kitefolio address.
         </p>
         <a
           href="/pricing"
@@ -438,7 +438,7 @@ export function DomainPanel({
         </p>
         <p className="text-xs leading-5 text-slate-500">
           Domain registries require the owner’s contact details. They’re sent to the registrar and not stored
-          by Fuccura after registration.
+          by Kitefolio after registration.
         </p>
         <div className="grid grid-cols-2 gap-2">
           <input

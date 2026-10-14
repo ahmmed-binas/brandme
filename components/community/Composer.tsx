@@ -24,7 +24,7 @@ const HINTS: Record<PostKind, { title: string; body: string }> = {
   },
   review: {
     title: "e.g. Published in an evening",
-    body: "What worked, what didn’t, and who you’d recommend Fuccura to.",
+    body: "What worked, what didn’t, and who you’d recommend Kitefolio to.",
   },
   design: {
     title: "e.g. Studio — a template for architects",

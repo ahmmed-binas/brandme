@@ -1,10 +1,10 @@
 /** The single source of truth for the public-facing product identity. */
 export const brand = {
-  name: "Fuccura",
+  name: "Kitefolio",
   tagline: "Portfolios at your own address.",
   description:
     "Turn your CV, GitHub or LinkedIn into a well-designed portfolio and publish it at your own domain.",
-  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@fuccura.example",
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@kitefolio.example",
   /** WhatsApp for sales and support, in international form without “+” (UAE 052 833 8003). */
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "971528338003",
 } as const;
@@ -18,7 +18,7 @@ export interface NavLink {
 
 /**
  * Free tools, in the groups shown under “Tools” in the menu. Add new ones here.
- * The first group is Fuccura's own (featured); the second holds the everyday
+ * The first group is Kitefolio's own (featured); the second holds the everyday
  * utilities, kept for now while the owner decides which earn their place.
  */
 export const toolGroups: Array<{ title: string; items: NavLink[] }> = [

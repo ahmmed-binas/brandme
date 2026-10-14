@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact Fuccura on WhatsApp or by email about your website, a plan, or help with a free tool.",
+    "Contact Kitefolio on WhatsApp or by email about your website, a plan, or help with a free tool.",
   alternates: { canonical: "/contact" },
 };
 

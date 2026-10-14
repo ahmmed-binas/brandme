@@ -230,7 +230,7 @@ export async function listTickets(
         id: message.id,
         body: message.body,
         fromStaff: message.from_staff,
-        authorName: message.from_staff ? "Fuccura support" : message.name,
+        authorName: message.from_staff ? "Kitefolio support" : message.name,
         createdAt: message.created_at.toISOString(),
       })),
   }));

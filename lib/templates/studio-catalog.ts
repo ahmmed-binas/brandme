@@ -1997,7 +1997,7 @@ const LEGACY_STYLE: Record<StyleTag, TemplateDefinition["style"]> = {
 export const studioCatalog: TemplateDefinition[] = SPECS.map((spec) => ({
   ...spec,
   category: CATEGORY[spec.professions[0]] ?? "Professional",
-  author: "Fuccura Studio",
+  author: "Kitefolio Studio",
   createdAt: "2026-10-02",
   style: LEGACY_STYLE[spec.styles[0]],
   tags: [spec.mood === "dark" ? "Dark" : "Light", ...spec.styles],

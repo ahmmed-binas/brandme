@@ -1,6 +1,6 @@
-FUCCURA – REPORT, 14 OCTOBER 2026 (morning)
+KITEFOLIO – REPORT, 14 OCTOBER 2026 (morning)
 
-LIVE NOW (all deployed and checked on fuccura.com)
+LIVE NOW (all deployed and checked on kitefolio.com)
 - c5e6fb4  CV import works again: the free AI model had been retired by
            the provider; switched to one it still offers. Tested from the
            live server.
@@ -18,7 +18,7 @@ LIVE NOW (all deployed and checked on fuccura.com)
              allows 1,000 a day, so ~100 free users cost nothing.
            * The editor shows "N free CV imports left"; at 0 it shows
              "Upgrade to Pro, AED 35" and "WhatsApp us".
-           * New page: fuccura.com/services/custom-software (custom
+           * New page: kitefolio.com/services/custom-software (custom
              software & AI apps, built then maintained monthly; free call,
              written quote, no prices). In the footer and sitemap.
 
@@ -52,4 +52,4 @@ WAITING FOR YOU
    assistants and look after them monthly. Free call?" One project pays
    more than 50 Pro plans.
 3. Post the "Stop sending your CV" video (faceless version) with the
-   AI-free caption, and pin a comment: "Type your job at fuccura.com/for".
+   AI-free caption, and pin a comment: "Type your job at kitefolio.com/for".

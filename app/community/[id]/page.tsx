@@ -56,7 +56,7 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
           reviewRating: { "@type": "Rating", ratingValue: post.rating, bestRating: 5 },
           itemReviewed: {
             "@type": "SoftwareApplication",
-            name: "Fuccura",
+            name: "Kitefolio",
             applicationCategory: "DesignApplication",
           },
         }

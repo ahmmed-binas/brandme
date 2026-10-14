@@ -16,7 +16,7 @@ import { getUserById } from "@/utils/user-account";
  * Custom-domain business rules.
  *
  * - A portfolio (one owner + template) can have one custom domain.
- * - Bought domains: the customer pays first (Stripe). Only then does Fuccura
+ * - Bought domains: the customer pays first (Stripe). Only then does Kitefolio
  *   buy the domain, with the customer as the legal registrant. If registration
  *   fails, the payment is refunded automatically.
  * - Buying or connecting a domain needs Pro. Domains already set up keep

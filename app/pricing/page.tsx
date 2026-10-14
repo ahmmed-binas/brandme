@@ -19,7 +19,7 @@ import {
 /** Pro billed yearly, per month, for comparing with competitors' yearly prices. */
 const PRO_YEARLY_PER_MONTH = Math.round(PRICES.proYear / 12);
 
-/** What only Fuccura does (true facts about our product; competitors' columns are price only). */
+/** What only Kitefolio does (true facts about our product; competitors' columns are price only). */
 const ONLY_HERE = [
   ["Designs drawn for real estate agents in the UAE", "Not a generic template you have to bend"],
   ["An AI copy of your own voice", "Narrates your listing videos and reels"],
@@ -52,7 +52,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "Is Free really free?",
-    "Yes. One website with a blog stays online for free for as long as you like, with a small “Made with Fuccura” link. We’d rather you use it and tell a friend than pay for something you’re unsure about.",
+    "Yes. One website with a blog stays online for free for as long as you like, with a small “Made with Kitefolio” link. We’d rather you use it and tell a friend than pay for something you’re unsure about.",
   ],
   [
     "How do I pay?",
@@ -60,7 +60,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "What’s the difference between Pro and Agent?",
-    `Pro is for anyone who wants their own domain and no Fuccura link. Agent is built for real estate agents: listing pages, a WhatsApp button on every listing, your cloned voice for listing videos, and ${AGENT_EDITS_PER_MONTH} changes done for you each month.`,
+    `Pro is for anyone who wants their own domain and no Kitefolio link. Agent is built for real estate agents: listing pages, a WhatsApp button on every listing, your cloned voice for listing videos, and ${AGENT_EDITS_PER_MONTH} changes done for you each month.`,
   ],
   [
     "How does AI work if it isn’t in the price?",
@@ -156,7 +156,7 @@ export default function PricingPage() {
           <b className="font-medium">{aed(PRICES.foundingYear)} a year</b>, locked in for good.
         </p>
         <a
-          href={whatsappLink("Hi! I’d like a founding member spot for Fuccura Pro.")}
+          href={whatsappLink("Hi! I’d like a founding member spot for Kitefolio Pro.")}
           className="rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-paper transition hover:bg-signal hover:text-signal-ink"
         >
           Claim a spot
@@ -214,17 +214,17 @@ export default function PricingPage() {
         ))}
       </div>
 
-      {/* Why Fuccura: an honest price comparison, then what only we do. Data in lib/offers.ts. */}
+      {/* Why Kitefolio: an honest price comparison, then what only we do. Data in lib/offers.ts. */}
       <section className="mt-24 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
         <div>
-          <h2 className="font-display text-[2.4rem] leading-tight">Why Fuccura?</h2>
+          <h2 className="font-display text-[2.4rem] leading-tight">Why Kitefolio?</h2>
           <p className="mt-4 text-ink-soft">
             The big website builders are good, but they’re built for everyone, priced in dollars, and you do
             all the work. Here’s what a year of a simple website costs, per month.
           </p>
           <ul className="mt-6 divide-y divide-rule rounded-2xl border border-rule">
             <li className="flex items-baseline justify-between gap-4 bg-ink px-5 py-4 text-paper first:rounded-t-2xl">
-              <span className="font-medium">Fuccura Pro</span>
+              <span className="font-medium">Kitefolio Pro</span>
               <span className="font-display text-2xl">{aed(PRO_YEARLY_PER_MONTH)}</span>
             </li>
             {COMPETITORS.map((competitor) => (

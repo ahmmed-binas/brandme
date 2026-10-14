@@ -2,7 +2,7 @@
 
     marketing/.tts/cb/Scripts/python workers/voice/make_owner_voice.py <recording>
 
-The owner (Ahmed Binas) agreed on 12 October 2026 that Fuccura may offer his voice
+The owner (Ahmed Binas) agreed on 12 October 2026 that Kitefolio may offer his voice
 as a built-in voice. Keeps the clearest 15 seconds of the recording (the same
 choice the engine makes for cloned voices) as workers/voice/builtin/ahmed.wav.
 """

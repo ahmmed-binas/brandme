@@ -41,7 +41,7 @@ export default function DomainSetupStudio() {
       ? {
           domain: ".com first; .me or .dev are strong alternatives",
           host: managed
-            ? "Let Fuccura manage deployment and DNS after checkout"
+            ? "Let Kitefolio manage deployment and DNS after checkout"
             : "Deploy your exported code to Vercel, Netlify, or your own host",
           why: "A short, memorable personal domain makes a portfolio easier to share and trust.",
         }

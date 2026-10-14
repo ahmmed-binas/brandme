@@ -4,10 +4,10 @@ import { BOT, visitorId } from "@/lib/analytics/track";
 import { alertOwner } from "@/lib/owner/alerts";
 
 /**
- * Leads: people who reached out to Fuccura. Counted in the owner's daily
+ * Leads: people who reached out to Kitefolio. Counted in the owner's daily
  * report and the agent's scorecard.
- *   whatsapp – clicked one of Fuccura's own WhatsApp buttons (VisitBeacon notices it)
- *   email    – clicked Fuccura's own email address
+ *   whatsapp – clicked one of Kitefolio's own WhatsApp buttons (VisitBeacon notices it)
+ *   email    – clicked Kitefolio's own email address
  *   contact  – sent the contact form (name, email and subject kept for follow-up)
  * Booked calls are counted from call_bookings, where they already live.
  */

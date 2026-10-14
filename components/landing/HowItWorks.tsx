@@ -19,7 +19,7 @@ const STEPS = [
   {
     label: "Publish",
     title: "Put it on a domain with your name.",
-    body: "Publish to a Fuccura address for free, or buy yourname.com in a few clicks. We register it in your name, point it at your portfolio and switch on HTTPS.",
+    body: "Publish to a Kitefolio address for free, or buy yourname.com in a few clicks. We register it in your name, point it at your portfolio and switch on HTTPS.",
   },
 ];
 

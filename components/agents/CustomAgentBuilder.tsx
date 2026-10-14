@@ -24,7 +24,7 @@ const PLATFORMS = [
   "Shopify",
   "Webflow",
   "Wix",
-  "Fuccura",
+  "Kitefolio",
   "Custom-built",
   "Not sure",
 ] as const;
@@ -52,7 +52,7 @@ export function CustomAgentBuilder({ whatsapp }: { whatsapp: string }) {
   const message = useMemo(
     () =>
       [
-        "Hi! I’d like a custom AI agent from Fuccura.",
+        "Hi! I’d like a custom AI agent from Kitefolio.",
         business.trim() ? `My business: ${business.trim()}` : "",
         chosen.length
           ? `I want it to: ${chosen.map((job) => job.label.charAt(0).toLowerCase() + job.label.slice(1)).join(", ")}.`

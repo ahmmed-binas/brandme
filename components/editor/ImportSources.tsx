@@ -180,7 +180,7 @@ export function ImportSources({
             </Link>
             <a
               href={whatsappLink(
-                "Hi! I've used my free CV imports on Fuccura and need a hand with my website.",
+                "Hi! I've used my free CV imports on Kitefolio and need a hand with my website.",
               )}
               target="_blank"
               rel="noopener noreferrer"

@@ -1,4 +1,4 @@
-// Reads fuccura.com's Google Search Console data for Ahmed Agent's runs.
+// Reads kitefolio.com's Google Search Console data for Ahmed Agent's runs.
 //
 //   node scripts/agent/search-console.mjs            last 28 days
 //   node scripts/agent/search-console.mjs 7          last 7 days

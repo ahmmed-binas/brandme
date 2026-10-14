@@ -29,18 +29,18 @@
 <body>
 
 <h1>How the voice tool works</h1>
-<p class="sub">Data, your laptop and security · fuccura.com/tools/voice · October 2026 · Ahmed Agent</p>
+<p class="sub">Data, your laptop and security · kitefolio.com/tools/voice · October 2026 · Ahmed Agent</p>
 
 <h2>1. In one minute</h2>
 <p>Three computers take part. The visitor’s browser prepares the sound, the web server stores and queues it, and your laptop does the AI work, because it has the graphics card and the server doesn’t.</p>
 <div class="flow">
-  <div class="box"><b>Visitor’s browser</b>Records or opens the video, pulls out <em>only the sound</em>, and sends it to fuccura.com. The video never leaves their device.</div>
+  <div class="box"><b>Visitor’s browser</b>Records or opens the video, pulls out <em>only the sound</em>, and sends it to kitefolio.com. The video never leaves their device.</div>
   <div class="arrow">→</div>
-  <div class="box"><b>Web server (VPS)</b>Your company’s server. Stores the sound in Fuccura’s own database and puts the job in a queue. Never runs the AI.</div>
+  <div class="box"><b>Web server (VPS)</b>Your company’s server. Stores the sound in Kitefolio’s own database and puts the job in a queue. Never runs the AI.</div>
   <div class="arrow">←</div>
   <div class="box"><b>Your laptop</b>Asks the server for work every 3 seconds, makes the voice or clip on its graphics card, and sends the result back.</div>
 </div>
-<p>The laptop only ever <em>calls out</em> to fuccura.com. Nothing on the internet can connect <em>in</em> to your laptop, so no ports are opened on your router.</p>
+<p>The laptop only ever <em>calls out</em> to kitefolio.com. Nothing on the internet can connect <em>in</em> to your laptop, so no ports are opened on your router.</p>
 
 <h2>2. Step by step</h2>
 <h3>Making a voice</h3>
@@ -63,19 +63,19 @@
 <table>
   <tr><th>Data</th><th>Where</th><th>How long</th></tr>
   <tr><td>The original video</td><td>Never leaves the visitor’s device</td><td>Never stored by us</td></tr>
-  <tr><td>Uploaded sound + consent recording</td><td>Fuccura database on the server</td><td>Until the voice is made (usually under a minute), then deleted</td></tr>
-  <tr><td>12-second voice sample</td><td>Fuccura database on the server</td><td>Until the person deletes their voice or account</td></tr>
-  <tr><td>Clips (text + MP3)</td><td>Fuccura database on the server</td><td>7 days (Free) or 90 days (Pro), then deleted by the hourly job</td></tr>
+  <tr><td>Uploaded sound + consent recording</td><td>Kitefolio database on the server</td><td>Until the voice is made (usually under a minute), then deleted</td></tr>
+  <tr><td>12-second voice sample</td><td>Kitefolio database on the server</td><td>Until the person deletes their voice or account</td></tr>
+  <tr><td>Clips (text + MP3)</td><td>Kitefolio database on the server</td><td>7 days (Free) or 90 days (Pro), then deleted by the hourly job</td></tr>
   <tr><td>Voice samples on your laptop</td><td>A temporary folder (<code>fuccura-voices-…</code>)</td><td>Only while the engine runs. Deleted when it stops, and any leftovers are cleared on the next start</td></tr>
   <tr><td>The AI model (Chatterbox)</td><td>Your laptop (Hugging Face cache)</td><td>Permanent; it contains no customer data</td></tr>
-  <tr><td>Similarity score, dates, style</td><td>Fuccura database</td><td>With the voice / clip</td></tr>
+  <tr><td>Similarity score, dates, style</td><td>Kitefolio database</td><td>With the voice / clip</td></tr>
 </table>
 <p>Your voice data is never sent to any AI company (OpenAI, Google, ElevenLabs…). The model is open source (MIT licence) and runs on your own laptop.</p>
 
 <h2 class="page-break">4. Security</h2>
 <h3>Your laptop</h3>
 <ul>
-  <li><b>Outgoing only.</b> The engine makes HTTPS requests to fuccura.com, and nothing can reach in.</li>
+  <li><b>Outgoing only.</b> The engine makes HTTPS requests to kitefolio.com, and nothing can reach in.</li>
   <li><b>A secret key</b> (<code>TOOLS_WORKER_TOKEN</code>, 43 random characters) proves to the server that it’s your laptop. It lives in <code>workers/voice/.env</code> (not in git) and in the server’s <code>.env</code>. Without the right key, the engine’s web addresses answer “Not found”.</li>
   <li><b>What the key can do:</b> fetch queued recordings and voice samples, and send back results. It can’t read accounts, emails, payments or anything else.</li>
   <li><b>If the laptop is lost or stolen:</b> change <code>TOOLS_WORKER_TOKEN</code> on the server (new random value) and restart the app. The old key stops working at once. Turning on BitLocker (Windows disk encryption) protects the key and model at rest.</li>
@@ -83,8 +83,8 @@
 <h3>The web server</h3>
 <ul>
   <li>Everything travels over <b>HTTPS</b> (Caddy, automatic certificates).</li>
-  <li>Fuccura’s database is <b>not reachable from the internet</b>: it has no open port and only the app can talk to it.</li>
-  <li>Fuccura is <b>capped</b> at 0.75 CPU and 768 MB for the app (about 2 GB in total), so it can never slow your company’s software. It normally uses about 150 MB and under 1% CPU.</li>
+  <li>Kitefolio’s database is <b>not reachable from the internet</b>: it has no open port and only the app can talk to it.</li>
+  <li>Kitefolio is <b>capped</b> at 0.75 CPU and 768 MB for the app (about 2 GB in total), so it can never slow your company’s software. It normally uses about 150 MB and under 1% CPU.</li>
   <li>The app is built on your PC and only the finished image goes to the server, so the server never runs builds.</li>
   <li>Secrets live only in <code>.env</code> files on the server and your PC, never in the code or on GitHub.</li>
 </ul>
@@ -106,7 +106,7 @@
 <ul>
   <li><b>Your laptop is the engine.</b> When it’s off, the page says “Currently not available” and jobs wait in the queue. That’s fine for now; a rented graphics card is the upgrade once there’s demand and income.</li>
   <li><b>Voice is personal (biometric) data.</b> We collect only what’s needed, delete uploads at once, and explain it on the privacy page. This isn’t legal advice; UAE data-protection law should be checked before big growth.</li>
-  <li><b>The server belongs to your employer.</b> Fuccura’s data sits on it in its own isolated database, capped and separate. Moving to Fuccura’s own server is the clean long-term step.</li>
+  <li><b>The server belongs to your employer.</b> Kitefolio’s data sits on it in its own isolated database, capped and separate. Moving to Kitefolio’s own server is the clean long-term step.</li>
   <li><b>Keys:</b> if any <code>.env</code> file is ever shared by mistake, change the keys in it (each is a random value you can regenerate).</li>
 </ul>
 

@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 const KEY_FILE = process.env.GSC_KEY_FILE || join(homedir(), ".fuccura", "gsc-key.json");
 // A Domain property (verified by DNS) or a URL-prefix property; the first that answers is used.
-export const PROPERTIES = ["sc-domain:fuccura.com", "https://fuccura.com/"];
+export const PROPERTIES = ["sc-domain:kitefolio.com", "https://kitefolio.com/"];
 
 const base64url = (value) => Buffer.from(value).toString("base64url");
 

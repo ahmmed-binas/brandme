@@ -181,7 +181,7 @@ export function judgePost(
     if (draft.kind === "review" && history.hasLiveReview)
       return refuse(
         "already_reviewed",
-        "You’ve already reviewed Fuccura. Edit your existing review instead.",
+        "You’ve already reviewed Kitefolio. Edit your existing review instead.",
       );
     const normalised = normaliseForDuplicates(body);
     if (history.recentBodies.some((previous) => normaliseForDuplicates(previous) === normalised))

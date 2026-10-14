@@ -80,7 +80,7 @@ const FAQ: Array<[string, string]> = [
     "Answer Engine Optimisation: making your site easy for AI assistants such as ChatGPT, Claude and Perplexity to understand and quote, so you’re the business they mention when someone asks.",
   ],
   [
-    "Do I need a Fuccura website?",
+    "Do I need a Kitefolio website?",
     "No. Agents work with WordPress, Next.js, Shopify, Webflow, Wix and custom-built sites.",
   ],
   [

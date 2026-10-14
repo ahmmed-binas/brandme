@@ -81,7 +81,7 @@ function fromRow(row: Row): JournalPost {
     submittedAt: row.submitted_at?.toISOString() ?? null,
     author: row.submitted_at
       ? {
-          name: row.author_name?.trim() || "A Fuccura member",
+          name: row.author_name?.trim() || "A Kitefolio member",
           url: row.portfolio_slug ? `/p/${row.portfolio_slug}` : null,
         }
       : null,

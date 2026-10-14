@@ -10,7 +10,7 @@ import { databaseConfigured } from "@/utils/db-schema";
 export const metadata: Metadata = {
   title: "Community: suggestions, reviews and designs",
   description:
-    "Suggest features, read honest reviews, and see portfolio designs submitted by the Fuccura community.",
+    "Suggest features, read honest reviews, and see portfolio designs submitted by the Kitefolio community.",
   alternates: { canonical: "/community" },
 };
 

@@ -24,7 +24,7 @@ When the worker isn't running, people can still queue work. The page tells them 
 ## Settings: `workers/voice/.env` (not in git)
 
 ```
-FUCCURA_URL=http://localhost:3000      # or https://fuccura.com for the live site
+KITEFOLIO_URL=http://localhost:3000      # or https://kitefolio.com for the live site
 TOOLS_WORKER_TOKEN=<long secret>       # must match TOOLS_WORKER_TOKEN on the website
 WORKER_NAME=pc
 ```

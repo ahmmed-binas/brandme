@@ -93,7 +93,7 @@ export async function loadDailyReport(): Promise<DailyReport> {
 }
 
 /**
- * The month's goal: Ahmed Agent's first month running Fuccura (set 11 October 2026).
+ * The month's goal: Ahmed Agent's first month running Kitefolio (set 11 October 2026).
  * The owner judges it mainly on leads. Change the numbers here.
  */
 const GOAL = { deadline: "11 November 2026", leads: 25, accounts: 100, published: 15 };

@@ -28,7 +28,7 @@ const PROVIDERS = {
     consoleLabel: "console.anthropic.com",
     steps: [
       "Sign in at console.anthropic.com and add a payment method under Billing.",
-      "Open API keys and choose Create key. Name it “Fuccura”.",
+      "Open API keys and choose Create key. Name it “Kitefolio”.",
       "Copy the key (it starts with sk-ant-) and paste it below.",
     ],
     note: null as string | null,
@@ -41,7 +41,7 @@ const PROVIDERS = {
     consoleLabel: "platform.openai.com",
     steps: [
       "Sign in at platform.openai.com (the same login as ChatGPT) and add credit under Billing.",
-      "Open API keys and choose Create new secret key. Name it “Fuccura”.",
+      "Open API keys and choose Create new secret key. Name it “Kitefolio”.",
       "Copy the key (it starts with sk-) and paste it below.",
     ],
     note: "For ChatGPT and Codex users. A ChatGPT Plus, Pro or Codex subscription doesn’t include API access: OpenAI bills API use separately, from the credit you add on the platform. We use the newest GPT model your key can reach.",
@@ -58,7 +58,7 @@ const json = async (url: string, init?: RequestInit) => {
   return body;
 };
 
-/** How the owner pays for AI: Fuccura credits, or their own Claude or OpenAI key. */
+/** How the owner pays for AI: Kitefolio credits, or their own Claude or OpenAI key. */
 export function AiSettings({
   ai,
   payments,
@@ -151,7 +151,7 @@ export function AiSettings({
       </div>
       <p className="mt-4 max-w-[42rem] text-[0.98rem] leading-relaxed text-ink-soft">
         The assistant, imports and the Investigator are paid for separately from your plan, at the same price
-        on every plan. Use Fuccura credits, or connect your own Claude or OpenAI account and pay them
+        on every plan. Use Kitefolio credits, or connect your own Claude or OpenAI account and pay them
         directly.
       </p>
 
@@ -166,7 +166,7 @@ export function AiSettings({
           </>
         ) : ai.platformAi ? (
           <>
-            AI runs on <b className="font-medium">Fuccura credits</b>
+            AI runs on <b className="font-medium">Kitefolio credits</b>
             <span className="text-paper/70">· {ai.credits.toLocaleString("en")} left</span>
           </>
         ) : (
@@ -177,7 +177,7 @@ export function AiSettings({
       <div role="radiogroup" aria-label="How AI is paid for" className="mt-5 grid gap-3 md:grid-cols-3">
         {option(
           "credits",
-          "Fuccura credits",
+          "Kitefolio credits",
           "Pay as you go. Sold at what the AI costs us plus 5%. Nothing to set up.",
         )}
         {option("anthropic", "Your Claude key", "Use your Anthropic account. No credits used.")}

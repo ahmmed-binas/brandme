@@ -191,7 +191,7 @@ log("order status:", sql(`SELECT status FROM domain_orders WHERE id='${orderId}'
 await page.screenshot({ path: `${S}/shots/domain-live.png` });
 
 sql(`SELECT 1`);
-// The custom domain serves the published portfolio without the Fuccura site chrome.
+// The custom domain serves the published portfolio without the Kitefolio site chrome.
 const html = execSync(`curl -s -H "Host: ${domain}" ${BASE}/`).toString();
 const wwwHtml = execSync(`curl -s -H "Host: www.${domain}" ${BASE}/`).toString();
 log(

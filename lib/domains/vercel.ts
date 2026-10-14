@@ -92,7 +92,7 @@ export async function getPrice(domain: string): Promise<RegistrarPrice | null> {
   }
 }
 
-/** ICANN registrant details. The customer is the legal owner of the domain, not Fuccura. */
+/** ICANN registrant details. The customer is the legal owner of the domain, not Kitefolio. */
 export interface RegistrantContact {
   firstName: string;
   lastName: string;
@@ -117,7 +117,7 @@ export async function buyDomain(
   contact: RegistrantContact,
 ): Promise<{ orderId: string }> {
   const data = await vercel<{ orderId?: string }>("POST", `/v1/registrar/domains/${enc(domain)}/buy`, {
-    autoRenew: false, // Renewals are billed to the customer separately, so Fuccura never renews unpaid domains.
+    autoRenew: false, // Renewals are billed to the customer separately, so Kitefolio never renews unpaid domains.
     years: 1,
     expectedPrice,
     contactInformation: contact,

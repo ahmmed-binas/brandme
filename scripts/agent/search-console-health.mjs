@@ -1,4 +1,4 @@
-// Checks fuccura.com's health in Google Search Console for Ahmed Agent's runs:
+// Checks kitefolio.com's health in Google Search Console for Ahmed Agent's runs:
 // the sitemaps Google has (errors, warnings, pages submitted) and whether the
 // key pages are indexed (URL Inspection, read-only).
 //
@@ -8,7 +8,7 @@
 // Sign-in and key file: see gsc.mjs.
 import { accessToken, call, PROPERTIES, readKey } from "./gsc.mjs";
 
-const SITE = "https://fuccura.com";
+const SITE = "https://kitefolio.com";
 const KEY_PAGES = [
   "/",
   "/for",

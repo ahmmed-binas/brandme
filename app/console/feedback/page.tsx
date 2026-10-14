@@ -126,7 +126,7 @@ export default async function ConsoleFeedback() {
       <h2 className="mt-8 text-[14px] font-semibold">Star ratings on pages ({ratings.length})</h2>
       <p className="mt-1 text-[12.5px] text-[var(--c-text2)]">
         The stars under each template, agent and blog post. Comments marked “public” show with the person’s
-        name and photo on that page; the rest show as “A Fuccura member”.
+        name and photo on that page; the rest show as “A Kitefolio member”.
       </p>
       <div className={`mt-3 overflow-x-auto ${panel}`}>
         <table className="w-full min-w-[860px] text-left text-[12.5px]">

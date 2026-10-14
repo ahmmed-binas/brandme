@@ -81,7 +81,7 @@ export function VoiceClone() {
       setState(body);
       return true;
     } catch {
-      setError("We couldn’t reach Fuccura. Check your connection and try again.");
+      setError("We couldn’t reach Kitefolio. Check your connection and try again.");
     }
   };
 
@@ -681,7 +681,7 @@ function Allowance({ plan, left }: { plan: VoicePlan; left: number }) {
 
 /**
  * After the first finished clip: the free tool's job is to bring people to
- * Fuccura's websites, so show where their new voice can work for them.
+ * Kitefolio's websites, so show where their new voice can work for them.
  */
 function UseYourVoice() {
   return (

@@ -91,12 +91,12 @@ function ContactDelivery({ contact, onChange }: { contact: Contact; onChange: (c
       const number = contact.whatsappNumber.replace(/\D/g, "");
       if (number)
         window.open(
-          `https://wa.me/${number}?text=${encodeURIComponent("Fuccura test message")}`,
+          `https://wa.me/${number}?text=${encodeURIComponent("Kitefolio test message")}`,
           "_blank",
           "noopener,noreferrer",
         );
     } else if (contact.email)
-      window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent("Fuccura contact test")}&body=${encodeURIComponent("Your portfolio email connection is ready.")}`;
+      window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent("Kitefolio contact test")}&body=${encodeURIComponent("Your portfolio email connection is ready.")}`;
   };
   return (
     <div className="rounded-xl border border-violet-200 bg-violet-50 p-3 text-slate-700">

@@ -85,7 +85,7 @@ export async function recordServerError(method: string, path: string, message: s
         `${recent.rows[0]!.n} server errors in the last hour. The latest: ${method} ${path}: ${message.split("\n")[0]!.slice(0, 160)}`,
         "Ahmed Agent fixes errors at the next run. If something important is broken, message Ahmed Agent in Claude now.",
       ],
-      { label: "Open fuccura.com", url: siteUrl },
+      { label: "Open kitefolio.com", url: siteUrl },
     );
   } catch {
     // Recording an error must never cause another one.

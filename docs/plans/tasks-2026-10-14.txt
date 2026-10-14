@@ -1,4 +1,4 @@
-FUCCURA – TASKS FOR 14 OCTOBER 2026
+KITEFOLIO – TASKS FOR 14 OCTOBER 2026
 STATUS (14 Oct morning): 0, 1, 2, 4 and 5 (option 1) DONE and live – see report-2026-10-14.txt.
 3 (IP) and 5d (option 2 lock) wait for the owner's decision.
 (written 13 Oct night, from the owner's voice note)
@@ -10,7 +10,7 @@ What the owner sees: people rated templates, but the Feedback tab is empty.
 
 WHY (checked on the live database, 13 Oct):
 - There are TWO different rating systems:
-  a) Stars on each template's page (fuccura.com/gallery/<template>)
+  a) Stars on each template's page (kitefolio.com/gallery/<template>)
      -> saved in the table "template_ratings".
   b) The rating card inside the editor (pops up after 3 min of editing)
      -> saved in "template_feedback".
@@ -118,4 +118,4 @@ NOTES
 - Ignore 13 Oct visitors from India: owner's family.
 - Groq / free CV import: dropped for now.
 - Still waiting: owner to approve 5 new templates at
-  fuccura.com/templates/review (Dispatch, Atelier, Roadmap, Radar, Duet).
+  kitefolio.com/templates/review (Dispatch, Atelier, Roadmap, Radar, Duet).

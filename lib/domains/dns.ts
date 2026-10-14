@@ -32,8 +32,8 @@ export function cnameTarget(): string {
   }
 }
 
-export const verificationHost = (domain: string) => `_fuccura.${apexOf(domain)}`;
-export const verificationValue = (token: string) => `fuccura-verify=${token}`;
+export const verificationHost = (domain: string) => `_kitefolio.${apexOf(domain)}`;
+export const verificationValue = (token: string) => `kitefolio-verify=${token}`;
 
 export interface DnsRecord {
   type: string;

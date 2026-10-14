@@ -22,7 +22,7 @@ export default async function EmailSettings() {
     [
       "SMTP_FROM",
       mail.from,
-      "Who emails appear to come from. Use the same mailbox, e.g. “Fuccura <you@company.com>”.",
+      "Who emails appear to come from. Use the same mailbox, e.g. “Kitefolio <you@company.com>”.",
     ],
     ["SMTP_TO", mail.supportInbox ?? "not set", "Where support requests and contact messages arrive."],
   ];

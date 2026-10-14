@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/site";
 import { BUILTIN_VOICES, VOICE_PLANS, VOICE_STYLES } from "@/lib/tools/voice-config";
 
 /**
- * The free AI voice clone: Fuccura's main way in from search and social.
+ * The free AI voice clone: Kitefolio's main way in from search and social.
  * Top to bottom: a hero with a real before/after demo, the tool itself, uses,
  * how it works, why it's safe, tips, FAQ and a route to a free website.
  * Search engines get the same story as structured data (WebApplication, FAQ,
@@ -67,7 +67,7 @@ const DEMO: DemoSample[] = [
 ];
 
 const PROMISES = [
-  "Free with a Fuccura account",
+  "Free with a Kitefolio account",
   "30 seconds of your voice is enough",
   `${BUILTIN_VOICES.length} ready-made voices, one a real human voice`,
   "Download as MP3",
@@ -199,7 +199,7 @@ const schema = {
   "@graph": [
     {
       "@type": "WebApplication",
-      name: "Fuccura AI Voice Clone",
+      name: "Kitefolio AI Voice Clone",
       url: `${siteUrl}/tools/voice`,
       description: DESCRIPTION,
       applicationCategory: "MultimediaApplication",

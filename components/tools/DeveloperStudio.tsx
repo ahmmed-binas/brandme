@@ -25,7 +25,7 @@ const fromBase64Url = (part: string) => {
 
 export default function DeveloperStudio() {
   const [tool, setTool] = useState<Tool>("json");
-  const [source, setSource] = useState('{"name":"Fuccura","local":true}');
+  const [source, setSource] = useState('{"name":"Kitefolio","local":true}');
   const [result, setResult] = useState("");
   const [notice, setNotice] = useState("Paste JSON, then format, minify, or validate it.");
   const [jwt, setJwt] = useState("");

@@ -18,7 +18,7 @@ import PdfToImageStudio from "@/components/tools/PdfToImageStudio";
 export const metadata: Metadata = {
   title: "Free tools: AI voice clone, UAE mortgage calculator and PDF tools",
   description:
-    "Free tools from Fuccura: clone your voice for videos, work out a UAE mortgage with every upfront cost, and convert, merge or edit PDFs in your browser.",
+    "Free tools from Kitefolio: clone your voice for videos, work out a UAE mortgage with every upfront cost, and convert, merge or edit PDFs in your browser.",
   alternates: { canonical: "/tools" },
 };
 
@@ -91,12 +91,12 @@ export default function ToolsPage() {
         name: "Can I clone my own voice for free?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Yes. The AI voice clone makes a copy of your own voice from about 30 seconds of speech and reads any text aloud in it, free with a Fuccura account.",
+          text: "Yes. The AI voice clone makes a copy of your own voice from about 30 seconds of speech and reads any text aloud in it, free with a Kitefolio account.",
         },
       },
       {
         "@type": "Question",
-        name: "Are Fuccura tools free?",
+        name: "Are Kitefolio tools free?",
         acceptedAnswer: {
           "@type": "Answer",
           text: "Yes. The available PDF, image, everyday, and developer tools are free to use without an account.",
@@ -280,20 +280,20 @@ export default function ToolsPage() {
         </div>
         <div className="mt-16 max-w-4xl">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
-            What Fuccura does
+            What Kitefolio does
           </p>
           <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
             Free online tools for documents, images, data, and development.
           </h2>
           <p className="mt-5 leading-7 text-slate-600 dark:text-slate-400">
-            Fuccura is a privacy-first toolbox for practical work. Use it to merge and split PDFs, turn PDF
+            Kitefolio is a privacy-first toolbox for practical work. Use it to merge and split PDFs, turn PDF
             pages into images, edit visible PDF text, remove simple image backgrounds, increase image size,
             clean up text, or handle exact developer transformations. We focus on tasks where speed, a clear
             result, and keeping files on your own device matter more than an AI-generated answer.
           </p>
           <p className="mt-4 leading-7 text-slate-600 dark:text-slate-400">
             Each tool explains what it does and its limits. File tools work in your browser whenever possible;
-            developer tools do not execute pasted code or verify private credentials. That makes Fuccura
+            developer tools do not execute pasted code or verify private credentials. That makes Kitefolio
             useful for everyday personal documents, freelance work, portfolio preparation, and routine
             engineering tasks.
           </p>

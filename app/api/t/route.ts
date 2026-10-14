@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const viewer = await getCurrentUser().catch(() => null);
     if (viewer?.internal)
       return new Response(null, { status: 204, headers: { "Set-Cookie": internalCookieHeader() } });
-    // A click on one of Fuccura's own WhatsApp or email buttons (VisitBeacon), not a page view.
+    // A click on one of Kitefolio's own WhatsApp or email buttons (VisitBeacon), not a page view.
     if (typeof body.path === "string" && isLeadKind(body.lead) && body.lead !== "contact") {
       const user = viewer;
       if (!user?.isSuperadmin)

@@ -33,7 +33,7 @@ export default async function VoiceOpenGraphImage() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 34 }}>
-        <span>fuccura</span>
+        <span>kitefolio</span>
         <span
           style={{
             display: "flex",
@@ -62,7 +62,7 @@ export default async function VoiceOpenGraphImage() {
             />
           ))}
         </div>
-        <span style={{ fontSize: 30, opacity: 0.75 }}>fuccura.com/tools/voice</span>
+        <span style={{ fontSize: 30, opacity: 0.75 }}>kitefolio.com/tools/voice</span>
       </div>
     </div>,
     {

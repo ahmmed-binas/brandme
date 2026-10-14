@@ -42,7 +42,7 @@ export default async function OpenGraphImage() {
           />
           <circle cx="24" cy="24" r="3" fill="#15140f" />
         </svg>
-        fuccura
+        kitefolio
       </div>
       <div
         style={{

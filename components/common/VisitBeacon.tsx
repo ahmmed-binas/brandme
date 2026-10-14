@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { brand } from "@/lib/brand";
 
 /**
- * Counts page views, and clicks on Fuccura's own WhatsApp and email buttons
+ * Counts page views, and clicks on Kitefolio's own WhatsApp and email buttons
  * as leads (no cookies; see lib/analytics/track.ts and lib/analytics/leads.ts).
  * Automated browsers aren't counted.
  */
@@ -34,7 +34,7 @@ export default function VisitBeacon() {
   return null;
 }
 
-/** "whatsapp" or "email" when a link goes to Fuccura itself (not a customer's own number). */
+/** "whatsapp" or "email" when a link goes to Kitefolio itself (not a customer's own number). */
 function leadKind(href: string): "whatsapp" | "email" | null {
   const number = brand.whatsapp.replace(/\D/g, "");
   if (/^https:\/\/(wa\.me|api\.whatsapp\.com)\//.test(href) && href.replace(/\D/g, "").includes(number))

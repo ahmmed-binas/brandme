@@ -64,7 +64,7 @@ export const POST = route(async (request: Request) => {
       body:
         textToHtml(text.slice(0, 30_000)) +
         (includeReport === true ? reportNumbersHtml(await loadDailyReport()) : ""),
-      footer: "Sent by Ahmed Agent, Fuccura's AI assistant, to Fuccura's owner only.",
+      footer: "Sent by Ahmed Agent, Kitefolio's AI assistant, to Kitefolio's owner only.",
     }),
     attachments: files,
   });

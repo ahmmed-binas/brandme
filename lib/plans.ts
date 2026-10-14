@@ -29,7 +29,7 @@ export interface PlanLimits {
   publishedPortfolios: number;
   /** Cap on AI requests per day, whatever pays for them, so nobody can hammer the service. */
   aiEditsPerDay: number;
-  /** Whether a small "Made with Fuccura" link shows on published pages. */
+  /** Whether a small "Made with Kitefolio" link shows on published pages. */
   showsBranding: boolean;
   /** Whether the owner can buy or connect a domain of their own. */
   ownDomain: boolean;
@@ -63,7 +63,7 @@ export const PLANS: Record<PlanId, PlanLimits> = {
   pro: {
     id: "pro",
     name: "Pro",
-    summary: "Your site on your own domain, with no Fuccura link.",
+    summary: "Your site on your own domain, with no Kitefolio link.",
     // US cents at the dirham peg: AED 35 a month, AED 299 a year (lib/offers.ts).
     prices: { year: 8142, month: 953 },
     portfolios: 3,

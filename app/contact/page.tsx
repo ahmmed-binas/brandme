@@ -33,7 +33,7 @@ export default function ContactPage() {
             For now, email is the fastest way to reach us.
           </p>
           <a
-            href={`mailto:${brand.contactEmail}?subject=Fuccura%20enquiry`}
+            href={`mailto:${brand.contactEmail}?subject=Kitefolio%20enquiry`}
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950"
           >
             Email {brand.name} <ArrowRight size={16} />

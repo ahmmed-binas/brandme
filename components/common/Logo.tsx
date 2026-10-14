@@ -38,7 +38,7 @@ export function Logo({ className = "" }: { className?: string }) {
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <LogoMark size={30} className="transition-transform duration-500 group-hover:rotate-45" />
       <span className={`${wordmark.className} text-[1.45rem] font-medium leading-none tracking-[-0.035em]`}>
-        fuccura
+        kitefolio
       </span>
     </span>
   );

@@ -1,4 +1,4 @@
-# Fuccura
+# Kitefolio
 
 A portfolio builder: choose a designed template, fill it with your content (by hand, from a CV, or with AI help), and publish it at your own address. It also includes free, browser-only document tools.
 

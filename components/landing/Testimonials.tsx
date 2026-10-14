@@ -74,7 +74,7 @@ export default function Testimonials({ items }: { items: PublicFeedback[] }) {
                     <span>
                       <b className="block text-[15px] font-semibold text-ink">{item.name}</b>
                       <span className="text-[13px] text-ink-soft">
-                        Built with {getTemplate(item.templateId)?.name ?? "Fuccura"}
+                        Built with {getTemplate(item.templateId)?.name ?? "Kitefolio"}
                       </span>
                     </span>
                   </figcaption>

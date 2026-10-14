@@ -57,7 +57,7 @@ export default function DeveloperToolsPage() {
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        name: "Fuccura Developer Tools",
+        name: "Kitefolio Developer Tools",
         applicationCategory: "DeveloperApplication",
         operatingSystem: "Web",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -95,7 +95,7 @@ export default function DeveloperToolsPage() {
             Developer tools for exact work—not generated guesses.
           </h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-            Fuccura’s free developer toolbox handles the small but repetitive tasks behind debugging, APIs,
+            Kitefolio’s free developer toolbox handles the small but repetitive tasks behind debugging, APIs,
             configuration, and data checks. Format a JSON payload, decode a JWT, create a UUID, test a regular
             expression, or convert a Unix timestamp in seconds—without creating an account or sending your
             input to our server.

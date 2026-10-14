@@ -7,7 +7,7 @@ import { ROLES } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
 
 /**
- * /llms.txt: a plain summary of Fuccura for AI assistants and answer engines
+ * /llms.txt: a plain summary of Kitefolio for AI assistants and answer engines
  * (ChatGPT, Claude, Perplexity, Google's AI answers). Format: llmstxt.org.
  *
  * Built from the same sources as the site (prices from lib/offers.ts, tools

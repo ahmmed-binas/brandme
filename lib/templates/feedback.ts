@@ -231,7 +231,7 @@ export async function featuredFeedback(limit = 9): Promise<PublicFeedback[]> {
       [limit],
     );
     return result.rows.map((row) => ({
-      name: row.name?.trim() || "A Fuccura user",
+      name: row.name?.trim() || "A Kitefolio user",
       image: row.image,
       stars: row.stars,
       comment: row.comment,

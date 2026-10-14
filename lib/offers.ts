@@ -1,7 +1,7 @@
 import { brand } from "@/lib/brand";
 
 /**
- * What Fuccura sells and for how much, in UAE dirhams, as shown to customers.
+ * What Kitefolio sells and for how much, in UAE dirhams, as shown to customers.
  * Set with the owner on 12 October 2026, replacing "Pro $10 a year". Change
  * prices here: the pricing page, home page, terms and template FAQs read them.
  *
@@ -38,7 +38,7 @@ export const FOUNDING_SPOTS = 20;
 export const AGENT_EDITS_PER_MONTH = 2;
 
 /**
- * Competitors' cheapest paid plans, for the "Why Fuccura" comparison on /pricing.
+ * Competitors' cheapest paid plans, for the "Why Kitefolio" comparison on /pricing.
  * From their own pricing pages (yearly billing, before tax), converted at the
  * dirham peg. Re-check before changing, and update COMPETITORS_CHECKED.
  *   wix.com/plans: Light $17/month · squarespace.com/pricing: Basic $12/month
@@ -55,7 +55,7 @@ export const usdToAed = (usd: number) => Math.round(usd * AED_PER_USD);
 /** "AED 299" */
 export const aed = (amount: number) => `AED ${amount.toLocaleString("en-GB")}`;
 
-/** A WhatsApp chat with Fuccura, with the customer's first message typed in for them. */
+/** A WhatsApp chat with Kitefolio, with the customer's first message typed in for them. */
 export const whatsappLink = (message: string) =>
   `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(message)}`;
 
@@ -78,13 +78,13 @@ export const OFFERS: Offer[] = [
     name: "Free",
     price: aed(0),
     per: "for good",
-    pitch: "Your website online today, at a free Fuccura address.",
+    pitch: "Your website online today, at a free Kitefolio address.",
     features: [
       "Every template, colour and font",
       "One live website with a blog",
       "AI voice clone: 5 clips a day",
       "UAE mortgage calculator and free tools",
-      "A small “Made with Fuccura” link",
+      "A small “Made with Kitefolio” link",
     ],
     cta: { label: "Start free", href: "/templatechooser" },
   },
@@ -99,12 +99,12 @@ export const OFFERS: Offer[] = [
       "Everything in Free",
       // The domain itself is the customer's (about AED 45 a year from any registrar, or through us at cost).
       "Your own domain with HTTPS (free for the first year on yearly Pro)",
-      "No Fuccura link on your site",
+      "No Kitefolio link on your site",
       "Up to three websites, all live",
       "AI voice clone: 50 clips a day, first in the queue",
       "1 GB of images",
     ],
-    cta: { label: "Get Pro on WhatsApp", href: whatsappLink("Hi! I’d like Fuccura Pro.") },
+    cta: { label: "Get Pro on WhatsApp", href: whatsappLink("Hi! I’d like Kitefolio Pro.") },
   },
   {
     id: "agent",
@@ -122,7 +122,7 @@ export const OFFERS: Offer[] = [
     ],
     cta: {
       label: "Get Agent on WhatsApp",
-      href: whatsappLink("Hi! I’m an agent and I’d like the Fuccura Agent plan."),
+      href: whatsappLink("Hi! I’m an agent and I’d like the Kitefolio Agent plan."),
     },
     highlight: true,
   },
@@ -140,7 +140,7 @@ export const OFFERS: Offer[] = [
     ],
     cta: {
       label: "Order on WhatsApp",
-      href: whatsappLink("Hi! I’d like Fuccura to build my website for me."),
+      href: whatsappLink("Hi! I’d like Kitefolio to build my website for me."),
     },
   },
 ];

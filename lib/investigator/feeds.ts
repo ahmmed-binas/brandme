@@ -91,7 +91,7 @@ function getOnce(url: URL): Promise<{ status: number; location: string | null; b
         lookup: publicOnlyLookup,
         timeout: 12_000,
         headers: {
-          "User-Agent": "FuccuraInvestigator/1.0 (reads public feeds the profile owner asked us to watch)",
+          "User-Agent": "KitefolioInvestigator/1.0 (reads public feeds the profile owner asked us to watch)",
           Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.5",
         },
       },

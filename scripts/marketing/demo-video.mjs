@@ -37,7 +37,7 @@ const SEGMENTS = [
   [44.0, 50.0, 1], // Impressions: the chart once it has loaded
   [52.0, 54.8, 1, [[40, 100, 940, 818]]], // Pages changed: the table, address column blurred
 ];
-const END_CARD = { title: "Kestrel", subtitle: "Your own SEO & AEO agent · by fuccura", cta: "Link in bio", seconds: 4 };
+const END_CARD = { title: "Kestrel", subtitle: "Your own SEO & AEO agent · by kitefolio", cta: "Link in bio", seconds: 4 };
 const BG = "0x100f0d";
 const GOLD = "0xe0a43a";
 const FONT = process.platform === "win32" ? "C\\:/Windows/Fonts/segoeuib.ttf" : "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
@@ -130,7 +130,7 @@ run("ffmpeg", ["-y", "-i", video, ...(voice ? ["-i", voice] : []), "-filter_comp
 // 3. The vertical version: the video in the middle over a blurred copy, with a headline on top.
 const tall = join(out, "kestrel-9x16.mp4");
 console.log("Making the 9:16 version…");
-const vertical = `[0:v]split[a][b];[a]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.55:saturation=0.6[bg];[b]crop=1440:1080:240:0,scale=1080:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,${text("11 AI agents", 84, 230, GOLD)},${text("get my pages onto Google", 64, 340)},${text("while I sleep", 64, 420)},${text("fuccura", 52, "h-260", "0xdddddd")}[tall]`;
+const vertical = `[0:v]split[a][b];[a]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.55:saturation=0.6[bg];[b]crop=1440:1080:240:0,scale=1080:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,${text("11 AI agents", 84, 230, GOLD)},${text("get my pages onto Google", 64, 340)},${text("while I sleep", 64, 420)},${text("kitefolio", 52, "h-260", "0xdddddd")}[tall]`;
 run("ffmpeg", ["-y", "-i", wide, "-filter_complex", vertical, "-map", "[tall]", ...(voice ? ["-map", "0:a", "-c:a", "copy"] : ["-an"]), "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-movflags", "+faststart", tall]);
 
 console.log(`Done:\n  ${wide}\n  ${tall}${voice ? `\n  ${voice} (the cleaned voice on its own)` : "\n  (silent: add --voice voice.m4a for the voiceover)"}`);
