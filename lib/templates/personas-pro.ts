@@ -627,4 +627,271 @@ export const PRO_PERSONAS: Record<string, StandardContent> = {
       { school: "UAE Ministry of Justice", degree: "Sworn translator registration", start_date: "2013" },
     ],
   },
+
+  "pro-driving": {
+    name: "Rashid Khan",
+    professional_title: "Driving Instructor · Car, Motorbike & Bus",
+    location: "Dubai · Sharjah · Ajman",
+    availability: "Morning and evening slots this week · Ladies’ lessons available",
+    tagline: "Calm lessons, clear steps, and most of my students pass first time.",
+    summary: [
+      "I’ve taught over 1,800 people to drive in Dubai, from teenagers on their first day to professionals swapping a foreign licence. Nervous drivers are my favourite: we go at your pace, on quiet roads first.",
+      "I teach manual and automatic cars, motorbikes and light buses, and I prepare you for every part of the test: parking, assessment and the road test, with mock tests on the real routes.",
+    ],
+    email: "rashid@example.com",
+    phone: "+971 50 555 0161",
+    instagram: "https://www.instagram.com/",
+    avatar: p("drive-avatar"),
+    cover: p("drive-lesson"),
+    skills: ["Al Barsha", "Al Quoz", "Deira", "Mirdif", "Jumeirah", "Sharjah", "Ajman", "Silicon Oasis"],
+    projects: [
+      {
+        title: "First drive, empty car park",
+        year: "2026",
+        category: "Beginners",
+        client: "Week 1",
+        role: "Clutch, steering, mirrors",
+        description:
+          "Everyone starts here: no traffic, no pressure, just getting comfortable behind the wheel.",
+        image: p("drive-two"),
+      },
+      {
+        title: "Parking test practice",
+        year: "2026",
+        category: "Test prep",
+        client: "Week 3",
+        role: "Parallel, angle, garage",
+        description: "The same markings and cones as the test centre, until it feels automatic.",
+        image: p("drive-briefing"),
+      },
+      {
+        title: "Mirrors and blind spots",
+        year: "2026",
+        category: "Road skills",
+        client: "Week 4",
+        role: "Lane changes on Sheikh Zayed Road",
+        description:
+          "Mirror, signal, shoulder check, every time. The habit that passes tests and keeps you safe.",
+        image: p("drive-mirror"),
+      },
+      {
+        title: "Motorbike cone course",
+        year: "2025",
+        category: "Motorbike",
+        client: "Bike licence",
+        role: "Slow control, figure of eight",
+        description: "Low-speed balance and the cone course, then real roads once you’re steady.",
+        image: p("drive-bike"),
+      },
+      {
+        title: "Sunset road test route",
+        year: "2025",
+        category: "Mock test",
+        client: "Final week",
+        role: "The real routes",
+        description: "Full mock tests on the routes examiners use, with a written list of what to fix.",
+        image: p("drive-golden"),
+      },
+    ],
+    services: [
+      {
+        title: "Single lesson (car)",
+        description: "45 minutes, picked up from home or work.",
+        price: "AED 140",
+      },
+      {
+        title: "Beginner package",
+        description: "20 lessons, manual or automatic, with two mock tests.",
+        price: "AED 2,400",
+      },
+      {
+        title: "Licence swap refresher",
+        description: "5 lessons for experienced drivers converting a foreign licence.",
+        price: "AED 650",
+      },
+      { title: "Motorbike course", description: "15 lessons, bike and helmet provided.", price: "AED 1,900" },
+    ],
+    stats: [
+      { value: "87%", label: "pass first time" },
+      { value: "1,800+", label: "students taught" },
+      { value: "11", label: "years teaching" },
+    ],
+    highlights: [
+      { title: "Certified driving instructor", detail: "Car, motorbike and light bus", year: "2015" },
+      { title: "Defensive driving trainer", detail: "Corporate fleet courses", year: "2019" },
+      { title: "First aid certified", detail: "Renewed every year", year: "2026" },
+    ],
+    testimonials: [
+      {
+        quote:
+          "I failed twice with a big school. Rashid found my two bad habits in one lesson and I passed the next week.",
+        name: "Priya S.",
+        role: "Passed March 2026",
+      },
+      {
+        quote:
+          "I was terrified of highways. He started me on empty roads at 6 am. Now I drive to Abu Dhabi alone.",
+        name: "Hannah W.",
+        role: "Passed January 2026",
+      },
+    ],
+    experience: [
+      {
+        job_title: "Independent Driving Instructor",
+        company: "Rashid Khan Driving",
+        location: "Dubai",
+        start_date: "2019",
+        end_date: "Present",
+      },
+      {
+        job_title: "Senior Instructor",
+        company: "City driving school",
+        location: "Dubai",
+        start_date: "2015",
+        end_date: "2019",
+      },
+    ],
+    education: [
+      { school: "Driving instructor certification", degree: "Car, motorbike, light bus", start_date: "2015" },
+      { school: "Defensive driving", degree: "Trainer certificate", start_date: "2019" },
+    ],
+  },
+
+  "pro-flight": {
+    name: "Noor Al Amiri",
+    professional_title: "Flight Instructor · PPL, CPL & Instrument",
+    location: "Al Ain & Dubai, UAE",
+    availability: "Discovery flights every weekend · New PPL students from November",
+    tagline: "From your first take-off to your licence, one calm voice in your headset.",
+    summary: [
+      "I’ve been a flight instructor for eight years and have sent more than 140 students solo. I teach in single-engine trainers out of Al Ain, with a lot of patience and very clear briefings.",
+      "Every lesson starts on the ground: what we’ll do, what to expect, what good looks like. Then we fly it, and debrief with your logbook open. Nothing in the air should be a surprise.",
+    ],
+    email: "noor@example.com",
+    phone: "+971 55 555 0193",
+    linkedin: "https://www.linkedin.com/",
+    avatar: p("fly-avatar"),
+    cover: p("fly-cockpit"),
+    skills: [
+      "PPL",
+      "CPL",
+      "Instrument rating",
+      "Night rating",
+      "Discovery flights",
+      "Ground school",
+      "Radio work",
+      "Navigation",
+    ],
+    projects: [
+      {
+        title: "Pre-flight walk-round",
+        year: "2026",
+        category: "Lesson 1",
+        client: "Ground",
+        role: "Fuel, oil, controls, tyres",
+        description: "Every flight starts with the aircraft, the checklist and twenty careful minutes.",
+        image: p("fly-preflight"),
+      },
+      {
+        title: "Taxi and first take-off",
+        year: "2026",
+        category: "Lesson 2",
+        client: "Al Ain",
+        role: "You fly, I talk",
+        description:
+          "Most students take the controls on their first flight. It’s the moment people remember.",
+        image: p("fly-taxi"),
+      },
+      {
+        title: "Reading the panel",
+        year: "2026",
+        category: "Instruments",
+        client: "Ground school",
+        role: "Six-pack and scan",
+        description:
+          "Airspeed, attitude, altitude: learning a steady scan so the cockpit stops feeling busy.",
+        image: p("fly-gauges"),
+      },
+      {
+        title: "Headset on, radio calls",
+        year: "2025",
+        category: "Radio",
+        client: "Lesson 6",
+        role: "Clear, short, confident",
+        description: "We practise every call on the ground until it sounds like you’ve done it for years.",
+        image: p("fly-headset"),
+      },
+    ],
+    services: [
+      {
+        title: "Discovery flight",
+        description: "30 minutes in the air, you take the controls. Great as a gift.",
+        price: "AED 950",
+      },
+      {
+        title: "PPL course",
+        description: "45 flight hours, ground school and exam preparation.",
+        price: "From AED 42,000",
+      },
+      {
+        title: "Instrument rating coaching",
+        description: "Simulator and flight lessons for the IR test.",
+        price: "AED 1,100 / hour",
+      },
+      {
+        title: "Ground school (private)",
+        description: "One-to-one theory for any of the 9 exams.",
+        price: "AED 350 / hour",
+      },
+    ],
+    stats: [
+      { value: "3,200", label: "hours flown" },
+      { value: "1,900", label: "hours instructing" },
+      { value: "140+", label: "students sent solo" },
+    ],
+    highlights: [
+      { title: "Flight Instructor rating (FI)", detail: "Single-engine piston", year: "2018" },
+      { title: "Instrument rating instructor (IRI)", detail: "", year: "2021" },
+      { title: "Commercial pilot licence (CPL)", detail: "Multi-engine, instrument", year: "2016" },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Noor’s briefings are so clear that nothing in the air surprised me. I went solo after 14 hours.",
+        name: "Karim A.",
+        role: "PPL student, 2026",
+      },
+      {
+        quote:
+          "Booked a discovery flight for my dad’s birthday. He flew the plane for twenty minutes and hasn’t stopped talking about it.",
+        name: "Sarah M.",
+        role: "Discovery flight, 2025",
+      },
+    ],
+    experience: [
+      {
+        job_title: "Flight Instructor (FI/IRI)",
+        company: "Flying club, Al Ain",
+        location: "Al Ain",
+        start_date: "2018",
+        end_date: "Present",
+      },
+      {
+        job_title: "First Officer",
+        company: "Regional charter operator",
+        location: "Dubai",
+        start_date: "2016",
+        end_date: "2018",
+      },
+    ],
+    education: [
+      {
+        school: "Flight training academy",
+        degree: "Integrated ATPL (frozen)",
+        start_date: "2014",
+        end_date: "2016",
+      },
+      { school: "Flight instructor course", degree: "FI rating", start_date: "2018" },
+    ],
+  },
 };

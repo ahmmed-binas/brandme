@@ -1,6 +1,6 @@
 """
 Downloads the Unsplash photos used by the 2026 profession templates (Dispatch,
-Atelier, Roadmap, Radar, Duet) into public/samples/pro as WebP, and writes
+Atelier, Roadmap, Radar, Duet, Lane, Altitude) into public/samples/pro as WebP, and writes
 CREDITS.md. Unsplash License: free to use, credited anyway. Like public/samples/re
 they are left out of free template downloads (lib/templates/export.ts).
 
@@ -43,6 +43,20 @@ PHOTOS = {
     "lang-avatar": ("photo-1607990283143-e81e7a2c9349", "sigmund", 1400),
     "lang-desk": ("photo-1787724778903-0963add21d31", "silverkblack", 2000),
     "lang-pen": ("photo-1676312389476-fe01e238b422", "bermixstudio", 2000),
+    "drive-avatar": ("photo-1507003211169-0a1dd7228f2d", "miracletwentyone", 1400),
+    "drive-lesson": ("photo-1553782097-130fef5d3e27", "denizen", 2000),
+    "drive-briefing": ("photo-1630406144797-821be1f35d75", "bastroloog", 2000),
+    "drive-two": ("photo-1537211790624-e6f568af4b13", "davidemrich", 2000),
+    "drive-mirror": ("photo-1611508106567-6218ae6c5f6a", "solarfri", 2000),
+    "drive-golden": ("photo-1521136095380-08fbd7be93c8", "darwiiiin", 2000),
+    "drive-bike": ("photo-1764605514633-eb9a675ffbb8", "godze", 2000),
+    "fly-avatar": ("photo-1775486750740-cb5070f05aa9", "willhaddock", 1400),
+    "fly-cockpit": ("photo-1764547167443-1be5ab97e049", "horizonflights", 2000),
+    "fly-taxi": ("photo-1788744186978-0d8fb21939c7", "ozzieaviator", 2000),
+    "fly-gauges": ("photo-1652610050513-aee5fa596bdc", "grianghraf", 2000),
+    "fly-preflight": ("photo-1775486788201-eda6230a6430", "willhaddock", 2000),
+    "fly-headset": ("photo-1775486766610-18b17c5fd297", "willhaddock", 2000),
+    "fly-field": ("photo-1755252626479-c17bc3cdf8c3", "alpenair", 2000),
 }
 
 
@@ -56,6 +70,8 @@ def fetch(photo_id: str, size: int) -> Image.Image:
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for name, (photo_id, author, size) in PHOTOS.items():
+        if (OUT / f"{name}.webp").exists():
+            continue
         image = fetch(photo_id, size)
         image.thumbnail((size, size), Image.LANCZOS)
         target = OUT / f"{name}.webp"
