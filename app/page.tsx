@@ -7,18 +7,25 @@ import { personaFor } from "@/lib/templates/personas";
 import HowItWorks from "@/components/landing/HowItWorks";
 import TemplateShowcase, { CollectionStrip } from "@/components/landing/TemplateShowcase";
 import Faq from "@/components/landing/Faq";
-import Testimonials from "@/components/landing/Testimonials";
+import Testimonials, { type Review } from "@/components/landing/Testimonials";
+import InShort from "@/components/landing/InShort";
 import { featuredFeedback } from "@/lib/templates/feedback";
+import { publicReviews, ratingSummary, SITE_RATING_KEY } from "@/lib/templates/ratings";
+import { getTemplate } from "@/lib/templates/catalog";
 import Reveal from "@/components/landing/Reveal";
 import { FAQ } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
 import { PRICES, aed } from "@/lib/offers";
 import { siteDescription } from "@/lib/site";
 
+/** What people search for: “portfolio website builder”, “personal website”, plus who it's for. */
+const HOME_TITLE = `${brand.name}: Portfolio and Personal Website Builder`;
+
 export const metadata: Metadata = {
-  title: { absolute: `${brand.name} — Portfolio builder with your own domain` },
+  title: { absolute: HOME_TITLE },
   description: siteDescription,
   alternates: { canonical: "/" },
+  openGraph: { type: "website", url: "/", title: HOME_TITLE, description: siteDescription },
 };
 
 const OWNERSHIP = [
@@ -54,6 +61,30 @@ async function heroShowcase(): Promise<HeroShowcase[]> {
     .map((template) => ({ template, content: personaFor(template.persona) }));
 }
 
+/**
+ * Every real review for the home page: notes the owner featured from the
+ * editor's rating card, then ratings of Kitefolio left on the home page.
+ */
+async function homeReviews(): Promise<Review[]> {
+  const [featured, site] = await Promise.all([featuredFeedback(), publicReviews(SITE_RATING_KEY, 9)]);
+  return [
+    ...featured.map((item) => ({
+      name: item.name,
+      image: item.image,
+      stars: item.stars,
+      comment: item.comment,
+      context: `Built with ${getTemplate(item.templateId)?.name ?? brand.name}`,
+    })),
+    ...site.map((item) => ({
+      name: item.name,
+      image: item.image,
+      stars: item.stars,
+      comment: item.comment,
+      context: `Reviewed ${brand.name}`,
+    })),
+  ];
+}
+
 function SectionHeading({ kicker, children, id }: { kicker: string; children: React.ReactNode; id: string }) {
   return (
     <div className="max-w-[46rem]">
@@ -69,7 +100,11 @@ function SectionHeading({ kicker, children, id }: { kicker: string; children: Re
 }
 
 export default async function Home() {
-  const [showcase, voices] = await Promise.all([heroShowcase(), featuredFeedback()]);
+  const [showcase, reviews, siteRating] = await Promise.all([
+    heroShowcase(),
+    homeReviews(),
+    ratingSummary(SITE_RATING_KEY),
+  ]);
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -96,6 +131,8 @@ export default async function Home() {
 
       <HowItWorks />
 
+      <InShort />
+
       <section aria-labelledby="templates-title" className="border-t border-rule py-24 lg:py-32">
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
@@ -119,7 +156,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <Testimonials items={voices} />
+      <Testimonials items={reviews} summary={siteRating} />
 
       <section
         aria-labelledby="yours-title"

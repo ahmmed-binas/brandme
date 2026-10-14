@@ -27,6 +27,7 @@ const pageName = (key: string) => {
   if (kind === "agent") return `Agent: ${rest}`;
   if (kind === "journal") return `Blog: ${rest}`;
   if (kind === "community") return `Community template: ${rest}`;
+  if (kind === "site") return "Kitefolio (home page reviews)";
   return key;
 };
 const stars = (count: number | null) => (count ? "★".repeat(count) + "☆".repeat(5 - count) : "–");

@@ -9,6 +9,9 @@ export interface RatingSummary {
 
 export const NO_RATINGS: RatingSummary = { average: null, count: 0 };
 
+/** The key for ratings of Kitefolio as a whole (home page reviews), next to template and agent keys. */
+export const SITE_RATING_KEY = "site:kitefolio";
+
 /** Every template's average and count, keyed by template id. Templates without ratings are absent. */
 export async function ratingSummaries(): Promise<Record<string, RatingSummary>> {
   if (!databaseConfigured()) return {};
