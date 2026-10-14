@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { ClipPlayer, DownloadButton } from "@/components/gallery/DownloadPanel";
 import PreviewFrame from "@/components/templates/PreviewFrame";
 import { RateTemplate } from "@/components/templates/Rating";
+import { Reviews } from "@/components/templates/Reviews";
 import { galleryArticle, galleryItems, noticeFor } from "@/lib/gallery/items";
 import { LICENSES } from "@/lib/gallery/submissions";
 import { brand } from "@/lib/brand";
@@ -467,6 +468,12 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
           </ul>
         </section>
       )}
+
+      <Reviews
+        ratingKey={item.kind === "original" ? item.slug : `community:${item.slug}`}
+        title={`What people said about ${item.title}`}
+        className="mx-auto mt-24 max-w-[1240px] px-5 sm:px-8"
+      />
 
       <section className="mx-auto mt-24 max-w-[52rem] px-5 sm:px-8" aria-labelledby="faq">
         <h2

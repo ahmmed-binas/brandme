@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import PreviewFrame from "@/components/templates/PreviewFrame";
+import { RateTemplate } from "@/components/templates/Rating";
+import { Reviews } from "@/components/templates/Reviews";
 import { RoleEssentials } from "@/components/gallery/RoleEssentials";
 import type { GalleryArticle } from "@/lib/gallery/items";
 import { faqSchema, roleFaq, roleTemplateBreadcrumbs, type FaqEntry } from "@/lib/gallery/role-seo";
@@ -121,6 +123,13 @@ export async function RoleTemplateArticle({
             <p className="text-center text-[0.88rem] text-ink-soft">
               No card needed · your own domain with Pro
             </p>
+            <div className="flex justify-center">
+              <RateTemplate
+                templateId={item.slug}
+                initial={item.rating}
+                returnTo={`/for/${role.id}/${item.slug}`}
+              />
+            </div>
           </div>
         </header>
 
@@ -230,6 +239,12 @@ export async function RoleTemplateArticle({
           </ul>
         </section>
       )}
+
+      <Reviews
+        ratingKey={item.slug}
+        title={`What people said about ${item.title}`}
+        className="mx-auto mt-24 max-w-[1240px] px-5 sm:px-8"
+      />
 
       <section className="mx-auto mt-24 max-w-[52rem] px-5 sm:px-8" aria-labelledby="faq">
         <h2

@@ -1,5 +1,7 @@
 import ConsoleLogin from "@/components/console/ConsoleLogin";
 import FeatureToggle from "@/components/console/FeatureToggle";
+import HideRatingToggle from "@/components/console/HideRatingToggle";
+import { allRatings } from "@/lib/templates/ratings";
 import Shell from "@/components/console/Shell";
 import { getTemplate } from "@/lib/templates/catalog";
 import { feedbackOverview, tagLabel } from "@/lib/templates/feedback";
@@ -17,6 +19,16 @@ const when = (date: Date) =>
   });
 
 const templateName = (id: string) => getTemplate(id)?.name ?? id;
+/** A rating's page: a template, or “agent:…”, “journal:…”, “community:…”. */
+const pageName = (key: string) => {
+  const colon = key.indexOf(":");
+  const [kind, rest] = colon > 0 ? [key.slice(0, colon), key.slice(colon + 1)] : ["template", key];
+  if (kind === "template") return templateName(rest ?? key);
+  if (kind === "agent") return `Agent: ${rest}`;
+  if (kind === "journal") return `Blog: ${rest}`;
+  if (kind === "community") return `Community template: ${rest}`;
+  return key;
+};
 const stars = (count: number | null) => (count ? "★".repeat(count) + "☆".repeat(5 - count) : "–");
 const minutes = (seconds: number | null) =>
   seconds === null ? "–" : seconds < 120 ? `${seconds}s` : `${Math.round(seconds / 60)} min`;
@@ -27,7 +39,7 @@ const panel = "rounded-xl border border-[var(--c-line)] bg-[var(--c-panel)]";
 export default async function ConsoleFeedback() {
   const user = await getCurrentUser().catch(() => null);
   if (!user?.isSuperadmin) return <ConsoleLogin />;
-  const { recent, byTemplate, tagCounts } = await feedbackOverview();
+  const [{ recent, byTemplate, tagCounts }, ratings] = await Promise.all([feedbackOverview(), allRatings()]);
   const real = recent.filter((row) => !row.internal);
   const answered = real.filter((row) => !row.skipped).length;
 
@@ -108,6 +120,64 @@ export default async function ConsoleFeedback() {
             )}
           </ul>
         </section>
+      </div>
+
+      {/* Stars given on template, agent and blog pages (most ratings come from here). */}
+      <h2 className="mt-8 text-[14px] font-semibold">Star ratings on pages ({ratings.length})</h2>
+      <p className="mt-1 text-[12.5px] text-[var(--c-text2)]">
+        The stars under each template, agent and blog post. Comments marked “public” show with the person’s
+        name and photo on that page; the rest show as “A Fuccura member”.
+      </p>
+      <div className={`mt-3 overflow-x-auto ${panel}`}>
+        <table className="w-full min-w-[860px] text-left text-[12.5px]">
+          <thead className="text-[var(--c-muted)]">
+            <tr>
+              {["When (Dubai)", "Who", "Page", "Rating", "Comment", "On page"].map((head) => (
+                <th key={head} className="px-4 py-3 font-medium">
+                  {head}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {ratings.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-[var(--c-muted)]">
+                  No ratings yet.
+                </td>
+              </tr>
+            ) : (
+              ratings.map((row) => (
+                <tr key={`${row.userId}-${row.key}`} className="border-t border-[var(--c-line)] align-top">
+                  <td className="whitespace-nowrap px-4 py-2.5">{when(row.at)}</td>
+                  <td className="px-4 py-2.5">
+                    {row.name ?? row.email ?? "–"}
+                    {row.internal && (
+                      <span className="ml-1 text-[11px] text-[var(--c-muted)]">(you/team)</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5">{pageName(row.key)}</td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-amber-400">{stars(row.stars)}</td>
+                  <td className="max-w-[22rem] px-4 py-2.5">
+                    {row.comment ?? <span className="text-[var(--c-muted)]">–</span>}
+                    {row.comment && (
+                      <span className="block text-[11px] text-[var(--c-muted)]">
+                        {row.public ? "Public with name and photo" : "Anonymous"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {row.comment ? (
+                      <HideRatingToggle userId={row.userId} ratingKey={row.key} initial={row.hidden} />
+                    ) : (
+                      <span className="text-[11.5px] text-[var(--c-muted)]">Stars only</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       <h2 className="mt-8 text-[14px] font-semibold">Every answer</h2>

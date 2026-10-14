@@ -717,6 +717,18 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "030_rating_comments",
+  statements: [
+    // Star ratings (templates, agents, blog posts) can carry a short comment. public: the
+    // person agreed to show their name, photo and comment on the page; hidden: the owner
+    // took it off the page from the console. Both default to off.
+    `ALTER TABLE template_ratings ADD COLUMN IF NOT EXISTS comment TEXT`,
+    `ALTER TABLE template_ratings ADD COLUMN IF NOT EXISTS public BOOLEAN NOT NULL DEFAULT false`,
+    `ALTER TABLE template_ratings ADD COLUMN IF NOT EXISTS hidden BOOLEAN NOT NULL DEFAULT false`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

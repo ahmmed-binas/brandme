@@ -43,6 +43,9 @@ export function RateTemplate({
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [hover, setHover] = useState(0);
   const [error, setError] = useState("");
+  const [comment, setComment] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
+  const [note, setNote] = useState<"closed" | "open" | "saving" | "saved">("closed");
 
   useEffect(() => {
     let live = true;
@@ -53,6 +56,8 @@ export function RateTemplate({
         setSummary({ average: data.average, count: data.count });
         setMine(data.mine);
         setSignedIn(data.signedIn);
+        setComment(data.comment ?? "");
+        setIsPublic(Boolean(data.public));
       })
       .catch(() => {});
     return () => {
@@ -76,6 +81,27 @@ export function RateTemplate({
       return;
     }
     setSummary({ average: data.average, count: data.count });
+    // After choosing stars, offer the optional comment box.
+    if (stars !== null && note === "closed") setNote("open");
+  }
+
+  /** Saves the optional comment and whether it may be shown with the person's name and photo. */
+  async function saveNote() {
+    if (!mine) return;
+    setError("");
+    setNote("saving");
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stars: mine, comment, public: isPublic }),
+    }).catch(() => null);
+    const data = await response?.json().catch(() => null);
+    if (!response?.ok) {
+      setNote("open");
+      setError(data?.error ?? "That didn’t save. Try again.");
+      return;
+    }
+    setNote("saved");
   }
 
   const shown = hover || mine || 0;
@@ -117,6 +143,15 @@ export function RateTemplate({
               </button>
             ))}
           </span>
+          {mine && note === "closed" && (
+            <button
+              type="button"
+              onClick={() => setNote("open")}
+              className="text-[0.8rem] text-ink underline underline-offset-4"
+            >
+              {comment ? "Edit comment" : "Add a comment"}
+            </button>
+          )}
           {mine && (
             <button
               type="button"
@@ -127,6 +162,57 @@ export function RateTemplate({
             </button>
           )}
         </span>
+      )}
+      {signedIn && mine && note !== "closed" && (
+        <div className="w-full max-w-[28rem] rounded-xl border border-rule bg-card p-3">
+          {note === "saved" ? (
+            <p className="text-[0.86rem] text-ink-soft">
+              Saved.{" "}
+              <button type="button" onClick={() => setNote("open")} className="underline underline-offset-4">
+                Edit
+              </button>
+            </p>
+          ) : (
+            <>
+              <label className="block text-[0.82rem] font-medium text-ink">
+                What did you think? <span className="font-normal text-ink-soft">(optional)</span>
+                <textarea
+                  value={comment}
+                  onChange={(event) => setComment(event.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  className="mt-1.5 w-full resize-none rounded-lg border border-rule bg-paper px-3 py-2 text-[0.9rem] font-normal text-ink outline-none focus:border-ink"
+                />
+              </label>
+              <label className="mt-2 flex cursor-pointer items-start gap-2 text-[0.8rem] text-ink-soft">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={(event) => setIsPublic(event.target.checked)}
+                  className="mt-0.5"
+                />
+                Show my name and profile photo with my comment on this page
+              </label>
+              <div className="mt-2.5 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={saveNote}
+                  disabled={note === "saving"}
+                  className="rounded-full bg-ink px-4 py-1.5 text-[0.82rem] font-medium text-paper disabled:opacity-50"
+                >
+                  {note === "saving" ? "Saving…" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNote("closed")}
+                  className="text-[0.8rem] text-ink-soft hover:text-ink"
+                >
+                  Not now
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       )}
       {error && (
         <span role="alert" className="text-[0.84rem] text-red-700">
