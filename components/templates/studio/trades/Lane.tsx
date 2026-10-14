@@ -2,7 +2,6 @@
 
 import "@fontsource-variable/inter-tight";
 import "@fontsource-variable/jetbrains-mono";
-import { useState } from "react";
 import {
   Picture,
   Reveal,
@@ -20,39 +19,78 @@ import { CountUp } from "../motion";
 import { Vehicle3D, type VehicleKind } from "../vehicle3d";
 
 /**
- * Lane: a driving instructor's site. A real 3D car, motorbike or bus you can
- * turn with your finger sits on a piece of road in the hero (switch between
- * them), under a huge outlined headline; a thin red-to-blue line runs down the
- * page like a lane marking. Then the pass rate, the road to the licence, lesson
- * packages, lessons in pictures, areas covered, reviews and one-tap booking.
- * For driving, motorbike, bus and truck instructors.
+ * Lane, Throttle and Route: three instructor sites built on one layout, each
+ * with its own 3D vehicle driving along an endless road in the hero (a car
+ * for Lane, a motorbike for Throttle, a bus for Route). Visitors drag it
+ * across the lanes and tap to park it. A huge outlined headline sits under
+ * the road; a thin red-to-blue line runs down the page like a lane marking.
+ * Then the pass rate, the road to the licence, packages, lessons in pictures,
+ * areas covered, reviews and one-tap booking.
  */
 
-const VEHICLES: Array<{ kind: VehicleKind; label: string }> = [
-  { kind: "car", label: "Car" },
-  { kind: "bike", label: "Motorbike" },
-  { kind: "bus", label: "Bus" },
-];
+type Variant = {
+  kind: VehicleKind;
+  /** Under the name in the side bar. */
+  role: string;
+  /** The vehicle's name in the drag hint. */
+  noun: string;
+  /** Used in the WhatsApp booking message and the email subject. */
+  lesson: string;
+  road: string[][];
+};
 
-const ROAD = [
-  ["Theory", "Road signs and rules, with practice tests until you’re scoring well every time."],
-  ["Parking", "Parallel, angle and garage parking, on the same markings as the test centre."],
-  ["Assessment", "Steady control in traffic: mirrors, signals, lane discipline, roundabouts."],
-  ["Road test", "Mock tests on the real routes, then the test with a calm head."],
-];
+const VARIANTS: Record<string, Variant> = {
+  lane: {
+    kind: "car",
+    role: "Driving instructor",
+    noun: "car",
+    lesson: "a driving lesson",
+    road: [
+      ["Theory", "Road signs and rules, with practice tests until you’re scoring well every time."],
+      ["Parking", "Parallel, angle and garage parking, on the same markings as the test centre."],
+      ["Assessment", "Steady control in traffic: mirrors, signals, lane discipline, roundabouts."],
+      ["Road test", "Mock tests on the real routes, then the test with a calm head."],
+    ],
+  },
+  throttle: {
+    kind: "bike",
+    role: "Motorcycle instructor",
+    noun: "bike",
+    lesson: "a riding lesson",
+    road: [
+      ["Taster", "An hour off the road: balance, clutch and brakes, with the bike and helmet provided."],
+      ["Cone course", "Slow control, figure of eight and emergency stops until they feel easy."],
+      ["Road riding", "Junctions, roundabouts and highway speeds, with radio coaching in your helmet."],
+      ["Road test", "Mock tests on the real routes, then the test with a calm head."],
+    ],
+  },
+  route: {
+    kind: "bus",
+    role: "Bus & truck instructor",
+    noun: "bus",
+    lesson: "a bus or truck lesson",
+    road: [
+      ["Theory & medical", "The rules for heavy vehicles, the eye test and the paperwork, sorted first."],
+      ["Yard skills", "Reversing, tight turns and kerb-side stops in the training yard."],
+      ["On the road", "Space, mirrors and planning ahead in real traffic, on the test routes."],
+      ["Road test", "Mock tests in the same vehicle you’ll be tested in, then the real thing."],
+    ],
+  },
+};
 
 const digits = (phone?: string) => (phone ?? "").replace(/[^\d]/g, "");
 
 export default function Lane({ content, template, embedded }: StudioProps) {
   const studio = useStudio(content, template, embedded);
-  const { c, has, label, accent } = studio;
-  const [vehicle, setVehicle] = useState<VehicleKind>("car");
+  const { c, has, label, accent, palette } = studio;
+  const variant = VARIANTS[template.id] ?? VARIANTS.lane!;
+  const ROAD = variant.road;
   const phone = digits(c.phone);
   const whatsapp = phone ? `https://wa.me/${phone}` : undefined;
   const book = whatsapp
-    ? `${whatsapp}?text=${encodeURIComponent(`Hi ${firstName(c.name)}, I'd like to book a driving lesson.`)}`
+    ? `${whatsapp}?text=${encodeURIComponent(`Hi ${firstName(c.name)}, I'd like to book ${variant.lesson}.`)}`
     : c.email
-      ? `mailto:${c.email}?subject=${encodeURIComponent("Driving lessons")}`
+      ? `mailto:${c.email}?subject=${encodeURIComponent(`Booking ${variant.lesson}`)}`
       : "#book";
   const display = "font-[family-name:var(--t-display)]";
   const mono = "font-[family-name:var(--t-mono)]";
@@ -74,7 +112,7 @@ export default function Lane({ content, template, embedded }: StudioProps) {
             <span aria-hidden className={`absolute right-0 top-0 h-full w-[3px] ${line}`} />
             <p className={`${display} text-[1.15rem] font-semibold uppercase tracking-[0.12em]`}>{c.name}</p>
             <p className={`${mono} mt-1 text-[11px] uppercase tracking-[0.18em] opacity-60`}>
-              Driving instructor
+              {variant.role}
             </p>
             <nav
               className={`${mono} mt-16 flex flex-col gap-5 text-[12px] uppercase tracking-[0.2em] opacity-75`}
@@ -116,31 +154,12 @@ export default function Lane({ content, template, embedded }: StudioProps) {
 
             <div className="mt-6 grid gap-6 @4xl:mt-0 @4xl:grid-cols-[minmax(0,1fr)_17rem]">
               <div className="relative min-w-0">
-                {/* Vehicle switcher */}
-                <div
-                  className={`${mono} inline-flex rounded-full bg-[var(--t-surface)] p-1 text-[12px] shadow-[0_0_0_1px_color-mix(in_oklab,var(--t-fg)_10%,transparent)]`}
-                  role="tablist"
-                  aria-label="Vehicle"
-                >
-                  {VEHICLES.map((item) => (
-                    <button
-                      key={item.kind}
-                      type="button"
-                      role="tab"
-                      aria-selected={vehicle === item.kind}
-                      onClick={() => setVehicle(item.kind)}
-                      className={`rounded-full px-4 py-1.5 uppercase tracking-[0.14em] transition ${vehicle === item.kind ? "bg-[var(--t-accent)] text-white" : "opacity-70 hover:opacity-100"}`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="relative mt-2 aspect-[4/3] w-full @4xl:aspect-[16/10]">
-                  <Vehicle3D kind={vehicle} accent={accent} />
+                <div className="relative aspect-[4/3] w-full @4xl:aspect-[16/10]">
+                  <Vehicle3D kind={variant.kind} accent={accent} background={palette?.bg ?? "#15161b"} />
                   <p
-                    className={`${mono} pointer-events-none absolute right-2 top-2 text-[11px] uppercase tracking-[0.18em] opacity-50`}
+                    className={`${mono} pointer-events-none absolute left-2 top-2 rounded-full bg-[color-mix(in_oklab,var(--t-bg)_70%,transparent)] px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] backdrop-blur`}
                   >
-                    Drag to turn
+                    Drag the {variant.noun} across the road · tap to park
                   </p>
                 </div>
                 <h1

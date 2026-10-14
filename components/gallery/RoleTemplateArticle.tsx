@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TemplateBadges } from "@/components/templates/TemplateBadges";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import PreviewFrame from "@/components/templates/PreviewFrame";
 import { RateTemplate } from "@/components/templates/Rating";
@@ -221,7 +222,12 @@ export async function RoleTemplateArticle({
           <ul className="mt-8 grid gap-6 sm:grid-cols-3">
             {others.map((template) => (
               <li key={template.id}>
-                <Link href={`/for/${role.id}/${template.id}`} className="group block">
+                <Link href={`/for/${role.id}/${template.id}`} className="group relative block">
+                  <TemplateBadges
+                    threeD={template.threeD}
+                    pro={template.proOnly}
+                    className="absolute right-3 top-3 z-10"
+                  />
                   {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnail */}
                   <img
                     src={`/templates/${template.id}.webp`}

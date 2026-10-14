@@ -304,7 +304,7 @@ export const WORK_ROLES = [
     "education",
     ["motorbike instructor", "riding instructor", "bike instructor", "CBT instructor", "motorcycle training"],
     {
-      base: "pro-driving",
+      base: "pro-moto",
       keepWork: true,
       title: "Motorcycle Instructor",
       tagline: "From the cone course to the open road, safely and without the nerves.",
@@ -328,10 +328,10 @@ export const WORK_ROLES = [
         "Omar F.",
         "Passed 2026",
       ],
-      experience: [["Motorcycle Instructor", "Rashid Khan Driving", "2019", "Present"]],
+      experience: [["Motorcycle Instructor", "Karim Haddad Riding", "2021", "Present"]],
       education: [["Motorcycle instructor certification", "Driving institute", "2018"]],
     },
-    ["lane", "site-board", "practice"],
+    ["throttle", "lane", "site-board"],
   ),
   role(
     "bus-driving-instructor",
@@ -347,7 +347,7 @@ export const WORK_ROLES = [
       "LGV instructor",
     ],
     {
-      base: "pro-driving",
+      base: "pro-bus",
       keepWork: true,
       title: "Bus & Heavy Vehicle Driving Instructor",
       tagline: "Big vehicles, calm teaching: light bus, coach and truck licences.",
@@ -367,14 +367,14 @@ export const WORK_ROLES = [
         ["11", "years teaching"],
       ],
       quote: [
-        "Our accident rate dropped by half the year after Rashid trained our drivers.",
+        "Our accident rate dropped by half the year after Samuel trained our drivers.",
         "Fleet manager",
         "Logistics company",
       ],
-      experience: [["Heavy Vehicle Instructor", "Rashid Khan Driving", "2019", "Present"]],
+      experience: [["Heavy Vehicle Instructor", "Samuel Mensah Driver Training", "2019", "Present"]],
       education: [["Heavy vehicle instructor certification", "Driving institute", "2017"]],
     },
-    ["lane", "site-board", "practice"],
+    ["route", "lane", "site-board"],
   ),
   role(
     "flight-instructor",

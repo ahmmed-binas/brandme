@@ -75,6 +75,7 @@ interface StudioSpec {
   persona: string;
   idealFor: string[];
   proOnly?: boolean;
+  threeD?: boolean;
 }
 
 const SPECS: StudioSpec[] = [
@@ -1142,9 +1143,11 @@ const SPECS: StudioSpec[] = [
     professions: ["trades", "education"],
     styles: ["Bold", "Technical"],
     mood: "dark",
+    proOnly: true,
+    threeD: true,
     description:
-      "A driving instructor's site with a real 3D car, motorbike or bus to turn with your finger, the road to the licence, lesson packages and one-tap booking.",
-    idealFor: ["Driving instructors", "Motorbike instructors", "Bus & truck instructors"],
+      "A driving instructor's site with a 3D car driving an endless road: drag it across the lanes, tap to park it with the hazards on. The road to the licence, lesson packages and one-tap booking.",
+    idealFor: ["Driving instructors", "Driving schools", "Ladies’ driving instructors"],
     sections: [
       "stats",
       "services",
@@ -1173,6 +1176,7 @@ const SPECS: StudioSpec[] = [
     professions: ["management", "consulting"],
     styles: ["Bold", "Technical"],
     mood: "dark",
+    threeD: true,
     proOnly: true,
     description:
       "A 3D Pro template for operations managers: your projects stand on a turntable of pedestals as objects (a parcel, gears, a truck), your numbers sit on a live operations board.",
@@ -1206,6 +1210,7 @@ const SPECS: StudioSpec[] = [
     professions: ["marketing", "writing"],
     styles: ["Editorial", "Bold"],
     mood: "light",
+    threeD: true,
     proOnly: true,
     description:
       "A 3D Pro template for content marketers: every piece of work is an object on your desk (a camera, a mic, a phone, a stack of books). Click one and its story and results open.",
@@ -1233,12 +1238,80 @@ const SPECS: StudioSpec[] = [
     ],
   },
   {
+    id: "throttle",
+    name: "Throttle",
+    persona: "pro-moto",
+    professions: ["trades", "education"],
+    styles: ["Bold", "Technical"],
+    mood: "dark",
+    proOnly: true,
+    threeD: true,
+    description:
+      "A motorcycle instructor's site with a 3D motorbike riding an endless road: drag it across the lanes and it leans into the turn. Riding courses, the road to the licence and one-tap booking.",
+    idealFor: ["Motorcycle instructors", "Riding schools", "Delivery rider trainers"],
+    sections: [
+      "stats",
+      "services",
+      "projects",
+      "skills",
+      "testimonials",
+      "about",
+      "highlights",
+      "experience",
+      "contact",
+    ],
+    palettes: [
+      p("carbon", "Carbon & orange", "#101112", "#f0efec", "#ff6b1a", "#8d8b87", "#1a1b1d"),
+      p("racing", "Racing green", "#0e1512", "#e9f1ec", "#2fd37a", "#86978d", "#16201b"),
+      p("sand", "Desert sand", "#f3ede3", "#1b1712", "#d9480f", "#7a6f62", "#fffaf2"),
+    ],
+    fonts: [
+      f("unbounded", "Unbounded + Manrope", F.unbounded, F.manrope, F.jetbrains),
+      f("grotesk", "Space Grotesk + Manrope", F.grotesk, F.manrope, F.jetbrains),
+    ],
+  },
+  {
+    id: "route",
+    name: "Route",
+    persona: "pro-bus",
+    professions: ["trades", "education"],
+    styles: ["Bold", "Technical"],
+    mood: "light",
+    proOnly: true,
+    threeD: true,
+    description:
+      "A bus and truck instructor's site with a 3D bus driving an endless road: drag it across the lanes, tap to stop. Heavy-vehicle courses, fleet training and one-tap booking.",
+    idealFor: ["Bus driving instructors", "Truck & HGV instructors", "Fleet trainers"],
+    sections: [
+      "stats",
+      "services",
+      "projects",
+      "skills",
+      "testimonials",
+      "about",
+      "highlights",
+      "experience",
+      "contact",
+    ],
+    palettes: [
+      p("depot", "Depot daylight", "#eef0f2", "#14171c", "#ffb000", "#5f6670", "#ffffff"),
+      p("night", "Night route", "#111418", "#e9edf2", "#ffb000", "#8a919c", "#191d23"),
+      p("transit", "Transit blue", "#eaf0f8", "#0f1726", "#1f5bd8", "#5d6a80", "#ffffff"),
+    ],
+    fonts: [
+      f("grotesk", "Space Grotesk + Manrope", F.grotesk, F.manrope, F.jetbrains),
+      f("inter", "Inter Tight + JetBrains", F.interTight, F.interTight, F.jetbrains),
+    ],
+  },
+  {
     id: "altitude",
     name: "Altitude",
     persona: "pro-flight",
     professions: ["education", "trades"],
     styles: ["Bold", "Technical"],
     mood: "dark",
+    proOnly: true,
+    threeD: true,
     description:
       "A flight instructor's site: a 3D plane that banks with your pointer over drifting clouds, hours as cockpit instruments, a logbook of ratings and a discovery-flight booking.",
     idealFor: ["Flight instructors", "Flying schools", "Glider & drone instructors"],

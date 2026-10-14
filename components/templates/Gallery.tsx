@@ -1,5 +1,6 @@
 "use client";
 
+import { TemplateBadges } from "@/components/templates/TemplateBadges";
 import { useMemo, useState } from "react";
 import { Pagination, usePaged } from "@/components/common/Pagination";
 import Link from "next/link";
@@ -20,6 +21,8 @@ export interface GalleryTemplate {
   palettes: string[];
   status?: "approved" | "changes" | "rejected" | "pending";
   rating?: RatingSummary;
+  threeD?: boolean;
+  proOnly?: boolean;
 }
 
 const STATUS_LABEL = {
@@ -370,6 +373,7 @@ export default function Gallery({
                     decoding="async"
                     className="absolute bottom-3 right-3 w-[22%] translate-y-3 rounded-lg border-[3px] border-ink object-cover object-top opacity-0 shadow-xl transition duration-500 group-hover:translate-y-0 group-hover:opacity-100"
                   />
+                  <TemplateBadges threeD={template.threeD} pro={template.proOnly} />
                   <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-2 text-[0.85rem] text-paper opacity-0 transition duration-300 group-hover:opacity-100">
                     Preview <ArrowUpRight size={14} />
                   </span>

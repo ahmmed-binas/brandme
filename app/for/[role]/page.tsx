@@ -9,6 +9,7 @@ import { PROFESSIONS } from "@/lib/templates/types";
 import { faqSchema, roleBreadcrumbs, roleFaq } from "@/lib/gallery/role-seo";
 import { RoleEssentials } from "@/components/gallery/RoleEssentials";
 import PreviewFrame from "@/components/templates/PreviewFrame";
+import { TemplateBadges } from "@/components/templates/TemplateBadges";
 
 export async function generateMetadata({ params }: { params: Promise<{ role: string }> }): Promise<Metadata> {
   const role = roleById((await params).role);
@@ -107,9 +108,14 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
               <li key={template.id}>
                 <Link
                   href={templatePageHref(template.id, { role: role.id })}
-                  className="group block overflow-hidden rounded-xl border border-rule"
+                  className="group relative block overflow-hidden rounded-xl border border-rule"
                   aria-label={`Preview ${template.name} for ${role.plural}`}
                 >
+                  <TemplateBadges
+                    threeD={template.threeD}
+                    pro={template.proOnly}
+                    className="absolute right-3 top-3 z-10"
+                  />
                   {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnails, already sized */}
                   <img
                     src={`/templates/${template.id}.webp`}

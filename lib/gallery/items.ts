@@ -30,6 +30,10 @@ export interface GalleryItem {
   rating: RatingSummary;
   downloads: number;
   motion: boolean;
+  /** Interactive 3D design. */
+  threeD?: boolean;
+  /** Only paid plans can save and publish it. */
+  pro?: boolean;
   createdAt: string;
   /** Originals only: opens in the editor, so it can be customised without code. */
   editable: boolean;
@@ -117,6 +121,8 @@ export async function galleryItems(): Promise<GalleryItem[]> {
       rating: ratings[template.id] ?? NONE,
       downloads: downloads[template.id] ?? 0,
       motion: Boolean(template.styles?.includes("Motion")),
+      threeD: Boolean(template.threeD),
+      pro: Boolean(template.proOnly),
       createdAt: template.createdAt,
       editable: true,
     }));

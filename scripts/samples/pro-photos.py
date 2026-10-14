@@ -1,6 +1,6 @@
 """
 Downloads the Unsplash photos used by the 2026 profession templates (Dispatch,
-Atelier, Roadmap, Radar, Duet, Lane, Altitude, Control Room, Studio Desk) into public/samples/pro as WebP, and writes
+Atelier, Roadmap, Radar, Duet, Lane, Throttle, Route, Altitude, Control Room, Studio Desk) into public/samples/pro as WebP, and writes
 CREDITS.md. Unsplash License: free to use, credited anyway. Like public/samples/re
 they are left out of free template downloads (lib/templates/export.ts).
 
@@ -59,6 +59,17 @@ PHOTOS = {
     "fly-field": ("photo-1755252626479-c17bc3cdf8c3", "alpenair", 2000),
     "ops-avatar": ("photo-1676989880361-091e12efc056", "we_are_rising", 1400),
     "content-avatar": ("photo-1611432579402-7037e3e2c1e4", "alexstarnes", 1400),
+    "moto-avatar": ("photo-1789997547242-935249681a29", "victoraugusto_melo", 1400),
+    "moto-road": ("photo-1598548841213-9cdbcdf8ec47", "gersche", 2000),
+    "moto-city": ("photo-1634015190736-3cecd58f89fe", "ryunosuke_kikuno", 2000),
+    "moto-curve": ("photo-1590507022928-b8db9b188154", "jusdevoyage", 2000),
+    "moto-sport": ("photo-1504160820508-da86e9dc8a28", "joshuaryanphoto", 2000),
+    "moto-helmet": ("photo-1556570508-121c77af2a75", "gijsparadijs", 2000),
+    "bus-cab": ("photo-1631798262744-5c15818c2e92", "jacklucassmith", 2000),
+    "bus-seat": ("photo-1736955075954-fba0a07c5118", "diegosmarines", 2000),
+    "bus-interior": ("photo-1564593606425-53fbf6dc3eb1", "christianw", 2000),
+    "bus-truck": ("photo-1618582948377-cd7eb0e8cb14", "seffen99", 2000),
+    "bus-road": ("photo-1611746351408-c0a1346be8e8", "tirynelson", 2000),
 }
 
 

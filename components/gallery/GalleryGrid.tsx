@@ -139,9 +139,20 @@ function Tile({ item, index }: { item: GalleryItem; index: number }) {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/25 to-transparent"
         />
         <span className="absolute left-4 top-4 flex gap-1.5 [transform:translateZ(30px)]">
-          <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-black backdrop-blur">
-            Free
-          </span>
+          {item.pro ? (
+            <span className="rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-2.5 py-1 text-[11px] font-semibold text-black">
+              Pro
+            </span>
+          ) : (
+            <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-black backdrop-blur">
+              Free
+            </span>
+          )}
+          {item.threeD && (
+            <span className="rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+              3D
+            </span>
+          )}
           {item.kind === "community" && (
             <span className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
               Community

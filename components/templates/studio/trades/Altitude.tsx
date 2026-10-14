@@ -200,11 +200,11 @@ export default function Altitude({ content, template, embedded }: StudioProps) {
             )}
           </div>
           <div className="relative aspect-[5/4] w-full">
-            <Vehicle3D kind="plane" accent={accent} road={false} />
+            <Vehicle3D kind="plane" accent={accent} background={palette?.bg ?? "#071225"} />
             <p
               className={`${mono} pointer-events-none absolute right-2 top-2 text-[11px] uppercase tracking-[0.18em] opacity-50`}
             >
-              Drag to turn
+              Drag to fly · tap to roll
             </p>
           </div>
         </div>

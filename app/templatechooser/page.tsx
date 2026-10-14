@@ -53,6 +53,8 @@ export default async function TemplateChooser({
       mood: template.mood ?? "light",
       palettes: (template.palettes ?? []).map((palette) => palette.accent),
       status: template.review.status,
+      threeD: template.threeD,
+      proOnly: template.proOnly,
       rating: ratings[template.id],
     }));
   const page = pageNumber(params.page);

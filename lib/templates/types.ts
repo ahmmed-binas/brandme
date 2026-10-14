@@ -110,4 +110,6 @@ export interface TemplateDefinition {
   persona?: string;
   /** 3D Pro templates: anyone can look, only paid plans can save and publish. */
   proOnly?: boolean;
+  /** Interactive 3D design (three.js); shown as a “3D” badge on cards. */
+  threeD?: boolean;
 }
