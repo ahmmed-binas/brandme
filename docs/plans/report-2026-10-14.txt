@@ -1,0 +1,55 @@
+FUCCURA – REPORT, 14 OCTOBER 2026 (morning)
+
+LIVE NOW (all deployed and checked on fuccura.com)
+- c5e6fb4  CV import works again: the free AI model had been retired by
+           the provider; switched to one it still offers. Tested from the
+           live server.
+- 8aae85f  Ratings:
+           * Console > Feedback now lists every star rating on the site
+             (the 18 five-star ratings from "Gun Crush" show there), with
+             the comment and a "Hide from page" switch.
+           * After choosing stars, people can add a comment and tick
+             "show my name and profile photo".
+           * "What people said about <template>" under every template and
+             job page (anonymous unless they ticked the box).
+- cfc657b  Money protection + new service:
+           * Free accounts: 3 free CV imports in total (not per day).
+             Paid: 5 a day. Whole site: max 300 a day. The free AI service
+             allows 1,000 a day, so ~100 free users cost nothing.
+           * The editor shows "N free CV imports left"; at 0 it shows
+             "Upgrade to Pro, AED 35" and "WhatsApp us".
+           * New page: fuccura.com/services/custom-software (custom
+             software & AI apps, built then maintained monthly; free call,
+             written quote, no prices). In the footer and sitemap.
+
+HOW IT WAS TESTED
+- Type check and lint clean; local browser tests:
+  * signed in, rated Quarterly 4 stars with a comment + "public": saved,
+    and the review appeared under the page (test data removed after).
+  * a test account ran 4 real CV imports: 3 worked (3 → 2 → 1 → 0 left),
+    the 4th was refused with the upgrade message; the editor showed the
+    upgrade box with both buttons.
+- Live: pages return 200, rating and import APIs answer, migrations 030
+  and 031 applied, Groq answers from inside the live app.
+- NOT tested live: the console Feedback page itself (needs your
+  superadmin login). Please open Console > Feedback and check the
+  "Star ratings on pages" table.
+
+WAITING FOR YOU
+1. Lock editing/publishing when free AI runs out? (Option 2 in the task
+   list.) Today only the AI is limited, so "Basic is free" stays true.
+2. IP tracking: raw IP (needs a privacy update) or country/city only?
+3. Prices for custom software / AI apps (the page says "quoted after a
+   free call" until you decide).
+
+3 HUMAN TASKS TO GET CUSTOMER #1 (today)
+1. Message "Gun Crush" (rated 18 templates last night, 5 stars each):
+   "Saw you rated a lot of templates, thank you for trying it! Which one
+   would you actually use? I'll help you set it up free." Warmest lead
+   we have.
+2. Send the custom software page to 5 business owners you know (your
+   workplace contacts, shops, clinics): "We now build custom apps and AI
+   assistants and look after them monthly. Free call?" One project pays
+   more than 50 Pro plans.
+3. Post the "Stop sending your CV" video (faceless version) with the
+   AI-free caption, and pin a comment: "Type your job at fuccura.com/for".
