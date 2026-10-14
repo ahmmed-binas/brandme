@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { whatsappLink } from "@/lib/offers";
 import { ChevronDown, ClipboardPaste, FileUp, Loader2 } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import type { ImportedProfile } from "@/lib/import/profile";
@@ -32,6 +34,22 @@ export function ImportSources({
   const [pasted, setPasted] = useState("");
   const cvInput = useRef<HTMLInputElement | null>(null);
   const linkedinInput = useRef<HTMLInputElement | null>(null);
+  // Free CV imports left on the free plan (null: not limited), and whether they've run out.
+  const [freeLeft, setFreeLeft] = useState<number | null>(null);
+  const [upgrade, setUpgrade] = useState(false);
+
+  useEffect(() => {
+    if (!aiReady) return;
+    fetch("/api/ai/import")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body: { freeLeft?: number | null } | null) => {
+        if (body && typeof body.freeLeft === "number") {
+          setFreeLeft(body.freeLeft);
+          setUpgrade(body.freeLeft === 0);
+        }
+      })
+      .catch(() => undefined);
+  }, [aiReady]);
 
   const run = async (label: string, task: () => Promise<ImportedProfile | null>) => {
     setBusy(true);
@@ -52,7 +70,12 @@ export function ImportSources({
       body: JSON.stringify({ text }),
     });
     const body = await response.json().catch(() => ({}));
+    if (body.upgrade) {
+      setUpgrade(true);
+      setFreeLeft(0);
+    }
     if (!response.ok) throw new Error(body.error ?? "The AI import didn’t work.");
+    if (typeof body.freeLeft === "number") setFreeLeft(body.freeLeft);
     return body.profile as ImportedProfile;
   };
 
@@ -130,7 +153,44 @@ export function ImportSources({
 
   return (
     <section aria-label="Import your details" className="space-y-2">
-      <p className="text-xs font-black uppercase tracking-wider text-slate-500">Import your details</p>
+      <p className="flex items-baseline justify-between text-xs font-black uppercase tracking-wider text-slate-500">
+        Import your details
+        {freeLeft !== null && (
+          <span className="font-semibold normal-case tracking-normal text-slate-500">
+            {freeLeft} free CV import{freeLeft === 1 ? "" : "s"} left
+          </span>
+        )}
+      </p>
+      {upgrade && (
+        <div
+          role="status"
+          className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-[13px] text-amber-950"
+        >
+          <p className="font-semibold">You’ve used your free CV imports.</p>
+          <p className="mt-0.5">
+            Pro gives you more imports and your own domain. Or message us and we’ll help. You can still edit
+            everything by hand.
+          </p>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            <Link
+              href="/pricing"
+              className="rounded-full bg-[#15140f] px-3.5 py-1.5 text-[12.5px] font-semibold text-white"
+            >
+              Upgrade to Pro, AED 35
+            </Link>
+            <a
+              href={whatsappLink(
+                "Hi! I've used my free CV imports on Fuccura and need a hand with my website.",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-amber-400 px-3.5 py-1.5 text-[12.5px] font-semibold"
+            >
+              WhatsApp us
+            </a>
+          </div>
+        </div>
+      )}
 
       <button
         type="button"

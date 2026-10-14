@@ -11,6 +11,7 @@ const COLUMNS = [
       ["Pricing", "/pricing"],
       ["AI agents", "/agents"],
       ["Build your own agent", "/agents/custom"],
+      ["Custom software & AI apps", "/services/custom-software"],
       ["How it works", "/#how-it-works"],
       ["Your account", "/account"],
     ],

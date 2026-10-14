@@ -25,6 +25,7 @@ const STATIC: Array<[path: string, priority: number]> = [
   ["/agents/editor", 0.6],
   ["/agents/reviewer", 0.6],
   ["/agents/custom", 0.8],
+  ["/services/custom-software", 0.8],
   ["/community", 0.6],
   ["/blog", 0.6],
   ["/about", 0.4],

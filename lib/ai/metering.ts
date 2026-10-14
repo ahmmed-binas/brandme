@@ -42,7 +42,8 @@ export interface AiAccess {
   /** "free-tier": the free CV-import API (freeAiClient); costs nothing and is never charged. */
   billing: "own-key" | "credits" | "free" | "free-tier";
 }
-export type AiGate = { ok: true; access: AiAccess } | { ok: false; status: 402 | 429 | 503; error: string };
+export type AiGate =
+  { ok: true; access: AiAccess } | { ok: false; status: 402 | 429 | 503; error: string; upgrade?: boolean };
 
 async function countRequest(ownerId: string, cap: number): Promise<boolean> {
   const result = await db.query(
@@ -112,9 +113,39 @@ export async function openAi(user: CurrentUser): Promise<AiGate> {
   return { ok: true, access: { client: claudeClient(), ownerId: user.id, billing: "credits" } };
 }
 
-/** CV imports a person may run a day on the free API, and in total across the site (Groq's free tier allows about 1,000). */
+/**
+ * Free CV imports (on the free AI service):
+ * - Basic accounts get FREE_IMPORTS_LIFETIME, ever, so the site can carry about
+ *   100 free users without cost (owner's instruction, 14 October 2026).
+ * - Paid accounts get FREE_IMPORTS_PER_USER a day.
+ * - The whole site stops at FREE_IMPORTS_PER_DAY, well under the service's
+ *   1,000 requests a day (it also allows only 8,000 tokens a minute, so bursts
+ *   come back as “busy, try again”).
+ */
+export const FREE_IMPORTS_LIFETIME = 3;
 const FREE_IMPORTS_PER_USER = 5;
-const FREE_IMPORTS_PER_DAY = 800;
+const FREE_IMPORTS_PER_DAY = 300;
+
+/** True when this account imports on the free service and is on the free plan. */
+const onFreeAllowance = (user: CurrentUser) =>
+  !(user.hasOwnKey || platformAiConfigured() || !freeAiConfigured()) && user.plan.id === "basic";
+
+/** Free CV imports left for this account, or null when it isn't limited this way. */
+export async function freeImportsLeft(user: CurrentUser): Promise<number | null> {
+  if (!onFreeAllowance(user)) return null;
+  await ensureSchema();
+  const result = await db.query<{ used: number }>(
+    "SELECT free_imports_used AS used FROM app_users WHERE id = $1",
+    [user.id],
+  );
+  return Math.max(0, FREE_IMPORTS_LIFETIME - (result.rows[0]?.used ?? 0));
+}
+
+/** Counts one successful free import (called only after the import worked, so failures are free). */
+export async function countFreeImport(user: CurrentUser): Promise<void> {
+  if (!onFreeAllowance(user)) return;
+  await db.query("UPDATE app_users SET free_imports_used = free_imports_used + 1 WHERE id = $1", [user.id]);
+}
 
 /**
  * AI for importing a CV or pasted text. The paid route (own key or platform
@@ -123,6 +154,13 @@ const FREE_IMPORTS_PER_DAY = 800;
  */
 export async function openImportAi(user: CurrentUser): Promise<AiGate> {
   if (user.hasOwnKey || platformAiConfigured() || !freeAiConfigured()) return openAi(user);
+  if ((await freeImportsLeft(user)) === 0)
+    return {
+      ok: false,
+      status: 402,
+      upgrade: true,
+      error: `You’ve used your ${FREE_IMPORTS_LIFETIME} free CV imports. Pro (AED 35 a month) gives you more, or WhatsApp us and we’ll help. You can still edit everything by hand.`,
+    };
   if (!(await rateLimit(`free-import:${user.id}`, FREE_IMPORTS_PER_USER, 86_400)))
     return {
       ok: false,

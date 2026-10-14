@@ -729,6 +729,15 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "031_free_import_allowance",
+  statements: [
+    // Free CV imports a Basic account has used, ever (lib/ai/metering.ts FREE_IMPORTS_LIFETIME).
+    // A lifetime allowance, so free accounts can't run up the free AI service every day.
+    `ALTER TABLE app_users ADD COLUMN IF NOT EXISTS free_imports_used INTEGER NOT NULL DEFAULT 0`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

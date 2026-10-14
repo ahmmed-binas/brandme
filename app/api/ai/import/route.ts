@@ -1,6 +1,13 @@
 import { jsonError, readJson, route } from "@/lib/api/http";
 import { extractProfile } from "@/lib/ai/portfolio-assistant";
-import { openImportAi, releaseRequest, settleAi, sumUsage } from "@/lib/ai/metering";
+import {
+  freeImportsLeft,
+  openImportAi,
+  releaseRequest,
+  settleAi,
+  sumUsage,
+  countFreeImport,
+} from "@/lib/ai/metering";
 import { compactProfile } from "@/lib/import/profile";
 import { groundProfile } from "@/lib/import/grounding";
 import { standardContentSchema } from "@/lib/portfolio/schema";
@@ -8,6 +15,13 @@ import { databaseConfigured } from "@/utils/db-schema";
 import { getCurrentUser } from "@/utils/user-account";
 
 const MAX_TEXT = 40_000;
+
+/** How many free CV imports this account has left (null when it isn't limited). */
+export const GET = route(async () => {
+  if (!databaseConfigured()) return Response.json({ freeLeft: null });
+  const user = await getCurrentUser();
+  return Response.json({ freeLeft: user ? await freeImportsLeft(user) : null });
+});
 
 /**
  * Free text (CV, LinkedIn About, bio) → structured portfolio content. Paid with
@@ -26,7 +40,8 @@ export const POST = route(async (request: Request) => {
   if (text.length > MAX_TEXT) return jsonError(422, "That text is too long. Paste up to about 6,000 words.");
 
   const gate = await openImportAi(user);
-  if (!gate.ok) return jsonError(gate.status, gate.error);
+  if (!gate.ok)
+    return Response.json({ error: gate.error, upgrade: gate.upgrade ?? false }, { status: gate.status });
   try {
     const result = await extractProfile(gate.access.client, text);
     const bill = await settleAi(gate.access, result.usage ? sumUsage(result.usage) : null, "AI import");
@@ -45,7 +60,9 @@ export const POST = route(async (request: Request) => {
       text,
     );
     if (removed.length) console.info(`AI import: dropped ${removed.length} unsupported item(s)`);
+    if (gate.access.billing === "free-tier") await countFreeImport(user);
     return Response.json({
+      freeLeft: await freeImportsLeft(user),
       profile: compactProfile(profile),
       removed: removed.length,
       charged: bill.charged,
