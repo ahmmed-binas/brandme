@@ -117,7 +117,8 @@ export async function listJournal({ drafts = false } = {}): Promise<JournalPost[
       article.slug,
       {
         ...article,
-        cover: null,
+        // Covers drawn by scripts/marketing/blog-covers.mjs (public/blog-covers).
+        cover: `/blog-covers/${article.slug}.webp`,
         media: null,
         publishedAt: new Date(`${article.publishedAt}T09:00:00Z`).toISOString(),
         updatedAt: null,

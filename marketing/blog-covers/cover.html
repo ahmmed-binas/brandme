@@ -1,0 +1,112 @@
+<!doctype html>
+<!-- Blog cover (1600×900). Filled from the address: ?title=…&category=…&shots=prospectus,keynote&frame=browser|phones
+     Rendered by scripts/marketing/blog-covers.mjs into public/blog-covers/<slug>.webp -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face { font-family: "Fraunces"; src: url("../../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Fraunces"; src: url("../../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-italic.woff2"); font-weight: 100 900; font-style: italic; }
+      @font-face { font-family: "Bricolage"; src: url("../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2"); font-weight: 200 800; }
+      @font-face { font-family: "Inter Tight"; src: url("../../node_modules/@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2"); font-weight: 100 900; }
+      * { box-sizing: border-box; margin: 0; }
+      body { width: 1600px; height: 900px; overflow: hidden; background: #f4f0e8; font-family: "Inter Tight", sans-serif; color: #15140f; }
+      .cover { position: relative; width: 1600px; height: 900px; overflow: hidden; }
+      .glow { position: absolute; inset: 0; background:
+        radial-gradient(700px 520px at 82% 40%, rgba(35, 56, 224, 0.20), transparent 70%),
+        radial-gradient(520px 420px at 98% 100%, rgba(196, 133, 28, 0.20), transparent 70%); }
+      .grain { position: absolute; inset: 0; opacity: .55; mix-blend-mode: multiply; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+      .text { position: absolute; left: 96px; top: 96px; bottom: 96px; width: 760px; display: flex; flex-direction: column; }
+      .category { display: inline-flex; align-self: flex-start; font-size: 22px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #2338e0; background: rgba(35,56,224,.09); border-radius: 999px; padding: 12px 22px; }
+      h1 { margin-top: 44px; font-family: "Fraunces"; font-weight: 450; font-size: 84px; line-height: 1.02; letter-spacing: -0.028em; }
+      h1 em { font-style: italic; font-weight: 380; color: #2338e0; }
+      .logo { margin-top: auto; display: flex; align-items: center; gap: 14px; font-family: "Bricolage"; font-weight: 500; font-size: 38px; letter-spacing: -0.035em; }
+      .logo span { font-family: "Inter Tight"; font-size: 22px; letter-spacing: 0; color: #57534a; margin-left: 10px; }
+      .visual { position: absolute; right: -40px; top: 120px; width: 760px; height: 700px; }
+      .browser { position: absolute; left: 40px; top: 30px; width: 700px; border-radius: 22px; overflow: hidden; background: #fbf9f4;
+        box-shadow: 0 0 0 1px rgba(21,20,15,.08), 0 50px 90px -30px rgba(21,20,15,.45), 0 16px 30px -18px rgba(21,20,15,.3); transform: rotate(-2deg); }
+      .bar { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px; background: #efebe2; border-bottom: 1px solid rgba(21,20,15,.08); }
+      .bar i { width: 12px; height: 12px; border-radius: 50%; background: rgba(21,20,15,.18); }
+      .bar b { margin-left: 14px; font: 500 16px "Inter Tight"; color: #57534a; background: #fff; border-radius: 999px; padding: 5px 16px; }
+      .browser img { display: block; width: 100%; height: 440px; object-fit: cover; object-position: top; }
+      .phone { position: absolute; width: 250px; height: 500px; border-radius: 40px; padding: 10px; background: #15140f;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 40px 70px -25px rgba(21,20,15,.55); }
+      .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 31px; display: block; }
+      .phone::after { content: ""; position: absolute; top: 18px; left: 50%; width: 70px; height: 20px; margin-left: -35px; border-radius: 20px; background: #15140f; }
+      .badge { position: absolute; padding: 16px 22px; border-radius: 18px; background: #fbf9f4; font: 600 22px "Inter Tight";
+        box-shadow: 0 0 0 1px rgba(21,20,15,.08), 0 24px 40px -20px rgba(21,20,15,.4); }
+      .badge small { display: block; font-size: 15px; font-weight: 500; color: #57534a; margin-top: 2px; }
+    </style>
+  </head>
+  <body>
+    <div class="cover">
+      <div class="glow"></div>
+      <div class="grain"></div>
+      <div class="text">
+        <span class="category" id="category"></span>
+        <h1 id="title"></h1>
+        <div class="logo">
+          <svg viewBox="0 0 48 48" width="48" height="48">
+            <rect x="12" y="12" width="24" height="24" fill="none" stroke="#15140f" stroke-width="3" />
+            <rect x="12" y="12" width="24" height="24" fill="none" stroke="#c4851c" stroke-width="3" transform="rotate(45 24 24)" />
+            <circle cx="24" cy="24" r="3" fill="#15140f" />
+          </svg>
+          fuccura<span>Journal</span>
+        </div>
+      </div>
+      <div class="visual" id="visual"></div>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      // The last words of the title in italic blue, the way the site's headings do it.
+      const title = params.get("title") ?? "";
+      const accent = params.get("accent") ?? "";
+      const h1 = document.getElementById("title");
+      if (accent && title.includes(accent)) {
+        const [before] = title.split(accent);
+        h1.append(before);
+        const em = document.createElement("em");
+        em.textContent = accent;
+        h1.append(em, title.slice(before.length + accent.length));
+      } else h1.textContent = title;
+      document.getElementById("category").textContent = params.get("category") ?? "";
+      const shots = (params.get("shots") ?? "prospectus").split(",");
+      const frame = params.get("frame") ?? "browser";
+      const visual = document.getElementById("visual");
+      if (frame === "phones") {
+        const spots = [
+          { left: 30, top: 120, rotate: -9 },
+          { left: 250, top: 40, rotate: 2 },
+          { left: 470, top: 130, rotate: 10 },
+        ];
+        shots.slice(0, 3).forEach((shot, index) => {
+          const phone = document.createElement("div");
+          phone.className = "phone";
+          const s = spots[index];
+          phone.style.cssText = `left:${s.left}px;top:${s.top}px;transform:rotate(${s.rotate}deg);z-index:${index === 1 ? 2 : 1}`;
+          phone.innerHTML = `<img src="../../public/templates/${shot}-phone.webp" />`;
+          visual.append(phone);
+        });
+      } else {
+        const address = params.get("address") ?? "yourname.com";
+        visual.innerHTML = `<div class="browser"><div class="bar"><i></i><i></i><i></i><b>${address}</b></div><img src="../../public/templates/${shots[0]}.webp" /></div>`;
+        if (shots[1]) {
+          const phone = document.createElement("div");
+          phone.className = "phone";
+          phone.style.cssText = "left:540px;top:250px;transform:rotate(6deg);width:200px;height:400px;border-radius:34px";
+          phone.innerHTML = `<img src="../../public/templates/${shots[1]}-phone.webp" style="border-radius:26px" />`;
+          visual.append(phone);
+        }
+      }
+      const badge = params.get("badge");
+      if (badge) {
+        const [big, small] = badge.split("|");
+        const el = document.createElement("div");
+        el.className = "badge";
+        el.style.cssText = "left:0;top:470px;z-index:3;transform:rotate(-3deg)";
+        el.innerHTML = `${big}${small ? `<small>${small}</small>` : ""}`;
+        visual.append(el);
+      }
+    </script>
+  </body>
+</html>
