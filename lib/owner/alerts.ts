@@ -22,7 +22,15 @@ const ALERTS_PER_DAY = 5;
 const ERROR_SPIKE = 5;
 const ERROR_ALERT_GAP_SECONDS = 3 * 3600;
 
+/**
+ * The owner can switch off every automatic email to him (alerts and the report)
+ * with OWNER_EMAILS=off in the server's .env. Leads and sign-ups still show in
+ * the console. Owner's choice, 15 October 2026: he reads the app instead.
+ */
+export const ownerEmailsOff = () => process.env.OWNER_EMAILS === "off";
+
 export async function alertOwner(subject: string, lines: string[], link?: { label: string; url: string }) {
+  if (ownerEmailsOff()) return;
   try {
     const to = supportInbox();
     if (!to || !databaseConfigured()) return;

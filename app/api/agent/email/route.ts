@@ -3,6 +3,7 @@ import { jsonError, readJson, route } from "@/lib/api/http";
 import { renderEmail, textToHtml } from "@/lib/email/layout";
 import { sendMail, supportInbox, type Mail } from "@/lib/email/mailer";
 import { loadDailyReport, reportNumbersHtml } from "@/lib/owner/daily-report";
+import { ownerEmailsOff } from "@/lib/owner/alerts";
 import { db } from "@/utils/db";
 import { bearerMatches } from "@/lib/security/bearer";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -31,6 +32,8 @@ const ATTACHMENT_TYPES: Record<string, string> = {
  */
 export const POST = route(async (request: Request) => {
   if (!bearerMatches(request, "AGENT_TOKEN")) return jsonError(404, "Not found.");
+  // The owner turned emails off (OWNER_EMAILS=off): agents report in the app instead.
+  if (ownerEmailsOff()) return Response.json({ ok: false, reason: "The owner has turned emails off." });
   const to = supportInbox();
   if (!to) return jsonError(503, "Set SMTP_TO (the owner's inbox) first.");
 

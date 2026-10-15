@@ -1,4 +1,5 @@
 import { db } from "@/utils/db";
+import { ownerEmailsOff } from "./alerts";
 import { ensureSchema } from "@/utils/db-schema";
 import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
@@ -226,6 +227,7 @@ function dubaiDate(at = new Date()): string {
  * two-day period, after 9:00 Dubai time. Returns true if sent.
  */
 export async function sendDailyReport(): Promise<boolean> {
+  if (ownerEmailsOff()) return false;
   const to = supportInbox();
   if (!to) return false;
   const dubaiHour = (new Date().getUTCHours() + DUBAI_OFFSET_HOURS) % 24;
