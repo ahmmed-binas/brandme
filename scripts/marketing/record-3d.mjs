@@ -48,6 +48,24 @@ const SHOTS = {
       }
     },
   },
+  // The car weaving between lanes for 25 seconds: “gameplay” for split-screen videos.
+  "lane-loop": {
+    id: "lane",
+    scroll: 0,
+    seconds: 25,
+    async act(page, frame, box) {
+      const lanes = [0.62, 0.42, 0.7, 0.5, 0.4, 0.66, 0.48, 0.58];
+      const turn = Math.floor(frame / 90);
+      const step = frame % 90;
+      const y = lanes[turn % lanes.length];
+      if (step === 10) {
+        await page.mouse.move(...at(box, 0.5, 0.55));
+        await page.mouse.down();
+      }
+      if (step > 10 && step <= 30) await page.mouse.move(...at(box, 0.5 + (step - 10) * 0.004, 0.55 + ((y - 0.55) * (step - 10)) / 20));
+      if (step === 31) await page.mouse.up();
+    },
+  },
   "studio-desk": {
     id: "studio-desk",
     scroll: "canvas",
