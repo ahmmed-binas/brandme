@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import PortfolioTemplateView from "@/components/templates/PortfolioTemplateView";
+import { isTemplateAvailable } from "@/lib/templates/approval";
 import { getTemplate } from "@/lib/templates/catalog";
 import type { Metadata } from "next";
 import { sampleFor } from "@/lib/templates/samples";
@@ -32,5 +33,7 @@ export async function generateMetadata({
     title: `${template.name} portfolio template`,
     description: template.description,
     alternates: { canonical: `/templates/${template.id}` },
+    // Templates waiting for the owner's approval can be previewed by link, but stay out of search.
+    ...(!(await isTemplateAvailable(template)) && { robots: { index: false, follow: false } }),
   };
 }
