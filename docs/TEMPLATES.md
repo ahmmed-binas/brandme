@@ -78,3 +78,16 @@ Calculators in these templates (DLD 4% fee, Golden Visa threshold of AED 2M, Eja
 ## 3D Pro templates (October 2026)
 
 Control Room (operations managers) and Studio Desk (content marketers) are drawn with three.js in `components/templates/studio/objects3d.tsx`. Every project becomes a 3D object chosen from its **category** (`objectFor`): typing “Video”, “Logistics” or an object's own name (“rocket”, “globe”…) swaps the object, and the editor shows the list. Objects only: no 3D people or faces (owner's rule). They are `proOnly` in the catalogue: anyone can try them in the editor, but saving and publishing need a paid plan (`lib/templates/pro.ts`, checked in the save and publish routes), and their code is not in the free downloads. The instructor templates Lane and Altitude use `vehicle3d.tsx` the same way.
+
+## Premium 3D agent templates: Monolith, Tide, Arc, Dune, Atlas (October 2026)
+
+Designed as standalone pages in a separate session and converted into studio templates (pending the owner's approval, Pro and 3D like the other 3D templates). Code: `components/templates/studio/realestate/premium/`.
+
+- `stage.js` is the shared three.js stage (drag to orbit, bloom, pause off screen, still frames when motion is off) with `destroy()`, so scenes clean up when the editor unmounts them. `realism.js` holds the sky, glass facades, mirror water and HDRI loader.
+- `scenes/*.js` are each page's original 3D code, extracted almost verbatim into `mount<Name>(canvas, options)`. Where the page drives the scene (Dune's sun clock, Arc's build slider and Drawing/Render switch, Atlas's district selection), the controller returns methods for it.
+- `pieces.tsx` has the shared listings grid, UAE mortgage calculator, enquiry form (opens WhatsApp or email with the message; nothing is stored), contact cards and the floating WhatsApp button. They keep the original class names, so each template styles them in its own CSS.
+- `<name>.css` was generated from each page by `scripts/samples/scope-css.py` (selectors scoped to `.pm-<name>`, @media → @container, vw → cqw), with hand adjustments at the end of each file. `premium.css` turns the fixed nav and WhatsApp button into sticky ones.
+- Content mapping (see `lib/templates/personas-premium.ts`): listings are `projects` (client = price, role = specs, category = status, technologies = area and type); the credentials strip is `highlights`; community, launch or district tables are `services` (Atlas and Tide read their figures from the price text); words in the tagline between asterisks take the accent colour.
+- Skies: two CC0 Poly Haven HDRIs halved to 1k in `public/samples/re/sky/`.
+- Arc is the off-plan design drawn as “Blueprint” (renamed because a developer template already uses that name).
+- **Owner decision pending:** Monolith shows a recognisable Burj Khalifa and Tide a recognisable Burj Al Arab, both drawn in code. Their outlines are trademarks of Emaar and Jumeirah; ask before approving those two for sale.

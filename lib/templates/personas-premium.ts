@@ -1,0 +1,651 @@
+import type { StandardContent } from "@/lib/portfolio/schema";
+
+/**
+ * Sample agents for the premium 3D agent templates (Monolith, Tide, Blueprint,
+ * Dune, Atlas). Everyone here is invented, and every licence number is sample
+ * content; prices are realistic for Dubai in 2026. Photos are the Unsplash set in
+ * public/samples/re (see CREDITS.md).
+ *
+ * Field use in these templates: projects are listings (client = price, role =
+ * specs, category = status, technologies = area and type, year = permit or
+ * handover); highlights are the credentials strip; services are the community or
+ * launch table (price = typical price); stats are the “about” numbers.
+ */
+const r = (name: string) => `/samples/re/${name}.webp`;
+
+export const PREMIUM_PERSONAS: Record<string, StandardContent> = {
+  "pm-dune": {
+    name: "Yousef Al Amiri",
+    professional_title: "Villa Specialist · Dubai",
+    availability: "بيتٌ يعرفُ الشمس",
+    tagline: "A home that knows where the sun sets.",
+    summary: [
+      "Family villas in Arabian Ranches, Dubai Hills, Al Barari and Tilal Al Ghaf. I’ll show you which rooms get the morning light, and where the garden is shaded by four o’clock.",
+      "I grew up in a villa with a courtyard my grandfather built facing north, and I still judge every home by where the shade falls in the afternoon.",
+      "I work with families moving up from apartments and with owners selling homes they’ve raised children in. I take every viewing myself and visit at the hour you’d actually use the garden.",
+    ],
+    location: "Arabian Ranches Community Centre, Dubai",
+    email: "yousef@example.ae",
+    phone: "+971 50 555 0144",
+    instagram: "https://www.instagram.com/",
+    avatar: r("agent-man-3"),
+    skills: ["Arabian Ranches", "Dubai Hills Estate", "Al Barari", "Tilal Al Ghaf", "The Valley"],
+    highlights: [
+      { title: "RERA BRN", detail: "44706", year: "" },
+      { title: "Oasis & Stone Realty · ORN", detail: "27615", year: "" },
+      { title: "Languages", detail: "Arabic, English", year: "" },
+      { title: "Villas sold since 2015", detail: "96", year: "" },
+    ],
+    projects: [
+      {
+        title: "Courtyard Villa, Palmera",
+        client: "AED 5,850,000",
+        role: "4 bed · 5 bath · 4,100 sq ft · north garden",
+        category: "For sale",
+        technologies: ["Arabian Ranches", "Villa"],
+        year: "Permit 7160310227",
+        image: r("villa-pool"),
+      },
+      {
+        title: "Park-edge Villa, Sidra",
+        client: "AED 9,400,000",
+        role: "5 bed · 6 bath · 5,300 sq ft",
+        category: "For sale",
+        technologies: ["Dubai Hills Estate", "Villa"],
+        year: "Permit 7160322419",
+        image: r("living-chandelier"),
+      },
+      {
+        title: "Garden Mansion",
+        client: "AED 16,800,000",
+        role: "6 bed · 7 bath · 9,800 sq ft",
+        category: "For sale",
+        technologies: ["Al Barari", "Villa"],
+        year: "Permit 7160335508",
+        image: r("living-view"),
+      },
+      {
+        title: "Lagoon Townhouse",
+        client: "AED 4,300,000",
+        role: "4 bed · 4 bath · 2,950 sq ft",
+        category: "Off-plan",
+        technologies: ["Tilal Al Ghaf", "Townhouse"],
+        description: "Handover Q1 2028 · 60/40 payment plan.",
+        year: "Permit 7160347761",
+        image: r("kitchen-dining"),
+      },
+      {
+        title: "Family Villa, Alvorada",
+        client: "AED 420,000 a year",
+        role: "4 bed · 5 bath · 3,900 sq ft",
+        category: "For rent",
+        technologies: ["Arabian Ranches", "Villa"],
+        year: "Permit 7160351193",
+        image: r("living-wood"),
+      },
+      {
+        title: "First Villa, Farm Gardens",
+        client: "AED 3,350,000",
+        role: "3 bed · 4 bath · 2,400 sq ft",
+        category: "For sale",
+        technologies: ["The Valley", "Townhouse"],
+        year: "Permit 7160364402",
+        image: r("kitchen-white"),
+      },
+    ],
+    services: [
+      {
+        title: "Arabian Ranches",
+        description: "Established gardens, schools inside the gates, golf",
+        price: "AED 5.8M",
+      },
+      {
+        title: "Dubai Hills Estate",
+        description: "Park views, the mall, 15 minutes to Downtown",
+        price: "AED 9.4M",
+      },
+      { title: "Al Barari", description: "Botanical gardens, privacy, very low density", price: "AED 14.5M" },
+      { title: "Tilal Al Ghaf", description: "A swimmable lagoon, newer homes, quiet", price: "AED 7.2M" },
+      { title: "The Valley", description: "Value for space, first villa purchase", price: "AED 3.4M" },
+    ],
+    stats: [
+      { value: "96", label: "Villas sold" },
+      { value: "31", label: "Families placed in Arabian Ranches" },
+      { value: "2", label: "Languages" },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Yousef came back at 4 pm to show us where the shade fell. We bought the villa with the north garden, and we use it every evening.",
+        name: "The Haddad family",
+        role: "Arabian Ranches, 2025",
+      },
+      {
+        quote:
+          "He sold our home of twelve years in three weeks and arranged the move-out around the school term.",
+        name: "Sarah & Mark P.",
+        role: "Dubai Hills Estate, 2025",
+      },
+      {
+        quote:
+          "He explained the service charges and cooling costs before we fell in love with a house we couldn’t run.",
+        name: "Khalid M.",
+        role: "Tilal Al Ghaf, 2024",
+      },
+    ],
+  },
+
+  "pm-blueprint": {
+    name: "Priya Raman",
+    professional_title: "Off-plan advisory · Dubai",
+    tagline: "Buy the drawing. Own the tower.",
+    summary: [
+      "I help buyers choose off-plan homes from developers with a record of handing over on time, and I check the escrow account and payment plan before you pay a dirham.",
+      "I spent eight years on construction sites in Chennai and Dubai before moving into property advice. I can read a structural drawing, a construction progress report and an escrow statement, and I’ll tell you when a launch is priced on hype.",
+      "I only advise on projects from developers who have handed over at least three buildings within six months of the promised date.",
+    ],
+    location: "Business Bay, Dubai",
+    email: "priya@example.ae",
+    phone: "+971 50 555 0172",
+    linkedin: "https://www.linkedin.com/",
+    avatar: "/samples/pro/product-avatar.webp",
+    skills: [
+      "Dubai Creek Harbour",
+      "Dubai Hills Estate",
+      "Sobha Hartland",
+      "Jumeirah Village Circle",
+      "Dubai South",
+    ],
+    highlights: [
+      { title: "RERA BRN", detail: "60392", year: "" },
+      { title: "Brokerage", detail: "Groundwork Property Advisory · ORN 33781", year: "" },
+      { title: "Launches advised", detail: "38 since 2017", year: "" },
+      { title: "Languages", detail: "English, Hindi, Tamil", year: "" },
+    ],
+    projects: [
+      {
+        title: "Arc 48, 2-bed",
+        client: "AED 2,800,000",
+        role: "2 bed · 2 bath · 1,240 sq ft",
+        category: "Off-plan",
+        technologies: ["Dubai Creek Harbour", "Apartment"],
+        description: "Handover Q4 2027 · 60/40 payment plan.",
+        year: "Permit 7150110293",
+        image: r("tower-kaktus"),
+      },
+      {
+        title: "Hillside Terraces",
+        client: "AED 4,950,000",
+        role: "4 bed · 5 bath · 2,980 sq ft",
+        category: "Off-plan",
+        technologies: ["Dubai Hills Estate", "Townhouse"],
+        description: "Handover Q2 2028 · 70/30 payment plan.",
+        year: "Permit 7150124410",
+        image: r("build-site"),
+      },
+      {
+        title: "Circle Park Studios",
+        client: "AED 780,000",
+        role: "Studio · 1 bath · 430 sq ft",
+        category: "Off-plan",
+        technologies: ["Jumeirah Village Circle", "Apartment"],
+        description: "Handover Q1 2027 · 40/60 payment plan.",
+        year: "Permit 7150139877",
+        image: r("build-crane"),
+      },
+      {
+        title: "Lagoon Edge 3-bed",
+        client: "AED 3,650,000",
+        role: "3 bed · 4 bath · 1,790 sq ft",
+        category: "Off-plan",
+        technologies: ["Sobha Hartland", "Apartment"],
+        description: "Handover Q3 2027 · 50/50 payment plan.",
+        year: "Permit 7150142266",
+        image: r("tower-modern"),
+      },
+      {
+        title: "Handed-over 1-bed resale",
+        client: "AED 1,640,000",
+        role: "1 bed · 2 bath · 820 sq ft",
+        category: "For sale",
+        technologies: ["Dubai Creek Harbour", "Apartment"],
+        year: "Permit 7150150081",
+        image: r("living-city"),
+      },
+      {
+        title: "Aviation District Villa",
+        client: "AED 210,000 a year",
+        role: "4 bed · 4 bath · 3,300 sq ft",
+        category: "For rent",
+        technologies: ["Dubai South", "Villa"],
+        year: "Permit 7150163390",
+        image: r("living-curtains"),
+      },
+    ],
+    stats: [
+      { value: "38", label: "Launches advised" },
+      { value: "0", label: "Client projects delayed past 12 months" },
+      { value: "6 mo", label: "Max delay I’ll accept" },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Priya talked us out of a launch with no escrow number on the brochure. Six months later the project was paused.",
+        name: "Anil & Deepa K.",
+        role: "Bought in Sobha Hartland",
+      },
+      {
+        quote: "Her snagging list ran to 64 items. The developer fixed every one before we took the keys.",
+        name: "Jonas W.",
+        role: "Handover in Dubai Hills",
+      },
+      {
+        quote: "She sent site photos at every milestone, so I always knew what my money had paid for.",
+        name: "Rania S.",
+        role: "Investor, Creek Harbour",
+      },
+    ],
+  },
+
+  "pm-atlas": {
+    name: "Sara Al Mansoori",
+    professional_title: "Dubai area specialist",
+    availability: "Dubai, by neighbourhood",
+    tagline: "Choose the *area* first. The home follows.",
+    summary: [
+      "I’ve bought, rented and sold in seven of Dubai’s most asked-about neighbourhoods. Tap one to see what it costs, what it earns and who it suits.",
+      "I trained as an urban planner at the American University of Sharjah and spent four years at a master developer before I became a broker. I still read master plans, metro extensions and school openings, because they move prices before the portals notice.",
+      "Most of my clients are investors buying from abroad. I send a written area report before every viewing and a rental forecast before every offer.",
+    ],
+    location: "Al Wasl Road, Jumeirah",
+    email: "sara@example.ae",
+    phone: "+971 50 555 0136",
+    linkedin: "https://www.linkedin.com/",
+    avatar: r("agent-woman-2"),
+    highlights: [
+      { title: "RERA BRN", detail: "57218", year: "" },
+      { title: "Compass Line Real Estate · ORN", detail: "30552", year: "" },
+      { title: "Languages", detail: "Arabic · English · French", year: "" },
+      { title: "Transactions since 2013", detail: "310+", year: "" },
+    ],
+    services: [
+      {
+        title: "Dubai Marina",
+        description: "Sea views, walkable, strong short-let demand",
+        price: "AED 2,250 · 6.8% · AED 105k · +9.5%",
+      },
+      {
+        title: "Palm Jumeirah",
+        description: "Beachfront villas, trophy homes",
+        price: "AED 5,900 · 4.6% · AED 190k · +14.2%",
+      },
+      {
+        title: "Jumeirah Village Circle",
+        description: "Highest yields, first investments",
+        price: "AED 1,150 · 8.1% · AED 68k · +11.0%",
+      },
+      {
+        title: "Dubai Hills Estate",
+        description: "Families, schools, golf and the park",
+        price: "AED 2,150 · 5.9% · AED 110k · +12.8%",
+      },
+      {
+        title: "Downtown Dubai",
+        description: "Prestige, tower views, short lets",
+        price: "AED 3,150 · 5.8% · AED 130k · +8.4%",
+      },
+      {
+        title: "Business Bay",
+        description: "Value next to Downtown, canal living",
+        price: "AED 2,280 · 6.9% · AED 96k · +10.3%",
+      },
+      {
+        title: "Dubai Creek Harbour",
+        description: "Off-plan upside, skyline views",
+        price: "AED 2,050 · 6.2% · AED 92k · +13.1%",
+      },
+    ],
+    projects: [
+      {
+        title: "Marina Promenade, 2-bed",
+        client: "AED 2,650,000",
+        role: "2 bed · 3 bath · 1,280 sq ft",
+        category: "For sale",
+        technologies: ["Dubai Marina", "Apartment"],
+        year: "Permit 7170401128",
+        image: r("living-view"),
+      },
+      {
+        title: "Circle Park Townhouse",
+        client: "AED 2,350,000",
+        role: "3 bed · 4 bath · 2,100 sq ft",
+        category: "For sale",
+        technologies: ["Jumeirah Village Circle", "Townhouse"],
+        year: "Permit 7170412290",
+        image: r("kitchen-island"),
+      },
+      {
+        title: "Park-view 1-bed",
+        client: "AED 115,000 a year",
+        role: "1 bed · 2 bath · 790 sq ft",
+        category: "For rent",
+        technologies: ["Dubai Hills Estate", "Apartment"],
+        year: "Permit 7170423371",
+        image: r("bed-room"),
+      },
+      {
+        title: "Canal Tower Studio",
+        client: "AED 980,000",
+        role: "Studio · 1 bath · 480 sq ft",
+        category: "For sale",
+        technologies: ["Business Bay", "Apartment"],
+        year: "Permit 7170434415",
+        image: r("living-city"),
+      },
+      {
+        title: "Harbour Edge 2-bed",
+        client: "AED 2,150,000",
+        role: "2 bed · 2 bath · 1,160 sq ft",
+        category: "Off-plan",
+        technologies: ["Dubai Creek Harbour", "Apartment"],
+        description: "Handover Q2 2027 · 60/40 payment plan.",
+        year: "Permit 7170445503",
+        image: r("tower-modern"),
+      },
+      {
+        title: "Frond Garden Villa",
+        client: "AED 1,100,000 a year",
+        role: "5 bed · 6 bath · 6,500 sq ft",
+        category: "For rent",
+        technologies: ["Palm Jumeirah", "Villa"],
+        year: "Permit 7170456688",
+        image: r("villa-pool"),
+      },
+    ],
+    stats: [
+      { value: "310+", label: "Transactions" },
+      { value: "7", label: "Areas covered" },
+      { value: "58%", label: "Clients abroad" },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Sara’s area report steered me from the Marina to JVC. Same budget, 2.3 points more yield, and the tenant renewed.",
+        name: "Lukas H.",
+        role: "Investor in Munich · JVC, 2025",
+      },
+      {
+        quote:
+          "She knew which Business Bay towers have chiller fees and which don’t. That alone saved us AED 9,000 a year.",
+        name: "Amina & Yusuf",
+        role: "Bought in Business Bay, 2025",
+      },
+      {
+        quote:
+          "Clear numbers, no pressure. We bought in Dubai Hills after she walked us through the school catchments.",
+        name: "Priyanka D.",
+        role: "Dubai Hills Estate, 2024",
+      },
+    ],
+  },
+
+  "pm-monolith": {
+    name: "Layla Haddad",
+    professional_title: "Downtown Dubai",
+    availability: "Downtown Dubai · Business Bay · DIFC",
+    tagline: "Homes above the *city*, sold quietly.",
+    summary: [
+      "I represent buyers and sellers of penthouses and high-floor residences around the Boulevard. Most of my sales never reach a portal.",
+      "I moved to Dubai in 2011 to work in hotel development and started selling homes in Downtown five years later. I still work only in the streets I can walk: Downtown, Business Bay, DIFC and City Walk.",
+      "Sellers come to me for discreet, off-market sales. Buyers come for honest advice on floor, view and service charge, because those decide resale value here more than the brand on the lobby.",
+      "“The view you pay for should be the view you keep. I check what is being built next door before you sign.”",
+    ],
+    location: "Boulevard Plaza Tower 1, Downtown Dubai",
+    email: "layla@example.ae",
+    phone: "+971 50 555 0129",
+    instagram: "https://www.instagram.com/",
+    avatar: "/samples/pro/lang-avatar.webp",
+    highlights: [
+      { title: "BRN", detail: "48213", year: "" },
+      { title: "Meridian Crest Properties · ORN", detail: "29104", year: "" },
+      { title: "Languages", detail: "English, Arabic, French", year: "" },
+    ],
+    stats: [
+      { value: "AED 1.2B", label: "Sold since 2016" },
+      { value: "214", label: "Completed deals" },
+      { value: "11 days", label: "Median time to offer" },
+      { value: "68%", label: "Off-market sales" },
+      { value: "4.9", label: "Average client rating" },
+      { value: "3", label: "Languages" },
+    ],
+    services: [
+      {
+        title: "Downtown Dubai",
+        description: "Fountain and tower views, branded residences",
+        price: "3,150 · 5.8%",
+      },
+      { title: "DIFC", description: "Walk-to-work apartments, gallery district", price: "3,420 · 5.4%" },
+      {
+        title: "Business Bay",
+        description: "Canal frontage, newer towers, value per foot",
+        price: "2,280 · 6.9%",
+      },
+      { title: "City Walk", description: "Low-rise, family layouts, street retail", price: "2,760 · 6.1%" },
+    ],
+    projects: [
+      {
+        title: "Sky Collection Penthouse",
+        client: "AED 38,500,000",
+        role: "4 bed · 5 bath · 7,420 sq ft",
+        category: "For sale",
+        technologies: ["Downtown Dubai", "Penthouse"],
+        year: "Permit 7130482915",
+        image: r("living-chandelier"),
+      },
+      {
+        title: "Fountain-view Residence",
+        client: "AED 9,800,000",
+        role: "3 bed · 4 bath · 2,860 sq ft",
+        category: "For sale",
+        technologies: ["Downtown Dubai", "Apartment"],
+        year: "Permit 7130519027",
+        image: r("living-city"),
+      },
+      {
+        title: "Canal Corner Duplex",
+        client: "AED 6,450,000",
+        role: "3 bed · 3 bath · 2,410 sq ft",
+        category: "For sale",
+        technologies: ["Business Bay", "Apartment"],
+        year: "Permit 7130554410",
+        image: r("tower-balconies"),
+      },
+      {
+        title: "Gallery Quarter Loft",
+        client: "AED 420,000 a year",
+        role: "2 bed · 3 bath · 1,980 sq ft",
+        category: "For rent",
+        technologies: ["DIFC", "Apartment"],
+        year: "Permit 7130561188",
+        image: r("living-curtains"),
+      },
+      {
+        title: "Boulevard Crown, Level 71",
+        client: "AED 24,750,000",
+        role: "5 bed · 6 bath · 6,100 sq ft",
+        category: "Off-plan",
+        technologies: ["Downtown Dubai", "Penthouse"],
+        description: "Handover Q2 2028 · 60/40 payment plan.",
+        year: "Permit 7130578802",
+        image: r("dubai-towers"),
+      },
+      {
+        title: "Garden Townhouse",
+        client: "AED 550,000 a year",
+        role: "4 bed · 5 bath · 3,900 sq ft",
+        category: "For rent",
+        technologies: ["City Walk", "Townhouse"],
+        year: "Permit 7130590341",
+        image: r("kitchen-white"),
+      },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Layla told us to walk away from the first penthouse because of a tower going up across the road. The one we bought instead has the view we were promised.",
+        name: "R. & M. Okonkwo",
+        role: "Bought in Downtown, 2025",
+      },
+      {
+        quote:
+          "Sold our Business Bay apartment off-market in nine days, with no open house and no portal listing.",
+        name: "Henrik L.",
+        role: "Sold in Business Bay, 2025",
+      },
+      {
+        quote:
+          "She handled the bank, the trustee and the NOC while I was in Paris. I signed twice and collected the keys.",
+        name: "Claire D.",
+        role: "Bought in DIFC, 2024",
+      },
+    ],
+  },
+
+  "pm-tide": {
+    name: "Omar Siddiqui",
+    professional_title: "Waterfront · Dubai",
+    availability: "Palm Jumeirah · Marina · Bluewaters",
+    tagline: "Wake up to the Gulf.",
+    summary: [
+      "Beachfront villas and sea-view apartments along Dubai’s coast. I show most homes from the water first, so you see exactly what faces the sea.",
+      "I grew up a few streets from the Arabian Sea and have sold homes on Dubai’s coastline since 2014. I hold a day skipper licence, and on Saturdays I take buyers out on the water to see the fronds and towers from the sea side.",
+      "Waterfront homes have problems inland homes don’t: salt on the façade, beach erosion, and noise from the jet-ski lane. I check all three before you make an offer.",
+    ],
+    location: "Dubai Marina Yacht Club",
+    email: "omar@example.ae",
+    phone: "+971 50 555 0118",
+    instagram: "https://www.instagram.com/",
+    avatar: r("agent-man"),
+    skills: [
+      "Signature villas, Frond G",
+      "Marina penthouses",
+      "Bluewaters residences",
+      "Emaar Beachfront",
+      "Jumeirah Bay plots",
+      "Private beach access",
+    ],
+    highlights: [
+      { title: "Sunset, Dubai", detail: "6:01 pm", year: "" },
+      { title: "Sea temperature", detail: "28 °C", year: "" },
+      { title: "Next boat viewing", detail: "Saturday 5 pm", year: "" },
+    ],
+    stats: [
+      { value: "140+", label: "Waterfront sales" },
+      { value: "27", label: "Frond villas sold" },
+      { value: "4", label: "Languages" },
+    ],
+    services: [
+      {
+        title: "Palm Jumeirah",
+        description: "Private-beach villas on the fronds, hotel apartments on the trunk.",
+        price: "5,900 · 4.6% · 95%",
+      },
+      {
+        title: "Dubai Marina",
+        description: "High-floor sea views, walk to JBR beach and the tram.",
+        price: "2,250 · 6.8% · 55%",
+      },
+      {
+        title: "Bluewaters",
+        description: "Island living beside the wheel, car-free promenades.",
+        price: "3,300 · 5.9% · 70%",
+      },
+      {
+        title: "Emaar Beachfront",
+        description: "New towers on a private beach between Palm and Marina.",
+        price: "3,050 · 6.1% · 85%",
+      },
+      {
+        title: "Jumeirah Bay",
+        description: "An island of mansion plots and one hotel.",
+        price: "4,700 · n/a · 100%",
+      },
+    ],
+    projects: [
+      {
+        title: "Signature Villa, Frond G",
+        client: "AED 58,000,000",
+        role: "6 bed · 7 bath · 11,200 sq ft",
+        category: "For sale",
+        technologies: ["Palm Jumeirah", "Villa"],
+        year: "Permit 7140210554",
+        image: r("villa-pool"),
+      },
+      {
+        title: "Marina Sky Penthouse",
+        client: "AED 16,900,000",
+        role: "4 bed · 5 bath · 5,050 sq ft",
+        category: "For sale",
+        technologies: ["Dubai Marina", "Penthouse"],
+        year: "Permit 7140229810",
+        image: r("bedroom-ocean"),
+      },
+      {
+        title: "Island Residence, Building 4",
+        client: "AED 360,000 a year",
+        role: "2 bed · 3 bath · 1,720 sq ft",
+        category: "For rent",
+        technologies: ["Bluewaters", "Apartment"],
+        year: "Permit 7140231177",
+        image: r("living-view"),
+      },
+      {
+        title: "Beachfront Tower, Level 38",
+        client: "AED 7,200,000",
+        role: "3 bed · 4 bath · 2,140 sq ft",
+        category: "Off-plan",
+        technologies: ["Emaar Beachfront", "Apartment"],
+        description: "Handover Q4 2027.",
+        year: "Permit 7140248002",
+        image: r("coast-aerial"),
+      },
+      {
+        title: "Garden Home, Frond B",
+        client: "AED 1,450,000 a year",
+        role: "5 bed · 6 bath · 7,000 sq ft",
+        category: "For rent",
+        technologies: ["Palm Jumeirah", "Villa"],
+        year: "Permit 7140250936",
+        image: r("living-wood"),
+      },
+      {
+        title: "JBR Sea-view Apartment",
+        client: "AED 3,850,000",
+        role: "2 bed · 3 bath · 1,610 sq ft",
+        category: "For sale",
+        technologies: ["Dubai Marina", "Apartment"],
+        year: "Permit 7140262415",
+        image: r("kitchen-dining"),
+      },
+    ],
+    testimonials: [
+      {
+        quote:
+          "Seeing the villa from the boat first told us more than three site visits. We bought on Frond F that week.",
+        name: "The Andersson family",
+        role: "Palm Jumeirah, 2025",
+      },
+      {
+        quote:
+          "Omar flagged the jet-ski lane under our first choice. The flat we chose is quiet, and the view is just as good.",
+        name: "Faisal R.",
+        role: "Dubai Marina, 2025",
+      },
+      {
+        quote: "He let our Bluewaters apartment in six days to a tenant who has renewed twice.",
+        name: "Mei & Tom",
+        role: "Bluewaters, 2024",
+      },
+    ],
+  },
+};

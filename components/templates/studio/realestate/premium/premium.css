@@ -1,0 +1,58 @@
+/*
+ * Shared rules for the premium agent templates. The original pages used
+ * position: fixed for the nav and the WhatsApp button; inside the studio they
+ * become sticky, so they work in the editor, the phone preview and the live site.
+ */
+/* The pages set overflow-x: hidden on body; on the root it would make a scroll box and stop sticky elements. */
+.pm.pm { position: relative; overflow: visible; overflow-x: clip; }
+.pm .pm-sentinel { position: absolute; top: 0; height: 40px; width: 1px; pointer-events: none; }
+.pm .nav { position: sticky; top: 0; inset: auto; margin-bottom: calc(-1 * var(--nav-h, 76px)); }
+.pm .wa-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  height: 0;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+.pm .wa-dock .wa-float {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  pointer-events: auto;
+  transform: translate(-16px, calc(-100% - 16px));
+}
+.pm .lst-art > img,
+.pm .lst-art > div,
+.pm .lst-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pm .pm-hint {
+  position: absolute;
+  right: max(16px, 3cqw);
+  top: calc(var(--nav-h, 76px) + 20px);
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(8, 10, 16, 0.55);
+  color: #fff;
+  font: 500 12px/1 system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(8px);
+  transition: opacity 0.6s;
+  animation: pm-hint 2.4s ease-in-out infinite;
+}
+.pm .pm-hint::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}
+.pm .pm-hint.gone { opacity: 0; }
+@keyframes pm-hint { 50% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .pm .pm-hint { animation: none; } }
+[data-static] .pm .pm-hint { animation: none; }

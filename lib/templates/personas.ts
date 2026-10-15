@@ -3,6 +3,7 @@ import { MORE_PERSONAS } from "./personas-more";
 import { REALESTATE_PERSONAS } from "./personas-realestate";
 import { UAE_PERSONAS } from "./personas-uae";
 import { PRO_PERSONAS } from "./personas-pro";
+import { PREMIUM_PERSONAS } from "./personas-premium";
 
 /**
  * Sample people used to fill template previews and as a new portfolio's
@@ -1462,7 +1463,7 @@ PERSONAS.trainer = {
   ],
 };
 
-Object.assign(PERSONAS, MORE_PERSONAS, REALESTATE_PERSONAS, UAE_PERSONAS, PRO_PERSONAS);
+Object.assign(PERSONAS, MORE_PERSONAS, REALESTATE_PERSONAS, UAE_PERSONAS, PRO_PERSONAS, PREMIUM_PERSONAS);
 
 export function personaFor(id: string | undefined): StandardContent {
   return structuredClone(PERSONAS[id ?? "developer"] ?? PERSONAS.developer);
