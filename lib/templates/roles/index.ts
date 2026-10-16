@@ -54,7 +54,9 @@ export function applyRole(base: StandardContent, role: Role): StandardContent {
     professional_title: s.title,
     tagline: s.tagline,
     summary: s.bio,
-    availability: s.availability ?? base.availability,
+    // The base person's availability is about their own job ("Booking rewires" for an
+    // electrician), so a different job only keeps it when it is the same job.
+    availability: s.availability ?? (base.professional_title === s.title ? base.availability : undefined),
     skills: s.skills.split(" · "),
     services: s.services.map(([title, description, price]) => ({
       title,

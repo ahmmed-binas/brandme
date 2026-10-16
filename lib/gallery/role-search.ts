@@ -30,13 +30,13 @@ export const ROLE_SEARCH: Record<string, RoleSearch> = {
     heading: ["Machine learning engineer", "portfolio website, ready to publish"],
   },
   "event-planner": {
-    title: "Event Planner Portfolio Samples: Free Templates & Live Example",
+    title: "Event Planner Portfolio Samples: Free Templates",
     description:
       "Event planner portfolio samples you can use: weddings, corporate events and launches, with photos, packages and an enquiry button. Free, no code.",
     heading: ["Event planner portfolio", "samples you can make your own"],
   },
   barrister: {
-    title: "Barrister Profile Website Design: Free Templates for Barristers",
+    title: "Barrister Profile Website Design: Free Templates",
     description:
       "A barrister profile website with your call year, chambers, practice areas, notable cases and direct access details. Free designs, edit without code.",
     heading: ["Barrister profile", "website design, done properly"],

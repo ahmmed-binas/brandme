@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { designsForRole, templatePageHref } from "@/lib/templates/links";
@@ -25,6 +27,16 @@ export async function generateMetadata({ params }: { params: Promise<{ role: str
       `How to make a ${role.label.toLowerCase()} portfolio website in five steps: what to include, live examples written for ${role.plural}, and free designs you can edit without code.`,
     alternates: { canonical: `/for/${role.id}` },
   };
+}
+
+/**
+ * The picture of a design for the fan at the top: filled with this job's own
+ * sample content when it has been captured (scripts/samples/role-thumbs.mjs,
+ * done for the jobs people find us with), otherwise the design's own sample.
+ */
+function fanPicture(roleId: string, templateId: string): string {
+  const own = `/templates/roles/${roleId}/${templateId}.webp`;
+  return existsSync(path.join(process.cwd(), "public", own)) ? own : `/templates/${templateId}.webp`;
 }
 
 /** A landing page per job title: what the portfolio says, and the designs that suit it. */
@@ -124,7 +136,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnails, already sized */}
                       <img
-                        src={`/templates/${template.id}.webp`}
+                        src={fanPicture(role.id, template.id)}
                         alt={`${template.name} design for a ${role.label.toLowerCase()} website`}
                         className="aspect-[3/2] w-full object-cover object-top"
                       />
