@@ -366,3 +366,48 @@ html {
   font-size: 0.85em;
   opacity: 0.65;
 }
+
+/*
+ * The kite logo (components/common/Logo.tsx). On hover of the mark, or of a
+ * link around it with class "group", the kite sways from its top corner and
+ * the tail waves. Nothing moves for people who ask for reduced motion.
+ */
+.kite-mark .kite-body,
+.kite-mark .kite-tail {
+  transform-box: view-box;
+  transform-origin: 24px 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kite-mark:hover .kite-body,
+  .group:hover .kite-mark .kite-body {
+    animation: kite-sway 1.6s ease-in-out infinite;
+  }
+  .kite-mark:hover .kite-tail,
+  .group:hover .kite-mark .kite-tail {
+    animation: kite-tail 1.6s ease-in-out infinite;
+  }
+}
+@keyframes kite-sway {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  30% {
+    transform: rotate(-7deg) translateY(-1.5px);
+  }
+  70% {
+    transform: rotate(6deg) translateY(-0.5px);
+  }
+}
+@keyframes kite-tail {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-12deg);
+  }
+  70% {
+    transform: rotate(10deg);
+  }
+}

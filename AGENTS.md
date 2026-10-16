@@ -96,4 +96,4 @@ See the PDF for detail. In short: configurable auto-update (done: the Investigat
 
 ## Brand
 
-Logo: two squares, one turned 45° (an eight-point star), plus the lowercase wordmark “kitefolio” in Bricolage Grotesque. Component `components/common/Logo.tsx`, favicon `app/icon.svg`, home-screen icon `app/apple-icon.tsx`. Approved by the owner on 10 October 2026.
+Logo: a diamond kite in four panels (ink, gold, pale gold) with a centre knot and a curling tail with three bows; it sways on hover (`.kite-mark` in `app/globals.css`, still with reduced motion). Plus the lowercase wordmark “kitefolio” in Bricolage Grotesque. Component `components/common/Logo.tsx`, also beside the big name in the footer; favicon `app/icon.svg`, home-screen icon `app/apple-icon.tsx`, share card `app/opengraph-image.tsx`, social images `marketing/brand/` (`scripts/marketing/brand-images.mjs`). Approved by the owner on 16 October 2026 (replacing the eight-point star of 10 October).

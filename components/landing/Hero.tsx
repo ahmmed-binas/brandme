@@ -11,6 +11,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { ArrowRight, Lock } from "lucide-react";
+import { PRICES, aed } from "@/lib/offers";
 import type { StandardContent } from "@/lib/portfolio/schema";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import { TEMPLATE_MOCKS } from "./TemplateMocks";
@@ -250,7 +251,7 @@ export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
             className="rise font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft"
             style={{ "--i": 0 } as React.CSSProperties}
           >
-            Portfolio builder · free to start
+            Website builder for professionals · free to start
           </p>
           <h1
             id="hero-title"
@@ -258,17 +259,17 @@ export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
           >
             <span className="line">
               <span className="rise" style={{ "--i": 1 } as React.CSSProperties}>
-                Your work,
+                Your website,
               </span>
             </span>
             <span className="line">
               <span className="rise" style={{ "--i": 2 } as React.CSSProperties}>
-                at <em className="font-[300] text-signal">your own</em>
+                made for <em className="font-[300] text-signal">your</em>
               </span>
             </span>
             <span className="line">
               <span className="rise" style={{ "--i": 3 } as React.CSSProperties}>
-                address.
+                job.
               </span>
             </span>
           </h1>
@@ -276,8 +277,9 @@ export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
             className="rise mt-8 max-w-[34rem] text-[1.12rem] leading-[1.65] text-ink-soft"
             style={{ "--i": 4 } as React.CSSProperties}
           >
-            Kitefolio turns your CV, GitHub or LinkedIn into a portfolio that’s carefully typeset, quick to
-            load, and published at a domain with your name on it.
+            Kitefolio gives you a personal website designed for your job, from real estate agents and nurses
+            to lawyers and designers. Pick a design, click any text to make it yours, and publish free today.
+            Add your own domain with Pro from {aed(PRICES.proMonth)} a month.
           </p>
 
           <form

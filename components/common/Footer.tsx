@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoMark } from "@/components/common/Logo";
 import { brand } from "@/lib/brand";
 
 const COLUMNS = [
@@ -72,10 +73,12 @@ export default function Footer() {
             </nav>
           ))}
         </div>
+        {/* The kite and the name, big. The kite sways when you hover it. */}
         <p
           aria-hidden
-          className="mt-20 select-none overflow-hidden whitespace-nowrap font-display text-[min(29.5vw,28.5rem)] font-[300] leading-[0.78] tracking-[-0.06em] text-ink [font-variation-settings:'opsz'_144]"
+          className="mt-20 flex select-none items-center gap-[0.04em] overflow-hidden whitespace-nowrap py-[0.12em] font-display text-[min(24vw,24rem)] font-[300] leading-[0.78] tracking-[-0.06em] text-ink [font-variation-settings:'opsz'_144]"
         >
+          <LogoMark className="h-[0.7em] w-[0.7em] shrink-0" />
           {brand.name}
         </p>
         <div className="flex flex-col gap-2 border-t border-rule py-6 text-[0.85rem] text-ink-faint sm:flex-row sm:justify-between">

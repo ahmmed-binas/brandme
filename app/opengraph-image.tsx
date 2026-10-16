@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { ROLES } from "@/lib/templates/roles";
 import { brand } from "@/lib/brand";
 
 export const alt = `${brand.name}: portfolios at your own address`;
@@ -28,19 +29,29 @@ export default async function OpenGraphImage() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 40 }}>
-        <svg viewBox="0 0 48 48" width="56" height="56">
-          <rect x="12" y="12" width="24" height="24" fill="none" stroke="#15140f" strokeWidth="3" />
-          <rect
-            x="12"
-            y="12"
-            width="24"
-            height="24"
+        <svg viewBox="0 0 48 48" width="64" height="64">
+          <path
+            d="M24 1.6 L37.6 15 L24 33.4 L10.4 15 Z"
             fill="none"
-            stroke="#c4851c"
-            strokeWidth="3"
-            transform="rotate(45 24 24)"
+            stroke="#15140f"
+            strokeWidth="1.1"
+            strokeLinejoin="round"
           />
-          <circle cx="24" cy="24" r="3" fill="#15140f" />
+          <path d="M23.2 4.4 L13.2 14.2 L23.2 14.2 Z" fill="#c4851c" />
+          <path d="M24.8 4.4 L34.8 14.2 L24.8 14.2 Z" fill="#15140f" />
+          <path d="M13.2 15.8 L23.2 15.8 L23.2 30 Z" fill="#15140f" />
+          <path d="M24.8 15.8 L34.8 15.8 L24.8 30 Z" fill="#e8c27a" />
+          <circle cx="24" cy="15" r="1.5" fill="#c4851c" />
+          <path
+            d="M24 33.4 C 20.6 36.4, 27.6 38.6, 24.2 41.6 S 27 45, 25.4 47.4"
+            fill="none"
+            stroke="#15140f"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+          <path d="M20.8 35.6 L23.3 36.9 L20.8 38.2 Z M25.8 35.6 L23.3 36.9 L25.8 38.2 Z" fill="#c4851c" />
+          <path d="M22.1 39.9 L24.6 41.2 L22.1 42.5 Z M27.1 39.9 L24.6 41.2 L27.1 42.5 Z" fill="#e8c27a" />
+          <path d="M23.7 43.9 L26.1 45.1 L23.7 46.3 Z M28.5 43.9 L26.1 45.1 L28.5 46.3 Z" fill="#c4851c" />
         </svg>
         kitefolio
       </div>
@@ -53,11 +64,11 @@ export default async function OpenGraphImage() {
           letterSpacing: -3,
         }}
       >
-        <span>Your work,</span>
+        <span>Your website,</span>
         <span style={{ display: "flex" }}>
-          at&nbsp;<span style={{ color: "#2338e0", fontStyle: "italic" }}>your own</span>
+          made for&nbsp;<span style={{ color: "#2338e0", fontStyle: "italic" }}>your</span>
         </span>
-        <span>address.</span>
+        <span>job.</span>
       </div>
       <div
         style={{
@@ -69,8 +80,8 @@ export default async function OpenGraphImage() {
           paddingTop: 24,
         }}
       >
-        <span>Portfolio builder</span>
-        <span>35+ templates · free to start</span>
+        <span>Website builder for professionals</span>
+        <span>{ROLES.length} job titles · free to start</span>
       </div>
     </div>,
     { ...size, fonts: font ? [{ name: "Fraunces", data: font, style: "normal", weight: 400 }] : [] },
