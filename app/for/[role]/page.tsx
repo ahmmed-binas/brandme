@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
-import { faqSchema, roleBreadcrumbs, roleFaq } from "@/lib/gallery/role-seo";
+import { faqSchema, roleBreadcrumbs, roleFaq, roleSteps } from "@/lib/gallery/role-seo";
 import { RoleEssentials } from "@/components/gallery/RoleEssentials";
 import PreviewFrame from "@/components/templates/PreviewFrame";
 import { TemplateBadges } from "@/components/templates/TemplateBadges";
@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<{ role: str
   if (!role) return {};
   return {
     // Words people search: "portfolio website for nurses", "nurse portfolio examples", "free template".
-    title: `${role.label} Portfolio Website: Free Templates & a Live Example`,
-    description: `How to make a ${role.label.toLowerCase()} portfolio: what to include, a live example with sample content written for ${role.plural}, and free designs you can edit without code.`,
+    title: `${role.label} Portfolio Website: Free Templates & Examples`,
+    description: `How to make a ${role.label.toLowerCase()} portfolio website in five steps: what to include, live examples written for ${role.plural}, and free designs you can edit without code.`,
     alternates: { canonical: `/for/${role.id}` },
   };
 }
@@ -94,6 +94,22 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
       )}
 
       <RoleEssentials role={role} className="mt-24" />
+
+      <section className="mt-20 max-w-[52rem]" aria-labelledby="how-to">
+        <h2 id="how-to" className="font-display text-[2.2rem] tracking-[-0.02em] text-ink">
+          How to make a {role.label.toLowerCase()} portfolio website
+        </h2>
+        <ol className="mt-6 space-y-4">
+          {roleSteps(role).map((step, index) => (
+            <li key={index} className="flex gap-4 leading-relaxed text-ink-soft">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full border border-rule font-mono text-[0.85rem] text-ink">
+                {index + 1}
+              </span>
+              <span className="pt-1">{step}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       {designs.length > 0 && (
         <section className="mt-20" aria-labelledby="designs">

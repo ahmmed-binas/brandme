@@ -46,7 +46,7 @@ async function text(): Promise<string> {
       `It is built first for UAE real estate agents, and has job-specific templates for ${ROLES.length} job titles.`,
     "",
     "Key facts:",
-    `- Free plan: one live website with a blog, every template, colour and font. A small “Made with ${brand.name}” link is shown.`,
+    `- Free plan: one live website with a blog, every standard template, colour and font (3D templates need Pro). A small “Made with ${brand.name}” link is shown.`,
     `- Prices are in UAE dirhams (AED). Paid plans currently start on WhatsApp; there is no online checkout yet.`,
     `- ${templates.length} website templates are live, including a real estate collection for UAE agents.`,
     `- Published portfolios can show an “Open to work” badge for recruiters.`,

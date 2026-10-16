@@ -43,7 +43,7 @@ const FAQ: FaqEntry[] = [
   },
   {
     question: "Are these portfolio templates free?",
-    answer: `Yes. Every design is free to use, and your website stays online for free at a ${brand.name} address. Pro adds your own domain and removes the ${brand.name} link.`,
+    answer: `Yes. The standard designs are free to use, and your website stays online for free at a ${brand.name} address. Pro unlocks the 3D designs, adds your own domain and removes the ${brand.name} link.`,
   },
   {
     question: "How long does it take?",
