@@ -8,8 +8,10 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
-import { faqSchema, roleBreadcrumbs, roleFaq, roleSteps } from "@/lib/gallery/role-seo";
+import { faqSchema, roleBreadcrumbs, roleFaq } from "@/lib/gallery/role-seo";
 import { RoleEssentials } from "@/components/gallery/RoleEssentials";
+import { RoleSteps } from "@/components/gallery/RoleSteps";
+import { HoverClip } from "@/components/gallery/HoverClip";
 import PreviewFrame from "@/components/templates/PreviewFrame";
 import { TemplateBadges } from "@/components/templates/TemplateBadges";
 import { ROLE_SEARCH } from "@/lib/gallery/role-search";
@@ -174,21 +176,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
 
       <RoleEssentials role={role} className="mt-24" />
 
-      <section className="mt-20 max-w-[52rem]" aria-labelledby="how-to">
-        <h2 id="how-to" className="font-display text-[2.2rem] tracking-[-0.02em] text-ink">
-          How to make a {role.label.toLowerCase()} portfolio website
-        </h2>
-        <ol className="mt-6 space-y-4">
-          {roleSteps(role).map((step, index) => (
-            <li key={index} className="flex gap-4 leading-relaxed text-ink-soft">
-              <span className="grid size-8 shrink-0 place-items-center rounded-full border border-rule font-mono text-[0.85rem] text-ink">
-                {index + 1}
-              </span>
-              <span className="pt-1">{step}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <RoleSteps role={role} className="mt-24" />
 
       {designs.length > 0 && (
         <section className="mt-20" aria-labelledby="designs">
@@ -211,13 +199,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
                     pro={template.proOnly}
                     className="absolute right-3 top-3 z-10"
                   />
-                  {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnails, already sized */}
-                  <img
-                    src={`/templates/${template.id}.webp`}
-                    alt=""
-                    loading="lazy"
-                    className="aspect-[3/2] w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
+                  <HoverClip id={template.id} alt="" />
                 </Link>
                 <div className="mt-4 flex items-baseline justify-between gap-4">
                   <h3 className="font-display text-[1.6rem] leading-none text-ink">{template.name}</h3>
@@ -235,15 +217,34 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
         </section>
       )}
 
-      <section className="mt-20 max-w-[52rem]" aria-labelledby="questions">
-        <h2 id="questions" className="font-display text-[2.2rem] tracking-[-0.02em] text-ink">
-          Questions {role.plural} ask
-        </h2>
-        <div className="mt-6 divide-y divide-rule border-y border-rule">
-          {faq.map((entry) => (
-            <details key={entry.question} className="py-4" open>
-              <summary className="cursor-pointer list-none font-medium text-ink">{entry.question}</summary>
-              <p className="mt-2 leading-relaxed text-ink-soft">{entry.answer}</p>
+      <section className="mt-24 grid gap-10 lg:grid-cols-[1fr_1.6fr]" aria-labelledby="questions">
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Questions</p>
+          <h2
+            id="questions"
+            className="mt-3 font-display text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.02] tracking-[-0.02em] text-ink"
+          >
+            What {role.plural} ask
+          </h2>
+          {designs[0] && (
+            <Link
+              href={`/editor/${designs[0].id}?role=${role.id}`}
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink"
+            >
+              Make yours free <ArrowRight size={16} />
+            </Link>
+          )}
+        </div>
+        <div className="divide-y divide-rule border-y border-rule">
+          {faq.map((entry, index) => (
+            <details key={entry.question} className="group py-5" open={index === 0}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-display text-[1.25rem] leading-snug text-ink [&::-webkit-details-marker]:hidden">
+                {entry.question}
+                <span className="grid size-9 shrink-0 place-items-center rounded-full border border-rule text-[1.2rem] leading-none transition-transform duration-300 group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <p className="mt-3 max-w-[44rem] leading-relaxed text-ink-soft">{entry.answer}</p>
             </details>
           ))}
         </div>
