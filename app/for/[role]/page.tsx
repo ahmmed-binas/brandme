@@ -10,14 +10,19 @@ import { faqSchema, roleBreadcrumbs, roleFaq, roleSteps } from "@/lib/gallery/ro
 import { RoleEssentials } from "@/components/gallery/RoleEssentials";
 import PreviewFrame from "@/components/templates/PreviewFrame";
 import { TemplateBadges } from "@/components/templates/TemplateBadges";
+import { ROLE_SEARCH } from "@/lib/gallery/role-search";
 
 export async function generateMetadata({ params }: { params: Promise<{ role: string }> }): Promise<Metadata> {
   const role = roleById((await params).role);
   if (!role) return {};
+  // Jobs people already find us with get their own wording (lib/gallery/role-search.ts).
+  const search = ROLE_SEARCH[role.id];
   return {
     // Words people search: "portfolio website for nurses", "nurse portfolio examples", "free template".
-    title: `${role.label} Portfolio Website: Free Templates & Examples`,
-    description: `How to make a ${role.label.toLowerCase()} portfolio website in five steps: what to include, live examples written for ${role.plural}, and free designs you can edit without code.`,
+    title: search?.title ?? `${role.label} Portfolio Website: Free Templates & Examples`,
+    description:
+      search?.description ??
+      `How to make a ${role.label.toLowerCase()} portfolio website in five steps: what to include, live examples written for ${role.plural}, and free designs you can edit without code.`,
     alternates: { canonical: `/for/${role.id}` },
   };
 }
@@ -30,6 +35,12 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
   const designs = designsForRole(role, available);
   const profession = PROFESSIONS.find((item) => item.id === role.profession);
   const faq = roleFaq(role);
+  const heading = ROLE_SEARCH[role.id]?.heading ?? [
+    `${role.label} portfolio`,
+    "templates and a live example",
+  ];
+  // Up to three designs fanned out beside the heading, the first on top.
+  const fan = designs.slice(0, 3);
   const schema = {
     "@context": "https://schema.org",
     "@graph": [roleBreadcrumbs(role), faqSchema(faq)],
@@ -51,26 +62,82 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
         </Link>{" "}
         / {profession?.label}
       </nav>
-      <header className="mt-8 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-end">
-        <h1 className="font-display text-[clamp(2.6rem,6vw,4.8rem)] font-[400] leading-[0.95] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">
-          {role.label} portfolio{" "}
-          <em className="block font-[300] text-signal">templates and a live example</em>
-        </h1>
+      <header className="mt-8 grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
         <div>
-          <p className="text-[1.08rem] leading-[1.7] text-ink-soft">
+          <h1 className="font-display text-[clamp(2.6rem,6vw,4.8rem)] font-[400] leading-[0.95] tracking-[-0.03em] text-ink [font-variation-settings:'opsz'_48]">
+            {heading[0]} <em className="block font-[300] text-signal">{heading[1]}</em>
+          </h1>
+          <p className="mt-6 max-w-[38rem] text-[1.08rem] leading-[1.7] text-ink-soft">
             A free personal website for {role.plural}: your services, fees, results and reviews in one place.
             Below is a real example written for the job, what to include, and the designs that suit it. Edit
             without code and publish in minutes.
           </p>
           {designs[0] && (
-            <Link
-              href={`/editor/${designs[0].id}?role=${role.id}`}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[0.95rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink"
-            >
-              Start with {designs[0].name} <ArrowRight size={16} />
-            </Link>
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link
+                href={`/editor/${designs[0].id}?role=${role.id}`}
+                className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-[0.98rem] font-medium text-paper transition-colors hover:bg-signal hover:text-signal-ink"
+              >
+                Make yours free <ArrowRight size={16} />
+              </Link>
+              <a
+                href="#designs"
+                className="text-[0.95rem] text-ink underline decoration-rule underline-offset-4 hover:decoration-ink"
+              >
+                See all {designs.length} designs
+              </a>
+            </div>
           )}
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-soft">
+            <li>✓ Free to publish</li>
+            <li>✓ No code</li>
+            <li>✓ Live in ten minutes</li>
+          </ul>
         </div>
+
+        {fan.length > 0 && (
+          <div
+            className="relative mx-auto h-[300px] w-full max-w-[560px] overflow-x-clip sm:h-[380px] lg:overflow-visible"
+            aria-label={`Designs for ${role.plural}`}
+          >
+            {fan
+              .slice()
+              .reverse()
+              .map((template, back) => {
+                // The first design sits in front; the others fan out behind it.
+                const index = fan.length - 1 - back;
+                const turn = [0, -7, 7][index] ?? 0;
+                const shift = [0, -22, 22][index] ?? 0;
+                return (
+                  <div
+                    key={template.id}
+                    className="absolute left-1/2 top-1/2 w-[78%] hover:z-10"
+                    style={{
+                      transform: `translate(calc(-50% + ${shift}%), -50%) rotate(${turn}deg)`,
+                      zIndex: fan.length - index,
+                    }}
+                  >
+                    <Link
+                      href={`/editor/${template.id}?role=${role.id}`}
+                      aria-label={`Start with ${template.name}`}
+                      className="block overflow-hidden rounded-2xl border border-rule bg-paper shadow-[0_30px_70px_-35px_rgba(0,0,0,.55)] transition-transform duration-500 hover:-translate-y-4"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnails, already sized */}
+                      <img
+                        src={`/templates/${template.id}.webp`}
+                        alt={`${template.name} design for a ${role.label.toLowerCase()} website`}
+                        className="aspect-[3/2] w-full object-cover object-top"
+                      />
+                      <span className="flex items-center justify-between px-4 py-2.5 text-[0.85rem] text-ink">
+                        <span className="font-medium">{template.name}</span>
+                        <span className="text-ink-soft">Use this →</span>
+                      </span>
+                    </Link>
+                  </div>
+                );
+              })}
+          </div>
+        )}
       </header>
 
       {designs[0] && (
