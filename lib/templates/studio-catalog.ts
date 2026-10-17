@@ -1078,6 +1078,37 @@ const SPECS: StudioSpec[] = [
     ],
   },
   {
+    id: "peek",
+    name: "Peek",
+    persona: "pro-product",
+    professions: ["product", "marketing", "design"],
+    styles: ["Playful", "Motion"],
+    mood: "light",
+    description:
+      "A playful site with a mascot whose eyes follow the visitor: an opening screen with your name, a soft glowing grid, numbers that count up, a reading bar, and your work, writing and career in tabs.",
+    idealFor: ["Product managers", "Marketers", "Designers early in their career"],
+    sections: [
+      "stats",
+      "about",
+      "skills",
+      "projects",
+      "highlights",
+      "experience",
+      "education",
+      "testimonials",
+      "contact",
+    ],
+    palettes: [
+      p("blush", "Blush", "#fff5f7", "#1f1420", "#ff3d7f", "#7a6670", "#ffffff"),
+      p("lilac", "Lilac", "#f6f3ff", "#17132a", "#7c5cff", "#6d6687", "#ffffff"),
+      p("night", "Night", "#120d16", "#f7eef4", "#ff6fa5", "#a495a0", "#1d1622"),
+    ],
+    fonts: [
+      f("bricolage", "Bricolage + DM Sans", F.bricolage, F.dmSans, F.jetbrains),
+      f("fraunces", "Fraunces + Figtree", F.fraunces, F.figtree, F.jetbrains),
+    ],
+  },
+  {
     id: "radar",
     name: "Radar",
     persona: "pro-hr",

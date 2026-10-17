@@ -32,6 +32,7 @@ export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   dispatch: load(() => import("./trades/Dispatch")),
   atelier: load(() => import("./beauty/Atelier")),
   roadmap: load(() => import("./product/Roadmap")),
+  peek: load(() => import("./product/Peek")),
   radar: load(() => import("./people/Radar")),
   duet: load(() => import("./language/Duet")),
   lane: load(() => import("./trades/Lane")),
