@@ -604,7 +604,7 @@ export const HEALTH_ROLES = [
         ["Master’s in Oral Implantology", "Universitat Internacional de Catalunya", "2016"],
       ],
     },
-    ["smile", "clinic", "pulse", "practice"],
+    ["enamel", "smile", "clinic", "pulse", "practice"],
   ),
   role(
     "orthodontist",

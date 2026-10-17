@@ -85,6 +85,7 @@ export const STUDIO_COMPONENTS: Record<string, ComponentType<StudioProps>> = {
   "margin-notes": load(() => import("./education/MarginNotes")),
   pulse: load(() => import("./healthcare/Pulse")),
   smile: load(() => import("./healthcare/Smile")),
+  enamel: load(() => import("./healthcare/Enamel")),
   counsel: load(() => import("./legal/Counsel")),
   mise: load(() => import("./food/Mise")),
   skyline: load(() => import("./realestate/Skyline")),

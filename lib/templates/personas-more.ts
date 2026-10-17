@@ -656,6 +656,96 @@ export const MORE_PERSONAS: Record<string, StandardContent> = {
     ],
   },
 
+  /**
+   * A dental clinic with a team, for the Enamel template. The dentists are
+   * projects (name, speciality, a line about them); opening hours are the
+   * availability line, which Enamel reads into its hours table and booking slots.
+   */
+  "dental-team": {
+    name: "Pearl Dental Clinic",
+    professional_title: "Family & cosmetic dentistry",
+    location: "Jumeirah 1, Dubai",
+    availability: "Sat–Thu 9:00–21:00 · Fri 14:00–21:00",
+    tagline: "We care for your smile.",
+    summary: [
+      "Everyone should have easy access to a great dentist. Book online in under a minute, with no booking fee and no waiting on hold.",
+      "We’re a DHA-licensed clinic of three dentists and two hygienists. You’ll always see the price before treatment starts, and we keep slots free every day for emergencies.",
+    ],
+    email: "hello@example.com",
+    phone: "+971 4 000 0000",
+    instagram: "https://www.instagram.com/",
+    skills: ["Open 7 days", "Emergency visits same day", "Insurance accepted"],
+    highlights: [
+      {
+        title: "Flexible schedule",
+        detail: "Open every day, late on weekdays, with slots kept free for emergencies.",
+      },
+      { title: "Clear prices", detail: "You’ll get the full price in writing before any treatment starts." },
+      {
+        title: "Gentle care",
+        detail: "Nervous patients welcome: we explain every step and go at your pace.",
+      },
+    ],
+    stats: [
+      { value: "11", label: "years in Jumeirah" },
+      { value: "6,500+", label: "patients" },
+      { value: "4.9★", label: "from 1,100 reviews" },
+    ],
+    services: [
+      {
+        title: "Check-up & clean",
+        description: "Examination, X-rays and a hygienist clean.",
+        price: "AED 350",
+      },
+      { title: "Teeth whitening", description: "In-clinic whitening in one visit.", price: "From AED 1,200" },
+      {
+        title: "Clear aligners",
+        description: "3D scan, plan and your first aligners.",
+        price: "From AED 9,500",
+      },
+      { title: "Fillings", description: "Tooth-coloured, one surface.", price: "From AED 400" },
+      { title: "Dental implant", description: "Implant, abutment and crown.", price: "From AED 6,500" },
+      { title: "Children’s dentistry", description: "Gentle visits for under-12s.", price: "AED 250" },
+    ],
+    projects: [
+      {
+        title: "Dr. Layla Mansour",
+        role: "Cosmetic dentist & clinic lead",
+        description: "Whitening, veneers and smile makeovers. Speaks English and Arabic.",
+      },
+      {
+        title: "Dr. Arjun Menon",
+        role: "Orthodontist",
+        description: "Clear aligners and braces for teens and adults. Speaks English, Hindi and Malayalam.",
+      },
+      {
+        title: "Dr. Elena Petrova",
+        role: "Paediatric dentist",
+        description: "Calm, playful first visits for children. Speaks English and Russian.",
+      },
+    ],
+    testimonials: [
+      {
+        quote: "Booked at 10pm, seen the next morning, and I knew the price before I sat down.",
+        name: "Rania A.",
+        role: "Check-up",
+      },
+      {
+        quote: "Dr. Arjun made aligners simple. Every visit started on time.",
+        name: "James W.",
+        role: "Clear aligners",
+      },
+      {
+        quote: "My son was scared of dentists. Now he asks when he can go back.",
+        name: "Mariam K.",
+        role: "Parent",
+      },
+    ],
+    education: [
+      { degree: "Licensed by the Dubai Health Authority (DHA)", school: "Clinic licence", end_date: "2015" },
+    ],
+  },
+
   /** A dental clinic, for the Smile template (bookings by WhatsApp or email). */
   dental: {
     name: "Dr. Sara Haddad",
