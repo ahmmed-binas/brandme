@@ -1078,6 +1078,28 @@ const SPECS: StudioSpec[] = [
     ],
   },
   {
+    id: "syntax-night",
+    name: "Syntax Night",
+    persona: "dev-night",
+    professions: ["developer", "data", "student"],
+    styles: ["Technical", "Bold"],
+    mood: "dark",
+    description:
+      "A dark developer portfolio: a typed name, a code terminal that writes your profile, floating tech tiles, gradient skill cards, projects with Live and Code buttons, a timeline, certificates, a little robot guide and a chat bubble. Design by Chandan G, used with permission.",
+    idealFor: ["Full stack developers", "ML engineers", "Computer science graduates"],
+    sections: ["about", "skills", "projects", "experience", "education", "highlights", "contact"],
+    palettes: [p("night", "Night", "#0f172a", "#f8fafc", "#3b82f6", "#64748b", "#1e293b")],
+    fonts: [
+      f(
+        "poppins",
+        "Poppins + JetBrains",
+        '"Poppins", "Segoe UI", system-ui, sans-serif',
+        '"Poppins", "Segoe UI", system-ui, sans-serif',
+        F.jetbrains,
+      ),
+    ],
+  },
+  {
     id: "syntax",
     name: "Syntax",
     persona: "developer",

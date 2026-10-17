@@ -657,6 +657,115 @@ export const MORE_PERSONAS: Record<string, StandardContent> = {
   },
 
   /**
+   * A full stack developer, for Syntax Night. Skills written as
+   * "Group: a, b, c" become the skill cards; highlights with a year are
+   * certificates, without one they're activities; a link labelled "CV" turns on
+   * the View/Download buttons.
+   */
+  "dev-night": {
+    name: "Alex Carter",
+    professional_title: "Full Stack Developer & Machine Learning Enthusiast",
+    tagline: "Where code meets intelligence.",
+    location: "Dubai, UAE",
+    availability: "Ready for new challenges!",
+    email: "alex.carter@example.com",
+    phone: "+971 50 000 0000",
+    github: "https://github.com/",
+    linkedin: "https://www.linkedin.com/",
+    links: [{ label: "LeetCode", url: "https://leetcode.com/" }],
+    summary: [
+      "A passionate Computer Science graduate and Full Stack Developer with a strong interest in bringing Machine Learning into everyday products.",
+      "I enjoy building complete, user-centred products, from clean, intuitive interfaces to reliable back-end services and data pipelines.",
+      "Goal: join a product team where I can ship with the MERN stack and Python, while growing my skills in AI and cloud engineering.",
+    ],
+    skills: [
+      "Programming: TypeScript, Python, JavaScript, C++, Java",
+      "Web Stack: MongoDB, Express.js, React, Node.js, Tailwind CSS",
+      "Tools & Technologies: OpenAI API, Vite, VS Code, Linux, Git",
+      "Soft Skills: Communication, Leadership, Problem-solving",
+    ],
+    projects: [
+      {
+        title: "Interview Coach",
+        description:
+          "AI interview practice app: mock interviews with spoken answers, feedback on structure and clarity, and a resume checker against job descriptions.",
+        technologies: ["React", "TypeScript", "Node.js", "Express", "MongoDB"],
+        live_url: "https://example.com",
+        github: "https://github.com/",
+      },
+      {
+        title: "ClinicLink",
+        description:
+          "Appointment booking for clinics: patients find a doctor, pick a slot and pay online; doctors manage schedules from a dashboard.",
+        technologies: ["React", "Node.js", "MongoDB", "Express", "Flutter"],
+        live_url: "https://example.com",
+        github: "https://github.com/",
+      },
+      {
+        title: "Souk Store",
+        description:
+          "A fast e-commerce storefront with search, filters, wishlist and a clean checkout, built for small shops that want to sell online.",
+        technologies: ["React", "JavaScript", "Tailwind CSS", "Redux"],
+        live_url: "https://example.com",
+        github: "https://github.com/",
+      },
+      {
+        title: "Sleep Score Predictor",
+        description:
+          "A machine learning model that estimates sleep quality from daily habits, with a dashboard that explains which factors matter most.",
+        technologies: ["Python", "Streamlit", "Machine Learning", "Scikit-Learn"],
+        live_url: "https://example.com",
+        github: "https://github.com/",
+      },
+    ],
+    experience: [
+      {
+        job_title: "Machine Learning Intern",
+        company: "Northwind Labs (Remote)",
+        start_date: "Jun 2025",
+        end_date: "Aug 2025",
+        description:
+          "Built forecasting pipelines for weekly demand, tuned models and engineered features that cut prediction error by a fifth, and shipped a dashboard the team uses every week.",
+      },
+    ],
+    education: [
+      {
+        school: "Your University, City",
+        degree: "B.Sc. in Computer Science",
+        start_date: "2021",
+        end_date: "2025",
+        description: "GPA: 3.7 / 4.0",
+      },
+      {
+        school: "Your High School, City",
+        degree: "High School Diploma",
+        end_date: "2021",
+        description: "Grade: 88%",
+      },
+    ],
+    highlights: [
+      {
+        title: "Database Data Modeling",
+        detail: "Schema design, indexing strategies and query optimisation.",
+        year: "2025",
+      },
+      {
+        title: "Cloud Computing",
+        detail: "Virtualisation, storage, networking and service models.",
+        year: "2024",
+      },
+      {
+        title: "Data Structures & Algorithms in C++",
+        detail: "Arrays, trees, graphs, dynamic programming and complexity.",
+        year: "2024",
+      },
+      { title: "Runner-up, University Code Challenge" },
+      { title: "Completed 100 Days of Code" },
+      { title: "Built a real-time prototype at a 24-hour hackathon" },
+    ],
+  },
+
+  /**
    * A dental clinic with a team, for the Enamel template. The dentists are
    * projects (name, speciality, a line about them); opening hours are the
    * availability line, which Enamel reads into its hours table and booking slots.
