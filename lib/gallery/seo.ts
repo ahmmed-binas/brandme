@@ -1,5 +1,5 @@
 import { brand } from "@/lib/brand";
-import { PRICES, aed } from "@/lib/offers";
+import { DEFAULT_PRICES, aed, type Prices } from "@/lib/offers";
 import { siteUrl } from "@/lib/site";
 import { getTemplate } from "@/lib/templates/catalog";
 import { ROLES } from "@/lib/templates/roles";
@@ -40,9 +40,11 @@ export function templateFaq(input: {
   fonts: string[];
   palettes: Array<{ name: string }>;
   editable: boolean;
+  /** The live prices (lib/settings/prices.ts). */
+  prices?: Prices;
 }): FaqEntry[] {
-  const { title, audience, fonts, palettes, editable } = input;
-  const proPrice = `${aed(PRICES.proMonth)} a month`;
+  const { title, audience, fonts, palettes, editable, prices = DEFAULT_PRICES } = input;
+  const proPrice = `${aed(prices.proMonth)} a month`;
   const faq: FaqEntry[] = [
     {
       question: `Is the ${title} template free?`,

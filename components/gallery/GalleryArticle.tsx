@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPrices } from "@/lib/settings/prices";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -97,6 +98,7 @@ export async function GalleryArticle({ slug, roleId }: { slug: string; roleId?: 
   const jobs = original ? jobsFor(item.slug) : [];
   const profession = original ? professionOf(item.slug) : null;
   const faq = templateFaq({
+    prices: await getPrices(),
     title: item.title,
     audience: item.audience,
     fonts: item.fonts,

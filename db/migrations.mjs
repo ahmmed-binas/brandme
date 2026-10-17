@@ -754,6 +754,27 @@ migrations.push({
   ],
 });
 
+migrations.push({
+  id: "033_prices_and_template_tags",
+  statements: [
+    // Settings the superadmin changes in the console (lib/settings/prices.ts): the plan prices.
+    `CREATE TABLE IF NOT EXISTS site_settings (
+      key TEXT PRIMARY KEY,
+      value JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_by UUID REFERENCES app_users(id) ON DELETE SET NULL
+    )`,
+    // Per-template labels ("Most popular", "New"…) and a Pro switch, set in the console
+    // (lib/templates/overrides.ts). pro_only NULL means "as in the catalogue".
+    `CREATE TABLE IF NOT EXISTS template_overrides (
+      template_id TEXT PRIMARY KEY,
+      badges TEXT[] NOT NULL DEFAULT '{}',
+      pro_only BOOLEAN,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+  ],
+});
+
 const LOCK_KEY = 72_901_337; // Arbitrary constant identifying this app's migration lock.
 
 /**

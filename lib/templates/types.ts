@@ -112,4 +112,6 @@ export interface TemplateDefinition {
   proOnly?: boolean;
   /** Interactive 3D design (three.js); shown as a “3D” badge on cards. */
   threeD?: boolean;
+  /** Labels the superadmin set in Console > Catalog ("Most popular", "New"…); see overrides.ts. */
+  badges?: string[];
 }

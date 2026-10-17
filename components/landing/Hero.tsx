@@ -11,7 +11,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { ArrowRight, Lock } from "lucide-react";
-import { PRICES, aed } from "@/lib/offers";
+import { DEFAULT_PRICES, aed } from "@/lib/offers";
 import type { StandardContent } from "@/lib/portfolio/schema";
 import type { TemplateDefinition } from "@/lib/templates/types";
 import { TEMPLATE_MOCKS } from "./TemplateMocks";
@@ -222,7 +222,14 @@ function Specimen({
   );
 }
 
-export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
+export default function Hero({
+  showcase = [],
+  proMonth = DEFAULT_PRICES.proMonth,
+}: {
+  showcase?: HeroShowcase[];
+  /** The live Pro price, from the server (lib/settings/prices.ts). */
+  proMonth?: number;
+}) {
   const [name, setName] = useState("");
   const [templateIndex, setTemplateIndex] = useState(0);
   const [touched, setTouched] = useState(false);
@@ -279,7 +286,7 @@ export default function Hero({ showcase = [] }: { showcase?: HeroShowcase[] }) {
           >
             Kitefolio gives you a personal website designed for your job, from real estate agents and nurses
             to lawyers and designers. Pick a design, click any text to make it yours, and publish free today.
-            Add your own domain with Pro from {aed(PRICES.proMonth)} a month.
+            Add your own domain with Pro from {aed(proMonth)} a month.
           </p>
 
           <form

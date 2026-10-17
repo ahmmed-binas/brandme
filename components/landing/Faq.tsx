@@ -1,10 +1,10 @@
-import { FAQ } from "./faq-data";
+import { faqFor } from "./faq-data";
 
 /** Native <details> keeps the answers in the HTML for search engines and works without JavaScript. */
-export default function Faq() {
+export default function Faq({ items = faqFor() }: { items?: ReturnType<typeof faqFor> }) {
   return (
     <div className="divide-y divide-rule border-y border-rule">
-      {FAQ.map((item) => (
+      {items.map((item) => (
         <details key={item.q} className="group py-1 [&_summary::-webkit-details-marker]:hidden">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left font-display text-[clamp(1.25rem,2vw,1.55rem)] leading-snug tracking-[-0.01em] text-ink outline-none focus-visible:underline">
             {item.q}

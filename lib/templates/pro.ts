@@ -1,5 +1,6 @@
 import type { PlanLimits } from "@/lib/plans";
 import { getTemplate } from "./catalog";
+import { templateOverrides } from "./overrides";
 import { PRO_TEMPLATE_MESSAGE } from "./pro-message";
 
 /**
@@ -10,9 +11,15 @@ import { PRO_TEMPLATE_MESSAGE } from "./pro-message";
 
 type Viewer = { isAdmin: boolean; plan: PlanLimits };
 
+/** Whether a template is Pro-only right now: the console's switch, otherwise the catalogue. */
+export async function isProTemplate(templateId: string): Promise<boolean> {
+  const override = (await templateOverrides()).get(templateId);
+  return override?.proOnly ?? Boolean(getTemplate(templateId)?.proOnly);
+}
+
 /** Whether this person may save or publish this template. */
-export function canUseTemplate(templateId: string, viewer: Viewer | null): boolean {
-  if (!getTemplate(templateId)?.proOnly) return true;
+export async function canUseTemplate(templateId: string, viewer: Viewer | null): Promise<boolean> {
+  if (!(await isProTemplate(templateId))) return true;
   return Boolean(viewer && (viewer.isAdmin || viewer.plan.id !== "basic"));
 }
 

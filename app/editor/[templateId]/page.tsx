@@ -38,7 +38,7 @@ export default async function EditorPage({
         sample={sampleFor(template, role?.id)}
         role={role?.id ?? ""}
         roles={roles}
-        proLocked={!canUseTemplate(template.id, viewer)}
+        proLocked={!(await canUseTemplate(template.id, viewer))}
       />
     );
   }

@@ -3,6 +3,7 @@ import { databaseConfigured, ensureSchema } from "@/utils/db-schema";
 import { templateCatalog } from "./catalog";
 import type { TemplateDefinition } from "./types";
 import { OWNER_DECISIONS } from "./decisions";
+import { templateOverrides } from "./overrides";
 
 /**
  * Templates go live only after the owner approves them on /templates/review
@@ -56,9 +57,18 @@ export function reviewOf(reviews: Map<string, TemplateReview>, template: Templat
 export async function availableTemplates(
   moderator = false,
 ): Promise<Array<TemplateDefinition & { review: TemplateReview }>> {
-  const reviews = await templateReviews();
+  const [reviews, overrides] = await Promise.all([templateReviews(), templateOverrides()]);
   return templateCatalog
-    .map((template) => ({ ...template, review: reviewOf(reviews, template) }))
+    .map((template) => {
+      // The superadmin's labels and Pro switch (Console > Catalog) win over the catalogue.
+      const override = overrides.get(template.id);
+      return {
+        ...template,
+        proOnly: override?.proOnly ?? template.proOnly,
+        badges: override?.badges ?? template.badges,
+        review: reviewOf(reviews, template),
+      };
+    })
     .filter((template) => moderator || !approvalRequired() || template.review.status === "approved");
 }
 

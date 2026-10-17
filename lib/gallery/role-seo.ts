@@ -1,5 +1,5 @@
 import { brand } from "@/lib/brand";
-import { FREE_DOMAIN_UP_TO, PRICES, aed } from "@/lib/offers";
+import { DEFAULT_PRICES, aed, type Prices } from "@/lib/offers";
 import { siteUrl } from "@/lib/site";
 import type { Role } from "@/lib/templates/roles";
 
@@ -33,18 +33,18 @@ export function roleSteps(role: Role): string[] {
 }
 
 /** Extra questions for real estate jobs, with what clients in the UAE look for. */
-function realEstateFaq(role: Role): FaqEntry[] {
+function realEstateFaq(role: Role, prices: Prices): FaqEntry[] {
   if (role.profession !== "realestate") return [];
   return [
     {
       question: `What should a ${role.label.toLowerCase()} website in Dubai include?`,
-      answer: `Your name, photo and agency; your RERA broker number (BRN); the areas and property types you cover; current listings with a WhatsApp button on each; reviews from buyers, sellers or tenants; and the languages you speak. ${brand.name} has five real estate designs built around listings, and the Agent plan (${aed(PRICES.agentMonth)} a month) adds listing pages and changes done for you.`,
+      answer: `Your name, photo and agency; your RERA broker number (BRN); the areas and property types you cover; current listings with a WhatsApp button on each; reviews from buyers, sellers or tenants; and the languages you speak. ${brand.name} has five real estate designs built around listings, and the Agent plan (${aed(prices.agentMonth)} a month) adds listing pages and changes done for you.`,
     },
   ];
 }
 
 /** Questions people search about a portfolio for this job, answered from its sample content. */
-export function roleFaq(role: Role): FaqEntry[] {
+export function roleFaq(role: Role, prices: Prices = DEFAULT_PRICES): FaqEntry[] {
   const services = role.starter.services.slice(0, 3).map(([title]) => title.toLowerCase());
   const skills = role.starter.skills.split(" · ").slice(0, 4);
   const credentials = role.starter.education.slice(0, 2).map(([title]) => title);
@@ -59,7 +59,7 @@ export function roleFaq(role: Role): FaqEntry[] {
     },
     {
       question: `Is a ${role.label.toLowerCase()} portfolio website free?`,
-      answer: `Yes. The standard designs are free, and your website stays online at a free ${brand.name} address. Pro unlocks the 3D designs and puts your site on your own domain for ${aed(PRICES.proMonth)} a month, or ${aed(PRICES.proYear)} a year with the first year’s domain free (up to ${aed(FREE_DOMAIN_UP_TO)}).`,
+      answer: `Yes. The standard designs are free, and your website stays online at a free ${brand.name} address. Pro unlocks the 3D designs and puts your site on your own domain for ${aed(prices.proMonth)} a month, or ${aed(prices.proYear)} a year with the first year’s domain free (up to ${aed(prices.freeDomainUpTo)}).`,
     },
     {
       question: `How do I make a ${role.label.toLowerCase()} portfolio website?`,
@@ -69,7 +69,7 @@ export function roleFaq(role: Role): FaqEntry[] {
       question: `How do recruiters find a ${role.label.toLowerCase()} portfolio?`,
       answer: `Many search Google for the job title with words like “portfolio” and “open to work”. ${brand.name} titles your published page with your name and job (for example “Sara Khan, ${role.label}: Portfolio”), and the “Open to work” switch in the editor adds a badge and puts “Open to work” in that title.`,
     },
-    ...realEstateFaq(role),
+    ...realEstateFaq(role, prices),
     {
       question: "Can I edit it without coding?",
       answer: `Yes. Click any text or photo to change it, pick colours and fonts, and publish. The sample content for ${role.plural} gets you most of the way; you replace it with your own.`,

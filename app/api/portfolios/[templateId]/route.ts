@@ -22,7 +22,7 @@ export const GET = route(async (_request: Request, { params }: Context) => {
 export const PUT = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  if (!canUseTemplate(owner.templateId, owner.user)) return proTemplateRefusal();
+  if (!(await canUseTemplate(owner.templateId, owner.user))) return proTemplateRefusal();
   const body = await readJson(request, MAX_CONTENT_BYTES + 10_000);
   if (body instanceof Response) return body;
   const { content, theme, baseVersion, force } = (body ?? {}) as {

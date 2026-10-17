@@ -13,20 +13,24 @@ import { featuredFeedback } from "@/lib/templates/feedback";
 import { approvedSiteReviews, ratingSummary, SITE_RATING_KEY } from "@/lib/templates/ratings";
 import { getTemplate } from "@/lib/templates/catalog";
 import Reveal from "@/components/landing/Reveal";
-import { FAQ } from "@/components/landing/faq-data";
+import { faqFor } from "@/components/landing/faq-data";
 import { brand } from "@/lib/brand";
-import { PRICES, aed } from "@/lib/offers";
-import { siteDescription } from "@/lib/site";
+import { aed } from "@/lib/offers";
+import { getPrices } from "@/lib/settings/prices";
+import { siteDescriptionFor } from "@/lib/site";
 
 /** What people search for: “portfolio website builder”, “personal website”, plus who it's for. */
 const HOME_TITLE = `${brand.name}: Portfolio and Personal Website Builder`;
 
-export const metadata: Metadata = {
-  title: { absolute: HOME_TITLE },
-  description: siteDescription,
-  alternates: { canonical: "/" },
-  openGraph: { type: "website", url: "/", title: HOME_TITLE, description: siteDescription },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const description = siteDescriptionFor(await getPrices());
+  return {
+    title: { absolute: HOME_TITLE },
+    description,
+    alternates: { canonical: "/" },
+    openGraph: { type: "website", url: "/", title: HOME_TITLE, description },
+  };
+}
 
 const OWNERSHIP = [
   {
@@ -101,6 +105,8 @@ function SectionHeading({ kicker, children, id }: { kicker: string; children: Re
 }
 
 export default async function Home() {
+  const prices = await getPrices();
+  const faq = faqFor(prices);
   const [showcase, reviews, siteRating] = await Promise.all([
     heroShowcase(),
     homeReviews(),
@@ -113,7 +119,7 @@ export default async function Home() {
       // (No SoftwareApplication: its rich result needs ratings and reviews we don't have yet.)
       {
         "@type": "FAQPage",
-        mainEntity: FAQ.map((item) => ({
+        mainEntity: faq.map((item) => ({
           "@type": "Question",
           name: item.q,
           acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -128,11 +134,11 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
-      <Hero showcase={showcase} />
+      <Hero showcase={showcase} proMonth={prices.proMonth} />
 
       <HowItWorks />
 
-      <InShort />
+      <InShort prices={prices} />
 
       <section aria-labelledby="templates-title" className="border-t border-rule py-24 lg:py-32">
         <div className="mx-auto max-w-[1320px] px-5 sm:px-8">
@@ -235,15 +241,15 @@ export default async function Home() {
             <Reveal delay={0.08} className="flex flex-col bg-card p-8">
               <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">Pro</p>
               <p className="mt-5 font-display text-[3.6rem] leading-none tracking-[-0.04em] text-ink">
-                {aed(PRICES.proMonth)}
+                {aed(prices.proMonth)}
                 <span className="ml-1 font-sans text-base tracking-normal text-ink-soft">/ month</span>
               </p>
               <ul className="mt-7 space-y-3 text-[0.98rem] text-ink-soft">
                 {[
                   "Connect your own domain, set up and secured",
                   "No Kitefolio link on your site",
-                  `Or ${aed(PRICES.proYear)} a year`,
-                  `Agents: ${aed(PRICES.agentMonth)} a month, with listings and changes done for you`,
+                  `Or ${aed(prices.proYear)} a year`,
+                  `Agents: ${aed(prices.agentMonth)} a month, with listings and changes done for you`,
                 ].map((line) => (
                   <li key={line} className="flex gap-3">
                     <span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink" />
@@ -270,7 +276,7 @@ export default async function Home() {
             </SectionHeading>
           </Reveal>
           <div className="lg:col-span-8">
-            <Faq />
+            <Faq items={faq} />
           </div>
         </div>
       </section>

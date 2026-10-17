@@ -4,7 +4,8 @@ import LegalPage, { type LegalSection } from "@/components/common/LegalPage";
 import { brand } from "@/lib/brand";
 import { governingCountry, legal, operator } from "@/lib/legal";
 import { GRACE_DAYS } from "@/lib/plans";
-import { PRICES, aed } from "@/lib/offers";
+import { aed } from "@/lib/offers";
+import { getPrices } from "@/lib/settings/prices";
 import { MIN_AGE } from "@/lib/accounts/passwords";
 
 export const metadata: Metadata = {
@@ -22,7 +23,8 @@ const mail = (
   </a>
 );
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const prices = await getPrices();
   const sections: LegalSection[] = [
     {
       title: "About these terms",
@@ -69,9 +71,9 @@ export default function TermsPage() {
       body: [
         <>
           <b className="font-medium text-ink">Basic</b> is free. <b className="font-medium text-ink">Pro</b>{" "}
-          costs {aed(PRICES.proMonth)} a month or {aed(PRICES.proYear)} a year, and{" "}
-          <b className="font-medium text-ink">Agent</b> {aed(PRICES.agentMonth)} a month, paid in advance. A
-          website built for you costs {aed(PRICES.doneForYou)}, once. Prices are shown before you pay; your
+          costs {aed(prices.proMonth)} a month or {aed(prices.proYear)} a year, and{" "}
+          <b className="font-medium text-ink">Agent</b> {aed(prices.agentMonth)} a month, paid in advance. A
+          website built for you costs {aed(prices.doneForYou)}, once. Prices are shown before you pay; your
           bank may add its own currency fees.
         </>,
         <>

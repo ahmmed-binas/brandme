@@ -9,6 +9,7 @@ import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES, roleById } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
 import { faqSchema, roleBreadcrumbs, roleFaq } from "@/lib/gallery/role-seo";
+import { getPrices } from "@/lib/settings/prices";
 import { RoleEssentials } from "@/components/gallery/RoleEssentials";
 import { RoleSteps } from "@/components/gallery/RoleSteps";
 import { HoverClip } from "@/components/gallery/HoverClip";
@@ -48,7 +49,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
   const available = await availableTemplates();
   const designs = designsForRole(role, available);
   const profession = PROFESSIONS.find((item) => item.id === role.profession);
-  const faq = roleFaq(role);
+  const faq = roleFaq(role, await getPrices());
   const heading = ROLE_SEARCH[role.id]?.heading ?? [
     `${role.label} portfolio`,
     "templates and a live example",
@@ -197,6 +198,7 @@ export default async function RolePage({ params }: { params: Promise<{ role: str
                   <TemplateBadges
                     threeD={template.threeD}
                     pro={template.proOnly}
+                    badges={template.badges}
                     className="absolute right-3 top-3 z-10"
                   />
                   <HoverClip id={template.id} alt="" />

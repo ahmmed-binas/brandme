@@ -1,7 +1,8 @@
 import { bookingUrl } from "@/lib/booking";
 import { brand, toolGroups } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
-import { OFFERS, FOUNDING_SPOTS, PRICES, aed } from "@/lib/offers";
+import { aed, offersFor, type Prices } from "@/lib/offers";
+import { getPrices } from "@/lib/settings/prices";
 import { availableTemplates } from "@/lib/templates/approval";
 import { ROLES } from "@/lib/templates/roles";
 import { PROFESSIONS } from "@/lib/templates/types";
@@ -19,8 +20,8 @@ export const revalidate = 3600;
 const url = (path: string) => `${siteUrl}${path}`;
 const item = (label: string, path: string, note: string) => `- [${label}](${url(path)}): ${note}`;
 
-function plans(): string[] {
-  return OFFERS.map((offer) => {
+function plans(prices: Prices): string[] {
+  return offersFor(prices).map((offer) => {
     const price = `${offer.price} ${offer.per}${offer.alternative ? ` (${offer.alternative})` : ""}`;
     return `- **${offer.name}**, ${price}: ${offer.pitch} Includes: ${offer.features.join("; ")}.`;
   });
@@ -35,7 +36,7 @@ function tools(): string[] {
 }
 
 async function text(): Promise<string> {
-  const templates = await availableTemplates();
+  const [templates, prices] = await Promise.all([availableTemplates(), getPrices()]);
   const professions = PROFESSIONS.map((profession) => profession.label).join(", ");
   return [
     `# ${brand.name}`,
@@ -54,8 +55,8 @@ async function text(): Promise<string> {
     "",
     "## Plans and prices",
     "",
-    ...plans(),
-    `- **Founding members**: the first ${FOUNDING_SPOTS} customers get Pro for ${aed(PRICES.foundingYear)} a year, price locked.`,
+    ...plans(prices),
+    `- **Founding members**: the first ${prices.foundingSpots} customers get Pro for ${aed(prices.foundingYear)} a year, price locked.`,
     item("Pricing", "/pricing", "every plan compared, with competitors' prices"),
     "",
     "## Build a website",
@@ -63,7 +64,7 @@ async function text(): Promise<string> {
     item("Templates", "/templatechooser", "choose a design and start editing, free"),
     item("Websites by job title", "/for", `portfolio templates and examples for ${professions}`),
     item("Free template gallery", "/gallery", "templates to download free"),
-    item("Done for you", "/pricing", `we build the whole site in 48 hours for ${aed(PRICES.doneForYou)}`),
+    item("Done for you", "/pricing", `we build the whole site in 48 hours for ${aed(prices.doneForYou)}`),
     // Only when Cal.com is set up; otherwise /book just redirects to /contact.
     ...(bookingUrl()
       ? [item("Book a free call", "/book", "a free video call to talk through your website")]

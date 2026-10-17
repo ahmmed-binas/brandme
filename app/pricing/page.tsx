@@ -4,20 +4,15 @@ import { Check } from "lucide-react";
 import { CREDIT_PACKS } from "@/lib/billing/credits";
 import { GRACE_DAYS, cardFeeCents, formatUsd } from "@/lib/plans";
 import {
-  AGENT_EDITS_PER_MONTH,
   COMPETITORS,
   COMPETITORS_CHECKED,
-  FOUNDING_SPOTS,
-  FREE_DOMAIN_UP_TO,
-  OFFERS,
-  PRICES,
   aed,
+  offersFor,
   usdToAed,
   whatsappLink,
+  type Prices,
 } from "@/lib/offers";
-
-/** Pro billed yearly, per month, for comparing with competitors' yearly prices. */
-const PRO_YEARLY_PER_MONTH = Math.round(PRICES.proYear / 12);
+import { getPrices } from "@/lib/settings/prices";
 
 /** What only Kitefolio does (true facts about our product; competitors' columns are price only). */
 const ONLY_HERE = [
@@ -30,18 +25,25 @@ import { brand } from "@/lib/brand";
 import { siteUrl } from "@/lib/site";
 
 /*
- * Prices and plans come from lib/offers.ts (AED, set with the owner on 12 October 2026).
+ * Plans come from lib/offers.ts; the prices are the live ones the superadmin sets in
+ * Console > Catalog (lib/settings/prices.ts, defaults set with the owner on 12 October 2026).
  * Until online checkout is live, paid plans start on WhatsApp. When it is, the card
  * checkout in ./PlanPicker.tsx can come back for Pro.
  */
 
-export const metadata: Metadata = {
-  title: "Pricing: free to start",
-  description: `${brand.name} is free for one website with a blog. Pro is ${aed(PRICES.proMonth)} a month for your own domain; Agent is ${aed(PRICES.agentMonth)} a month for UAE real estate agents; or we build your site for you for ${aed(PRICES.doneForYou)}.`,
-  alternates: { canonical: "/pricing" },
-};
+/** Rebuilt at least hourly; saving prices in the console refreshes it at once. */
+export const revalidate = 3600;
 
-const FAQ: Array<[string, string]> = [
+export async function generateMetadata(): Promise<Metadata> {
+  const prices = await getPrices();
+  return {
+    title: "Pricing: free to start",
+    description: `${brand.name} is free for one website with a blog. Pro is ${aed(prices.proMonth)} a month for your own domain; Agent is ${aed(prices.agentMonth)} a month for UAE real estate agents; or we build your site for you for ${aed(prices.doneForYou)}.`,
+    alternates: { canonical: "/pricing" },
+  };
+}
+
+const faqFor = (prices: Prices): Array<[string, string]> => [
   [
     "Can I see a demo first?",
     "Yes. Book a free 20-minute demo call and we’ll walk you through the editor, the designs made for your kind of work and the Investigator, using your own details if you like. You can also try any template in the editor without an account.",
@@ -60,7 +62,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "What’s the difference between Pro and Agent?",
-    `Pro is for anyone who wants their own domain and no Kitefolio link. Agent is built for real estate agents: listing pages, a WhatsApp button on every listing, your cloned voice for listing videos, and ${AGENT_EDITS_PER_MONTH} changes done for you each month.`,
+    `Pro is for anyone who wants their own domain and no Kitefolio link. Agent is built for real estate agents: listing pages, a WhatsApp button on every listing, your cloned voice for listing videos, and ${prices.agentEditsPerMonth} changes done for you each month.`,
   ],
   [
     "How does AI work if it isn’t in the price?",
@@ -76,7 +78,7 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "What counts as a change done for me?",
-    `Anything you’d ask a web designer for: a new section, a different layout for your listings, your brand colours, a new page. On Agent, send it on WhatsApp and we do it, up to ${AGENT_EDITS_PER_MONTH} a month. Editing your own text and photos is unlimited and always free.`,
+    `Anything you’d ask a web designer for: a new section, a different layout for your listings, your brand colours, a new page. On Agent, send it on WhatsApp and we do it, up to ${prices.agentEditsPerMonth} a month. Editing your own text and photos is unlimited and always free.`,
   ],
   [
     "Can I cancel?",
@@ -92,11 +94,16 @@ const FAQ: Array<[string, string]> = [
   ],
   [
     "Do I need a domain?",
-    `No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee. With yearly Pro your first year’s domain is free (any normal .com, .ae or similar up to ${aed(FREE_DOMAIN_UP_TO)}); after that it renews at the registrar’s price, usually about AED 45 a year for a .com. On monthly Pro the domain is paid separately.`,
+    `No. Every portfolio gets a free address. With Pro you can connect a domain you own (we set it up and handle HTTPS) or buy one through us at the registrar’s price plus the card fee. With yearly Pro your first year’s domain is free (any normal .com, .ae or similar up to ${aed(prices.freeDomainUpTo)}); after that it renews at the registrar’s price, usually about AED 45 a year for a .com. On monthly Pro the domain is paid separately.`,
   ],
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const prices = await getPrices();
+  const offers = offersFor(prices);
+  const faq = faqFor(prices);
+  /** Pro billed yearly, per month, for comparing with competitors' yearly prices. */
+  const proYearlyPerMonth = Math.round(prices.proYear / 12);
   // A Service, not a Product: Product snippets expect star ratings and reviews, which we
   // don't have yet and never invent. Add real ones only when real customers leave them.
   const jsonLd = {
@@ -110,10 +117,10 @@ export default function PricingPage() {
     offers: [
       ...[
         ["Free plan", 0],
-        ["Pro plan, monthly", PRICES.proMonth],
-        ["Pro plan, yearly", PRICES.proYear],
-        ["Agent plan, monthly", PRICES.agentMonth],
-        ["Website done for you", PRICES.doneForYou],
+        ["Pro plan, monthly", prices.proMonth],
+        ["Pro plan, yearly", prices.proYear],
+        ["Agent plan, monthly", prices.agentMonth],
+        ["Website done for you", prices.doneForYou],
       ].map(([name, price]) => ({
         "@type": "Offer",
         name,
@@ -151,9 +158,9 @@ export default function PricingPage() {
       {/* Founding members: the first customers keep a low price for good. */}
       <div className="mx-auto mt-12 flex max-w-[52rem] flex-wrap items-center justify-between gap-4 rounded-2xl border border-signal/40 bg-signal/10 px-6 py-5">
         <p className="text-[0.98rem] text-ink">
-          <b className="font-medium">Founding members:</b> the first {FOUNDING_SPOTS} customers get Pro for{" "}
-          <s className="text-ink-soft">{aed(PRICES.proYear)}</s>{" "}
-          <b className="font-medium">{aed(PRICES.foundingYear)} a year</b>, locked in for good.
+          <b className="font-medium">Founding members:</b> the first {prices.foundingSpots} customers get Pro
+          for <s className="text-ink-soft">{aed(prices.proYear)}</s>{" "}
+          <b className="font-medium">{aed(prices.foundingYear)} a year</b>, locked in for good.
         </p>
         <a
           href={whatsappLink("Hi! I’d like a founding member spot for Kitefolio Pro.")}
@@ -164,7 +171,7 @@ export default function PricingPage() {
       </div>
 
       <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        {OFFERS.map((offer) => (
+        {offers.map((offer) => (
           <article
             key={offer.id}
             className={`flex flex-col rounded-3xl border p-7 ${offer.highlight ? "border-ink bg-ink text-paper" : "border-rule bg-card"}`}
@@ -225,7 +232,7 @@ export default function PricingPage() {
           <ul className="mt-6 divide-y divide-rule rounded-2xl border border-rule">
             <li className="flex items-baseline justify-between gap-4 bg-ink px-5 py-4 text-paper first:rounded-t-2xl">
               <span className="font-medium">Kitefolio Pro</span>
-              <span className="font-display text-2xl">{aed(PRO_YEARLY_PER_MONTH)}</span>
+              <span className="font-display text-2xl">{aed(proYearlyPerMonth)}</span>
             </li>
             {COMPETITORS.map((competitor) => (
               <li key={competitor.name} className="flex items-baseline justify-between gap-4 px-5 py-4">
@@ -296,7 +303,7 @@ export default function PricingPage() {
       <section className="mx-auto mt-24 max-w-[48rem]">
         <h2 className="font-display text-[2.4rem] leading-tight">Questions people ask</h2>
         <dl className="mt-8 divide-y divide-rule border-y border-rule">
-          {FAQ.map(([question, answer]) => (
+          {faq.map(([question, answer]) => (
             <div key={question} className="py-6">
               <dt className="font-medium">{question}</dt>
               <dd className="mt-2 leading-relaxed text-ink-soft">{answer}</dd>

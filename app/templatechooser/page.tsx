@@ -83,6 +83,7 @@ export default async function TemplateChooser({
       status: template.review.status,
       threeD: template.threeD,
       proOnly: template.proOnly,
+      badges: template.badges,
       rating: ratings[template.id],
     }));
   const page = pageNumber(params.page);

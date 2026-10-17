@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getPrices } from "@/lib/settings/prices";
 import { TemplateBadges } from "@/components/templates/TemplateBadges";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import PreviewFrame from "@/components/templates/PreviewFrame";
@@ -59,7 +60,7 @@ export async function RoleTemplateArticle({
     .slice(0, 5);
 
   const faq: FaqEntry[] = [
-    ...roleFaq(role),
+    ...roleFaq(role, await getPrices()),
     {
       question: `Why use ${item.title} for a ${jobLabel} portfolio?`,
       answer: `${item.title} shows ${list(shows.slice(0, 3))}. It opens with sample content written for ${role.plural}, so you replace words rather than start from a blank page.`,
@@ -226,6 +227,7 @@ export async function RoleTemplateArticle({
                   <TemplateBadges
                     threeD={template.threeD}
                     pro={template.proOnly}
+                    badges={template.badges}
                     className="absolute right-3 top-3 z-10"
                   />
                   {/* eslint-disable-next-line @next/next/no-img-element -- static thumbnail */}

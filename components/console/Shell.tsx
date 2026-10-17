@@ -12,6 +12,7 @@ import {
   MessagesSquare,
   MessageSquareHeart,
   Settings2,
+  Tags,
   Users,
 } from "lucide-react";
 import { CRITICAL_TABS, loadBadges, markSeen, type BadgeTab } from "@/lib/console/badges";
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/users", label: "Users", icon: Users },
   { href: "/calls", label: "Calls", icon: CalendarDays },
   { href: "/feedback", label: "Feedback", icon: MessageSquareHeart },
+  { href: "/catalog", label: "Catalog", icon: Tags },
 ] as const;
 
 const TOOLS = [

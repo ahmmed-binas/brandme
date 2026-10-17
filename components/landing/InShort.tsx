@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Reveal from "@/components/landing/Reveal";
 import { brand } from "@/lib/brand";
-import { FOUNDING_SPOTS, PRICES, aed } from "@/lib/offers";
+import { DEFAULT_PRICES, aed, type Prices } from "@/lib/offers";
 import { ROLES, roleById } from "@/lib/templates/roles";
 
 /**
@@ -30,7 +30,7 @@ const POPULAR_JOBS = [
   "private-chef",
 ];
 
-function facts() {
+function facts(prices: Prices) {
   return [
     {
       term: `What is ${brand.name}?`,
@@ -42,7 +42,7 @@ function facts() {
     },
     {
       term: "What does it cost?",
-      detail: `One website with a blog is free for good. Pro is ${aed(PRICES.proMonth)} a month or ${aed(PRICES.proYear)} a year for your own domain, up to three sites and no ${brand.name} link. Agent is ${aed(PRICES.agentMonth)} a month for real estate agents, and we can build the whole site for you for ${aed(PRICES.doneForYou)}. The first ${FOUNDING_SPOTS} customers get Pro for ${aed(PRICES.foundingYear)} a year.`,
+      detail: `One website with a blog is free for good. Pro is ${aed(prices.proMonth)} a month or ${aed(prices.proYear)} a year for your own domain, up to three sites and no ${brand.name} link. Agent is ${aed(prices.agentMonth)} a month for real estate agents, and we can build the whole site for you for ${aed(prices.doneForYou)}. The first ${prices.foundingSpots} customers get Pro for ${aed(prices.foundingYear)} a year.`,
     },
     {
       term: "Where is it based?",
@@ -55,7 +55,7 @@ function facts() {
   ];
 }
 
-export default function InShort() {
+export default function InShort({ prices = DEFAULT_PRICES }: { prices?: Prices }) {
   const jobs = POPULAR_JOBS.map((id) => roleById(id)).filter((role) => role !== undefined);
   return (
     <section aria-labelledby="in-short-title" className="border-t border-rule py-24 lg:py-32">
@@ -71,7 +71,7 @@ export default function InShort() {
         </Reveal>
         <div className="lg:col-span-8">
           <dl className="divide-y divide-rule border-y border-rule">
-            {facts().map((fact) => (
+            {facts(prices).map((fact) => (
               <div key={fact.term} className="grid gap-2 py-6 sm:grid-cols-[14rem_1fr] sm:gap-8">
                 <dt className="font-display text-[1.3rem] leading-tight text-ink">{fact.term}</dt>
                 <dd className="text-[1.02rem] leading-[1.7] text-ink-soft">{fact.detail}</dd>

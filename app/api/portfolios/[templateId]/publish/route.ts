@@ -10,7 +10,7 @@ type Context = { params: Promise<{ templateId: string }> };
 export const POST = route(async (request: Request, { params }: Context) => {
   const owner = await requireOwner(params);
   if (owner instanceof Response) return owner;
-  if (!canUseTemplate(owner.templateId, owner.user)) return proTemplateRefusal();
+  if (!(await canUseTemplate(owner.templateId, owner.user))) return proTemplateRefusal();
   const body = await readJson(request, 2_000);
   if (body instanceof Response) return body;
   const slug = normaliseSlug(String((body as { slug?: unknown } | null)?.slug ?? ""));

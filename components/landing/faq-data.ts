@@ -1,14 +1,17 @@
-import { AGENT_EDITS_PER_MONTH, FREE_DOMAIN_UP_TO, PRICES, aed } from "@/lib/offers";
+import { DEFAULT_PRICES, aed, type Prices } from "@/lib/offers";
 
-/** Shared by the FAQ section and its FAQPage structured data, so they never drift apart. */
-export const FAQ = [
+/**
+ * Shared by the FAQ section and its FAQPage structured data, so they never drift
+ * apart. Built from the live prices (lib/settings/prices.ts).
+ */
+export const faqFor = (prices: Prices = DEFAULT_PRICES) => [
   {
     q: "How much does it cost?",
-    a: `One portfolio with a blog is free for as long as you like, with no card needed. Pro is ${aed(PRICES.proMonth)} a month, or ${aed(PRICES.proYear)} a year with the first year’s domain free (up to ${aed(FREE_DOMAIN_UP_TO)}), for up to three sites on your own domain without our link. AI is sold at what it costs us plus 5%, or you can use your own Claude key.`,
+    a: `One portfolio with a blog is free for as long as you like, with no card needed. Pro is ${aed(prices.proMonth)} a month, or ${aed(prices.proYear)} a year with the first year’s domain free (up to ${aed(prices.freeDomainUpTo)}), for up to three sites on your own domain without our link. AI is sold at what it costs us plus 5%, or you can use your own Claude key.`,
   },
   {
     q: "Can real estate agents in the UAE use Kitefolio?",
-    a: `Yes; they're who we built it for first. There are five real estate designs (Skyline, Manor, Front Door, Shoreline and Off Plan) with room for listings, areas and reviews. The Agent plan, ${aed(PRICES.agentMonth)} a month, adds listing pages, a WhatsApp button on your site and listings, your voice on listing videos, and ${AGENT_EDITS_PER_MONTH} changes a month done for you.`,
+    a: `Yes; they're who we built it for first. There are five real estate designs (Skyline, Manor, Front Door, Shoreline and Off Plan) with room for listings, areas and reviews. The Agent plan, ${aed(prices.agentMonth)} a month, adds listing pages, a WhatsApp button on your site and listings, your voice on listing videos, and ${prices.agentEditsPerMonth} changes a month done for you.`,
   },
   {
     q: "Can recruiters find my portfolio on Google?",
@@ -16,7 +19,7 @@ export const FAQ = [
   },
   {
     q: "Can you build my website for me?",
-    a: `Yes. Our Done for you service is ${aed(PRICES.doneForYou)} once: we write and design your site from your CV, listings and photos, and it's live in 48 hours, with one round of changes before it goes live.`,
+    a: `Yes. Our Done for you service is ${aed(prices.doneForYou)} once: we write and design your site from your CV, listings and photos, and it's live in 48 hours, with one round of changes before it goes live.`,
   },
   {
     q: "Will my portfolio stay up to date?",
