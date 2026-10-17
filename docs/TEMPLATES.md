@@ -29,9 +29,23 @@ Rules for designs, so they work in the editor, on phones and on the live site:
 1. Add an entry to `SPECS` in `lib/templates/studio-catalog.ts` (two or three palettes and font pairings).
 2. Write the component and register it in `registry.tsx`.
 3. Run the app and capture thumbnails: `BASE=http://localhost:3000 node scripts/samples/template-thumbs.mjs <id>`.
-4. Sign in as an admin and approve it at `/templates/review`, or add it to `decisions.ts`.
+4. The owner approves it at `/templates/review`. Agents never approve their own templates or add them to `decisions.ts`.
 
 Set `TEMPLATES_REQUIRE_APPROVAL=false` to skip approval entirely.
+
+### Checklist before committing a template (agents: every item)
+
+Another agent reviews each new template against this list, so it's quicker to get it right first time.
+
+- **Sources:** if it's based on someone else's site or repo, check the licence (`api.github.com/repos/<owner>/<repo>/license`). No licence means copy nothing (code, images, drawings, text): rebuild the ideas yourself. Never use real people's or businesses' details without their consent; samples are invented.
+- **Approval:** it starts pending. Not in `decisions.ts`.
+- **Layout:** container queries (`@3xl:`, `cqw`) only, no viewport breakpoints, no `position: fixed` (use `sticky` or `absolute` inside the template). No sideways scroll at 390px wide.
+- **Editing:** every visible piece of content has `{...ed("path")}`; every section is wrapped in `has("section")` and hides when empty; the name is in the `<h1>`.
+- **Motion:** respects `motionOff()` / `prefers-reduced-motion` and `[data-static]` (captures). Nothing heavy (WebGL, video, 3D) without a still fallback.
+- **Honesty:** no fake reviews or ratings shown as real; prices in samples are plausible; no AI features that cost money per visit; no pop-ups that block the page.
+- **Content model:** uses the shared fields only (`standardContentSchema`); a new sample person goes in `lib/templates/personas*.ts`.
+- **Checks:** `npx tsc --noEmit`, `npx eslint <files>`, `npx prettier --write <files>`, `npm run build`, tried in a browser on desktop and phone, thumbnails captured with `scripts/samples/template-thumbs.mjs`.
+- **Commit:** one template per commit, saying what it's for and where ideas came from; no AI model names in commits or comments.
 
 ## Job titles (roles)
 

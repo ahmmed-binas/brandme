@@ -65,7 +65,7 @@ Owner's manuals: `docs/plans/running-formora-with-an-ai-agent.pdf` (how the site
 ## Rules the owner has set
 
 1. **Ask before major decisions** (pricing, licences, data collection, anything that changes what customers pay or see). Make small, conventional calls yourself and say so.
-2. **New templates need the owner's approval** before customers see them. Add them as pending; never mark them approved yourself. Rejected templates are deleted from the code.
+2. **New templates need the owner’s approval** before customers see them. Add them as pending; never mark them approved yourself. Rejected templates are deleted from the code. Follow the checklist in `docs/TEMPLATES.md` (“Checklist before committing a template”); another agent reviews every new template against it.
 3. **Don't open pull requests unless asked.** Work on the current branch (`improve-editor-and-business`; not merged into `main` yet), commit with clear messages, push.
 4. **Never put AI model identifiers in commits, PR text or code comments.**
 5. **Test like a user.** Every change was checked end to end before pushing; keep doing that and report results honestly (what passed, what didn't, what you couldn't test).
