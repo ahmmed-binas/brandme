@@ -1078,6 +1078,27 @@ const SPECS: StudioSpec[] = [
     ],
   },
   {
+    id: "syntax",
+    name: "Syntax",
+    persona: "developer",
+    professions: ["developer", "data"],
+    styles: ["Technical", "Minimal"],
+    mood: "light",
+    description:
+      "A developer's site laid out like a code editor in daylight: a file-tree sidebar, $ whoami typing your name, a terminal that writes your profile, skills as packages, projects with Live and Code buttons, and experience as a commit log.",
+    idealFor: ["Software developers", "Data and ML engineers", "Students looking for their first role"],
+    sections: ["about", "skills", "projects", "experience", "education", "highlights", "contact"],
+    palettes: [
+      p("daylight", "Daylight", "#f7f5f0", "#1b1a17", "#e4572e", "#6f6a62", "#ffffff"),
+      p("ink", "Ink", "#ffffff", "#0f172a", "#2563eb", "#64748b", "#f8fafc"),
+      p("night-shift", "Night shift", "#101413", "#e8efe9", "#36d399", "#8fa39a", "#161c1a"),
+    ],
+    fonts: [
+      f("grotesk", "Space Grotesk + JetBrains", F.grotesk, F.instrumentSans, F.jetbrains),
+      f("instrument", "Instrument Sans + JetBrains", F.instrumentSans, F.instrumentSans, F.jetbrains),
+    ],
+  },
+  {
     id: "enamel",
     name: "Enamel",
     persona: "dental-team",
