@@ -18,7 +18,7 @@ export const MAX_CONSENT_BYTES = 2_000_000;
  *   voicesPerDay – how often the voice can be made again
  */
 export const VOICE_PLANS = {
-  free: { label: "Free", clipsPerDay: 5, maxChars: 250, keepDays: 7, voicesPerDay: 2, priority: 0 },
+  free: { label: "Free", clipsPerDay: 5, maxChars: 600, keepDays: 7, voicesPerDay: 2, priority: 0 },
   pro: { label: "Pro", clipsPerDay: 50, maxChars: 1000, keepDays: 90, voicesPerDay: 10, priority: 1 },
 } as const;
 
