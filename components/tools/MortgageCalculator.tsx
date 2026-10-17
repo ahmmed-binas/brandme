@@ -175,7 +175,7 @@ export function MortgageCalculator() {
       {/* Results */}
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="rounded-3xl bg-ink p-6 text-paper sm:p-8">
-          <p className="text-[0.85rem] text-paper/70">Monthly payment</p>
+          <p className="text-[0.85rem] text-paper/70">Monthly repayment</p>
           <p
             className="mt-1 font-display text-[clamp(2.4rem,6vw,3.6rem)] leading-none tabular-nums"
             aria-live="polite"

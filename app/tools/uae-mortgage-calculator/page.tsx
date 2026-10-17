@@ -10,15 +10,18 @@ import { RULES_CHECKED, RULES_SOURCE } from "@/lib/tools/uae-mortgage";
  * in lib/tools/uae-mortgage.ts (with sources and the date they were checked).
  */
 
-const TITLE = "UAE Mortgage Calculator 2026: Monthly Payment and All Upfront Costs";
+// "Mortgage repayment calculator" is a search people find this page with (Search Console, October 2026).
+const TITLE = "UAE Mortgage Calculator 2026: Monthly Repayments & Upfront Costs";
 const DESCRIPTION =
-  "Free UAE mortgage calculator using the Central Bank’s loan limits for expats and UAE nationals. See your monthly payment, minimum down payment, DLD fees and every cost you pay up front in Dubai.";
+  "Free UAE mortgage repayment calculator: your monthly repayment, the minimum down payment for expats and UAE nationals, DLD fees and every cost you pay up front in Dubai.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   keywords: [
     "UAE mortgage calculator",
+    "mortgage repayment calculator",
+    "monthly mortgage repayment",
     "Dubai mortgage calculator",
     "mortgage calculator for expats UAE",
     "Dubai property purchase costs",
@@ -42,6 +45,11 @@ const RULES: Array<[string, string, string, string]> = [
 ];
 
 const FAQ: Array<{ question: string; answer: string }> = [
+  {
+    question: "How are monthly mortgage repayments calculated?",
+    answer:
+      "With the standard repayment formula: monthly repayment = loan × r × (1 + r)ⁿ ÷ ((1 + r)ⁿ − 1), where r is the yearly interest rate divided by 12 and n is the number of months. For example, a loan of AED 1,600,000 at 4.5% over 25 years (300 months) costs about AED 8,893 a month, and about AED 1,068,000 in interest over the whole term. The calculator above does this for you and adds every fee you pay up front.",
+  },
   {
     question: "How much deposit do I need to buy in Dubai as an expat?",
     answer:
@@ -129,8 +137,9 @@ export default function MortgageCalculatorPage() {
           UAE mortgage calculator
         </h1>
         <p className="mt-4 text-[1.08rem] leading-relaxed text-ink-soft">
-          Your monthly payment, the minimum down payment the law allows, and every fee you pay up front in
-          Dubai. Built on the Central Bank’s rules for expats and UAE nationals, checked {RULES_CHECKED}.
+          A mortgage repayment calculator for the UAE: your monthly repayment, the minimum down payment the
+          law allows, and every fee you pay up front in Dubai. Built on the Central Bank’s rules for expats
+          and UAE nationals, checked {RULES_CHECKED}.
         </p>
       </header>
 
