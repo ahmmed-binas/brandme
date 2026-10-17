@@ -12,6 +12,29 @@ import { pagedMetadata, pageNumber } from "@/lib/seo/paging";
 const PAGE_SIZE = 18;
 const FILTERS = ["for", "field", "style", "mood", "q", "role"] as const;
 
+/**
+ * The designs shown first, before any filter: the most striking ones, mixing
+ * real estate, 3D and other jobs so the first screen doesn't look like one
+ * niche. (Visitors left after the first row was three similar developer
+ * designs, October 2026.) Change the order here; unknown or unapproved ids
+ * are skipped.
+ */
+const FEATURED = [
+  "mirage",
+  "campaign",
+  "monolith",
+  "lookbook",
+  "studio-desk",
+  "dune",
+  "riso",
+  "tide",
+  "keynote",
+];
+const featuredRank = (id: string) => {
+  const at = FEATURED.indexOf(id);
+  return at < 0 ? FEATURED.length : at;
+};
+
 // Depends on who is signed in; never pre-render at build time.
 export const dynamic = "force-dynamic";
 
@@ -39,10 +62,15 @@ export default async function TemplateChooser({
   const params = await searchParams;
   const viewer = await getCurrentUser().catch(() => null);
   const moderator = Boolean(viewer?.isAdmin);
-  // The professional collection first; the three original templates follow.
+  // The featured designs first, then the rest of the professional collection;
+  // the three original templates follow.
   const ratings = await ratingSummaries();
   const templates: GalleryTemplate[] = (await availableTemplates(moderator))
-    .sort((a, b) => Number(a.collection !== "studio") - Number(b.collection !== "studio"))
+    .sort(
+      (a, b) =>
+        featuredRank(a.id) - featuredRank(b.id) ||
+        Number(a.collection !== "studio") - Number(b.collection !== "studio"),
+    )
     .map((template) => ({
       id: template.id,
       name: template.name,
@@ -62,7 +90,7 @@ export default async function TemplateChooser({
     notFound();
 
   return (
-    <div className="mx-auto max-w-[1320px] px-5 pb-24 pt-14 sm:px-8 lg:pt-20">
+    <div className="mx-auto max-w-[1320px] px-5 pb-24 pt-8 sm:px-8 sm:pt-14 lg:pt-20">
       <header className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-end">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
@@ -73,19 +101,19 @@ export default async function TemplateChooser({
           </h1>
         </div>
         <div>
-          <p className="max-w-[34rem] text-[1.08rem] leading-[1.7] text-ink-soft">
+          <p className="max-w-[34rem] text-[0.98rem] leading-[1.6] text-ink-soft sm:text-[1.08rem] sm:leading-[1.7]">
             A photographer needs a contact sheet, not a skills bar. A researcher needs a references list. Each
             design here was drawn for a profession, then made yours with colours, type and the sections you
             choose.
           </p>
-          <p className="mt-4 text-[0.95rem] text-ink-soft">
+          <p className="mt-4 hidden text-[0.95rem] text-ink-soft sm:block">
             Would rather have the code?{" "}
             <Link href="/gallery" className="text-ink underline underline-offset-4">
               Download templates free
             </Link>
             , including ones made by the community.
           </p>
-          <p className="mt-2 text-[0.95rem] text-ink-soft">
+          <p className="mt-2 hidden text-[0.95rem] text-ink-soft sm:block">
             Designed one yourself?{" "}
             <Link href="/gallery/submit" className="text-ink underline underline-offset-4">
               Send us your template
