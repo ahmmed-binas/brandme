@@ -19,7 +19,7 @@ import {
   useStudio,
   type StudioProps,
 } from "../kit";
-import { CountUp, Words, motionOff, scrollParent } from "../motion";
+import { CountUp, Words, scrollParent, useLookAt } from "../motion";
 
 /**
  * Peek: a playful product manager's site with a mascot that watches you.
@@ -52,43 +52,6 @@ function useReadingProgress<T extends HTMLElement>() {
     update();
     parent.addEventListener("scroll", update, { passive: true });
     return () => parent.removeEventListener("scroll", update);
-  }, []);
-  return ref;
-}
-
-/**
- * Points the mascot's eyes at the pointer, or follows the phone's tilt where
- * the browser shares it without asking. Writes `--lx`/`--ly` (−1 to 1).
- */
-function useLookAt<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || motionOff()) return;
-    const clamp = (value: number) => Math.max(-1, Math.min(1, value));
-    const look = (x: number, y: number) => {
-      node.style.setProperty("--lx", x.toFixed(3));
-      node.style.setProperty("--ly", y.toFixed(3));
-    };
-    const onPointer = (event: PointerEvent) => {
-      const rect = node.getBoundingClientRect();
-      const dx = event.clientX - (rect.left + rect.width / 2);
-      const dy = event.clientY - (rect.top + rect.height / 2);
-      const distance = Math.hypot(dx, dy) || 1;
-      // Full strength beyond 260px away; a little less when the pointer is close.
-      const strength = Math.min(1, distance / 260);
-      look((dx / distance) * strength, (dy / distance) * strength);
-    };
-    const onTilt = (event: DeviceOrientationEvent) => {
-      if (event.gamma === null || event.beta === null) return;
-      look(clamp(event.gamma / 30), clamp((event.beta - 45) / 30));
-    };
-    window.addEventListener("pointermove", onPointer, { passive: true });
-    window.addEventListener("deviceorientation", onTilt);
-    return () => {
-      window.removeEventListener("pointermove", onPointer);
-      window.removeEventListener("deviceorientation", onTilt);
-    };
   }, []);
   return ref;
 }

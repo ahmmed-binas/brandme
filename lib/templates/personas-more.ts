@@ -656,6 +656,94 @@ export const MORE_PERSONAS: Record<string, StandardContent> = {
     ],
   },
 
+  /** A dental clinic, for the Smile template (bookings by WhatsApp or email). */
+  dental: {
+    name: "Dr. Sara Haddad",
+    professional_title: "Dentist & Clinic Owner",
+    location: "Al Barsha, Dubai",
+    availability: "Open today 9:00–21:00 · Saturdays too",
+    tagline: "Gentle dentistry for nervous patients and busy families.",
+    summary: [
+      "Our clinic is small on purpose: one dentist you get to know, a hygienist, and appointments that never feel rushed.",
+      "Many of our patients hadn’t seen a dentist in years because they were scared. We take it slowly, explain every step, and tell you the price before we start.",
+    ],
+    email: "hello@example.com",
+    phone: "+971 4 000 0000",
+    instagram: "https://www.instagram.com/",
+    skills: [
+      "Check-ups",
+      "Nervous patients",
+      "Children’s dentistry",
+      "Whitening",
+      "Clear aligners",
+      "Implants",
+      "Crowns",
+      "Emergency care",
+    ],
+    services: [
+      {
+        title: "Check-up & clean",
+        description: "Examination, X-rays and a hygienist clean.",
+        price: "AED 350",
+      },
+      { title: "Teeth whitening", description: "In-clinic whitening in one visit.", price: "AED 1,200" },
+      {
+        title: "Clear aligners",
+        description: "Consultation, 3D scan and your plan.",
+        price: "From AED 9,500",
+      },
+      { title: "Dental implant", description: "Implant, abutment and crown.", price: "From AED 6,500" },
+      { title: "Children’s visit", description: "A gentle first visit for under-12s.", price: "AED 250" },
+      {
+        title: "Emergency appointment",
+        description: "Same day for pain or a broken tooth.",
+        price: "AED 300",
+      },
+    ],
+    stats: [
+      { value: "4,200", label: "patients" },
+      { value: "4.9★", label: "from 860 reviews" },
+      { value: "12", label: "years in Dubai" },
+    ],
+    testimonials: [
+      {
+        quote: "I hadn’t been to a dentist in eight years. Now I actually don’t mind going.",
+        name: "Omar K.",
+        role: "Nervous patient",
+      },
+      {
+        quote: "They gave me the full price before starting. No surprises at all.",
+        name: "Priya S.",
+        role: "Clear aligners",
+      },
+      {
+        quote: "My daughter asks when she can come back. That says it all.",
+        name: "Hannah L.",
+        role: "Parent",
+      },
+    ],
+    experience: [
+      {
+        job_title: "Clinic Owner & Dentist",
+        company: "Haddad Dental, Al Barsha",
+        location: "Dubai",
+        start_date: "2019",
+        end_date: "Present",
+      },
+      {
+        job_title: "Dentist",
+        company: "City dental group",
+        location: "Dubai",
+        start_date: "2014",
+        end_date: "2019",
+      },
+    ],
+    education: [
+      { degree: "Bachelor of Dental Surgery (BDS)", school: "University of Sharjah", end_date: "2013" },
+      { degree: "Licensed by the Dubai Health Authority", school: "DHA", end_date: "2014" },
+    ],
+  },
+
   education: {
     name: "Grace Mensah",
     professional_title: "Secondary Science Teacher & Head of Year 9",

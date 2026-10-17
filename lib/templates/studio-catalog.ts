@@ -1078,6 +1078,29 @@ const SPECS: StudioSpec[] = [
     ],
   },
   {
+    id: "smile",
+    name: "Smile",
+    persona: "dental",
+    professions: ["healthcare", "wellness"],
+    styles: ["Playful", "Motion"],
+    mood: "light",
+    description:
+      "A dental clinic site that gets the appointment: drifting molecules, a friendly tooth that watches visitors, every treatment with its price and a Book this button, and a booking card that opens WhatsApp with the request written.",
+    idealFor: ["Dentists & dental clinics", "Orthodontists", "Dental hygienists"],
+    sections: ["stats", "services", "about", "skills", "testimonials", "education", "experience", "contact"],
+    palettes: [
+      p("trust-blue", "Trust blue", "#f5f9ff", "#0d1b2e", "#1f6feb", "#5d6b80", "#ffffff"),
+      p("calm-teal", "Calm teal", "#f2fbfa", "#0c2422", "#0f9d8f", "#58716e", "#ffffff"),
+      p("fresh-green", "Fresh green", "#f4fbf3", "#11240f", "#2f9e44", "#5e705b", "#ffffff"),
+      p("slate", "Professional slate", "#f4f6f8", "#111827", "#475569", "#6b7280", "#ffffff"),
+      p("warm-coral", "Warm coral", "#fff7f4", "#2a1410", "#f0643c", "#7a625b", "#ffffff"),
+    ],
+    fonts: [
+      f("manrope", "Manrope + Figtree", F.manrope, F.figtree),
+      f("fraunces", "Fraunces + Figtree", F.fraunces, F.figtree),
+    ],
+  },
+  {
     id: "peek",
     name: "Peek",
     persona: "pro-product",
