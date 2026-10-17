@@ -671,7 +671,7 @@ function Allowance({ plan, left }: { plan: VoicePlan; left: number }) {
           <Link href="/pricing" className="font-medium text-ink underline underline-offset-4">
             Pro
           </Link>{" "}
-          gets {pro.clipsPerDay} clips a day, {pro.maxChars} characters each (about a minute), first place in
+          gets {pro.clipsPerDay} clips a day, {pro.maxChars} characters each (about 3 minutes), first place in
           the queue, and clips kept {pro.keepDays} days.
         </p>
       )}

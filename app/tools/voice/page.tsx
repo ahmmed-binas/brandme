@@ -141,7 +141,7 @@ const TIPS = [
 const FAQ: Array<{ question: string; answer: string }> = [
   {
     question: "Is the AI voice clone really free?",
-    answer: `Yes. Making your voice is free with a free ${brand.name} account, and you get ${free.clipsPerDay} clips a day of up to ${free.maxChars} characters (about 40 seconds). Pro gets ${pro.clipsPerDay} clips a day of up to ${pro.maxChars} characters (about a minute), and its clips go first in the queue.`,
+    answer: `Yes. Making your voice is free with a free ${brand.name} account, and you get ${free.clipsPerDay} clips a day of up to ${free.maxChars} characters (about 2 minutes). Pro gets ${pro.clipsPerDay} clips a day of up to ${pro.maxChars} characters (about 3 minutes), and its clips go first in the queue.`,
   },
   {
     question: "How realistic does my cloned voice sound?",

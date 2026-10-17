@@ -30,7 +30,7 @@ export * from "@/lib/tools/voice-config";
 /** A worker that asked for work within this many seconds counts as online. */
 const ONLINE_SECONDS = 90;
 /** A job a worker took but never finished is offered again after this long. */
-const STUCK_MINUTES = 10;
+const STUCK_MINUTES = 30;
 
 /** True when the bytes look like a WAV file (the browser converts every upload to WAV). */
 export function isWav(bytes: Buffer): boolean {
