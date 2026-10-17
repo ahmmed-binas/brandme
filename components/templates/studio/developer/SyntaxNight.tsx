@@ -6,7 +6,7 @@ import "@fontsource/poppins/600.css";
 import "@fontsource/poppins/700.css";
 import "@fontsource/poppins/800.css";
 import "@fontsource-variable/jetbrains-mono";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Atom,
   Award,
@@ -49,7 +49,7 @@ import { motionOff } from "../motion";
  * certificates; contact cards and a form that opens the visitor's email; a
  * small robot that comments on each section; and a chat bubble with quick
  * answers from the content. Nothing is stored and nothing is fixed to the
- * screen (sticky only); the custom cursor of the original is left out.
+ * screen (sticky only); the custom cursor is drawn inside the template.
  *
  * Content: skills written "Group: a, b, c" become skill cards; highlights
  * with a year are certificates, without one they're activities; a link
@@ -142,6 +142,49 @@ function useActiveSection(prefix: string) {
   return active;
 }
 
+/**
+ * The custom cursor: a gradient dot with a ring that trails it and grows over
+ * links and buttons. Drawn inside the template (absolute, not fixed), only for
+ * a mouse or trackpad, never in the editor, and off for reduced motion.
+ */
+function useCursor(enabled: boolean) {
+  const dot = useRef<HTMLSpanElement | null>(null);
+  const ring = useRef<HTMLSpanElement | null>(null);
+  useEffect(() => {
+    const dotNode = dot.current;
+    const ringNode = ring.current;
+    const root = dotNode?.parentElement;
+    if (!enabled || !dotNode || !ringNode || !root || motionOff()) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    root.classList.add("syn-cursor-on");
+    const move = (event: PointerEvent) => {
+      const box = root.getBoundingClientRect();
+      const x = `${event.clientX - box.left}px`;
+      const y = `${event.clientY - box.top}px`;
+      for (const node of [dotNode, ringNode]) {
+        node.style.left = x;
+        node.style.top = y;
+        node.style.opacity = "1";
+      }
+      const over = (event.target as Element | null)?.closest?.("a, button, label, input, textarea, select");
+      dotNode.classList.toggle("syn-cursor-hover", Boolean(over));
+      ringNode.classList.toggle("syn-cursor-hover", Boolean(over));
+    };
+    const leave = () => {
+      dotNode.style.opacity = "0";
+      ringNode.style.opacity = "0";
+    };
+    root.addEventListener("pointermove", move);
+    root.addEventListener("pointerleave", leave);
+    return () => {
+      root.classList.remove("syn-cursor-on");
+      root.removeEventListener("pointermove", move);
+      root.removeEventListener("pointerleave", leave);
+    };
+  }, [enabled]);
+  return { dot, ring };
+}
+
 function GradientIcon({ icon: Icon, size = 35 }: { icon: LucideIcon; size?: number }) {
   return (
     <span
@@ -155,6 +198,7 @@ function GradientIcon({ icon: Icon, size = 35 }: { icon: LucideIcon; size?: numb
 
 export default function SyntaxNight({ content, template, embedded }: StudioProps) {
   const studio = useStudio(content, template, embedded);
+  const { dot: cursorDot, ring: cursorRing } = useCursor(!embedded);
   const { c, has, label } = studio;
   const prefix = "syn";
   const active = useActiveSection(prefix);
@@ -257,7 +301,22 @@ export default function SyntaxNight({ content, template, embedded }: StudioProps
         @keyframes syn-wave { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-25deg); } 75% { transform: rotate(25deg); } }
         [data-static] .syn-particles, [data-static] .syn-float, [data-static] .syn-caret, [data-static] .syn-wave { animation: none; }
         [data-static] .syn-line { opacity: 1; transform: none; animation: none; }
+        .syn-cursor-on, .syn-cursor-on a, .syn-cursor-on button { cursor: none; }
+        .syn-cursor-on input, .syn-cursor-on textarea { cursor: text; }
+        .syn-dot, .syn-ring { position: absolute; left: 0; top: 0; z-index: 60; pointer-events: none; border-radius: 9999px; transform: translate(-50%, -50%); opacity: 0; }
+        .syn-dot { width: 20px; height: 20px; background: ${GRADIENT}; mix-blend-mode: difference; transition: transform .1s, background .2s, opacity .2s; }
+        .syn-ring { width: 40px; height: 40px; border: 2px solid var(--t-accent); transition: left .12s ease-out, top .12s ease-out, transform .3s, border-color .3s, opacity .3s; }
+        .syn-dot.syn-cursor-hover { transform: translate(-50%, -50%) scale(1.5); background: #10b981; }
+        .syn-ring.syn-cursor-hover { transform: translate(-50%, -50%) scale(1.5); border-color: #10b981; }
       `}</style>
+
+      {/* The custom cursor (see useCursor) */}
+      {!embedded && (
+        <>
+          <span ref={cursorDot} aria-hidden className="syn-dot" />
+          <span ref={cursorRing} aria-hidden className="syn-ring" />
+        </>
+      )}
 
       {/* Drifting particles behind everything */}
       <div aria-hidden className="syn-particles pointer-events-none absolute inset-0 -z-10 opacity-40" />
